@@ -13,7 +13,7 @@
 | 関連文書        | DOC-FW-01, DOC-APP-02, DOC-UI-03, DOC-S4-06, DOC-ROOT-prior-art-map |
 | SSOT 区分       | 構想 / スコープ / 非スコープ / Flywheel 1 枚図 の SSOT              |
 | Evidence Status | N/A (設計のみ、定量値なし)                                          |
-| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)                                 |
+| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message rewrite / 国際送金 restricted / 接続層 tier 化 callout / UI Wireframe-first 3 段 / Flywheel table Proposal source 列追加、Plan v1.3 final patch 反映) |
 
 ---
 
@@ -27,15 +27,21 @@ v2 が解こうとするのは、この二択の間に **段階的な自動化 +
 
 ### 1.2 中核 message
 
-**業務別ナレッジ文書を人間承認で育てる Flywheel** を中心に据える。
+**差戻しを、次の正解手順に変える仕組み**。
+
+- AI を一気に自動化するのではなく、現場の差戻しを毎日の改善提案に変える
+- 承認された手順だけを AI に覚えさせる
+- 減らすのは確認作業。残すのは手順変更と AI 設定変更の承認
+
+具体には次の loop:
 
 - AI が業務手順を実行 → 入力者が結果を確認 / 差戻し
-- 差戻しコメントは即時 staging knowledge として AI runtime に visible になる
-- 複数 case で再発した staging は batch で手順承認を経て compiled knowledge に昇格、業務手順ファイル群 (workflow.md / agent-instructions.md / approval-policy.md) に diff 適用される
+- 差戻しコメントはすぐに staging knowledge として AI runtime に visible になる (prototype: 同一セッション内 / 本番仮値: 当日中 `[仮説 / 要検証]`)
+- 複数 case で再発した staging は AI が日次分析、十分なナレッジが溜まり手順反映候補と判断した場合に Procedure Update Proposal を自動生成 (Proposal source = AI)、Manual 管理者が承認キューを管理 (R = Queue owner)、業務責任者が承認 (A) して compiled knowledge に昇格、業務手順ファイル群 (workflow.md / agent-instructions.md / approval-policy.md) に diff 適用される
 - 手順変更が AI 設定 (Agent / Model / Tool / Prompt / 権限) に及ぶ場合は設定承認を通る
-- Automation Maturity (Supervised / Checkpoint / Autonomous) は知識・設定承認 loop を縮小せず、業務承認 (案件承認) の介在頻度だけ縮小する
+- Automation Maturity (Supervised / Checkpoint / Autonomous) が進化しても、知識・設定承認 loop は縮小せず、案件承認の介在頻度だけ縮小する (Matrix B 主表現: **AIに任せる量は段階的に増やすが、人によるコントロールは渡さない**。slogan: 案件確認は減らす。ルール承認は残す。)
 
-「コメントを貯める仕組み」ではなく「**業務別ファイルを育てる仕組み**」として設計するのが v2 の差別化点。Flywheel 詳細は DOC-FW-01、承認モデルの静的構造は DOC-APP-02 を参照。
+Flywheel 詳細は DOC-FW-01、承認モデルの静的構造は DOC-APP-02 を参照。
 
 ## 2. 解くスコープ
 
@@ -43,7 +49,7 @@ v2 が解こうとするのは、この二択の間に **段階的な自動化 +
 
 - **UC-BO-01 法人住所変更処理** (主役、Demo Chapter 1/2 の起点): 法人顧客の登記住所変更依頼を、PDF 受領から業務システム反映まで AI が実行し、入力者確認 + 承認者承認の 2 段で確認する
 - **口座開設書類完備チェック** (Dashboard 並列カード、Demo で 1 シーン open): 書類完備性のチェック + Alert を AI が draft、入力者が確認
-- **国際送金 boundary** (`workflows/international-transfer-boundary/`): 自動化禁止業務として boundary spec のみ記述、UI 画面化なし、Dashboard カード化なし
+- **国際送金 boundary** (`workflows/international-transfer-boundary/`): 条件付き制限業務 (restricted boundary pack) として boundary spec のみ記述、UI 画面化なし、Dashboard カード化なし。`$10M 相当以上は AI 自動化不可 [仮説 / 要検証]` (high-value threshold、**実閾値は Phase 1 で検証・決定**)。未満はフレームワーク信頼性確認後に限定自動化を検討
 
 ### 2.2 起点 (本番想定の flow) と v2 prototype の見せ方
 
@@ -57,6 +63,17 @@ v2 が解こうとするのは、この二択の間に **段階的な自動化 +
 
 入力者確認 + 承認者承認 が揃って **案件承認** 全体を構成する。「4-eyes」はこの 2 者が揃った案件承認全体を指す呼称であり、入力者確認単独 / 承認者承認単独には使わない。
 
+> **本番接続方式メモ (設計記述、prototype 実装対象外)**:
+>
+> AI が業務システムにアクセスする本番接続は tier 化:
+>
+> - 標準: API
+> - 準標準: MQ / event / file bridge
+> - 代替: RPA / Computer Use / MCP
+> - 例外: DB 直接続 (原則 read-only、write は明示承認 + 限定条件)
+>
+> データ参照とデータ入力の両方に対応。v2 prototype はフロントエンド Web UI のみ、実接続は scope-out (Phase 1 で実設計予定)。詳細は `docs/_SSOT.md` 接続方針 SSOT pointer 参照。
+
 **v2 prototype の見せ方** (上記 flow を非実行で見せる):
 
 - PDF Inbox 画面 (`/inbox`) で「AI 処理中」状態から開始 (実 PDF watcher は実装しない)
@@ -68,7 +85,10 @@ v2 が解こうとするのは、この二択の間に **段階的な自動化 +
 
 - フロントエンドのみ (React 19 + Vite 8 + Tailwind v4 + shadcn/ui)
 - in-memory mock state、永続化なし
-- 9 画面 prototype (Hero 3 = 95% / 残り 6 = 85% 仕上げ)
+- 9 画面 prototype、Stripe 風の高密度・高信頼 SaaS UI で段階詳細化:
+  - **Step 1 (Day 11-13)**: Wireframe で情報設計と状態遷移を固定 (9 画面 low-fi)
+  - **Step 2 (Day 14-15)**: Stripe 風 design language 詳細化 (Hero 3 画面に design token 適用、medium-fi)
+  - **Step 3 (Day 16-18)**: マイクロインタラクション (hover / transition / inline feedback / status animation) を丁寧に作り込む (high-fi、Hero 3 = 95%、残り 6 = 85%)
 - 承認者画面は実装せず、CaseReview 内 `BusinessApprovalChip` + slide-only static mock で代替
 - 詳細は DOC-UI-03 参照
 
@@ -80,7 +100,7 @@ CLAUDE.md §scope-out を SSOT とし、本 doc では要点のみ:
 - 実 customer data / 実 PDF (mock のみ、サンプル画像で代替)
 - 実規制 cite (NYDFS / SR 11-7 等は v2 docs 内でも事実主張せず、DOC-ROOT-prior-art-map から ai-operator paper への reference link のみ)
 - 実送金 trigger / 実 master data 更新
-- 国際送金業務の UI 画面化 + Dashboard カード化 (`workflows/international-transfer-boundary/` に 3 文書のみ)
+- 国際送金業務の UI 画面化 + Dashboard カード化 (`workflows/international-transfer-boundary/` に 3 文書のみ、条件付き制限 restricted boundary pack。「自動化禁止 (業務全体 prohibited)」とは異なり「高額閾値以上で AI 自動化不可」の意味)
 - 承認者 (Business Approval) の画面化 (`case/BusinessApprovalChip.tsx` + slide-only static mock で代替、route / page / smoke test 対象外)
 - hands-on workshop (Session 4 は説明 + demo のみ)
 - 旧 repo (`backoffice-ai`, `ai-operator`) の archive 移動 (v2 完成まで `~/code/active/` に保持)
@@ -94,8 +114,8 @@ CLAUDE.md §scope-out を SSOT とし、本 doc では要点のみ:
                 ▼                                                          │
         ┌──────────────┐  入力者確認   ┌─────────────┐  AI auto-draft  ┌─────────────┐
         │ ① AI 入力   │  差戻し +     │ ② staging   │  ─────────────► │ ③ compiled │
-        │   結果       │  5-category   │   knowledge │  Batch +        │   knowledge │
-        │   (Case)     │  ──────────►  │   (即時)    │  手順承認       │   (正式)    │
+        │   結果       │  5-category   │   knowledge │  AI 日次分析 +  │   knowledge │
+        │   (Case)     │  ──────────►  │   (直後)    │  手順承認       │   (正式)    │
         └──────────────┘               └─────────────┘  ─────────────► └─────────────┘
               ▲                                                                │
               │                                                                ▼
@@ -117,15 +137,15 @@ CLAUDE.md §scope-out を SSOT とし、本 doc では要点のみ:
               └─ ⑤ 過去 case は遡って書き換えない (audit trail 保護)
 ```
 
-| 段                    | Owner (起票)    | Approver                  | 反映タイミング                                               |
-| --------------------- | --------------- | ------------------------- | ------------------------------------------------------------ |
-| ① 差戻し送信          | 入力者          | 入力者 (self、reject)     | 送信時 (prototype では同一セッション内)                      |
-| ② staging 生成        | AI (auto-draft) | (人間承認不要、weight 低) | prototype では同一セッション内。本番 SLO は Phase 1 で要定義 |
-| ③ compiled 昇格       | Manual 管理者   | 業務責任者 (手順承認)     | Batch (週次想定、`[仮説]`)                                   |
-| ④ 設定承認 (条件付き) | AI 管理者       | Type 別 co-A              | Ad-hoc + batch                                               |
-| ⑤ 反映後の波及        | (自動)          | (自動)                    | 次の case 処理から、過去 case は不変                         |
+| 段                    | Proposal source                                     | Owner (R, Queue owner) | Approver (A)              | 反映タイミング                                                                                |
+| --------------------- | --------------------------------------------------- | ---------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| ① 差戻し送信          | 入力者 (manual)                                     | 入力者                 | 入力者 (self、reject)     | 送信時 (prototype では同一セッション内)                                                       |
+| ② staging 生成        | AI (auto-draft)                                     | -                      | (人間承認不要、weight 低) | prototype では同一セッション内 / 本番仮値: 当日中 `[仮説 / 要検証]`                           |
+| ③ compiled 昇格       | **AI (日次分析)**                                   | **Manual 管理者**      | **業務責任者** (手順承認) | **AI 日次分析 → 承認キュー `[仮説 / 要検証]`**                                                |
+| ④ 設定承認 (条件付き) | AI 管理者 (manual) or AI (boundary review proposal) | AI 管理者              | Type 別 co-A              | Ad-hoc + batch                                                                                |
+| ⑤ 反映後の波及        | (自動)                                              | -                      | (自動)                    | 次の case 処理から、過去 case は不変 (関連ルール更新時は AI Proposal 画面で Alert、DOC-FW-01) |
 
-詳細は DOC-FW-01 で各段を section 化。
+「起票者」表現は手順承認では使わない (Proposal source = AI、R = Manual 管理者 = Queue owner)。詳細は DOC-FW-01 で各段を section 化。
 
 ## 5. 想定 outcome (Plan §1 抜粋)
 
@@ -142,4 +162,4 @@ CLAUDE.md §scope-out を SSOT とし、本 doc では要点のみ:
 - DOC-MON-05 (`docs/05-metrics-and-gates.md`): 4 KPI multi-criteria 仮説 gate + 7 KPI catalogue + 9 KRI
 - DOC-S4-06 (`docs/06-session4-narrative.md`): 8 slide × 60 min + Demo Chapter 1/2 script
 - DOC-ROOT-prior-art-map (`docs/prior-art-map.md`): 旧 repo (v1 + ai-operator) 参照関係 + 継承 / 再編 / 捨てる の SSOT
-- Plan: `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.1.2 lock)
+- Plan: `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.3 final patch 適用版 lock、Plan v1.1.2 22 日 base + Day 5 整合化 update)

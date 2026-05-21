@@ -2,11 +2,11 @@
 
 cowork-workshop Session 4 (2026-06-12 Fri) 向け、Backoffice 業務に AI Agent を段階自動化する構想の repo。
 
-「業務別ナレッジ文書を人間承認で育てる Flywheel」(差戻し → 即時 staging → batch 手順承認 → 設定承認で昇格) を中核 message とし、UC-BO-01 法人住所変更処理を主役、口座開設書類完備チェックを Dashboard 並列カードとして見せる。国際送金は `workflows/international-transfer-boundary/` に boundary spec only (Dashboard カードなし、画面化なし)。
+**差戻しを、次の正解手順に変える仕組み** を中核 message とし (差戻し → すぐに staging → AI 日次分析 + 手順承認 → 設定承認で昇格)、UC-BO-01 法人住所変更処理を主役、口座開設書類完備チェックを Dashboard 並列カードとして見せる。国際送金は `workflows/international-transfer-boundary/` に restricted boundary pack (`$10M` 相当以上は AI 自動化不可 `[仮説 / 要検証]`、実閾値は Phase 1 で検証・決定。Dashboard カードなし、画面化なし)。
 
 主構成: 設計書 (`docs/`)、業務別ファイル (`workflows/`)、UI prototype (`prototype/`、Day 11+)、Session 4 演出物 (`demo/`、Day 20+)。
 
-設計方針と作業規約は [`CLAUDE.md`](./CLAUDE.md)。文書間の SSOT 関係は [`docs/_SSOT.md`](./docs/_SSOT.md)。旧 repo (v1 `backoffice-ai` / `ai-operator`) との継承 / 再編 / 捨てるは [`docs/prior-art-map.md`](./docs/prior-art-map.md) で SSOT 化。Plan 全文は `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.1.2 lock、22 日 plan、5/21 Thu Day 1 - 6/11 Thu Day 22)。
+設計方針と作業規約は [`CLAUDE.md`](./CLAUDE.md)。文書間の SSOT 関係は [`docs/_SSOT.md`](./docs/_SSOT.md)。旧 repo (v1 `backoffice-ai` / `ai-operator`) との継承 / 再編 / 捨てるは [`docs/prior-art-map.md`](./docs/prior-art-map.md) で SSOT 化。Plan 全文は `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.3 final patch 適用版 lock、Plan v1.1.2 22 日 base + Day 5 整合化 update、5/21 Thu Day 1 - 6/11 Thu Day 22)。
 
 ## Status
 

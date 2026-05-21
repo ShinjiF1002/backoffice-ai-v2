@@ -15,7 +15,7 @@
 | 関連文書        | DOC-ROOT-prior-art-map, DOC-ROOT-_HEADER_TEMPLATE (全 docs / workflows / demo を mapping) |
 | SSOT 区分       | 文書間 SSOT mapping + Approval Taxonomy + enum 統一               |
 | Evidence Status | N/A (mapping 定義のみ、定量値なし)                                |
-| 改版履歴        | v0.1 (2026-05-21): 初版作成 (Day 1)。v0.1 (2026-05-22): Day 2 で 12 項目 header 追記 |
+| 改版履歴        | v0.1 (2026-05-21): 初版作成 (Day 1)。v0.1 (2026-05-22): Day 2 で 12 項目 header 追記。v0.2 (2026-05-25): Day 5 整合化 update (enum 拡張 / Approval Taxonomy RACI / SLO 仮値 / Snippet schema / 接続方針 SSOT pointer / Core Message 表現 SSOT 追加、Plan v1.3 final patch 反映) |
 
 Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19。SSOT 衝突は Day 10 Design Gate で grep 検出。
 
@@ -49,8 +49,8 @@ Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19。SSOT 衝突は Day 10 
 | UC-BO-01 metadata (owner / trust_level / risk_level / automation_status / approvers / update_history) | `workflows/corporate-address-change/_meta.yaml` | Day 6 | machine-readable |
 | UC-BO-01 暗黙知 snippet (staging / compiled) | `workflows/corporate-address-change/knowledge/{staging,compiled}/*.md` | Day 6 | staging ×3 + compiled ×3 |
 | 口座開設書類完備チェック (同上 5 文書 + knowledge ×2) | `workflows/account-opening-completeness/` | Day 7 | |
-| 国際送金 boundary 仕様 + 自動化禁止理由 | `workflows/international-transfer-boundary/{workflow.md, BOUNDARY.md, _meta.yaml}` | Day 7 | 3 文書 only、画面化なし、Dashboard カードなし |
-| 業務一覧 + Trust Level Progression | `workflows/_index.md` | Day 7 | 3 業務並列 (国際送金は automation_status=prohibited 行で 1 行表示) |
+| 国際送金 boundary 仕様 + 条件付き制限 (restricted) | `workflows/international-transfer-boundary/{workflow.md, BOUNDARY.md, _meta.yaml}` | Day 7 | 3 文書 only、画面化なし、Dashboard カードなし。`$10M 相当以上 [仮説 / 要検証]` で AI 自動化不可、未満は将来限定自動化検討 |
+| 業務一覧 + Trust Level Progression | `workflows/_index.md` | Day 7 | 3 業務並列 (国際送金は automation_status=restricted 行で 1 行表示) |
 | Session 4 audience / scope / safety / 開催 meta | `cowork-workshop/workshop-design.md` (Day 19 で update) | external | v2 完成後参照、Day 19 までは旧前提が残存 |
 | v2 ↔ cowork-workshop bridge | `cowork-workshop/CLAUDE.md` (Day 19 で update) | external | `session-{1,2,3}-narrative.md` は touch しない |
 
@@ -58,12 +58,20 @@ Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19。SSOT 衝突は Day 10 
 
 `docs/02-approval-model.md` (Day 4 起稿) で詳述、本 map では outline のみ:
 
-| 承認種別 | Owner (R) | Approver (A) | Scope | 反映タイミング | 備考 |
-|---|---|---|---|---|---|
-| **入力者確認** | 入力者 | 入力者 (AI 結果を accept / reject) | AI 入力結果 1 案件 | 送信時 (prototype では同一セッション内) | 案件承認の前段確認。単独では 4-eyes と呼ばない |
-| **承認者承認** | 承認者 | 承認者 | 入力者確認済の最終確認 | 承認時 (prototype では同一セッション内) | 入力者 ≠ 承認者。2 者が揃って案件承認全体を構成 |
-| **手順承認** | Manual 管理者 | 業務責任者 | knowledge → procedure / workflow.md / agent-instructions.md / approval-policy.md 昇格 | Batch (週次想定、`[仮説]`) | |
-| **設定承認** | AI 管理者 | Type 別 co-A (Type A: 通常 / Type B: Security / Type C: Automation Maturity 変更) | Agent / Model / Tool / Prompt / 権限 | Ad-hoc + batch | Type B/C は co-A |
+| 承認種別 | Proposal source | Owner (R, Queue owner) | Approver (A) | C 合議 | I 通知 | Scope | 反映タイミング |
+|---|---|---|---|---|---|---|---|
+| **入力者確認** | 入力者 (manual) | 入力者 | 入力者 (AI 結果を accept / reject) | - | - | AI 入力結果 1 案件 | 送信時 (prototype では同一セッション内) |
+| **承認者承認** | 承認者 (manual) | 承認者 | 承認者 | - | - | 入力者確認済の最終確認 | 承認時 (prototype では同一セッション内) |
+| **手順承認** | **AI (自動生成)** | **Manual 管理者** | **業務責任者** | **SME / AI 管理者** | **入力者 / 承認者** | knowledge → procedure / workflow.md / agent-instructions.md / approval-policy.md 昇格 | **AI 日次分析 → 承認キュー [仮説 / 要検証]** |
+| **設定承認** | AI 管理者 (manual) or AI (boundary review proposal) | AI 管理者 | Type 別 co-A (A: 通常 / B: Security / C: Automation Maturity 変更) | - | - | Agent / Model / Tool / Prompt / 権限 + boundary 変更 | Ad-hoc + batch |
+
+**RACI 注**:
+
+- `Proposal source = AI` は「AI が分析・提案を自動生成する」事実を示す情報項目。組織責任主体ではない。
+- `Owner (R) = Manual 管理者` がキューの責任を持つ (受理 / triage / forward / reject)。
+- UI 表示の「AI が提案を自動作成」表現は許可、ただし RACI 表記では Proposal source 列を使う。「起票者」表現は手順承認では使わない (AI proposal source を起票者と呼ばない)。
+- **SoD**: Queue owner (Manual 管理者) と Approver (業務責任者) の同一人物化禁止。
+- 案件承認 (入力者確認 + 承認者承認) は 4-eyes、入力者 ≠ 承認者。
 
 Matrix A/B/C RACI は `docs/02-approval-model.md` (Day 4) で SSOT。
 
@@ -87,9 +95,100 @@ Day 10 Design Gate + Day 19 + Day 21 で `grep -rEn` 確認 (v2 repo + `cowork-w
 |---|---|
 | `trust_level` | `supervised` / `checkpoint` / `autonomous` / `n/a` |
 | `risk_level` | `low` / `medium` / `high` |
-| `automation_status` | `active` / `prohibited` |
+| `automation_status` | `active` / `restricted` / `prohibited` |
 
-衝突禁止: `prohibited` は `automation_status` field にのみ出現。`trust_level=prohibited` のような書き方は無効 (Day 7 で `_meta.yaml` grep 確認)。
+- `active`: 通常 AI 自動化対象
+- `restricted`: 条件付き制限 (条件は `_meta.yaml` の `restricted_conditions` で machine-readable に保持。例: 国際送金は `high_value_threshold` 以上で AI 自動化不可)
+- `prohibited`: 業務全体が AI 自動化対象外 (現時点で該当業務なし、将来用に enum 保持)
+
+衝突禁止: `prohibited` / `restricted` は `automation_status` field にのみ出現。`trust_level=prohibited` のような書き方は無効 (Day 7 で `_meta.yaml` grep 確認)。
+
+`restricted_conditions` schema (`_meta.yaml`):
+
+```yaml
+restricted_conditions:
+  high_value_threshold: "$10M equivalent [hypothesis_requires_validation]"
+  automation_above_threshold: prohibited
+  automation_below_threshold: future_candidate_after_framework_validation
+```
+
+## SLO 仮値 [仮説 / 要検証]
+
+将来 `docs/05-metrics-and-gates.md` (Day 9 起稿) に移管予定。本 file が暫定 SSOT。
+
+| 段 | 値 |
+|---|---|
+| 差戻し送信 → staging 反映 | prototype: 同一セッション内 / 本番仮値: 当日中 [仮説 / 要検証] |
+| staging 生成 (AI auto-draft) | prototype: 同一セッション内 / 本番仮値: 当日中 [仮説 / 要検証] |
+| compiled 候補分析 (AI 日次) | 日次 [仮説 / 要検証] |
+| 手順承認後の反映 | 次回 AI 処理から [仮説 / 要検証] |
+| 設定承認 (Ad-hoc) | 申請時 review 着手 当日中 [仮説 / 要検証] |
+| 設定承認 (Batch) | 月次 [仮説 / 要検証] |
+| Emergency stop | 15 分以内 [仮説 / 要検証] |
+| Rollback | 当日中 [仮説 / 要検証] |
+
+**表現規範**:
+
+- 「同一セッション内」「当日中」「日次」「次回 AI 処理から」を使う
+- real-time guarantee と誤読される表現 (該当語彙の trace は `docs/prior-art-map.md` で記録) は使わない
+- prototype は「同一セッション内」のみ (in-memory state、永続化なし)
+- 本番仮値はすべて `[仮説 / 要検証]` ラベル必須
+
+## Knowledge snippet schema SSOT
+
+`workflows/{業務}/knowledge/{staging,compiled}/*.md` の frontmatter は以下 8 field 必須:
+
+```yaml
+---
+date: YYYY-MM-DD
+workflow_id: UC-BO-XX                          # e.g., UC-BO-01
+workflow_slug: corporate-address-change
+agent_id: agent-corporate-address-change       # agent-{slug}
+agent_version: v0.1                            # 仮値 OK、将来差分追跡用
+source_case: CASE-2026-XXX
+category: misunderstanding | ui_change | edge_case | judgment_gap | data_error
+weight: low | medium | high                    # 信頼度のみを表す
+---
+```
+
+**`weight` 解釈 (信頼度限定)**:
+
+- `low`: staging (未承認、AI auto-draft 直後)
+- `medium`: reviewed staging (人間が読んだが compiled 承認前)
+- `high`: compiled approved (手順承認済み、正式手順反映済み)
+
+**昇格優先度 (promotion priority) は当面 field 化せず**、AI 日次分析 logic 内で扱う。将来必要なら `promotion_priority: low | medium | high` を別 field で導入 (weight と混ぜない)。
+
+**Category routing 注**:
+
+- `data_error` は通常の compiled 昇格対象外、log / audit / 別 routing 扱い
+- `agent_id` は将来複数 Agent 体制を想定、現状 1 Agent / 業務でも明示
+
+## 接続方針 SSOT pointer
+
+本番接続方式の暫定 SSOT = `docs/00-overview.md` §2.2 接続層メモ。
+
+| Tier | 接続方式 | 用途 |
+|------|---------|------|
+| 標準 | API | 通常想定の接続方式 |
+| 準標準 | MQ / event / file bridge | レガシー / 非同期連携 |
+| 代替 | RPA / Computer Use / MCP | API 不在のレガシーシステム |
+| 例外 | DB 直接続 | **原則 read-only、write は明示承認 + 限定条件** |
+
+データ参照 / データ入力 両対応。v2 prototype は scope-out (実装しない)、Phase 1 で実設計予定。
+
+## Core Message 表現 SSOT (現行表層用)
+
+| 用途 | 表現 |
+|------|------|
+| Top message | 差戻しを、次の正解手順に変える仕組み |
+| Sub message 1 | AI を一気に自動化するのではなく、現場の差戻しを毎日の改善提案に変える |
+| Sub message 2 | 承認された手順だけを AI に覚えさせる |
+| Sub message 3 | 減らすのは確認作業。残すのは手順変更と AI 設定変更の承認 |
+| Matrix B 主表現 | AIに任せる量は段階的に増やすが、人によるコントロールは渡さない |
+| Matrix B slogan | 案件確認は減らす。ルール承認は残す。 |
+
+legacy wording (旧表現) の trace は `docs/prior-art-map.md` に記録 (履歴文書として残存可)。本 file には旧表現 exact text を置かない (grep gate の自己 hit 回避)。
 
 ## SSOT 競合検出 / Validation
 

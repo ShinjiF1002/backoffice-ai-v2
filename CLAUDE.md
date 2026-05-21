@@ -4,11 +4,40 @@ Backoffice 業務に AI Agent を段階自動化する構想 の v2 repo。cowor
 
 ## Plan
 
-実装は `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.1.2 lock、22 日 plan、5/21 Thu Day 1 - 6/11 Thu Day 22) に従う。非自明な scope 変更 (新 doc 追加、画面追加、KPI 変更、業務追加) は plan を update してから実装。Plan に書かれていない変更は禁止。
+実装は `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.3 final patch 適用版 lock、Plan v1.1.2 22 日 base + Day 5 整合化 update、5/21 Thu Day 1 - 6/11 Thu Day 22) に従う。非自明な scope 変更 (新 doc 追加、画面追加、KPI 変更、業務追加) は plan を update してから実装。Plan に書かれていない変更は禁止。
 
 ## 中核 message
 
-**業務別ナレッジ文書を人間承認で育てる Flywheel**。差戻し → 即時 staging ナレッジ → batch 手順承認 → 設定承認で昇格、の loop が中心。「コメントを貯める仕組み」ではなく「業務別ファイルを育てる仕組み」。
+**差戻しを、次の正解手順に変える仕組み**。差戻し → すぐに staging ナレッジ → AI 日次分析 + 手順承認 → 設定承認で昇格、の loop が中心。
+
+- AI を一気に自動化するのではなく、現場の差戻しを毎日の改善提案に変える
+- 承認された手順だけを AI に覚えさせる
+- 減らすのは確認作業。残すのは手順変更と AI 設定変更の承認
+
+Matrix B (Slide 7) 主表現: **AIに任せる量は段階的に増やすが、人によるコントロールは渡さない**。slogan: 案件確認は減らす。ルール承認は残す。
+
+## Connectivity (本番想定、設計メモ、prototype 実装対象外)
+
+AI が業務システムにアクセスする本番接続は tier 化。v2 prototype はフロントエンド Web UI のみ、実接続は scope-out (Phase 1 で実設計予定)。
+
+| Tier | 接続方式 | 用途 |
+|------|---------|------|
+| 標準 | API | 通常想定の接続方式 |
+| 準標準 | MQ / event / file bridge | レガシー / 非同期連携 |
+| 代替 | RPA / Computer Use / MCP | API 不在のレガシーシステム |
+| 例外 | DB 直接続 | **原則 read-only、write は明示承認 + 限定条件** |
+
+データ参照 / データ入力 両対応。詳細は `docs/00-overview.md` §2.2 接続層メモ参照。
+
+## UI Scope (段階詳細化、Stripe 風)
+
+UI は wireframe-first で詳細化する。Stripe 風の高密度・高信頼 SaaS UI を目指し、マイクロインタラクションを丁寧に作り込む。
+
+- **Step 1 (Day 11-13)**: Wireframe で情報設計と状態遷移を固定 (9 画面 low-fi)
+- **Step 2 (Day 14-15)**: Stripe 風 design language 詳細化 (Hero 3 画面に design token 適用、medium-fi)
+- **Step 3 (Day 16-18)**: マイクロインタラクション (hover / transition / inline feedback / status animation) を丁寧に作り込む (high-fi、Hero 3 = 95%、残り 6 = 85%)
+
+backend / external connection / real automation は実装しない (scope-out)。
 
 ## Tier 1 語彙 (Session 4 audience に出す、slide / UI label / copy 全部 OK)
 
@@ -63,7 +92,10 @@ UI / slide / docs / workflow 内の copy は日本語のみ。英語 string は 
 ### `_meta.yaml` enum 統一 (衝突禁止)
 - `trust_level`: `supervised` / `checkpoint` / `autonomous` / `n/a`
 - `risk_level`: `low` / `medium` / `high`
-- `automation_status`: `active` / `prohibited` (← `prohibited` はこの field にのみ出現)
+- `automation_status`: `active` / `restricted` / `prohibited` (← `restricted` / `prohibited` はこの field にのみ出現)
+  - `active`: 通常 AI 自動化対象
+  - `restricted`: 条件付き制限 (条件は `restricted_conditions` で machine-readable に保持。国際送金が該当、`$10M` 相当以上は AI 自動化不可 `[仮説 / 要検証]`)
+  - `prohibited`: 業務全体が AI 自動化対象外 (現時点で該当業務なし、将来用 enum)
 
 `trust_level=prohibited` のような書き方は無効。Day 7 で 3 業務すべての `_meta.yaml` を grep 確認。
 

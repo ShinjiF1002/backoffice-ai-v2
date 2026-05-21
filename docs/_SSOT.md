@@ -2,11 +2,22 @@
 
 各論点の Single Source of Truth (SSOT) を 1 つの文書に固定する mapping。文書間で衝突発生時は SSOT 側を更新、reference 側は引用に留める。本 file は Day 1 起稿、Day 10 (Design Gate) + Day 19 で refresh。
 
-## Status
+| 項目            | 値                                                                |
+| --------------- | ----------------------------------------------------------------- |
+| 文書 ID         | DOC-ROOT-_SSOT                                                    |
+| 文書名          | SSOT Map (各論点の Single Source of Truth mapping)                |
+| 版数            | v0.1                                                              |
+| ステータス      | Draft                                                             |
+| オーナー        | backoffice-ai-v2 maintainer                                       |
+| 承認者          | self — 設定承認 (SSOT 配分の確定)                                 |
+| 閲覧対象        | Internal / Project team                                           |
+| 機密区分        | Internal                                                          |
+| 関連文書        | DOC-ROOT-prior-art-map, DOC-ROOT-_HEADER_TEMPLATE (全 docs / workflows / demo を mapping) |
+| SSOT 区分       | 文書間 SSOT mapping + Approval Taxonomy + enum 統一               |
+| Evidence Status | N/A (mapping 定義のみ、定量値なし)                                |
+| 改版履歴        | v0.1 (2026-05-21): 初版作成 (Day 1)。v0.1 (2026-05-22): Day 2 で 12 項目 header 追記 |
 
-- Created: 2026-05-21 (Day 1)
-- Owner: backoffice-ai-v2 maintainer
-- Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19
+Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19。SSOT 衝突は Day 10 Design Gate で grep 検出。
 
 ## Topic → SSOT 文書 mapping
 
@@ -30,7 +41,7 @@
 | BusinessApprovalView mock figure spec | `docs/06-session4-narrative.md` Slide 3 内 figure | Day 9 | spec source |
 | BusinessApprovalView HTML source | `demo/static-mocks/business-approval-view.html` | Day 20 | 実体化 (Tailwind CDN 1 file html、AiProposalPanel と design token 整合) |
 | BusinessApprovalView PNG export | `demo/screenshots/business-approval-view.png` | Day 20 | html を browser open + screenshot で export |
-| 旧 repo (v1 + ai-operator) 参照関係 | `docs/prior-art-map.md` | Day 1 (本日) | 継承 / 再編 / 捨てる の SSOT |
+| 旧 repo (v1 + ai-operator) 参照関係 | `docs/prior-art-map.md` | Day 1 | 継承 / 再編 / 捨てる の SSOT |
 | Doc header template (12 項目) | `docs/_HEADER_TEMPLATE.md` | Day 2 | Status / Evidence Status / SSOT 区分 / 機密区分 / Related Docs 等 |
 | UC-BO-01 法人住所変更 業務目的 / 手順 / 期待状態 / 禁止事項 | `workflows/corporate-address-change/workflow.md` | Day 6 | 業務責任者 owner |
 | UC-BO-01 AI 実行方針 / 参照ナレッジ / スクショ粒度 | `workflows/corporate-address-change/agent-instructions.md` | Day 6 | AI 管理者 owner |
@@ -58,7 +69,7 @@ Matrix A/B/C RACI は `docs/02-approval-model.md` (Day 4) で SSOT。
 
 ## Document Header Convention
 
-全 docs は `docs/_HEADER_TEMPLATE.md` (Day 2 起稿) の 12 項目共通ヘッダを冒頭に置く。`prior-art-map.md` + `_SSOT.md` (本日起稿) は Day 2 _HEADER_TEMPLATE 完成後に header 追記 (本 file はまだ無し)。
+全 `docs/*.md` / `workflows/{業務}/*.md` / `demo/*.md` は `docs/_HEADER_TEMPLATE.md` (Day 2 起稿) の 12 項目共通ヘッダを冒頭に置く。`_meta.yaml` は Markdown 文書ではないため対象外とし、別途 `_meta.yaml` schema で管理する。
 
 ## 規制語の hedge ルール
 

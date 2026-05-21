@@ -2,12 +2,22 @@
 
 v1 (`backoffice-ai`) + ai-operator paper から、本 v2 が「**継承 (HIGH) / 再編 (MEDIUM) / 捨てる (LOW / drop)**」する判断を file:line 単位で記録する SSOT。本 file は Day 1 起稿、Day 5 + Day 10 (Design Gate) + Day 19 で spot-check。旧 repo は本 map 完成後も touch しない (read-only prior art、move なし)。
 
-## Status
+| 項目            | 値                                                                 |
+| --------------- | ------------------------------------------------------------------ |
+| 文書 ID         | DOC-ROOT-prior-art-map                                             |
+| 文書名          | Prior Art Map (旧 repo → v2 継承 / 再編 / 捨てる)                  |
+| 版数            | v0.1                                                               |
+| ステータス      | Draft                                                              |
+| オーナー        | backoffice-ai-v2 maintainer                                        |
+| 承認者          | self — 設定承認 (旧 repo 取扱方針の確定)                           |
+| 閲覧対象        | Internal / Project team                                            |
+| 機密区分        | Internal                                                           |
+| 関連文書        | DOC-ROOT-_SSOT, DOC-ROOT-_HEADER_TEMPLATE                          |
+| SSOT 区分       | 旧 repo (v1 + ai-operator) 参照関係 + 継承 / 再編 / 捨てる の SSOT |
+| Evidence Status | N/A (設計のみ、定量値なし)                                         |
+| 改版履歴        | v0.1 (2026-05-21): 初版作成 (Day 1)。v0.1 (2026-05-22): Day 2 で 12 項目 header 追記 |
 
-- Created: 2026-05-21 (Day 1)
-- Owner: backoffice-ai-v2 maintainer
-- Refresh schedule: Day 5 (review 1) + Day 10 (Design Gate) + Day 19 (UI freeze)
-- 旧 repo: `~/code/active/` 内に保持、archive 移動は本 plan scope 外
+Refresh schedule: Day 5 (review 1) + Day 10 (Design Gate) + Day 19 (UI freeze)。旧 repo は `~/code/active/` 内に保持、archive 移動は本 plan scope 外。
 
 ## Source repos
 
@@ -48,7 +58,7 @@ v1 (`backoffice-ai`) + ai-operator paper から、本 v2 が「**継承 (HIGH) /
 | 7 | 9-field Screen Card template (Purpose / Personas / Objects / Actions / Approvals / Evidence / Prohibited / Dependencies / CTQ) | `ai-operator/docs/11-ia-screen-tree.md` §4 line 108-122 | `docs/03-ui-prototype-design.md` で 9 画面 × 9 field (v2 再編 taxonomy、ai-operator は別の 9 画面、継承ではなく taxonomy 新設) | Day 8 |
 | 8 | 7 KPI catalogue (volume / latency / accuracy / exception rate / escalation % / rollback % / MAPE) | `ai-operator/docs/24-monitoring.md` §3.2 line 157-167 | `docs/05-metrics-and-gates.md` Secondary metrics | Day 9 |
 | 9 | 9 KRI catalogue + Stub Label Taxonomy (Control minimum / Initial target / Hypothesis) | `ai-operator/docs/24-monitoring.md` §4.1 line 199-209 | `docs/05-metrics-and-gates.md` Alert section + `prototype/src/components/metrics/KpiGateCard.tsx` | Day 9 + Day 12 |
-| 10 | SSOT mapping + Approval Taxonomy + 12-項目 header | `ai-operator/docs/_SSOT.md` line 10-26, 158-172 + `_HEADER_TEMPLATE.md` | `docs/_SSOT.md` (本日起稿) + `docs/_HEADER_TEMPLATE.md` (Day 2 起稿)、規制 mapping grid は本 map でリンク化のみ | Day 1 + Day 2 |
+| 10 | SSOT mapping + Approval Taxonomy + 12-項目 header | `ai-operator/docs/_SSOT.md` line 10-26, 158-172 + `_HEADER_TEMPLATE.md` | `docs/_SSOT.md` (Day 1 起稿) + `docs/_HEADER_TEMPLATE.md` (Day 2 起稿)、規制 mapping grid は本 map でリンク化のみ | Day 1 + Day 2 |
 | 11 | Enterprise Premium design token (indigo 275 / violet 290 / emerald / amber + premium shadows) | `backoffice-ai/design-explorations/02-enterprise-premium.html` + `backoffice-ai/ui-prototype/src/index.css` | `prototype/src/index.css` | Day 11 |
 | 12 | shared component pattern (KpiTile / FlywheelDiagram / ConfidenceBadge / ListRowCard / StatusPill / Num / TrustLevelBadge / CategoryIcon / PageHeader) | `backoffice-ai/ui-prototype/src/components/shared/*.tsx` (9 files) | `prototype/src/components/shared/` (re-implement、code 流用なし) | Day 12 |
 | 13 | 5-category error taxonomy (misunderstanding / ui_change / edge_case / judgment_gap / data_error) + routing logic | `backoffice-ai/knowledge/error_taxonomy.md` + `backoffice-ai/CLAUDE.md` §Error Taxonomy | `docs/04-knowledge-pipeline.md` + `prototype/src/pages/SendBackCommentPage.tsx` | Day 8 + Day 16 |

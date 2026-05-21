@@ -55,6 +55,11 @@ UI / slide / docs / workflow 内の copy は日本語のみ。英語 string は 
 
 ## File 編集 hygiene
 
+### 文書冒頭の共通ヘッダ
+- 全 `docs/*.md` / `workflows/{業務}/*.md` / `demo/*.md` の冒頭に `docs/_HEADER_TEMPLATE.md` の 12 項目 markdown 表を配置 (文書 ID / 文書名 / 版数 / ステータス / オーナー / 承認者 / 閲覧対象 / 機密区分 / 関連文書 / SSOT 区分 / Evidence Status / 改版履歴)
+- 文書 ID は `DOC-{CATEGORY}-{NAME}` 形式、Category は `_HEADER_TEMPLATE.md` の表を参照 (ROOT / OV / FW / APP / UI / KNW / MON / S4 / WF / DEMO)
+- `_meta.yaml` (workflows/{業務}/_meta.yaml) は markdown ではないので 12 項目 header は不要、独自 YAML schema
+
 ### `_meta.yaml` enum 統一 (衝突禁止)
 - `trust_level`: `supervised` / `checkpoint` / `autonomous` / `n/a`
 - `risk_level`: `low` / `medium` / `high`

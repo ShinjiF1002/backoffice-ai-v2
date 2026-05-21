@@ -11,7 +11,7 @@ weight: high
 
 # 印鑑照合 confidence threshold 設定
 
-口座開設書類完備チェックの step 4 (印鑑照合) について、**confidence threshold = 0.80** `[仮値 / 要 Phase 1 検証]` を境界として運用する。閾値以下の case は入力者に「印鑑照合 confidence 低下」Alert (approval-policy §3 #2) を表示、手動 review を要求する。
+口座開設書類完備チェックの step 4 (印鑑照合) について、**confidence threshold = 0.80** `[仮説 / 要検証]` を境界として運用する。閾値以下の case は入力者に「印鑑照合 confidence 低下」Alert (approval-policy §3 #2) を表示、手動 review を要求する。
 
 ## 背景 (compiled 昇格までの経緯)
 
@@ -51,5 +51,5 @@ weight: high
 
 - `weight: high` (compiled approved、手順承認済)
 - AI runtime は本 snippet を優先 citation 対象
-- `[仮値 / 要 Phase 1 検証]`: 0.80 / 0.60 の閾値は demo 用仮値、本番閾値は Phase 1 evidence-based 検証で再決定
+- `[仮説 / 要検証]`: 0.80 / 0.60 の閾値は demo 用仮値、本番閾値は Phase 1 evidence-based 検証で再決定
 - UC-BO-01 の OCR confidence threshold (`workflows/corporate-address-change/knowledge/compiled/ocr-confidence-threshold.md`) と同じ「judgment_gap の閾値設定」pattern

@@ -11,7 +11,7 @@ weight: high
 
 # OCR confidence threshold 設定
 
-法人住所変更依頼 PDF の OCR 結果について、**confidence threshold = 0.85** `[仮値 / 要 Phase 1 検証]` を境界として運用する。閾値以下の case は入力者に「OCR confidence 低下」Alert chip を表示、手動 review を要求する。
+法人住所変更依頼 PDF の OCR 結果について、**confidence threshold = 0.85** `[仮説 / 要検証]` を境界として運用する。閾値以下の case は入力者に「OCR confidence 低下」Alert chip を表示、手動 review を要求する。
 
 ## 背景 (compiled 昇格までの経緯)
 
@@ -51,4 +51,4 @@ weight: high
 
 - `weight: high` (compiled approved、手順承認済)
 - AI runtime は本 snippet を優先 citation 対象とする
-- `[仮値 / 要 Phase 1 検証]`: 0.85 / 0.65 の閾値は demo 用仮値、本番閾値は Phase 1 evidence-based 検証で再決定
+- `[仮説 / 要検証]`: 0.85 / 0.65 の閾値は demo 用仮値、本番閾値は Phase 1 evidence-based 検証で再決定

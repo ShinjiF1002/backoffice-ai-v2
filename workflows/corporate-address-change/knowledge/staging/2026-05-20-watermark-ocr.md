@@ -16,7 +16,7 @@ weight: low
 ## 観測された pattern
 
 - 受領 PDF の背景に法人ロゴ (薄い灰色透かし)
-- OCR confidence が 0.65 以下 (threshold 0.85 [仮値 / 要 Phase 1 検証] と比較、`compiled/ocr-confidence-threshold.md` 参照)
+- OCR confidence が 0.65 以下 (threshold 0.85 [仮説 / 要検証] と比較、`compiled/ocr-confidence-threshold.md` 参照)
 - AI は「OCR confidence 低下」Alert chip を表示するが、入力者が手動 OCR 結果を override しないと進行できない
 
 ## 性質: data_error カテゴリ (重要)

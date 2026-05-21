@@ -1,0 +1,124 @@
+# 法人住所変更処理 — 承認方針 (Approval Policy)
+
+| 項目            | 値                                                                                                                                                                |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 文書 ID         | DOC-WF-corporate-address-approval-policy                                                                                                                          |
+| 文書名          | 法人住所変更処理 承認方針 (UC-BO-01)                                                                                                                              |
+| 版数            | v0.1                                                                                                                                                              |
+| ステータス      | Draft                                                                                                                                                             |
+| オーナー        | 業務責任者 + Manual 管理者 (共同 ownership、業務側 Alert / 差戻し条件は業務責任者、手順 curation 側は Manual 管理者)                                              |
+| 承認者          | 手順承認 — approval-policy.md の更新は AI 実行方針 (Alert 条件 / 差戻し条件) の変更を伴う (R = Manual 管理者 = Queue owner、A = 業務責任者、Proposal source = AI) |
+| 閲覧対象        | Internal / Project team / Session 4 facilitator                                                                                                                   |
+| 機密区分        | Internal                                                                                                                                                          |
+| 関連文書        | DOC-WF-corporate-address-workflow, DOC-WF-corporate-address-agent-instructions, DOC-FW-01, DOC-APP-02, DOC-UI-03                                                  |
+| SSOT 区分       | UC-BO-01 担当者確認 / 承認者確認 / Alert / 差戻し条件 / 過去 case Alert の SSOT                                                                                   |
+| Evidence Status | N/A (承認方針のみ、Alert threshold は `[仮説 / 要検証]` ラベル付き)                                                                                               |
+| 改版履歴        | v0.1 (2026-05-26): 初版作成 (Day 6)                                                                                                                               |
+
+---
+
+## 1. 担当者確認 (入力者確認)
+
+入力者は Case Review 画面 (`/cases/:id`) で AI 入力結果を確認し、以下を判定:
+
+- 8 step 全ての screenshot が期待どおりであること (DOC-WF-corporate-address-agent-instructions §3)
+- 国土地理院 API verify (step 6) が pass していること
+- Alert (§3 参照) が未発火、または発火した Alert に承認者が triage 済であること
+- 過去 case 関連ルール更新 Alert (§5 参照) があれば内容を確認
+
+**判定**:
+
+- **承認**: AI 結果を accept、承認者の業務承認 queue に進める
+- **差戻し**: SendBackComment 画面 (`/cases/:id/comment`) で 5-category + free-text コメント + 該当 case の context (PDF / screenshot / agent output) を送信
+
+詳細は DOC-FW-01 §2 (入力者確認による差戻し)、DOC-APP-02 §2 (案件承認) 参照。
+
+「**入力者確認 単独では 4-eyes と呼ばない**」原則を厳守 (DOC-FW-01 §2.1、DOC-APP-02 §2.2)。
+
+## 2. 承認者確認 (承認者承認)
+
+承認者は同じ証跡 (AI 入力結果 + 業務システム状態 + Alert + 入力者承認 timestamp + 過去 case Alert) を見て最終確認:
+
+- 入力者と異なる視点で reconciliation
+- 高リスク要素 (§3 Alert 発火) があれば escalate (業務責任者へ)
+- 関連手順更新 Alert (§5) があれば AI Proposal panel の banner を確認、影響を判断
+
+**判定**:
+
+- **承認**: case completed、業務システム反映 + Audit trail に記録
+- **差戻し**: 入力者に戻す (4-eyes が成立せず、案件承認全体を一度 unwind)
+- **escalate**: 業務責任者へ (Matrix C Escalation lane、DOC-APP-02 §8)
+
+**SoD**: 入力者 ≠ 承認者 (システム制約として強制、同一人物による self-approval は禁止)。
+
+「**4-eyes**」はこの 2 者が揃った案件承認全体を指す呼称。入力者確認単独 / 承認者承認単独には使わない。
+
+## 3. Alert 5 条件 (高リスク検知)
+
+AI runtime は各 step で以下 5 条件を check、検知時は Alert chip を AI Proposal panel に表示し、入力者 / 承認者の triage を待つ。
+
+| #   | Alert                          | 発火条件                                              | Severity | 対応                                            |
+| --- | ------------------------------ | ----------------------------------------------------- | -------- | ----------------------------------------------- |
+| 1   | **KYC overlap**                | 同一顧客で他 KYC プロセスが進行中                     | high     | 承認者 triage、KYC 完了待ち or escalate         |
+| 2   | **過去 90 日以内の他届出変更** | 90 日以内に住所以外の届出変更履歴あり (高頻度変更)    | medium   | 承認者 triage、整合性確認                       |
+| 3   | **国土地理院 API 未確認**      | API verify 失敗 / 一時的なエラー                      | high     | 入力者差戻し or Retry (Phase 1 で retry policy) |
+| 4   | **法人格変更可能性**           | 法人格変更を伴う住所変更の疑い (株式会社↔合同会社 等) | high     | 業務責任者へ escalate (別 workflow scope)       |
+| 5   | **銀行 vs 登記住所整合性異常** | 銀行登録住所 vs 登記住所が乖離                        | medium   | 業務責任者 triage、優先順位判断                 |
+
+Alert threshold (90 日、severity 区分) は `[仮説 / 要検証]`、本番閾値は Phase 1 で要定義。
+
+## 4. 差戻し条件 (5-category 必須)
+
+入力者が差戻しする時、以下 5-category のいずれかを必須選択:
+
+| Category           | 意味                           | compiled 昇格対象         | 例                                            |
+| ------------------ | ------------------------------ | ------------------------- | --------------------------------------------- |
+| `misunderstanding` | AI の意図誤解                  | ✅                        | 部分一致を完全一致と判定                      |
+| `ui_change`        | 業務システム UI 変更           | ✅                        | フィールド配置変更、ボタンラベル変更          |
+| `edge_case`        | 想定外パターン                 | ✅                        | 多店舗 / 法人格変更 / 国際送金関連            |
+| `judgment_gap`     | 判断ルール不足                 | ✅                        | confidence threshold 未設定、Alert 閾値未調整 |
+| `data_error`       | 入力データの誤り (AI 責でない) | ❌ (log/audit/別 routing) | PDF 透かしによる OCR 失敗、PDF 自体の破損     |
+
+`data_error` 以外の差戻しコメントは staging knowledge として AI runtime に visible になる (DOC-FW-01 §3)。`data_error` は staging に記録するが、AI runtime citation 対象外とし、log / audit / 別 routing で扱う (DOC-WF-corporate-address-agent-instructions §2.2、DOC-KNW-04 で詳述予定)。
+
+prototype では同一セッション内、本番仮値は `docs/_SSOT.md` の SLO 仮値表に従う (`[仮説 / 要検証]`)。
+
+## 5. 過去 case 関連ルール更新 Alert (3 適用範囲)
+
+**過去 case の AI proposal 本文は不変** (audit trail 保護、DOC-FW-01 §6.3)。ただし関連手順・ルールが後から承認された場合、AI Proposal 画面で Alert を出すことで承認者が気付けるようにする。
+
+| #   | 適用範囲              | 表示位置                        | Alert 内容                                                                                                                                                                              |
+| --- | --------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 未承認・承認待ち case | Case Review / AI Proposal panel | banner Alert (top of panel)、dismissible (auto-hide なし)、文言: 「関連手順が更新されています」「このcase作成後に承認されたルールがあります」「AI提案本文は当時のまま保持されています」 |
+| 2   | 承認済み過去 case     | Audit Trail (`/audit`)          | 関連更新履歴を timeline 表示 (どの workflow / agent-instructions / approval-policy 版が適用された case か)                                                                              |
+| 3   | 新規 case             | AiProposalPanel citation list   | 新ルールを通常 citation として参照                                                                                                                                                      |
+
+Alert 発火条件: 過去 case の `workflow_id` / `agent_id` / `category` が compiled knowledge と関連する場合 (例: 同 workflow の手順更新、同 agent の設定変更、同 category の Alert 閾値変更)。
+
+Alert UI 詳細仕様は DOC-UI-03 (Day 8 起稿予定) 参照。
+
+## 6. 手順承認 RACI (本 doc + workflow.md + agent-instructions.md の更新 trigger)
+
+本 doc 群に更新がある場合 (Alert 条件追加 / 差戻し条件変更 / 8 step 修正等)、AI が日次分析で Procedure Update Proposal を自動生成、Manual 管理者がキュー責任、業務責任者が承認する。
+
+| RACI 列         | 主体                                  | 役割                                                            |
+| --------------- | ------------------------------------- | --------------------------------------------------------------- |
+| Proposal source | AI (`agent-corporate-address-change`) | 日次分析で staging を集約、Procedure Update Proposal を自動生成 |
+| R (Queue owner) | Manual 管理者                         | キュー責任、受理 / triage / forward / reject                    |
+| A (承認)        | 業務責任者                            | 最終承認、業務リスクの受容判断                                  |
+| C (合議)        | SME / AI 管理者                       | 影響範囲確認 (業務影響 = SME / AI 設定影響 = AI 管理者)         |
+| I (通知)        | 入力者 / 承認者                       | 反映後の運用に影響、case 処理での判断材料                       |
+
+**SoD**: Queue owner (Manual 管理者) ≠ Approver (業務責任者) (システム制約として強制、AI Proposal source は人間ロールに影響しない)。
+
+詳細は DOC-APP-02 §3 (手順承認 RACI)、§6.1 (SoD 原則)、DOC-FW-01 §4 (Compiled 昇格 trigger) 参照。
+
+## 7. 関連文書
+
+- DOC-WF-corporate-address-workflow: 業務手順 (8 step / 期待状態 / 禁止事項)
+- DOC-WF-corporate-address-agent-instructions: AI 実行方針 / 参照ナレッジ / スクショ粒度
+- DOC-FW-01 §2 / §3 / §6.3: 差戻し / staging / 過去 case 不変原則 + Alert
+- DOC-APP-02 §2 / §3 / §6.1: 案件承認 (4-eyes) / 手順承認 RACI / SoD 原則
+- DOC-UI-03 (Day 8 起稿予定): AiProposalPanel Alert UI 仕様 (3 適用範囲)
+- `_meta.yaml`: machine-readable metadata
+- `knowledge/staging/`, `knowledge/compiled/`: 8 field frontmatter snippet 群

@@ -8,7 +8,7 @@ Backoffice 業務に AI Agent を段階自動化する構想 の v2 repo。cowor
 
 ## 中核 message
 
-**差戻しを、次の正解手順に変える仕組み**。差戻し → すぐに staging ナレッジ → AI 日次分析 + 手順承認 → 設定承認で昇格、の loop が中心。
+**差戻しを、次の正解手順に変える仕組み**。差戻し → staging ナレッジに記録 (未承認ヒント、AI 正式実行根拠ではない) → AI 日次分析 + 手順承認 → 設定承認で正式手順に昇格、の loop が中心。
 
 - AI を一気に自動化するのではなく、現場の差戻しを毎日の改善提案に変える
 - 承認された手順だけを AI に覚えさせる
@@ -31,11 +31,13 @@ AI が業務システムにアクセスする本番接続は tier 化。v2 proto
 
 ## UI Scope (段階詳細化、Stripe 風)
 
-UI は wireframe-first で詳細化する。Stripe 風の高密度・高信頼 SaaS UI を目指し、マイクロインタラクションを丁寧に作り込む。
+UI は wireframe-first で詳細化する。Stripe 風の高密度・高信頼 SaaS UI を目指し、マイクロインタラクションを丁寧に作り込む。**polish target は 9 画面 ALL 95% target equal**。Hero 3 区分は `demo-script` (Day 20) の画面遷移順序としてのみ残し、polish target には適用しない (Plan v1.4.1 Fix 3、v1.4.2 Rule 6)。
 
 - **Step 1 (Day 11-13)**: Wireframe で情報設計と状態遷移を固定 (9 画面 low-fi)
-- **Step 2 (Day 14-15)**: Stripe 風 design language 詳細化 (Hero 3 画面に design token 適用、medium-fi)
-- **Step 3 (Day 16-18)**: マイクロインタラクション (hover / transition / inline feedback / status animation) を丁寧に作り込む (high-fi、Hero 3 = 95%、残り 6 = 85%)
+- **Step 2 (Day 14-15)**: Stripe 風 design language 詳細化 (9 画面 ALL に design token 適用、medium-fi)
+- **Step 3 (Day 16-18)**: マイクロインタラクション (hover / transition / inline feedback / status animation) を丁寧に作り込む (high-fi、9 画面 ALL 95% target equal)
+
+**Prototype mode label (必須)**: 全画面共通 persistent pill を AppShell header right に表示。文言「プロトタイプ表示 — 外部システム未接続 / 証跡はモック」。必須対象: 9 画面全部 + `BusinessApprovalView` static mock (Plan v1.4 P0-3、v1.4.1 Fix 5)。
 
 backend / external connection / real automation は実装しない (scope-out)。
 

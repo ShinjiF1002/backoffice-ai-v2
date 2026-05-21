@@ -114,6 +114,12 @@ restricted_conditions:
 
 ## SLO 仮値 [仮説 / 要検証]
 
+**SLO 仮値 / 4 KPI 仮閾値の位置付け**:
+
+本 docs に記載の SLO 仮値および 4 KPI 仮閾値 (AI 入力承認率 ≥ 99% / 人手上書き率 ≤ 1% / Alert 発生率 ≤ 5% / 承認者差戻し率 ≤ 1%) は、すべて **Phase 1 で測定・再設定する検証仮説** であり、**本番導入可否を判定する gate ではない**。Session 4 で示す数値は target hypothesis であり実績値ではない (各値に `[仮説 / 要検証]` ラベル必須)。
+
+実 gate 化は Phase 1 でサンプル業務に対する measurement → calibration → governance review を経て決定する。
+
 将来 `docs/05-metrics-and-gates.md` (Day 9 起稿) に移管予定。本 file が暫定 SSOT。
 
 | 段 | 値 |
@@ -164,6 +170,22 @@ weight: low | medium | high                    # 信頼度のみを表す
 - `data_error` は通常の compiled 昇格対象外、log / audit / 別 routing 扱い
 - `agent_id` は将来複数 Agent 体制を想定、現状 1 Agent / 業務でも明示
 
+### staging knowledge の runtime 利用範囲 (Safety boundary)
+
+`weight: low` (staging) および `weight: medium` (reviewed staging) は AI runtime に visible だが、**正式な実行根拠 (citation) ではない**。利用範囲は以下 3 用途に限定:
+
+1. AI proposal の confidence 低下シグナル (未承認領域を flag)
+2. Human reviewer (入力者 / 承認者) への hint 表示 (「過去に同種差戻し履歴あり」等)
+3. AI が追加確認質問を生成する trigger
+
+AI が業務手順 / 入力値 / 承認ルールを **citation する根拠** として使用できるのは `weight: high` (compiled approved) のみ。
+
+compiled と staging が conflict した場合、compiled を runtime 採用 (staging は当該 conflict subset で runtime 参照対象外)。
+
+`data_error` category の staging は本 safety boundary とは別 routing (compiled 昇格対象外、citation 対象外、log / audit / 別 routing)。
+
+これにより「**承認された手順だけを AI に覚えさせる**」core message (Core Message 表現 SSOT Sub message 2) と、staging が runtime に visible である運用設計が両立する。
+
 ## 接続方針 SSOT pointer
 
 本番接続方式の暫定 SSOT = `docs/00-overview.md` §2.2 接続層メモ。
@@ -189,6 +211,18 @@ weight: low | medium | high                    # 信頼度のみを表す
 | Matrix B slogan | 案件確認は減らす。ルール承認は残す。 |
 
 legacy wording (旧表現) の trace は `docs/prior-art-map.md` に記録 (履歴文書として残存可)。本 file には旧表現 exact text を置かない (grep gate の自己 hit 回避)。
+
+## Session 4 表層表現規範 (Tier 1/2/3 言い換え rule)
+
+Session 4 表層 (slide / demo / UI label / mock data) で扱う表現の規範。内部 docs / `_meta.yaml` は具体値を維持、表層では抽象化する:
+
+| 内部 docs / `_meta.yaml` 表現                                          | Session 4 表層 (slide / demo / UI label / mock data) 表現         |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `$10M equivalent [hypothesis_requires_validation]` (国際送金高額閾値)  | 「高額・高リスク取引」(数値は出さない)                            |
+| 「規制 / コンプライアンス領域の人間判断」(汎用語)                      | 同左 (Tier 3 規制語は出さない)                                    |
+| 「Phase 1 で検証・決定」                                               | 「具体閾値は Phase 1 で業務・法務・リスク観点から検証する」(1 行) |
+
+詳細な Tier 1/2/3 vocabulary 体系は `CLAUDE.md` Tier 1/2/3 section + `docs/prior-art-map.md` (legacy trace) 参照。本 SSOT は Session 4 表層出力時の言い換え rule のみ。
 
 ## SSOT 競合検出 / Validation
 

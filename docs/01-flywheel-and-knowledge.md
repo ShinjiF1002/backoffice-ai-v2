@@ -133,6 +133,20 @@ AI が 7 桁郵便番号を自動補完してしまうと差戻しになる。
 - Manual 管理者の curate / 業務責任者の承認を経ていない
 - weight 上げ (compiled 昇格) には複数 case 再発 + 手順承認が必要 (§4)
 
+### 3.5 staging knowledge の runtime 利用範囲 (Safety boundary)
+
+staging knowledge は AI runtime に visible だが、**AI が業務手順を実行する根拠 (citation) としては使用しない**。利用範囲は以下 3 用途に限定:
+
+1. AI proposal の confidence 低下シグナル (未承認領域を flag する)
+2. Human reviewer (入力者 / 承認者) への hint 表示 (「過去に同種差戻し履歴あり」)
+3. AI が追加確認質問を生成する trigger
+
+citation 根拠として使用できるのは compiled approved knowledge (`weight: high`) のみ。compiled と staging が矛盾する場合、compiled が runtime 採用される (staging は当該 conflict subset で runtime 参照対象外)。
+
+これにより「**承認された手順だけを AI に覚えさせる**」core message (DOC-OV-00 §1.2 Sub message 2) と、staging が runtime に visible である運用設計が両立する。
+
+`data_error` category の staging は本 safety boundary とは別 routing (§2.3、DOC-KNW-04 参照、compiled 昇格対象外 / citation 対象外 / log / audit / 別 routing)。
+
 ## 4. ③ Compiled 昇格 (AI 日次分析、手順承認 trigger)
 
 ### 4.1 昇格 trigger

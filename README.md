@@ -2,7 +2,7 @@
 
 cowork-workshop Session 4 (2026-06-12 Fri) 向け、Backoffice 業務に AI Agent を段階自動化する構想の repo。
 
-**差戻しを、次の正解手順に変える仕組み** を中核 message とし (差戻し → すぐに staging → AI 日次分析 + 手順承認 → 設定承認で昇格)、UC-BO-01 法人住所変更処理を主役、口座開設書類完備チェックを Dashboard 並列カードとして見せる。国際送金は `workflows/international-transfer-boundary/` に restricted boundary pack (`$10M` 相当以上は AI 自動化不可 `[仮説 / 要検証]`、実閾値は Phase 1 で検証・決定。Dashboard カードなし、画面化なし)。
+**差戻しを、次の正解手順に変える仕組み** を中核 message とし (差戻し → staging ナレッジに記録 (未承認ヒント、AI 正式実行根拠ではない) → AI 日次分析 + 手順承認 → 設定承認で正式手順に昇格)、UC-BO-01 法人住所変更処理を主役、口座開設書類完備チェックを Dashboard 並列カードとして見せる。国際送金は `workflows/international-transfer-boundary/` に restricted boundary pack (`$10M` 相当以上は AI 自動化不可 `[仮説 / 要検証]`、実閾値は Phase 1 で検証・決定。Dashboard カードなし、画面化なし。Session 4 表層では「高額・高リスク取引」と抽象化)。
 
 主構成: 設計書 (`docs/`)、業務別ファイル (`workflows/`)、UI prototype (`prototype/`、Day 11+)、Session 4 演出物 (`demo/`、Day 20+)。
 

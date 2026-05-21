@@ -324,7 +324,7 @@ DOC-MON-05 が SSOT。要点:
 - **A (承認)**: 設定承認 Type A (通常 boundary 調整) / Type C (Automation Maturity 関連の場合)
 - **反映先**: 該当業務の `BOUNDARY.md` + `_meta.yaml` 関連 field (`restricted_conditions` 等) + plan update
 - **国際送金 `$10M [仮説 / 要検証]` 閾値変更も本 mechanism の対象** (実閾値は Phase 1 で検証・決定)
-- **Demo Chapter での扱い**: scope-out (Day 9 narrative / Day 20 demo-script で言及なし)
+- **Demo Chapter での扱い**: Demo 操作なし / Day 20 demo-script で言及なし。Day 9 narrative (Slide 7) または `workflows/_index.md` で境界例として 1 行だけ言及可 (Tier 3 規制語は出さない、§10 hedge、`_SSOT.md`「Session 4 表層表現規範」参照)
 - **発生頻度想定**: 月次以下 `[仮説 / 要検証]`、頻発する場合は通常 loop 組み込み再評価
 
 ## 10. 規制 cite の hedge (prior art pointer 一覧)

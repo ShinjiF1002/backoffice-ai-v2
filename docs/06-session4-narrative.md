@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00, DOC-FW-01, DOC-APP-02, DOC-UI-03, DOC-KNW-04, DOC-MON-05, DOC-ROOT-\_SSOT (特に「Session 4 表層表現規範」)                                                                            |
 | SSOT 区分       | 8 slide message + Demo Chapter 1/2 message spine + BusinessApprovalView mock figure spec の SSOT (demo の execution step は `demo/demo-script.md` Day 20 起稿に分離)                             |
 | Evidence Status | N/A (narrative 設計のみ、定量値は DOC-MON-05 を pointer)                                                                                                                                         |
-| 改版履歴        | v0.1 (2026-05-29): 初版作成 (Day 9、Plan v1.4 P0-4 (国際送金 Session 4 表層抽象化) + P2-11 (Autonomous footnote) + DOC-MON-05 connection (Slide 8)、Session 4 表層表現規範 `docs/_SSOT.md` 適用) |
+| 改版履歴        | v0.1 (2026-05-29): 初版作成 (Day 9、Plan v1.4 P0-4 (国際送金 Session 4 表層抽象化) + P2-11 (Autonomous footnote) + DOC-MON-05 connection (Slide 8)、Session 4 表層表現規範 `docs/_SSOT.md` 適用)。v0.2 (2026-05-29): CR R12+R13 hygiene patch (Blocking 2 規制語 gate self-contradictory 解消 §1.3 / §5 で Tier 3 exact list を paraphrase、Day 19/21 grep scope 明示、Minor 60 min summary math fix [Slide 1-8 28→32 / Q&A 4→2]、Minor Demo Chapter 1「Hero 1/2/3 画面遷移」を「Hero 1、Hero 2/3 は Demo 2」に clarify、Minor Demo Chapter 2 SoD enforcement explicit 1 行追加) |
 
 ---
 
@@ -27,13 +27,13 @@
 | ---------- | --------- | ---------------------------------------------------------------------------------------------------------- |
 | 0-2        | Intro     | self-intro + Session 4 の outcome 確認 (audience が来週、サンプル業務を選んで設計検討を始められる感触獲得) |
 | 2-22       | Slide 1-4 | 課題 → Core message → 案件承認 4-eyes → 3 層承認 (各 5 min)                                                |
-| 22-38      | Demo 1    | Demo Chapter 1: UC-BO-01 法人住所変更 (差戻し → staging → 反映観測、Hero 1 / 2 / 3 画面遷移)               |
+| 22-38      | Demo 1    | Demo Chapter 1: UC-BO-01 法人住所変更 (差戻し → staging → 反映観測、Hero 1 画面、Hero 2 / 3 は Demo 2 で展開) |
 | 38-46      | Slide 5-7 | Flywheel 全景 → 過去 case 不変 + Alert → Matrix B (各 ~2.5 min)                                            |
 | 46-54      | Demo 2    | Demo Chapter 2: AI 日次分析 → ProposalReview → 手順承認 → Metrics 観測                                     |
 | 54-58      | Slide 8   | Metrics 4 KPI multi-criteria 仮説 gate + 9 KRI                                                             |
 | 58-60      | Q&A       | 想定 4 min (収まらない場合 follow-up channel 明示)                                                         |
 
-合計: Intro 2 min + Slide 1-8 28 min + Demo 1/2 計 24 min + Q&A 4 min = **58 min + 2 min buffer**。
+合計: Intro 2 min + Slide 1-8 32 min (Slide 1-4 = 5×4 / Slide 5-7 ≈ 2.5×3 / Slide 8 = 4) + Demo 1/2 計 24 min + Q&A 2 min = **60 min**。Q&A は table の 58-60 段 (2 min buffer) で扱う。
 
 ### 1.2 audience 想定
 
@@ -46,7 +46,7 @@
 
 - Tier 1 語 (`CLAUDE.md` §「Tier 1 語彙」、案件承認 / 手順承認 / 設定承認 / 入力者 / 承認者 / Flywheel / 業務別ファイル群) は slide / 説明で自由使用
 - Tier 2 語 (`staging` / `compiled` / `Trust Level` / `Supervised` / `Checkpoint` / `Autonomous` / `Alert` / `差戻し` / `Knowledge`) は UI label / 補助説明で使用、メイン message では言い換え可
-- **Tier 3 語 (規制語 MRM / CISO / NYDFS / SR 11-7 / CCPA / OFAC / BSA / SAR / CTR / ECOA) は slide / UI label / mock data に出さない** (DOC-APP-02 §10 hedge、`docs/_SSOT.md` Session 4 表層表現規範)
+- **Tier 3 語 (規制語、詳細 list は `CLAUDE.md` §Tier 3 語彙 / `docs/prior-art-map.md` 参照) は slide / UI label / mock data に出さない** (DOC-APP-02 §10 hedge、`docs/_SSOT.md` Session 4 表層表現規範、self-hit 回避のため本 doc には exact list を置かない)
 
 ## 2. 各 slide 詳細 (Slide 1-8)
 
@@ -171,7 +171,7 @@
 **注**:
 
 - `$10M` 数値は出さない (内部 docs / `_meta.yaml` の `[hypothesis_requires_validation]` ラベル付き仮値のみ)
-- Tier 3 規制語 (NYDFS / SR 11-7 / OFAC 等) は出さない (DOC-APP-02 §10 hedge)
+- Tier 3 規制語 (詳細 list は `CLAUDE.md` §Tier 3 語彙 / `docs/prior-art-map.md` 参照) は出さない (DOC-APP-02 §10 hedge、self-hit 回避のため本 doc には exact list を置かない)
 - demo 操作なし (DOC-WF-international-transfer-workflow §5)
 
 **visual**: Matrix B 表 (Automation 段階 × 案件承認 / 手順承認 / 設定承認 の介在頻度)、Autonomous footnote は小字で添える、国際送金は表外 callout で 1 行
@@ -229,7 +229,7 @@ Demo の execution step (どの画面の何を click するか) は `demo/demo-s
 
 1. **Dashboard (`/dashboard`)**: 業務 card で「同種差戻しが 3+ 件再発」状態を示す
 2. **ProposalReview (`/proposals/:id`) [Hero 2]**: AI が自動生成した Procedure Update Proposal を見せる (Proposal source: AI / R: Manual 管理者 / A: 業務責任者 の RACI box、proposed diff)
-3. **Manual 管理者 triage**: forward 業務責任者
+3. **Manual 管理者 triage**: forward 業務責任者 (**mock data 上で Manual 管理者と業務責任者は異なる person 表記、SoD enforcement の demo 上 visualization、DOC-APP-02 §9.8 既定**)
 4. **業務責任者 approve**: compiled 昇格 + workflow.md / agent-instructions.md / approval-policy.md diff 適用
 5. **Metrics (`/metrics`) [Hero 3]**: 4 KPI target hypothesis 達成 trend を見せる (PageHeader 直下に「本番導入可否を判定する gate ではない」注表示)
 
@@ -270,12 +270,12 @@ Demo の execution step (どの画面の何を click するか) は `demo/demo-s
 
 Session 4 narrative は **Tier 3 規制語を出さない** (DOC-APP-02 §10 + `CLAUDE.md` §「Tier 3 語彙」):
 
-- slide / UI label / mock data に出さない: MRM / CISO / NYDFS / SR 11-7 / CCPA / OFAC / BSA / SAR / CTR / ECOA
+- slide / UI label / mock data に出さない: Tier 3 規制語 (詳細 list は `CLAUDE.md` §Tier 3 語彙 / `docs/prior-art-map.md` 参照、self-hit 回避のため本 doc には exact list を置かない)
 - 国際送金は「**高額・高リスク取引**」と抽象化 (Slide 7、Plan v1.4 P0-4)
 - 規制論拠は外部 cite せず、ai-operator paper への reference link 経由のみ (内部 docs)
 - audience 質問で Tier 3 語が出た場合は「具体的な規制名は Phase 1 で external regulatory review を経て扱う、本 v2 は設計検討段階」と返す
 
-**Day 19 / Day 21 grep**: `grep -rEn '(MRM|CISO|NYDFS|SR 11-7|CCPA|OFAC|BSA|SAR|CTR|ECOA)' docs/06-session4-narrative.md demo/demo-script.md` が 0 件であることを確認 (CLAUDE.md scope-out / `docs/_SSOT.md` §規制語 hedge)。
+**Day 19 / Day 21 grep**: `CLAUDE.md` Tier 3 語彙の exact list を grep target として、`docs/06-session4-narrative.md` (本 doc) / `demo/demo-script.md` / `demo/static-mocks/` / `prototype/src/data/` の **slide 本文 / UI label / mock data 用 string が 0 件** であることを確認 (CLAUDE.md scope-out / `docs/_SSOT.md` §規制語 hedge)。本 doc 内の rule description (本 §5 / §1.3) は gate scope 外 (self-hit 回避)。
 
 ## 6. 関連文書
 

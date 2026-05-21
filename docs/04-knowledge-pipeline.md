@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §1.2, DOC-FW-01 §3-§4, DOC-APP-02 §3 / §9.8, DOC-UI-03 §6 / §9, DOC-MON-05 (Day 9), DOC-ROOT-\_SSOT §1.4 / §1.5                                                                                                       |
 | SSOT 区分       | AI 日次分析 logic + 5-category routing 詳細 + Staging usage rules (UI 表示 + agent prompt embedding) + Staging lifecycle + Audit evidence event model (15 行、paired field 含む実 18) + LLMOps framework + Connection control matrix reference の SSOT |
 | Evidence Status | N/A (knowledge pipeline 設計のみ。判断基準 / lifecycle 期間 / KPI gate 仮閾値はすべて `[仮値 / 要 Phase 1 検証]`)                                                                                                               |
-| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1/Fix 4 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§8.1 audit event「15 field event model」→「15-row audit event model (paired field 含む実 field 数 18)」paraphrase)  |
+| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1/Fix 4 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§8.1 audit event「15 field event model」→「15-row audit event model (paired field 含む実 field 数 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§5.3 + §11 関連文書 で DOC-MON-05 + DOC-S4-06 を実 path pointer に置換)  |
 
 ---
 
@@ -149,7 +149,7 @@ weight: low | medium | high # 信頼度のみを表す
 
 ### 5.3 Evaluation
 
-- **SSOT pointer**: DOC-MON-05 (Day 9 起稿予定) の 4 KPI multi-criteria 仮説 gate + 7 KPI catalogue + 9 KRI catalogue
+- **SSOT pointer**: DOC-MON-05 (`docs/05-metrics-and-gates.md`) の 4 KPI multi-criteria 仮説 gate + 7 KPI catalogue + 9 KRI catalogue
 - **4 KPI 仮閾値**: AI 入力承認率 ≥ 99% / 人手上書き率 ≤ 1% / Alert 発生率 ≤ 5% / 承認者差戻し率 ≤ 1% (すべて `[仮説 / 要検証]`、ai-operator 24 §3.2 継承、Plan v1.4 P0-2 / v1.4.1 Fix 2 で「本番導入可否を判定する gate ではない、Phase 1 で測定・再設定する検証仮説」と再 framing 済)
 - **Evaluation event**: 各 case の AI proposal → human decision (accept / reject / sendback) を audit event model (§8) で記録、Metrics 画面 (DOC-UI-03 §4.8) で集計
 
@@ -340,7 +340,7 @@ Role × 画面 access matrix SSOT は `docs/02-approval-model.md` §9.8 (Phase 1
 - DOC-FW-01 §3-§4 (staging → compiled flow、本 doc §2 / §6 / §7 と整合) + §3.5 (staging safety boundary、§6.2 と整合) + §6.3 (過去 case 不変 + Alert、§8.3 と整合)
 - DOC-APP-02 §3 (手順承認 RACI、§2.4 と整合) + §9.8 (Role access matrix、§10 reference)
 - DOC-UI-03 §4.5 (ProposalReview、§2.4 と整合) + §4.7 (AuditTrail、§8.3 と整合) + §6 (AiProposalPanel Alert UI) + §9 (Staging UI pattern、§6.1 と整合)
-- DOC-MON-05 (4 KPI 仮閾値 + 7 KPI + 9 KRI、Day 9 起稿予定、§5.3 reference)
+- DOC-MON-05 (`docs/05-metrics-and-gates.md`、4 KPI 仮閾値 + 7 KPI + 9 KRI、§5.3 reference)
 - DOC-ROOT-\_SSOT §1.4 (Snippet schema SSOT、§3 reference) + §1.5 (接続方針 control matrix、§9 reference)
-- DOC-S4-06 (Session 4 narrative、Day 9 起稿予定)
+- DOC-S4-06 (`docs/06-session4-narrative.md`、Session 4 narrative)
 - `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix) + P1-7 (role access matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1 / Fix 4

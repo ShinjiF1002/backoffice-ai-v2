@@ -69,7 +69,7 @@ AI (`agent-international-transfer-boundary-analyzer`、`v0.1`) が以下を anal
 
 - 閾値前後 (例: `$8M-12M` range) の case が一定数発生
 - 送金先・受取人確認 / 制限対象照合の人間判断 confidence が安定 (false positive 率低下)
-- フレームワーク 4 KPI が gate 基準 pass (DOC-MON-05 Day 9 起稿予定)
+- フレームワーク 4 KPI が仮説 gate 基準 pass (DOC-MON-05 `docs/05-metrics-and-gates.md`、target hypothesis)
 
 ### 4.2 RACI (本 boundary review proposal)
 

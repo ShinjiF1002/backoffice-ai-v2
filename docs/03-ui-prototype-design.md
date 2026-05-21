@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §2.3, DOC-FW-01 §3.5, DOC-APP-02 §9.8, DOC-KNW-04, DOC-S4-06, DOC-ROOT-\_SSOT §1.4 / §1.5                                           |
 | SSOT 区分       | 9 画面 UI Screen Card + Stripe 風 design language + AiProposalPanel Alert UI (3 適用範囲) + Prototype mode label + Staging UI pattern の SSOT |
 | Evidence Status | N/A (UI 設計のみ。polish target 9 画面 ALL 95% target equal は v1.4.1 Fix 3 / v1.4.2 Rule 6 確定、Hero 3 区分は demo-script 遷移順序のみ)     |
-| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P1-1 + P1-5 (audit event reference) + v1.4 P0-3 / v1.4.1 Fix 3 / Fix 5 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§4.1 「Hero 起点」→「Demo Chapter 1 起点」 / §10 AiProposalPanel utilizers から ProposalReview 削除 / §4.7 audit event「15 field」→「15-row (paired field 含む実 18)」paraphrase)                    |
+| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P1-1 + P1-5 (audit event reference) + v1.4 P0-3 / v1.4.1 Fix 3 / Fix 5 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§4.1 「Hero 起点」→「Demo Chapter 1 起点」 / §10 AiProposalPanel utilizers から ProposalReview 削除 / §4.7 audit event「15 field」→「15-row (paired field 含む実 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§4.8 Metrics + §13 関連文書 で DOC-MON-05 を実 path pointer に置換)                    |
 
 ---
 
@@ -230,7 +230,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 3. **主要ユーザー**: 業務責任者 / AI 管理者 / Auditor (read)
 4. **主要 action**: 期間 filter / 業務 filter / KPI 個別 drilldown
 5. **状態**: dashboard view / KPI detail view
-6. **表示要素**: PageHeader、4 KPI multi-criteria gate card 群 (AI 入力承認率 / 人手上書き率 / Alert 発生率 / 承認者差戻し率、各 card に target hypothesis ≥ 99% / ≤ 1% / ≤ 5% / ≤ 1% + 仮値 caption + sparkline)、**全 KPI 数値に `[仮説 / 要検証]` ラベル必須** (DOC-MON-05 Day 9 起稿予定 SSOT)、9 KRI summary (Alert badge style)、業務別 trend chart、Prototype mode label
+6. **表示要素**: PageHeader、4 KPI multi-criteria gate card 群 (AI 入力承認率 / 人手上書き率 / Alert 発生率 / 承認者差戻し率、各 card に target hypothesis ≥ 99% / ≤ 1% / ≤ 5% / ≤ 1% + 仮値 caption + sparkline)、**全 KPI 数値に `[仮説 / 要検証]` ラベル必須** (DOC-MON-05 (`docs/05-metrics-and-gates.md`) §4.1 SSOT)、9 KRI summary (Alert badge style)、業務別 trend chart、Prototype mode label
 7. **遷移**: KPI card click → drilldown view (期間 / 業務 breakdown)
 8. **mock data 依存**: `mock-metrics.ts` (KPI / KRI sample data、すべて `[仮説]` caption 付き)
 9. **Day 11+ 実装メモ**: 「本番導入可否を判定する gate ではない、Phase 1 で測定・再設定する検証仮説」注 (Plan v1.4 P0-2 / v1.4.1 Fix 2) を PageHeader 直下に必ず表示。Hero 3 (Demo Chapter 2 終盤、4 KPI 仮閾値の説明画面)
@@ -406,7 +406,7 @@ mock data は restricted boundary pack (国際送金) を含めない (DOC-OV-00
 - DOC-APP-02 §3 (手順承認 RACI、§4.5 ProposalReview と整合)
 - DOC-APP-02 §9.8 (Role × 画面 access matrix、Phase 1 hand-off memo)
 - DOC-KNW-04 §4 (5-category routing、§4.3 SendBackComment と整合) + §8 (audit event model、§4.7 AuditTrail と整合)
-- DOC-MON-05 (4 KPI 仮閾値 + 7 KPI + 9 KRI、Day 9 起稿予定、§4.8 Metrics SSOT)
+- DOC-MON-05 (`docs/05-metrics-and-gates.md`、4 KPI 仮閾値 + 7 KPI + 9 KRI、§4.8 Metrics SSOT)
 - DOC-S4-06 (Session 4 narrative、Slide 3 BusinessApprovalView mock figure spec)
 - DOC-ROOT-\_SSOT §1.4 (Snippet schema SSOT、§9.2 weight インジケータと整合) + §1.5 (接続方針 control matrix)
 - `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.4 P0-1 / P0-3 / P1-1 + v1.4.1 Fix 3 / Fix 5

@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00, DOC-APP-02, DOC-KNW-04, DOC-MON-05, DOC-S4-06, DOC-ROOT-prior-art-map |
 | SSOT 区分       | Flywheel 因果 + 5 段ステージ詳細 + Loop の不変条件 の SSOT                       |
 | Evidence Status | N/A (設計のみ、定量値なし。本番 SLO は Phase 1 で要定義の旨を §3.2 で明示)       |
-| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message 連携 / Snippet schema 8 field / SLO _SSOT 参照 / Compiled 昇格 AI 日次 + Proposal source = AI + R = Manual 管理者 / BOUNDARY review proposal / 過去 case Alert / Matrix B 表現 rewrite、Plan v1.3 final patch 反映)。v0.3 (2026-05-27): CR R8 patch 反映 (§3.5 staging knowledge runtime 利用範囲 (Safety boundary) 新規 subsection 追加、core message Sub message 2「承認された手順だけを AI に覚えさせる」と staging visibility の論理衝突を解消、Plan v1.4 P0-1 / v1.4.1 Fix 1)。v0.4 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.3 「自動化禁止業務」→「restricted boundary pack」表記統一、§3.2 SLO _SSOT 参照を 05 §3 へ張替 [Day 9 移管済]、§10 Tier 3 exact list 抽象化 + prior-art-map.md 参照、boundary review proposal $10M exact text 削除して `BOUNDARY.md` §2 pointer 化、関連 P0-1 / P0-2 / P1) |
+| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message 連携 / Snippet schema 8 field / SLO _SSOT 参照 / Compiled 昇格 AI 日次 + Proposal source = AI + R = Manual 管理者 / BOUNDARY review proposal / 過去 case Alert / Matrix B 表現 rewrite、Plan v1.3 final patch 反映)。v0.3 (2026-05-27): CR R8 patch 反映 (§3.5 staging knowledge runtime 利用範囲 (Safety boundary) 新規 subsection 追加、core message Sub message 2「承認された手順だけを AI に覚えさせる」と staging visibility の論理衝突を解消、Plan v1.4 P0-1 / v1.4.1 Fix 1)。v0.4 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.3 旧 全体禁止業務 表記→「restricted boundary pack」表記統一、§3.2 SLO _SSOT 参照を 05 §3 へ張替 [Day 9 移管済]、§10 Tier 3 exact list 抽象化 + prior-art-map.md 参照、boundary review proposal 高額閾値 exact text 削除して `BOUNDARY.md` §2 pointer 化、関連 P0-1 / P0-2 / P1)。v0.5 (2026-05-30): Day 10.3 hygiene patch (CR R17 Blocking 反映、§3.2 L121 「SLO 仮値は `_SSOT.md` を SSOT」→「SLO 仮値は `docs/05-metrics-and-gates.md` §3 を SSOT (Day 9 移管済、`_SSOT.md` §1.3 は pointer のみ)」、L120 paraphrase の transitive 漏れを完了、Day 10.1 / Day 10.2 verification 6 ラウンド連続失敗の最終解消) |
 
 ---
 
@@ -118,7 +118,7 @@ AI が 7 桁郵便番号を自動補完してしまうと差戻しになる。
 
 - **prototype では同一セッション内に反映** (mock state を AppContext で immediate update、永続化なし)
 - **本番仮値: 当日中 `[仮説 / 要検証]`** (`docs/05-metrics-and-gates.md` §3 SLO 仮値表参照、Day 9 で `_SSOT.md` §1.3 から移管済、Phase 1 で実証)
-- SLO 仮値は `_SSOT.md` を SSOT とし、本 doc では参照のみ。表現規範: 「同一セッション内」「当日中」「日次」「次回 AI 処理から」を使う (real-time guarantee と誤読される表現は使わない、該当語彙の trace は `docs/prior-art-map.md`)
+- SLO 仮値は `docs/05-metrics-and-gates.md` §3 を SSOT とし (Day 9 移管済、`_SSOT.md` §1.3 は pointer のみ)、本 doc では参照のみ。表現規範: 「同一セッション内」「当日中」「日次」「次回 AI 処理から」を使う (real-time guarantee と誤読される表現は使わない、該当語彙の exact list は `docs/prior-art-map.md`)
 
 ### 3.3 Weight と参照優先度
 

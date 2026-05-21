@@ -1,19 +1,19 @@
 # Backoffice AI v2 — 進捗管理 tracker
 
-| 項目            | 値                                                                                       |
-| --------------- | ---------------------------------------------------------------------------------------- |
-| 文書 ID         | DOC-ROOT-\_PROGRESS                                                                      |
-| 文書名          | 進捗管理 tracker (Day 1-22 status + Plan v1.3 影響分析 + Verification gate 一覧)         |
-| 版数            | v0.1                                                                                     |
-| ステータス      | Active (Day 5 末で起稿、各 Day 末で update)                                              |
-| オーナー        | backoffice-ai-v2 maintainer                                                              |
-| 承認者          | self                                                                                     |
-| 閲覧対象        | Internal / Project team                                                                  |
-| 機密区分        | Internal                                                                                 |
-| 関連文書        | DOC-ROOT-\_SSOT, DOC-ROOT-prior-art-map, Plan v1.3 final patch                           |
-| SSOT 区分       | Day-by-day status + Plan v1.3 影響分析 + Verification gate の SSOT                       |
-| Evidence Status | N/A (進捗管理のみ、定量値なし)                                                           |
-| 改版履歴        | v0.1 (2026-05-25): 初版作成 (Day 5 整合化 update 後、Plan v1.3 final patch 影響分析含む) |
+| 項目            | 値                                                                                                                                                                                                                                                 |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 文書 ID         | DOC-ROOT-\_PROGRESS                                                                                                                                                                                                                                |
+| 文書名          | 進捗管理 tracker (Day 1-22 status + Plan v1.3 影響分析 + Verification gate 一覧)                                                                                                                                                                   |
+| 版数            | v0.1                                                                                                                                                                                                                                               |
+| ステータス      | Active (Day 5 末で起稿、各 Day 末で update)                                                                                                                                                                                                        |
+| オーナー        | backoffice-ai-v2 maintainer                                                                                                                                                                                                                        |
+| 承認者          | self                                                                                                                                                                                                                                               |
+| 閲覧対象        | Internal / Project team                                                                                                                                                                                                                            |
+| 機密区分        | Internal                                                                                                                                                                                                                                           |
+| 関連文書        | DOC-ROOT-\_SSOT, DOC-ROOT-prior-art-map, Plan v1.3 final patch                                                                                                                                                                                     |
+| SSOT 区分       | Day-by-day status + Plan v1.3 影響分析 + Verification gate の SSOT                                                                                                                                                                                 |
+| Evidence Status | N/A (進捗管理のみ、定量値なし)                                                                                                                                                                                                                     |
+| 改版履歴        | v0.1 (2026-05-25): 初版作成 (Day 5 整合化 update 後、Plan v1.3 final patch 影響分析含む)。v0.2 (2026-05-25): Day 6 着手前 plan 詳細化 (per-day update + 新規 verification gate + Open items 整理、CR Round 3 hygiene patch 規範を Day 6-22 に伝播) |
 
 Refresh: 各 Day 末で Status table 更新。Day 10 Design Gate / Day 19 SSOT Refresh / Day 21 Final で整合性確認。
 
@@ -21,31 +21,31 @@ Refresh: 各 Day 末で Status table 更新。Day 10 Design Gate / Day 19 SSOT R
 
 ## 1. Status overview (Day 1-22 + Session 4)
 
-| Day       | Date       | Status        | Commit      | Note                                                                                                |
-| --------- | ---------- | ------------- | ----------- | --------------------------------------------------------------------------------------------------- |
-| Day 1     | 2026-05-21 | ✅ completed  | `d596387`   | skeleton (README / CLAUDE / .gitignore / prior-art-map / \_SSOT)                                    |
-| Day 2     | 2026-05-22 | ✅ completed  | `3f7fee7`   | \_HEADER_TEMPLATE.md (12 項目 header SSOT)                                                          |
-| Day 3     | 2026-05-23 | ✅ completed  | `c1e952d`   | 00-overview.md + 01-flywheel-and-knowledge.md                                                       |
-| Day 4     | 2026-05-24 | ✅ completed  | `35b67a8`   | 02-approval-model.md                                                                                |
-| Day 5     | 2026-05-25 | ✅ completed  | `fb0df04` + `1bd5385` | **整合化 update (Plan v1.3 final patch、6 docs rewrite) + progress tracker + archive 退避 + hygiene patch** |
-| Day 6     | 2026-05-26 | 🟡 pending    | -           | workflows/corporate-address-change/ 5 docs + knowledge 6 件 (Snippet 8 field schema 適用)           |
-| Day 7     | 2026-05-27 | 🟡 pending    | -           | workflows/account-opening-completeness + workflows/international-transfer-boundary (restricted)     |
-| Day 8     | 2026-05-28 | 🟡 pending    | -           | 03-ui-prototype-design.md (Stripe 風 + Wireframe 段階) + 04-knowledge-pipeline.md (AI 日次分析)     |
-| Day 9     | 2026-05-29 | 🟡 pending    | -           | 05-metrics-and-gates.md (SLO 移管) + 06-session4-narrative.md (Core msg / Matrix B 新表現)          |
-| Day 10    | 2026-05-30 | 🟡 pending    | -           | **Design Gate (大): SSOT 衝突 grep + Refresh + 規制語 grep + 整合性 spot-check**                   |
-| Day 11    | 2026-05-31 | 🟡 pending    | -           | UI Wireframe phase (9 画面 low-fi、Day 11-13 の 1 日目)                                             |
-| Day 12    | 2026-06-01 | 🟡 pending    | -           | UI Wireframe phase 続き (Day 11-13 の 2 日目)                                                       |
-| Day 13    | 2026-06-02 | 🟡 pending    | -           | UI Wireframe phase 完了 (Day 11-13 の 3 日目、9 画面 low-fi 完成)                                  |
-| Day 14    | 2026-06-03 | 🟡 pending    | -           | UI medium-fi phase (Hero 3 画面に design token 適用、Day 14-15 の 1 日目)                          |
-| Day 15    | 2026-06-04 | 🟡 pending    | -           | UI medium-fi phase 完了 (Day 14-15 の 2 日目)                                                       |
-| Day 16    | 2026-06-05 | 🟡 pending    | -           | UI high-fi phase (Hero 3 = 95% + マイクロインタラクション、Day 16-18 の 1 日目)                    |
-| Day 17    | 2026-06-06 | 🟡 pending    | -           | UI high-fi phase 続き (Day 16-18 の 2 日目)                                                         |
-| Day 18    | 2026-06-07 | 🟡 pending    | -           | UI high-fi phase 完了 (Hero 3 = 95% + 残り 6 = 85%、Day 16-18 の 3 日目)                            |
-| Day 19    | 2026-06-08 | 🟡 pending    | -           | SSOT Refresh + cowork-workshop/CLAUDE.md + workshop-design.md update                                |
-| Day 20    | 2026-06-09 | 🟡 pending    | -           | demo (demo-script.md + business-approval-view.html + screenshot export)                             |
-| Day 21    | 2026-06-10 | 🟡 pending    | -           | Final integration + 規制語 grep + 旧表現 grep + 全体整合性                                          |
-| Day 22    | 2026-06-11 | 🟡 pending    | -           | Session 4 rehearsal (60 min run-through) + 最終 review                                              |
-| Session 4 | 2026-06-12 | 🎯 milestone | -           | 本番 (Backoffice AI v2 構想共有、audience 10 名)                                                     |
+| Day       | Date       | Status       | Commit                | Note                                                                                                        |
+| --------- | ---------- | ------------ | --------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Day 1     | 2026-05-21 | ✅ completed | `d596387`             | skeleton (README / CLAUDE / .gitignore / prior-art-map / \_SSOT)                                            |
+| Day 2     | 2026-05-22 | ✅ completed | `3f7fee7`             | \_HEADER_TEMPLATE.md (12 項目 header SSOT)                                                                  |
+| Day 3     | 2026-05-23 | ✅ completed | `c1e952d`             | 00-overview.md + 01-flywheel-and-knowledge.md                                                               |
+| Day 4     | 2026-05-24 | ✅ completed | `35b67a8`             | 02-approval-model.md                                                                                        |
+| Day 5     | 2026-05-25 | ✅ completed | `fb0df04` + `1bd5385` | **整合化 update (Plan v1.3 final patch、6 docs rewrite) + progress tracker + archive 退避 + hygiene patch** |
+| Day 6     | 2026-05-26 | 🟡 pending   | -                     | workflows/corporate-address-change/ 5 docs + knowledge 6 件 (Snippet 8 field schema 適用)                   |
+| Day 7     | 2026-05-27 | 🟡 pending   | -                     | workflows/account-opening-completeness + workflows/international-transfer-boundary (restricted)             |
+| Day 8     | 2026-05-28 | 🟡 pending   | -                     | 03-ui-prototype-design.md (Stripe 風 + Wireframe 段階) + 04-knowledge-pipeline.md (AI 日次分析)             |
+| Day 9     | 2026-05-29 | 🟡 pending   | -                     | 05-metrics-and-gates.md (SLO 移管) + 06-session4-narrative.md (Core msg / Matrix B 新表現)                  |
+| Day 10    | 2026-05-30 | 🟡 pending   | -                     | **Design Gate (大): SSOT 衝突 grep + Refresh + 規制語 grep + 整合性 spot-check**                            |
+| Day 11    | 2026-05-31 | 🟡 pending   | -                     | UI Wireframe phase (9 画面 low-fi、Day 11-13 の 1 日目)                                                     |
+| Day 12    | 2026-06-01 | 🟡 pending   | -                     | UI Wireframe phase 続き (Day 11-13 の 2 日目)                                                               |
+| Day 13    | 2026-06-02 | 🟡 pending   | -                     | UI Wireframe phase 完了 (Day 11-13 の 3 日目、9 画面 low-fi 完成)                                           |
+| Day 14    | 2026-06-03 | 🟡 pending   | -                     | UI medium-fi phase (Hero 3 画面に design token 適用、Day 14-15 の 1 日目)                                   |
+| Day 15    | 2026-06-04 | 🟡 pending   | -                     | UI medium-fi phase 完了 (Day 14-15 の 2 日目)                                                               |
+| Day 16    | 2026-06-05 | 🟡 pending   | -                     | UI high-fi phase (Hero 3 = 95% + マイクロインタラクション、Day 16-18 の 1 日目)                             |
+| Day 17    | 2026-06-06 | 🟡 pending   | -                     | UI high-fi phase 続き (Day 16-18 の 2 日目)                                                                 |
+| Day 18    | 2026-06-07 | 🟡 pending   | -                     | UI high-fi phase 完了 (Hero 3 = 95% + 残り 6 = 85%、Day 16-18 の 3 日目)                                    |
+| Day 19    | 2026-06-08 | 🟡 pending   | -                     | SSOT Refresh + cowork-workshop/CLAUDE.md + workshop-design.md update                                        |
+| Day 20    | 2026-06-09 | 🟡 pending   | -                     | demo (demo-script.md + business-approval-view.html + screenshot export)                                     |
+| Day 21    | 2026-06-10 | 🟡 pending   | -                     | Final integration + 規制語 grep + 旧表現 grep + 全体整合性                                                  |
+| Day 22    | 2026-06-11 | 🟡 pending   | -                     | Session 4 rehearsal (60 min run-through) + 最終 review                                                      |
+| Session 4 | 2026-06-12 | 🎯 milestone | -                     | 本番 (Backoffice AI v2 構想共有、audience 10 名)                                                            |
 
 凡例: ✅ completed / 🟡 pending / 🔵 in_progress / 🎯 milestone
 
@@ -75,6 +75,18 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 3. Alert 5 条件 (KYC overlap / 過去 90 日他届出 / 国土地理院 API 未確認 / 法人格変更 / 銀行 vs 登記住所整合性)
 4. Knowledge snippet schema (frontmatter、§2.1 で 8 field に拡張済)
 5. knowledge 6 件の内訳 (staging 3: 福岡 / 国際郵便 / 透かし + compiled 3: OCR confidence / 法人格変更 / 多店舗)
+
+**Day 6 着手前 plan 詳細化 (v0.2、CR Round 3 hygiene patch 規範を 5 docs に伝播)**:
+
+- **RACI 表現規範を 5 docs に適用** (新 SSOT、`docs/_SSOT.md` §1.2 と整合):
+  - Manual 管理者 = Queue owner (キュー責任、受理 / triage / forward / reject)
+  - AI = Proposal source (自動生成、組織責任主体ではない)
+  - 「起票」「起票責任」「起票者」表現は手順承認では使わない (旧 RACI 表現)
+  - `agent-instructions.md`: AI が Procedure Update Proposal を自動生成する経路を明示、Manual 管理者の curator role 説明
+  - `approval-policy.md`: 手順承認 RACI を `Proposal source / Queue owner / Approver / 合議 / 通知` 5 列で表現、SoD は Queue owner ≠ Approver
+  - `workflow.md`: 業務目的の文脈で Core message (差戻しを、次の正解手順に変える仕組み) と整合
+- **12 項目 DOC header**: 5 docs すべてに適用 (`_meta.yaml` は markdown 文書でないため除外)。Category は WF (workflow)
+- **「過去 case 関連ルール更新 Alert」言及**: `approval-policy.md` に Alert 3 適用範囲 (未承認 / 承認済み / 新規) を反映、文言は DOC-FW-01 §6.3 に整合
 
 ### 2.2 Day 7: workflows/account-opening-completeness + workflows/international-transfer-boundary
 
@@ -110,6 +122,13 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 - 3 業務並列 (UC-BO-01 active / UC-BO-02 active / international-transfer-boundary restricted)
 - Trust Level Progression は active 2 業務のみ表示、boundary 業務は restricted 1 行で別表示
 
+**Day 7 着手前 plan 詳細化 (v0.2)**:
+
+- **knowledge 2 件の staging/compiled 比率**: Day 7 起稿時に decide (user 判断、defer)、5 docs draft と並行で確定
+- **BOUNDARY.md content**: 高額閾値の rationale / 例外条件 / boundary review proposal mechanism reference (DOC-APP-02 §9.7)
+- **「起票」表現禁止を boundary review proposal にも適用**: BOUNDARY.md の RACI 言及で「Proposal source = AI / Queue owner = Manual 管理者 or AI 管理者 / Approver = 設定承認 Type A/C」を明示
+- **12 項目 DOC header**: account-opening 5 docs + international-transfer-boundary `workflow.md` / `BOUNDARY.md` に適用 (`_meta.yaml` は除外)。Category は WF
+
 ### 2.3 Day 8: 03-ui-prototype-design.md + 04-knowledge-pipeline.md
 
 **03 影響**:
@@ -126,6 +145,21 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 - **Snippet schema reference**: `docs/_SSOT.md` §1.4 を pointer
 - **5-category routing**: 各カテゴリの処理経路詳細、`data_error` は通常 compiled 昇格対象外 (log / audit / 別 routing)
 - **LLMOps framework**: 旧 ai-operator 24 §11 を v2 用に圧縮
+
+**Day 8 着手前 plan 詳細化 (v0.2、03 / 04 で SSOT 化する spec)**:
+
+- **AiProposalPanel 過去 case Alert UI spec (03 SSOT、3 適用範囲)**:
+  - 未承認・承認待ち case: Case Review / AI Proposal panel に banner Alert (top of panel)、文言「関連手順が更新されています / このcase作成後に承認されたルールがあります / AI提案本文は当時のまま保持されています」、dismissible (auto-hide なし)
+  - 承認済み過去 case: Audit Trail (`/audit`) に関連更新履歴を timeline 表示
+  - 新規 case: 新ルールを通常 citation として AiProposalPanel の citation list に表示
+- **Stripe 風 design token 候補リスト (03 SSOT、Day 14-15 medium-fi で適用)**:
+  - 色 token: slate (neutral) + indigo (accent) + amber (warning) + red (danger)
+  - typography: Inter (en) + Noto Sans JP (jp)、weight 400 / 500 / 600 / 700
+  - spacing: 8-grid (4 / 8 / 12 / 16 / 24 / 32 / 48 / 64)
+  - shadow: 3 段 (xs / sm / md / lg、subtle)
+  - anim curve: `cubic-bezier(0.22, 1, 0.36, 1)` (ease-out)、duration 150 / 250 / 400ms
+  - マイクロインタラクション 5-8 例: button hover scale / card hover lift / status badge transition / form submit feedback / toast slide-in / tooltip fade / accordion expand / chip ripple
+- **AI 日次分析 logic (04 SSOT)**: 判断基準 (同種差戻し 3+ 件 / 共通 pattern / staging 矛盾なし) を `[仮値 / 要 Phase 1 検証]` ラベル付きで明示。`data_error` 別 routing (log / audit) の処理経路詳細
 
 ### 2.4 Day 9: 05-metrics-and-gates.md + 06-session4-narrative.md
 
@@ -144,6 +178,23 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 - **過去 case 不変 + Alert**: Slide 5 or 6 で言及 (audit trail 保護 / 関連ルール更新時の Alert)
 - **規制語**: Tier 3 は slide に出さない、prior-art pointer のみ docs 内部に残存
 
+**Day 9 着手前 plan 詳細化 (v0.2)**:
+
+- **4 KPI multi-criteria gate 仮閾値 (user 判断: ai-operator 24 §3.2 継承)**:
+  - AI 入力承認率 ≥ 99% `[仮説 / 要検証]`
+  - 人手上書き率 ≤ 1% `[仮説 / 要検証]`
+  - Alert 発生率 ≤ 5% `[仮説 / 要検証]`
+  - 承認者差戻し率 ≤ 1% `[仮説 / 要検証]`
+- **9 KRI catalogue**: ai-operator 24 §4.1 を v2 で 9 件に圧縮 (drift / 例外発生率異常 / KPI 悪化 / UI drift 検知 / 等)、Day 9 起稿時に list 確定
+- **06 Slide spec 追加詳細化**:
+  - Slide 1 = 現状課題 (二択問題)、Slide 2 = Core msg (差戻しを、次の正解手順に変える仕組み) + 補助 3 コピー
+  - Slide 3 = 案件承認 4-eyes + BusinessApprovalView mock figure
+  - Slide 4 = 3 層承認 + Type A/B/C
+  - Slide 5 = Flywheel 全景 + Knowledge loop
+  - Slide 6 = 過去 case 不変 + 関連ルール更新 Alert + audit trail
+  - Slide 7 = Matrix B (主表現: AIに任せる量は段階的に増やすが、人によるコントロールは渡さない、slogan: 案件確認は減らす。ルール承認は残す。)
+  - Slide 8 = Metrics 4 KPI gate + multi-criteria 仮閾値
+
 ### 2.5 Day 10: Design Gate (大)
 
 **影響項目**:
@@ -156,6 +207,19 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
   - 業務承認画面 (03 spec vs 06 figure)
   - 4 KPI gate 数値 (05 SSOT vs mock-metrics.ts visualization)
   - Trust Level Progression (02 SSOT vs \_index per-業務値 vs TrustLevelBadge visual)
+
+**Day 10 着手前 plan 詳細化 (v0.2)**:
+
+- **grep target 拡張**: Day 5 grep gate `CURRENT_SURFACE_FILES` を以下に拡張:
+  - 追加: `docs/03-ui-prototype-design.md docs/04-knowledge-pipeline.md docs/05-metrics-and-gates.md docs/06-session4-narrative.md docs/_PROGRESS.md`
+  - 既存除外: `prior-art-map.md` / `_HEADER_TEMPLATE.md` (legacy wording trace 許容)
+- **workflows/ gate (Day 6/7 着手後の新規)**: snippet schema 8 field 必須 / `agent_version` 存在 / `weight: low\|medium\|high` enum / category 5 enum / `data_error` 別 routing
+- **新規 potential 衝突 spot-check (Plan v1.3 final patch 追加分)**:
+  - 過去 case Alert UI: `03 AiProposalPanel spec` vs `06 Slide 3 figure spec` vs `demo/static-mocks/business-approval-view.html`
+  - Snippet schema: `_SSOT.md §1.4` vs `01 §3.1` vs `04` vs `workflows/*/knowledge/*` frontmatter
+  - Stripe design token: `03` SSOT vs `prototype/tailwind.config.ts` (Day 11+ 実装)
+  - BOUNDARY review proposal: `02 §9.7` vs `workflows/international-transfer-boundary/BOUNDARY.md`
+- **\_SSOT.md Refresh**: SLO 仮値表を 05 に移管後の pointer 化、Snippet schema は keep、Topic → SSOT mapping table に 03-06 起稿分を追加
 
 ### 2.6 Day 11-18: UI 実装 (3 段詳細化)
 
@@ -179,6 +243,20 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 - 残り 6 = 85% 仕上げ (基本 token 適用 + 主要 interaction、デザイン全体感は Hero 3 と同等)
 - AiProposalPanel Alert UI 詳細化 (3 適用範囲、文言 / 配置 / dismiss)
 - TypeScript compile + visual smoke + a11y check (Lighthouse)
+
+**Day 11-18 着手前 plan 詳細化 (v0.2、phase 完了 gate 明示)**:
+
+- **Day 11 morning: prototype scaffolding (1-2h)**:
+  - `prototype/` directory に `npm init` + React 19 + Vite 8 + Tailwind v4 + shadcn/ui setup
+  - 基本 routing (React Router) + AppShell + Sidebar + Header + BottomNav
+  - mock data initial files (空 schema + 1-2 sample): `mock-cases.ts` / `mock-knowledge.ts` / `mock-agents.ts` / `mock-audit.ts` / `mock-metrics.ts`
+- **Day 13 末: Wireframe phase 完了 gate**: 9 画面 routing 動作 + low-fi wireframe 完成 + TypeScript compile pass + 9-field Screen Card と整合確認
+- **Day 15 末: medium-fi phase 完了 gate**: Hero 3 画面 (CaseReview / Dashboard / Metrics) に Stripe design token 適用、color / typography / spacing 反映、visual smoke OK
+- **Day 18 末: high-fi phase 完了 gate**:
+  - Hero 3 = 95% 仕上げ + マイクロインタラクション 5-8 例実装
+  - **AiProposalPanel 過去 case Alert UI 実装** (Day 8 spec 反映、3 適用範囲: 未承認 banner / 承認済み Audit Trail timeline / 新規 citation list)
+  - 残り 6 画面 = 85% 仕上げ
+  - Lighthouse a11y 90+ 目標
 
 ### 2.7 Day 19: SSOT Refresh + cowork-workshop 連携
 
@@ -210,35 +288,57 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 - Session 4 rehearsal (60 min run-through、8 slide + Demo Chapter 1/2)
 - 最終 review (Core message / Matrix B / Type A SoD / Boundary / 過去 case Alert の通し確認)
 
+**Day 21-22 着手前 plan 詳細化 (v0.2)**:
+
+- **Day 21 grep gate 範囲拡張**:
+  - `CURRENT_SURFACE_FILES`: README + CLAUDE + docs/00-06 + docs/\_SSOT + docs/\_PROGRESS
+  - `workflows/`: 3 業務すべての schema / RACI / boundary integrity
+  - `demo/`: demo-script.md + business-approval-view.html の整合性
+  - 規制語 grep (3 回目): MRM / CISO / NYDFS / SR 11-7 / CCPA / OFAC / BSA / SAR / CTR / ECOA、`prior-art-map.md` は除外
+  - 旧表現 grep: 「業務別ファイル」「知識・設定承認 loop」real-time 風表現 / 「週次 batch」/ 「起票責任」「起票 ≠ 承認」「手順更新提案の起票者」(7 種)
+- **Day 22 rehearsal structure**:
+  - 60 min run-through: 8 slide × 5-7 min each (40-56 min) + Demo Chapter 1/2 × 10 min (合計 20 min) + Q&A 想定 4 min (合計 60 min 以内に収める)
+  - 最終 review: Core message / Matrix B / Type A SoD / Boundary review proposal / 過去 case Alert / 4 KPI gate / 接続層 tier の通し確認
+  - 担当 (mock): Speaker (構想説明) + Demo operator (prototype 操作) + Note taker (audience reaction 記録)
+
 ---
 
 ## 3. Verification gate 一覧
 
-| Day                                        | Gate name                           | 内容                                                                                            | 状態          |
-| ------------------------------------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------- | ------------- |
-| Day 5                                      | grep gate A-H                       | 旧表現 / 新表現 / 構造 SSOT / 国際送金 / 接続層 / Alert UI / 規制語 / 履歴文書                  | ✅ pass (fb0df04) |
-| Day 6                                      | Snippet schema gate                 | knowledge 6 件 frontmatter 8 field 必須、weight 信頼度限定、category enum                       | 🟡 pending    |
-| Day 7                                      | restricted_conditions gate          | international-transfer-boundary/\_meta.yaml の restricted_conditions field 存在 + 値整合       | 🟡 pending    |
-| Day 8                                      | UI design language gate             | 03 の design token / 04 の AI 日次分析 logic SSOT                                                | 🟡 pending    |
-| Day 9                                      | Message gate                        | Core msg / Matrix B 表現が 05 / 06 と整合、SLO 仮値表が 05 に移管完了                            | 🟡 pending    |
-| Day 10                                     | Design Gate (大)                    | 全 SSOT 衝突 grep + \_SSOT.md Refresh + 規制語 + 4 既知 potential 衝突 spot-check                | 🟡 pending    |
-| Day 11-18                                  | UI build gate (per day or per phase) | TypeScript compile + visual smoke + a11y (Lighthouse) + Stripe 風 design language 適合          | 🟡 pending    |
-| Day 19                                     | Bridge gate                         | cowork-workshop/CLAUDE.md + workshop-design.md update、session-{1,2,3}-narrative.md 無変更      | 🟡 pending    |
-| Day 20                                     | Demo gate                           | demo-script step 動作 + business-approval-view.html screenshot export                            | 🟡 pending    |
-| Day 21                                     | Regulatory gate                     | 規制語 grep (3 回目) + 旧表現 grep + 全体整合性                                                   | 🟡 pending    |
-| Day 22                                     | Final rehearsal                     | 60 min run-through (8 slide + Demo Chapter 1/2)、最終 review                                     | 🟡 pending    |
+| Day             | Gate name                | 内容                                                                                                                              | 状態                            |
+| --------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Day 5           | grep gate A-H            | 旧表現 / 新表現 / 構造 SSOT / 国際送金 / 接続層 / Alert UI / 規制語 / 履歴文書                                                    | ✅ pass (`fb0df04` + `b7a710a`) |
+| Day 5 (hygiene) | A7 新 CR ガード          | 起票責任 / 起票 ≠ 承認 / 手順更新提案の起票者 が zero hit                                                                         | ✅ pass (`b7a710a`)             |
+| Day 6           | Snippet schema gate      | knowledge 6 件 frontmatter 8 field 必須、weight 信頼度限定、category enum                                                         | 🟡 pending                      |
+| Day 6           | RACI 規範 gate           | 5 docs で「起票」表現 zero hit / Proposal source = AI / Queue owner = Manual 管理者 明示                                          | 🟡 pending                      |
+| Day 7           | restricted_conditions gate | international-transfer-boundary/\_meta.yaml の restricted_conditions field 存在 + 値整合                                          | 🟡 pending                      |
+| Day 8           | UI design language gate  | 03 の Stripe design token (色 / typography / spacing / shadow / anim) / Alert UI 3 適用範囲 spec / 04 の AI 日次分析 logic SSOT   | 🟡 pending                      |
+| Day 9           | Message + KPI gate       | Core msg / Matrix B 表現が 05 / 06 と整合、SLO 仮値表が 05 に移管完了、4 KPI 仮閾値が ai-operator 24 §3.2 継承で記述               | 🟡 pending                      |
+| Day 10          | Design Gate (大)         | 全 SSOT 衝突 grep (03-06 拡張) + \_SSOT.md Refresh + 規制語 + 既知 4 + 新規 4 potential 衝突 spot-check                            | 🟡 pending                      |
+| Day 11          | Scaffolding gate         | React 19 + Vite 8 + Tailwind v4 + shadcn/ui setup 完了 / 基本 routing + AppShell 動作 / mock data initial files                  | 🟡 pending                      |
+| Day 13          | Wireframe phase 完了 gate | 9 画面 routing 動作 + low-fi wireframe 完成 + TypeScript compile + 9-field Screen Card 整合                                       | 🟡 pending                      |
+| Day 15          | medium-fi phase 完了 gate | Hero 3 画面 (CaseReview / Dashboard / Metrics) に Stripe design token 適用、visual smoke OK                                       | 🟡 pending                      |
+| Day 18          | high-fi phase 完了 gate   | Hero 3 = 95% + マイクロインタラクション + AiProposalPanel Alert UI (3 適用範囲) + 残り 6 = 85% + Lighthouse a11y 90+              | 🟡 pending                      |
+| Day 19          | Bridge gate              | cowork-workshop/CLAUDE.md + workshop-design.md update、session-{1,2,3}-narrative.md 無変更                                        | 🟡 pending                      |
+| Day 20          | Demo gate                | demo-script step 動作 + business-approval-view.html screenshot export + design token 整合                                         | 🟡 pending                      |
+| Day 21          | Regulatory gate          | 規制語 grep (3 回目) + 旧表現 7 種 grep + workflows + demo + 全体整合性                                                           | 🟡 pending                      |
+| Day 22          | Final rehearsal          | 60 min run-through (8 slide + Demo Chapter 1/2 + Q&A 4 min)、最終 review                                                          | 🟡 pending                      |
 
 ---
 
 ## 4. Open items (Day 5 末時点)
 
-| Item                                                                                                  | 状態                | Due  | Note                                                                                                       |
-| ----------------------------------------------------------------------------------------------------- | ------------------- | ---- | ---------------------------------------------------------------------------------------------------------- |
-| Day 6 outline gate 承認 (5 preemptive decisions: Owner マップ / スクショ粒度 / Alert 5 条件 / Snippet schema / knowledge 6 件内訳) | 🟡 user 承認待ち    | Day 6 開始前 | 前 turn で outline 提示済、user 承認後 Day 6 着手                                                          |
-| Plan v1.3 final patch の Day 6+ への先取り影響整理                                                     | ✅ 本 file §2 で完了 | Day 5 | docs/\_PROGRESS.md (本 file) で記述                                                                          |
-| docs-review.html 退避                                                                                  | ✅ 完了             | Day 5 | archive/docs-review-2026-05-25-pre-v1.3.html に move、`.gitignore` 更新、CLAUDE.md Archived artifacts 注記 |
-| 05-metrics-and-gates.md 起稿時の SLO 仮値表移管                                                       | 🟡 Day 9 で実行     | Day 9 | 現在は \_SSOT.md §1.3 が暫定 SSOT、Day 9 で 05 に SSOT 移譲                                                |
-| Stripe 風 design language 具体 token の Day 8 確定                                                    | 🟡 Day 8 で実行     | Day 8 | 色 / typography / spacing / shadow / anim curve / マイクロインタラクション 5-8 例                          |
+| Item                                                                                                                               | 状態                           | Due            | Note                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Day 6 outline gate 承認 (5 preemptive decisions: Owner マップ / スクショ粒度 / Alert 5 条件 / Snippet schema / knowledge 6 件内訳) | 🟡 user 承認待ち               | Day 6 開始前   | 前 turn で outline 提示済、Day 6 着手前の追加 plan 詳細化 (本 v0.2) も含めて再承認確認                                                                                                       |
+| Plan v1.3 final patch の Day 6+ への先取り影響整理 (per-day)                                                                       | ✅ 本 file §2 で完了           | Day 5          | docs/\_PROGRESS.md (本 file) v0.1 で記述、v0.2 で詳細化補強                                                                                                                                  |
+| Day 6 着手前 plan 詳細化 (CR Round 3 規範を Day 6-22 に伝播)                                                                       | ✅ 本 file v0.2 で完了         | Day 5          | per-day update + 新規 verification gate + Open items 整理                                                                                                                                  |
+| docs-review.html 退避                                                                                                              | ✅ 完了                        | Day 5          | archive/docs-review-2026-05-25-pre-v1.3.html に move、`.gitignore` 更新、CLAUDE.md Archived artifacts 注記                                                                                  |
+| 4 KPI multi-criteria gate 仮閾値                                                                                                   | ✅ 確定 (user 判断)            | Day 5          | ai-operator 24 §3.2 継承 (AI 入力承認率 ≥ 99% / 人手上書き率 ≤ 1% / Alert 発生率 ≤ 5% / 承認者差戻し率 ≤ 1%、全て `[仮説 / 要検証]`)、Day 9 で 05 に記述                                       |
+| Day 7 knowledge 2 件 staging/compiled 比率                                                                                         | 🟡 Day 7 起稿時に decide       | Day 7          | user 判断: defer、5 docs draft と並行で確定                                                                                                                                                |
+| 05-metrics-and-gates.md 起稿時の SLO 仮値表移管                                                                                    | 🟡 Day 9 で実行                | Day 9          | 現在は \_SSOT.md §1.3 が暫定 SSOT、Day 9 で 05 に SSOT 移譲                                                                                                                                |
+| Stripe 風 design language 具体 token の Day 8 確定                                                                                 | 🟡 Day 8 で実行                | Day 8          | 候補リストは本 file §2.3 で specify 済、Day 8 起稿時に 03 に SSOT 化                                                                                                                       |
+| AiProposalPanel 過去 case Alert UI 仕様 (3 適用範囲)                                                                               | 🟡 Day 8 spec / Day 16-18 実装 | Day 8 / Day 18 | spec は本 file §2.3 で specify 済、Day 8 で 03 に SSOT 化、Day 16-18 high-fi で実装                                                                                                         |
 
 ---
 

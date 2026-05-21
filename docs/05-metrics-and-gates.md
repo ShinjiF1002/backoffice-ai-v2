@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §1.2, DOC-FW-01 §6.2 / §7.1, DOC-APP-02 §7, DOC-UI-03 §4.8 (Metrics screen), DOC-KNW-04 §5.3 / §8, DOC-S4-06 Slide 8, DOC-ROOT-\_SSOT §1.3 (SLO pointer) / §1.4                                                                                      |
 | SSOT 区分       | SLO 仮値 + 4 KPI multi-criteria 仮説 gate + 各 KPI 定義 (分母 / 対象 / 除外 / sampling / 軽微 vs 実質 / precision-FP / 二重カウント防止) + 7 KPI catalogue + 9 KRI catalogue + Audit event reference の SSOT                                                   |
 | Evidence Status | N/A (本 doc 内の数値はすべて `[仮説 / 要検証]`。Phase 1 で measurement → calibration → governance review、本番導入可否を判定する gate ではない)                                                                                                                |
-| 改版履歴        | v0.1 (2026-05-29): 初版作成 (Day 9、Plan v1.4 P0-2 (KPI re-framing) + P1-2-a (KPI 各定義) + P1-5 (Audit event reference) + v1.4.1 Fix 2 反映、SLO 仮値表を \_SSOT.md §1.3 から移管、Day 8 deferred "gate" 語を「仮説 gate / target hypothesis」に正式 framing)。v0.2 (2026-05-29): CR R12+R13 hygiene patch (Blocking 1 禁止語 self-hit 解消 §2 / §3.2 paraphrase、Major 3 仮説ラベル統一 [仮値/要検証] → [仮説/要検証]、Minor R8 注追加 agent_version lifecycle Phase 1 定義予定) |
+| 改版履歴        | v0.1 (2026-05-29): 初版作成 (Day 9、Plan v1.4 P0-2 (KPI re-framing) + P1-2-a (KPI 各定義) + P1-5 (Audit event reference) + v1.4.1 Fix 2 反映、SLO 仮値表を \_SSOT.md §1.3 から移管、Day 8 deferred "gate" 語を「仮説 gate / target hypothesis」に正式 framing)。v0.2 (2026-05-29): CR R12+R13 hygiene patch (Blocking 1 禁止語 self-hit 解消 §2 / §3.2 paraphrase、Major 3 仮説ラベル統一 [仮値/要検証] → [仮説/要検証]、Minor R8 注追加 agent_version lifecycle Phase 1 定義予定)。v0.3 (2026-05-29): CR R14 hygiene patch (R13 patch の transitive 適用漏れ解消、Blocking「即時」exact text 4 箇所 paraphrase §4.1/§4.3/§9/§10、Major [仮値] 単体 1 箇所 §6 R6 → [仮説 / 要検証] 統一) |
 
 ---
 
@@ -81,7 +81,7 @@ real-time guarantee 風表現は禁止 (Plan v1.4.1 Fix 2、該当語彙の exac
 | Alert 発生率   | ≤ 5% `[仮説 / 要検証]`  | 案件に対して Alert が出る率      |
 | 承認者差戻し率 | ≤ 1% `[仮説 / 要検証]`  | 承認者が業務承認を reject する率 |
 
-**注**: 上記 4 KPI は Automation Maturity (Supervised → Checkpoint → Autonomous、§7 + DOC-APP-02 §7) 進化判断の **multi-criteria 仮説 gate**。**本番導入可否の即時判定 gate ではなく、Phase 1 検証仮説** として扱う (Plan v1.4 P0-2 / v1.4.1 Fix 2)。
+**注**: 上記 4 KPI は Automation Maturity (Supervised → Checkpoint → Autonomous、§7 + DOC-APP-02 §7) 進化判断の **multi-criteria 仮説 gate**。**本番導入可否を確定する gate ではなく、Phase 1 検証仮説** として扱う (Plan v1.4 P0-2 / v1.4.1 Fix 2)。
 
 ### 4.2 各 KPI 定義 (Plan v1.4 P1-2-a)
 
@@ -134,7 +134,7 @@ real-time guarantee 風表現は禁止 (Plan v1.4.1 Fix 2、該当語彙の exac
 
 ### 4.3 Automation Maturity 進化 multi-criteria gate
 
-4 KPI **全件** が target hypothesis を満たした場合に Automation Maturity の進化を **検討対象** とする (進化判断は業務責任者 + AI 管理者 + Security 関係者の合議、即時自動進化ではない):
+4 KPI **全件** が target hypothesis を満たした場合に Automation Maturity の進化を **検討対象** とする (進化判断は業務責任者 + AI 管理者 + Security 関係者の合議、自動進化ではない):
 
 - Supervised → Checkpoint: 4 KPI 全件で 3 ヶ月以上連続達成 `[仮説 / 要検証]`
 - Checkpoint → Autonomous: 4 KPI 全件で 6 ヶ月以上連続達成 + 9 KRI に異常なし `[仮説 / 要検証]`
@@ -168,7 +168,7 @@ KRI (Key Risk Indicator) は **異常検知 trigger**。閾値超過時は Manua
 | R3  | Alert false positive 急増        | precision (§4.2.3 併記) が週次で 50% 下回り `[仮説 / 要検証]`                    | approval-policy.md Alert 条件 review trigger |
 | R4  | 承認者差戻し率 急上昇            | target hypothesis (≤ 1%) を週次平均で 5 倍以上超過 `[仮説 / 要検証]`             | 業務責任者通知 + Forced Downgrade 検討       |
 | R5  | UI drift 検知                    | 業務システム画面 layout 変更による RPA / Computer Use 操作失敗 `[仮説 / 要検証]` | AI 管理者通知 + agent-instructions.md review |
-| R6  | compiled / staging conflict 発生 | 同一 workflow 内で compiled と staging が矛盾 (DOC-KNW-04 §7.2) `[仮値]`         | Manual 管理者 triage 強制                    |
+| R6  | compiled / staging conflict 発生 | 同一 workflow 内で compiled と staging が矛盾 (DOC-KNW-04 §7.2) `[仮説 / 要検証]` | Manual 管理者 triage 強制                    |
 | R7  | 同種差戻し再発頻度               | 同一 case ID で 2 回以上 sendback `[仮説 / 要検証]`                              | Manual 管理者 + AI 管理者通知                |
 | R8  | agent_version drift              | proposal source AI が deprecated agent_version で生成 `[仮説 / 要検証]` (注: Phase 1 で `agent_version` lifecycle (current / deprecated / archived) を定義予定、本 v2 phase では skeleton) | AI 管理者通知、agent_version 強制 upgrade    |
 | R9  | データ品質低下                   | `data_error` category 差戻しが週次平均で 2 倍以上増加 `[仮説 / 要検証]`          | 入力 PDF 受領元への channel review trigger   |
@@ -204,7 +204,7 @@ Audit evidence event model (15 行、paired field 含む実 field 数 18) の SS
 Day 8 docs (DOC-UI-03 / DOC-KNW-04) で残存していた「gate」表現を本 doc で正式 framing:
 
 - **使用語**: 「仮説 gate」「target hypothesis」「multi-criteria 仮説 gate」「Phase 1 検証仮説」
-- **避ける語**: 「即時 gate」「本番導入可否を判定する gate」(Plan v1.4 P0-2 / v1.4.1 Fix 2、§2 と整合)
+- **避ける表現**: real-time guarantee 風 gate 表現 / 本番導入可否を確定する gate 表現 (Plan v1.4 P0-2 / v1.4.1 Fix 2、§2 と整合、exact text は self-hit 回避のため本 doc に置かない、`docs/prior-art-map.md` 経由 trace)
 - **文脈別**:
   - Session 4 表層 (Slide 8): 「4 KPI multi-criteria 仮説 gate (target hypothesis)」と表現
   - 内部 docs: 「4 KPI multi-criteria 仮説 gate」「Phase 1 で正式 gate 化」と表現
@@ -221,4 +221,4 @@ Day 8 docs (DOC-UI-03 / DOC-KNW-04) で残存していた「gate」表現を本 
 - DOC-KNW-04 §5.3 (Evaluation reference、本 doc を pointer) + §8 (Audit evidence event model SSOT、§8 で reference)
 - DOC-S4-06 Slide 8 (Metrics + multi-criteria 仮閾値、本 doc を SSOT として narrative 化)
 - DOC-ROOT-\_SSOT §1.3 (SLO 仮値 pointer、本 doc §3 が移管後の本体) + §1.4 (Snippet schema、KPI の sample source 整合)
-- `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.4 P0-2 (KPI re-framing) + P1-2-a (KPI 各定義) + P1-5 (Audit event reference) + v1.4.1 Fix 2 (即時 gate paraphrase)
+- `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.4 P0-2 (KPI re-framing) + P1-2-a (KPI 各定義) + P1-5 (Audit event reference) + v1.4.1 Fix 2 (real-time guarantee 風 gate 表現 paraphrase)

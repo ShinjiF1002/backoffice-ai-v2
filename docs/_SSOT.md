@@ -60,8 +60,8 @@ Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19。SSOT 衝突は Day 10 
 
 | 承認種別 | Owner (R) | Approver (A) | Scope | 反映タイミング | 備考 |
 |---|---|---|---|---|---|
-| **入力者確認** | 入力者 | 入力者 (AI 結果を accept / reject) | AI 入力結果 1 案件 | リアルタイム | 案件承認の前段確認。単独では 4-eyes と呼ばない |
-| **承認者承認** | 承認者 | 承認者 | 入力者確認済の最終確認 | リアルタイム | 入力者 ≠ 承認者。2 者が揃って案件承認全体を構成 |
+| **入力者確認** | 入力者 | 入力者 (AI 結果を accept / reject) | AI 入力結果 1 案件 | 送信時 (prototype では同一セッション内) | 案件承認の前段確認。単独では 4-eyes と呼ばない |
+| **承認者承認** | 承認者 | 承認者 | 入力者確認済の最終確認 | 承認時 (prototype では同一セッション内) | 入力者 ≠ 承認者。2 者が揃って案件承認全体を構成 |
 | **手順承認** | Manual 管理者 | 業務責任者 | knowledge → procedure / workflow.md / agent-instructions.md / approval-policy.md 昇格 | Batch (週次想定、`[仮説]`) | |
 | **設定承認** | AI 管理者 | Type 別 co-A (Type A: 通常 / Type B: Security / Type C: Automation Maturity 変更) | Agent / Model / Tool / Prompt / 権限 | Ad-hoc + batch | Type B/C は co-A |
 

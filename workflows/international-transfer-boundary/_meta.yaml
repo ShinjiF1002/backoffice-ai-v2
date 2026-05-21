@@ -1,0 +1,47 @@
+# 国際送金 boundary pack — machine-readable metadata (restricted)
+# 12 項目 markdown header は yaml file 対象外 (CLAUDE.md File 編集 hygiene 参照)
+# Plan v1.3 final patch の restricted_conditions schema に整合 (docs/_SSOT.md §1.1)
+
+workflow_id: UC-BO-IT-BOUNDARY
+workflow_name: 国際送金 boundary pack
+workflow_slug: international-transfer-boundary
+
+# enum 統一 (docs/_SSOT.md §1.1)
+trust_level: n/a # boundary pack は AI 自律実行対象外、Trust Level Progression 適用外
+risk_level: high # 高額・規制リスク
+automation_status: restricted # 条件付き制限 (active / restricted / prohibited)
+
+# restricted 条件 (machine-readable、docs/_SSOT.md §1.1 schema)
+restricted_conditions:
+  high_value_threshold: "$10M equivalent [hypothesis_requires_validation]"
+  automation_above_threshold: prohibited # 閾値以上は AI 自動化不可、人間判断必須
+  automation_below_threshold: future_candidate_after_framework_validation # 閾値未満は将来限定自動化検討
+  threshold_status: hypothesis_requires_validation # 実閾値は Phase 1 で検証・決定
+  rationale: "国際送金は送金先・受取人・取引目的確認 / 制限対象照合 / 為替制限 / 報告要否判断等の人間判断要素を含む。閾値以上の高額案件は本 v2 phase では AI 自動化対象外。"
+
+# Boundary review proposal RACI (DOC-APP-02 §9.7、本 boundary 自体の更新 trigger)
+# 通常 loop (staging → compiled → workflow diff) の対象外、boundary review proposal 経由のみ
+approvers:
+  proposal_source_for_boundary_change: ai # boundary review proposal は AI 自動生成
+  queue_owner: ai_admin_or_manual_admin # R = AI 管理者 or Manual 管理者
+  approver: configuration_approval_type_a_or_c # A = 設定承認 Type A (通常 boundary 調整) / Type C (Automation Maturity 関連)
+  consulted: [sme, business_owner, security_stakeholder] # C = SME / 業務責任者 / Security 関係者
+  informed: [input_operator, business_approver] # I = 入力者 / 承認者
+
+# 通常 loop 適用外の明示 (DOC-FW-01 §4.3、DOC-APP-02 §3.4 / §9.7)
+normal_loop_excluded:
+  reason: "BOUNDARY.md は scope 画定文書、通常の staging → compiled → workflow diff 経路では更新しない"
+  exception: "boundary review proposal mechanism (DOC-APP-02 §9.7) 経由でのみ更新可能"
+  frequency_expectation: "月次以下 [仮説 / 要検証]、頻発する場合は通常 loop 組み込み再評価"
+
+# Audit trail (read-only)
+audit:
+  auditor: read_only
+
+# Update history
+update_history:
+  - date: 2026-05-27
+    version: v0.1
+    change: Initial boundary pack creation (Day 7)
+    by: backoffice-ai-v2 maintainer
+    related_commit: pending

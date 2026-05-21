@@ -1,0 +1,46 @@
+# UC-BO-02 口座開設書類完備チェック — machine-readable metadata
+# 12 項目 markdown header は yaml file 対象外 (CLAUDE.md File 編集 hygiene 参照)
+# Plan v1.3 final patch の Approval Taxonomy SSOT に整合
+
+workflow_id: UC-BO-02
+workflow_name: 口座開設書類完備チェック
+workflow_slug: account-opening-completeness
+
+# enum 統一 (docs/_SSOT.md §1.1)
+trust_level: supervised # supervised / checkpoint / autonomous / n/a
+risk_level: high # low / medium / high (KYC overlap / 必須書類 / 外国法人書類 / 印鑑照合 を扱うため high)
+automation_status: active # active / restricted / prohibited
+
+# 手順承認 RACI (Plan v1.3 final patch、Proposal source は人間ロールではない情報項目)
+approvers:
+  proposal_source_for_procedure_change: ai # AI が日次分析で自動生成
+  queue_owner: manual_admin # R = Manual 管理者 (Queue owner)
+  approver: business_owner # A = 業務責任者
+  consulted: [sme, ai_admin] # C = SME / AI 管理者
+  informed: [input_operator, business_approver] # I = 入力者 / 承認者
+
+# 設定承認 (agent-instructions.md 更新時)
+configuration_approval:
+  type: A # Type A 通常 (新 tool 追加時は Type B)
+  proposal_source_role: ai_admin
+  approver_role: ai_admin # 同 role、ただし person は別 (組織内 AI 管理者 role の別人物が承認、DOC-APP-02 §4.3)
+  sod: "proposal_source_person != approver_person"
+  fallback_when_single_admin: "co-A 必須 (= 業務責任者 or Security 関係者、DOC-APP-02 §4.3)"
+
+# 案件承認 (4-eyes、案件ごとに発生)
+case_approval:
+  input_confirmation_owner: input_operator # 入力者確認 (R+A self)
+  business_approval_owner: business_approver # 承認者承認 (R+A self)
+  sod: "input_operator != business_approver"
+
+# Audit trail (read-only)
+audit:
+  auditor: read_only
+
+# Update history
+update_history:
+  - date: 2026-05-27
+    version: v0.1
+    change: Initial workflow pack creation (Day 7)
+    by: backoffice-ai-v2 maintainer
+    related_commit: pending

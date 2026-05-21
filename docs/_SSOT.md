@@ -1,0 +1,96 @@
+# SSOT Map - backoffice-ai-v2
+
+各論点の Single Source of Truth (SSOT) を 1 つの文書に固定する mapping。文書間で衝突発生時は SSOT 側を更新、reference 側は引用に留める。本 file は Day 1 起稿、Day 10 (Design Gate) + Day 19 で refresh。
+
+## Status
+
+- Created: 2026-05-21 (Day 1)
+- Owner: backoffice-ai-v2 maintainer
+- Refresh schedule: Day 5 / Day 10 (Design Gate) / Day 19
+
+## Topic → SSOT 文書 mapping
+
+| 論点 | SSOT 文書 | 起稿 Day | 備考 |
+|---|---|---|---|
+| 構想 / スコープ / 非スコープ / Flywheel 1 枚図 | `docs/00-overview.md` | Day 3 | |
+| Flywheel 詳細 (差戻し → staging → compiled → 手順承認 → 設定承認) | `docs/01-flywheel-and-knowledge.md` | Day 3 | |
+| 3 層承認 (案件 / 手順 / 設定) | `docs/02-approval-model.md` | Day 4 | ai-operator 01 §3.1-3.3 圧縮 + 規制 cite hedge |
+| 4-eyes (入力 / 業務) | `docs/02-approval-model.md` | Day 4 | |
+| Matrix A/B/C RACI | `docs/02-approval-model.md` | Day 4 | ai-operator 01 §5 |
+| Automation Maturity (Supervised / Checkpoint / Autonomous) | `docs/02-approval-model.md` | Day 4 | ai-operator 01 §6 |
+| 9 画面 UI Screen Card | `docs/03-ui-prototype-design.md` | Day 8 | ai-operator 11 §4 9-field template (v2 再編) |
+| 5-category error taxonomy + Routing | `docs/04-knowledge-pipeline.md` | Day 8 | backoffice-ai `knowledge/error_taxonomy.md` |
+| Knowledge staging / compiled 設計 | `docs/04-knowledge-pipeline.md` | Day 8 | |
+| LLMOps framework | `docs/04-knowledge-pipeline.md` | Day 8 | ai-operator 24 §11 |
+| 4 KPI multi-criteria 仮説 gate (AI 入力承認率 / 人手上書き率 / Alert 発生率 / 承認者差戻し率) | `docs/05-metrics-and-gates.md` | Day 9 | `[仮説 / 要検証]` ラベル必須 |
+| 7 KPI catalogue + 9 KRI catalogue | `docs/05-metrics-and-gates.md` | Day 9 | ai-operator 24 §3.2 + §4.1 |
+| Session 4 narrative 8 slide message | `docs/06-session4-narrative.md` | Day 9 | |
+| Demo Chapter 1/2 message spine | `docs/06-session4-narrative.md` | Day 9 | message side |
+| Demo Chapter 1/2 実行 step | `demo/demo-script.md` | Day 20 | execution side、narrative と分離 |
+| BusinessApprovalView mock figure spec | `docs/06-session4-narrative.md` Slide 3 内 figure | Day 9 | spec source |
+| BusinessApprovalView HTML source | `demo/static-mocks/business-approval-view.html` | Day 20 | 実体化 (Tailwind CDN 1 file html、AiProposalPanel と design token 整合) |
+| BusinessApprovalView PNG export | `demo/screenshots/business-approval-view.png` | Day 20 | html を browser open + screenshot で export |
+| 旧 repo (v1 + ai-operator) 参照関係 | `docs/prior-art-map.md` | Day 1 (本日) | 継承 / 再編 / 捨てる の SSOT |
+| Doc header template (12 項目) | `docs/_HEADER_TEMPLATE.md` | Day 2 | Status / Evidence Status / SSOT 区分 / 機密区分 / Related Docs 等 |
+| UC-BO-01 法人住所変更 業務目的 / 手順 / 期待状態 / 禁止事項 | `workflows/corporate-address-change/workflow.md` | Day 6 | 業務責任者 owner |
+| UC-BO-01 AI 実行方針 / 参照ナレッジ / スクショ粒度 | `workflows/corporate-address-change/agent-instructions.md` | Day 6 | AI 管理者 owner |
+| UC-BO-01 担当者確認 / 承認者確認 / Alert / 差戻し条件 | `workflows/corporate-address-change/approval-policy.md` | Day 6 | |
+| UC-BO-01 metadata (owner / trust_level / risk_level / automation_status / approvers / update_history) | `workflows/corporate-address-change/_meta.yaml` | Day 6 | machine-readable |
+| UC-BO-01 暗黙知 snippet (staging / compiled) | `workflows/corporate-address-change/knowledge/{staging,compiled}/*.md` | Day 6 | staging ×3 + compiled ×3 |
+| 口座開設書類完備チェック (同上 5 文書 + knowledge ×2) | `workflows/account-opening-completeness/` | Day 7 | |
+| 国際送金 boundary 仕様 + 自動化禁止理由 | `workflows/international-transfer-boundary/{workflow.md, BOUNDARY.md, _meta.yaml}` | Day 7 | 3 文書 only、画面化なし、Dashboard カードなし |
+| 業務一覧 + Trust Level Progression | `workflows/_index.md` | Day 7 | 3 業務並列 (国際送金は automation_status=prohibited 行で 1 行表示) |
+| Session 4 audience / scope / safety / 開催 meta | `cowork-workshop/workshop-design.md` (Day 19 で update) | external | v2 完成後参照、Day 19 までは旧前提が残存 |
+| v2 ↔ cowork-workshop bridge | `cowork-workshop/CLAUDE.md` (Day 19 で update) | external | `session-{1,2,3}-narrative.md` は touch しない |
+
+## Approval Taxonomy SSOT
+
+`docs/02-approval-model.md` (Day 4 起稿) で詳述、本 map では outline のみ:
+
+| 承認種別 | Owner (R) | Approver (A) | Scope | 反映タイミング | 備考 |
+|---|---|---|---|---|---|
+| **入力者確認** | 入力者 | 入力者 (AI 結果を accept / reject) | AI 入力結果 1 案件 | リアルタイム | 案件承認の前段確認。単独では 4-eyes と呼ばない |
+| **承認者承認** | 承認者 | 承認者 | 入力者確認済の最終確認 | リアルタイム | 入力者 ≠ 承認者。2 者が揃って案件承認全体を構成 |
+| **手順承認** | Manual 管理者 | 業務責任者 | knowledge → procedure / workflow.md / agent-instructions.md / approval-policy.md 昇格 | Batch (週次想定、`[仮説]`) | |
+| **設定承認** | AI 管理者 | Type 別 co-A (Type A: 通常 / Type B: Security / Type C: Automation Maturity 変更) | Agent / Model / Tool / Prompt / 権限 | Ad-hoc + batch | Type B/C は co-A |
+
+Matrix A/B/C RACI は `docs/02-approval-model.md` (Day 4) で SSOT。
+
+## Document Header Convention
+
+全 docs は `docs/_HEADER_TEMPLATE.md` (Day 2 起稿) の 12 項目共通ヘッダを冒頭に置く。`prior-art-map.md` + `_SSOT.md` (本日起稿) は Day 2 _HEADER_TEMPLATE 完成後に header 追記 (本 file はまだ無し)。
+
+## 規制語の hedge ルール
+
+v2 docs 内で `MRM` / `CISO` / `Risk` (固有部署として) / `NYDFS` / `SR 11-7` / `CCPA` / `OFAC` / `BSA` / `SAR` / `CTR` / `ECOA` を使う時:
+
+- **事実主張** → 禁止
+- **参照のみ** → `[ai-operator paper §X.Y 参照、本 v2 では将来確認項目]` の hedge 表現
+- **Session 4 表層** → 完全に出さない
+
+Day 10 Design Gate + Day 19 + Day 21 で `grep -rEn` 確認 (v2 repo + `cowork-workshop/CLAUDE.md` + `cowork-workshop/workshop-design.md` に限定、`cowork-workshop/session-{1,2,3}-narrative.md` は scope 外、内部の旧 S4 参照は expected historical hit)。
+
+## File enum 統一
+
+| field | 許可値 |
+|---|---|
+| `trust_level` | `supervised` / `checkpoint` / `autonomous` / `n/a` |
+| `risk_level` | `low` / `medium` / `high` |
+| `automation_status` | `active` / `prohibited` |
+
+衝突禁止: `prohibited` は `automation_status` field にのみ出現。`trust_level=prohibited` のような書き方は無効 (Day 7 で `_meta.yaml` grep 確認)。
+
+## SSOT 競合検出 / Validation
+
+文書間 SSOT 衝突 (= 同一論点を 2 文書が claim) を Day 10 Design Gate で grep 検出。検出時は本 map で SSOT を 1 つに決め、もう一方は reference 化。具体的 grep target は Day 10 で個別に定義。
+
+## 既知の potential 衝突 (要注意)
+
+| 論点 | 衝突しうる文書 | 解決方針 |
+|---|---|---|
+| Demo Chapter 1/2 | `docs/06-session4-narrative.md` (message side) vs `demo/demo-script.md` (execution side) | message と execution step を明示分離、narrative は「何を伝えるか」、demo-script は「どのボタンを click するか」 |
+| 業務承認画面 | `docs/03-ui-prototype-design.md` (9 画面 spec) vs `docs/06-session4-narrative.md` Slide 3 内 figure (mock) | 03 は「画面化しない (Chip + slide-only mock で代替)」を SSOT、06 は figure spec を SSOT |
+| 4 KPI gate 数値 | `docs/05-metrics-and-gates.md` vs `prototype/src/data/mock-metrics.ts` | 05 は仮説値の定義 SSOT、mock-metrics は visualization 用 sample data (caption で「仮説」明示) |
+| Trust Level Progression | `docs/02-approval-model.md` vs `workflows/_index.md` vs `prototype/src/components/shared/TrustLevelBadge.tsx` | 02 が SSOT、_index は per-業務の現在値、TrustLevelBadge は visual representation |
+
+Day 10 Design Gate で各 potential 衝突を spot-check。

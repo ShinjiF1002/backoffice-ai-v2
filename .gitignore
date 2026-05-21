@@ -12,3 +12,8 @@ build/
 coverage/
 .eslintcache
 *.tsbuildinfo
+
+# Day 5 整合化 update 以降、root の docs-review*.html は untracked 運用
+# (ad-hoc review artifact、commit 対象外)
+# 過去の review 版は archive/ に退避済 (archive/ 配下は git 管理対象)
+/docs-review*.html

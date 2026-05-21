@@ -1,0 +1,2976 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Backoffice AI v2 — Day 1-4 docs review</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", "Noto Sans JP", system-ui, sans-serif;
+        font-feature-settings: "palt" 1;
+      }
+      pre,
+      code {
+        font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+      }
+      pre {
+        tab-size: 2;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-feature-settings: "palt" 1;
+        letter-spacing: 0;
+      }
+      .scroll-mt {
+        scroll-margin-top: 1rem;
+      }
+      /* ASCII art */
+      .ascii {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12.5px;
+        line-height: 1.45;
+        letter-spacing: 0;
+        white-space: pre;
+        overflow-x: auto;
+      }
+      /* Print */
+      @media print {
+        aside {
+          display: none !important;
+        }
+        main {
+          padding: 0 !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white !important;
+        }
+      }
+      /* Smooth anchor scroll */
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Custom shadow for review boxes */
+      .review-shadow {
+        box-shadow:
+          0 1px 3px rgba(15, 23, 42, 0.04),
+          0 1px 2px rgba(15, 23, 42, 0.06);
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">
+    <div class="flex max-w-screen-2xl mx-auto">
+      <!-- Sticky left nav -->
+      <aside
+        class="hidden lg:block w-72 sticky top-0 h-screen overflow-y-auto border-r border-slate-200 bg-white no-print"
+      >
+        <div class="p-5 border-b border-slate-200">
+          <div
+            class="text-[11px] font-semibold tracking-wider text-indigo-600 uppercase"
+          >
+            Backoffice AI v2
+          </div>
+          <div class="text-sm font-semibold text-slate-900 mt-0.5">
+            Day 1-4 docs review
+          </div>
+          <div class="text-xs text-slate-500 mt-1">
+            2026-05-25 (Day 5 buffer)
+          </div>
+        </div>
+        <nav class="p-4 text-sm">
+          <div class="mb-4">
+            <div
+              class="text-[11px] font-semibold tracking-wider text-slate-500 uppercase mb-2"
+            >
+              概要
+            </div>
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#summary"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700"
+                  >3 文書の役割と関係</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#glossary"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700"
+                  >Tier 語彙 / 仮説ラベル / hedge</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="mb-4">
+            <div
+              class="text-[11px] font-semibold tracking-wider text-indigo-700 uppercase mb-2"
+            >
+              DOC-OV-00 構想概要
+            </div>
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#ov-1"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700"
+                  >1. 課題と中核 message</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#ov-2"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700"
+                  >2. 解くスコープ</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#ov-3"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700"
+                  >3. 非スコープ</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#ov-4"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-medium"
+                  >4. Flywheel 1 枚図 ★</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#ov-5"
+                  class="block px-2 py-1 rounded hover:bg-indigo-50 hover:text-indigo-700 text-slate-700"
+                  >5. 想定 outcome</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="mb-4">
+            <div
+              class="text-[11px] font-semibold tracking-wider text-emerald-700 uppercase mb-2"
+            >
+              DOC-FW-01 Flywheel
+            </div>
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#fw-1"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700"
+                  >1. 全体構造 (5 段)</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#fw-2"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700"
+                  >2. ① 起点: 入力者確認</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#fw-3"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700"
+                  >3. ② Staging 生成</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#fw-4"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700"
+                  >4. ③ Compiled 昇格</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#fw-5"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700"
+                  >5. ④ 設定承認</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#fw-6"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700"
+                  >6. ⑤ 反映後の波及</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#fw-7"
+                  class="block px-2 py-1 rounded hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 font-medium"
+                  >7. Loop の不変条件 ★</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="mb-4">
+            <div
+              class="text-[11px] font-semibold tracking-wider text-violet-700 uppercase mb-2"
+            >
+              DOC-APP-02 承認モデル
+            </div>
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#app-1"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700 font-medium"
+                  >1. 全体構造 (3 軸交差) ★</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-2"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >2. 案件承認 (4-eyes)</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-3"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >3. 手順承認</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-4"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >4. 設定承認 Type A/B/C</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-5"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >5. 役割定義 (5+1)</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-6"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700 font-medium"
+                  >6. Matrix A RACI ★</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-7"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >7. Matrix B 不変条件</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-8"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >8. Matrix C 例外</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-9"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >9. Automation Maturity</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#app-10"
+                  class="block px-2 py-1 rounded hover:bg-violet-50 hover:text-violet-700 text-slate-700"
+                  >10. 規制 cite hedge</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="mb-2">
+            <div
+              class="text-[11px] font-semibold tracking-wider text-slate-500 uppercase mb-2"
+            >
+              レビュー観点
+            </div>
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#review-points"
+                  class="block px-2 py-1 rounded hover:bg-amber-50 hover:text-amber-700 text-slate-700"
+                  >特に確認してほしい点</a
+                >
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main content -->
+      <main class="flex-1 max-w-4xl px-6 lg:px-12 py-8">
+        <!-- Header -->
+        <header class="mb-10 pb-6 border-b border-slate-200">
+          <div
+            class="flex items-center gap-2 text-[11px] font-semibold tracking-wider uppercase text-slate-500 mb-2"
+          >
+            <span>Backoffice AI v2</span>
+            <span class="text-slate-300">/</span>
+            <span class="text-indigo-600">docs review</span>
+            <span class="text-slate-300">/</span>
+            <span>Day 5 buffer</span>
+          </div>
+          <h1 class="text-3xl font-semibold tracking-tight text-slate-900">
+            Day 1-4 docs review
+          </h1>
+          <p class="mt-3 text-slate-600 leading-relaxed">
+            DOC-OV-00 (構想概要) / DOC-FW-01 (Flywheel) / DOC-APP-02
+            (承認モデル) の 3 文書を、ASCII 図表 + Matrix を visual
+            で見やすく統合したレビュー artifact。原本は
+            <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded"
+              >docs/00-overview.md</code
+            >
+            /
+            <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded"
+              >docs/01-flywheel-and-knowledge.md</code
+            >
+            /
+            <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded"
+              >docs/02-approval-model.md</code
+            >
+            を参照。
+          </p>
+          <div class="mt-4 flex flex-wrap gap-2 text-xs">
+            <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full"
+              >2026-05-25 (Day 5 / 22)</span
+            >
+            <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full"
+              >commit: 35b67a8</span
+            >
+            <span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full"
+              >Plan v1.1.2 lock</span
+            >
+            <span
+              class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full"
+              >working tree clean</span
+            >
+          </div>
+        </header>
+
+        <!-- Summary -->
+        <section id="summary" class="mb-12 scroll-mt">
+          <h2 class="text-2xl font-semibold text-slate-900 mb-4">
+            3 文書の役割と関係
+          </h2>
+          <div
+            class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+          >
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="border-l-4 border-indigo-500 pl-4">
+                <div
+                  class="text-[11px] font-semibold tracking-wider text-indigo-600 uppercase"
+                >
+                  DOC-OV-00
+                </div>
+                <div class="font-semibold text-slate-900 mt-1">構想概要</div>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                  課題 / 中核 message / スコープ / 非スコープ / Flywheel 1
+                  枚図。<strong>v2 全体の入口</strong>、他 docs はここから派生。
+                </p>
+              </div>
+              <div class="border-l-4 border-emerald-500 pl-4">
+                <div
+                  class="text-[11px] font-semibold tracking-wider text-emerald-600 uppercase"
+                >
+                  DOC-FW-01
+                </div>
+                <div class="font-semibold text-slate-900 mt-1">
+                  Flywheel 詳細
+                </div>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                  5 段 loop (差戻し → staging → compiled → 手順承認 → 設定承認)
+                  の<strong>因果 + ステージ詳細</strong>。Matrix B
+                  不変条件を含む。
+                </p>
+              </div>
+              <div class="border-l-4 border-violet-500 pl-4">
+                <div
+                  class="text-[11px] font-semibold tracking-wider text-violet-600 uppercase"
+                >
+                  DOC-APP-02
+                </div>
+                <div class="font-semibold text-slate-900 mt-1">承認モデル</div>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                  3 層承認 + 4-eyes + Matrix A/B/C + Automation Maturity
+                  の<strong>静的 SSOT</strong>。役割定義 (5+1) を含む。
+                </p>
+              </div>
+            </div>
+            <div class="mt-6 pt-5 border-t border-slate-100">
+              <div
+                class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2"
+              >
+                依存関係
+              </div>
+              <ul class="text-sm text-slate-700 space-y-1.5">
+                <li>
+                  <span class="inline-block w-20 text-indigo-700 font-medium"
+                    >OV-00</span
+                  >
+                  → 全 docs の上流 (構想 / スコープを定義)
+                </li>
+                <li>
+                  <span class="inline-block w-20 text-emerald-700 font-medium"
+                    >FW-01</span
+                  >
+                  → OV-00 §4 Flywheel 図の詳細版 / APP-02 §7 Matrix B
+                  不変条件を共有
+                </li>
+                <li>
+                  <span class="inline-block w-20 text-violet-700 font-medium"
+                    >APP-02</span
+                  >
+                  → FW-01 の RACI 詳細委譲先 / DOC-UI-03 / DOC-MON-05 /
+                  DOC-S4-06 の前提
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Glossary -->
+        <section id="glossary" class="mb-12 scroll-mt">
+          <h2 class="text-2xl font-semibold text-slate-900 mb-4">
+            Tier 語彙 / 仮説ラベル / 規制語 hedge
+          </h2>
+          <div class="grid md:grid-cols-3 gap-4">
+            <!-- Tier 1 -->
+            <div
+              class="bg-white rounded-lg border border-emerald-200 review-shadow p-5"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                  >Tier 1</span
+                >
+                <span class="text-xs text-slate-600">audience に出す</span>
+              </div>
+              <div class="text-sm text-slate-700 leading-relaxed">
+                案件承認 / 手順承認 / 設定承認 / 入力者 / 承認者 / Flywheel /
+                業務別ファイル群
+              </div>
+              <div class="text-xs text-slate-500 mt-3">
+                UI label / slide / copy 全部 OK
+              </div>
+            </div>
+            <!-- Tier 2 -->
+            <div
+              class="bg-white rounded-lg border border-indigo-200 review-shadow p-5"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class="bg-indigo-100 text-indigo-800 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                  >Tier 2</span
+                >
+                <span class="text-xs text-slate-600"
+                  >UI / docs OK、slide は補助</span
+                >
+              </div>
+              <div
+                class="text-sm text-slate-700 leading-relaxed font-mono text-xs"
+              >
+                staging / compiled / Trust Level / Supervised / Checkpoint /
+                Autonomous / Alert / 差戻し / Knowledge / Plan First /
+                Verification gate
+              </div>
+            </div>
+            <!-- Tier 3 -->
+            <div
+              class="bg-white rounded-lg border border-rose-200 review-shadow p-5"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class="bg-rose-100 text-rose-800 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                  >Tier 3</span
+                >
+                <span class="text-xs text-slate-600">裏設計のみ、表層 NG</span>
+              </div>
+              <div
+                class="text-sm text-slate-700 leading-relaxed font-mono text-xs"
+              >
+                MRM / CISO / Risk (固有部署) / NYDFS / SR 11-7 / CCPA / OFAC /
+                BSA / SAR / CTR / ECOA
+              </div>
+              <div class="text-xs text-slate-500 mt-3">
+                v2 docs 内でも事実主張禁止、ai-operator paper への reference
+                link のみ
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 grid md:grid-cols-2 gap-4">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
+              <div class="flex items-center gap-2 mb-2">
+                <span
+                  class="bg-amber-200 text-amber-900 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                  >[仮説 / 要検証]</span
+                >
+              </div>
+              <div class="text-sm text-amber-900">
+                KPI 数値 (4 KPI gate: 99% / 1% / 5% / 1%) は実 gate ではなく
+                Session 4 説明用の <strong>仮説値</strong>。本番 threshold は
+                Phase 1 で要定義、本 doc では数値断定しない。
+              </div>
+            </div>
+            <div class="bg-slate-100 border border-slate-300 rounded-lg p-5">
+              <div
+                class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mb-2"
+              >
+                v2 docs 内の総称表現 (Tier 2/UI label には含めない)
+              </div>
+              <div class="text-sm text-slate-700 leading-relaxed">
+                <strong>Security 関係者</strong> = CISO + Security Officer +
+                Risk (Security 側)<br /><strong>Compliance 関係者</strong> =
+                Compliance Officer + Legal + MRM
+              </div>
+              <div class="text-xs text-slate-500 mt-2">
+                docs 内部限定、UI / slide / mock data には出さない
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================== -->
+        <!-- DOC-OV-00 -->
+        <!-- ====================================================================== -->
+        <section class="mb-16">
+          <div
+            class="flex items-center gap-3 mb-6 pb-3 border-b-2 border-indigo-200"
+          >
+            <span
+              class="bg-indigo-600 text-white text-xs font-semibold px-2.5 py-1 rounded"
+              >DOC-OV-00</span
+            >
+            <h2 class="text-3xl font-semibold text-slate-900">
+              構想概要 (Overview)
+            </h2>
+          </div>
+
+          <section id="ov-1" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              1. 課題と中核 message
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-3"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                1.1 解く課題
+              </h4>
+              <p class="text-slate-700 leading-relaxed">
+                バックオフィス業務は、ベテラン担当者の暗黙知に依存してきた領域である。組織として
+                AI 導入を検討するとき、選択肢は実務上「<strong
+                  >一括自動化</strong
+                >
+                (高リスク、例外対応の難しさ・規制対応の重さで実装が止まる)」か「<strong
+                  >諦める</strong
+                >
+                (現状維持、人手不足と退職リスクで持続不可能)」の二択に陥りやすい。
+              </p>
+              <p class="text-slate-700 leading-relaxed mt-3">
+                v2 が解こうとするのは、この二択の間に
+                <strong>段階的な自動化 + 暗黙知の組織知への蒸留</strong>
+                という第 3 の選択肢を提示することである。
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider"
+              >
+                1.2 中核 message
+              </h4>
+              <div
+                class="bg-indigo-50 border-l-4 border-indigo-500 px-5 py-4 rounded-r-md mb-4"
+              >
+                <p class="text-slate-900 font-medium">
+                  業務別ナレッジ文書を人間承認で育てる
+                  <span class="text-indigo-700">Flywheel</span>
+                </p>
+              </div>
+              <ul
+                class="text-sm text-slate-700 space-y-1.5 list-disc list-inside"
+              >
+                <li>AI が業務手順を実行 → 入力者が結果を確認 / 差戻し</li>
+                <li>
+                  差戻しコメントは即時 staging knowledge として AI runtime に
+                  visible になる
+                </li>
+                <li>
+                  複数 case で再発した staging は batch で手順承認を経て
+                  compiled knowledge に昇格、業務手順ファイル群 (workflow.md /
+                  agent-instructions.md / approval-policy.md) に diff 適用
+                </li>
+                <li>
+                  手順変更が AI 設定 (Agent / Model / Tool / Prompt / 権限)
+                  に及ぶ場合は設定承認を通る
+                </li>
+                <li>
+                  Automation Maturity (Supervised / Checkpoint / Autonomous)
+                  は知識・設定承認 loop を縮小せず、業務承認 (案件承認)
+                  の介在頻度だけ縮小する
+                </li>
+              </ul>
+              <p class="text-sm text-slate-600 mt-4 italic">
+                「コメントを貯める仕組み」ではなく「<strong
+                  class="text-slate-900"
+                  >業務別ファイルを育てる仕組み</strong
+                >」として設計するのが v2 の差別化点。
+              </p>
+            </div>
+          </section>
+
+          <section id="ov-2" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              2. 解くスコープ
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider"
+              >
+                2.1 対象業務
+              </h4>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <span
+                    class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-0.5 rounded h-6 flex-shrink-0 mt-0.5"
+                    >主役</span
+                  >
+                  <div class="text-sm text-slate-700">
+                    <strong>UC-BO-01 法人住所変更処理</strong> (Demo Chapter 1/2
+                    起点): 法人顧客の登記住所変更依頼を、PDF
+                    受領から業務システム反映まで AI が実行し、入力者確認 +
+                    承認者承認の 2 段で確認する
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <span
+                    class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2 py-0.5 rounded h-6 flex-shrink-0 mt-0.5"
+                    >並列</span
+                  >
+                  <div class="text-sm text-slate-700">
+                    <strong>口座開設書類完備チェック</strong> (Dashboard
+                    カード、Demo で 1 シーン open): 書類完備性のチェック + Alert
+                    を AI が draft、入力者が確認
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <span
+                    class="bg-slate-200 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded h-6 flex-shrink-0 mt-0.5"
+                    >boundary</span
+                  >
+                  <div class="text-sm text-slate-700">
+                    <strong>国際送金 boundary</strong> (<code
+                      class="text-xs bg-slate-100 px-1 rounded"
+                      >workflows/international-transfer-boundary/</code
+                    >): 自動化禁止業務として boundary spec のみ記述、UI
+                    画面化なし、Dashboard カード化なし
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider"
+              >
+                2.2 起点 (本番想定の flow) と v2 prototype の見せ方
+              </h4>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="border border-amber-200 bg-amber-50 rounded-md p-4">
+                  <div
+                    class="text-[11px] font-semibold text-amber-800 uppercase tracking-wider mb-2"
+                  >
+                    本番想定の flow
+                  </div>
+                  <ol
+                    class="text-sm text-slate-800 space-y-1.5 list-decimal list-inside"
+                  >
+                    <li>依頼書 PDF が特定フォルダに置かれる</li>
+                    <li>AI watcher が検知、自動的に業務システム操作を開始</li>
+                    <li>
+                      入力結果 (スクショ stack + PDF preview + Alert) を入力者の
+                      Case Review 画面に提示
+                    </li>
+                    <li><strong>入力者確認</strong>: 承認 / 差戻し</li>
+                    <li>
+                      入力者承認後、<strong>承認者承認</strong>:
+                      同じ証跡を見て最終確認
+                    </li>
+                  </ol>
+                  <p class="text-xs text-amber-900 mt-3">
+                    入力者確認 + 承認者承認 が揃って
+                    <strong>案件承認</strong> 全体を構成。「4-eyes」はこの 2
+                    者が揃った案件承認全体に対する呼称、単独 /
+                    別々には使わない。
+                  </p>
+                </div>
+                <div
+                  class="border border-indigo-200 bg-indigo-50 rounded-md p-4"
+                >
+                  <div
+                    class="text-[11px] font-semibold text-indigo-800 uppercase tracking-wider mb-2"
+                  >
+                    v2 prototype の見せ方 (非実行)
+                  </div>
+                  <ul
+                    class="text-sm text-slate-800 space-y-1.5 list-disc list-inside"
+                  >
+                    <li>
+                      PDF Inbox 画面 (<code
+                        class="text-xs bg-white px-1 rounded"
+                        >/inbox</code
+                      >) で「AI 処理中」状態から開始 (実 PDF watcher
+                      は実装しない)
+                    </li>
+                    <li>
+                      Case Review 画面 (<code
+                        class="text-xs bg-white px-1 rounded"
+                        >/cases/:id</code
+                      >) で mock evidence (PDF サムネ / スクショ stack / Alert /
+                      agent proposal) を表示
+                    </li>
+                    <li>
+                      入力者確認 / 承認者承認 の遷移は
+                      <strong>mock state 更新のみ</strong>、業務システム実操作 /
+                      永続化 は scope-out
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider"
+              >
+                2.3 UI scope
+              </h4>
+              <ul
+                class="text-sm text-slate-700 space-y-1.5 list-disc list-inside"
+              >
+                <li>
+                  フロントエンドのみ (React 19 + Vite 8 + Tailwind v4 +
+                  shadcn/ui)
+                </li>
+                <li>in-memory mock state、永続化なし</li>
+                <li>9 画面 prototype (Hero 3 = 95% / 残り 6 = 85% 仕上げ)</li>
+                <li>
+                  承認者画面は実装せず、CaseReview 内
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >BusinessApprovalChip</code
+                  >
+                  + slide-only static mock で代替
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="ov-3" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              3. 非スコープ (scope-out)
+            </h3>
+            <div class="bg-rose-50 border border-rose-200 rounded-lg p-6">
+              <div
+                class="text-[11px] font-semibold tracking-wider text-rose-700 uppercase mb-3"
+              >
+                v2 / Session 4 でやらない
+              </div>
+              <ul
+                class="text-sm text-slate-800 space-y-1.5 list-disc list-inside"
+              >
+                <li>
+                  実 LLM API 呼び出し / Computer use / desktop control /
+                  外部システム接続 / 完全自動化
+                </li>
+                <li>
+                  実 customer data / 実 PDF (mock のみ、サンプル画像で代替)
+                </li>
+                <li>
+                  実規制 cite (NYDFS / SR 11-7 等は v2 docs
+                  内でも事実主張せず、prior-art-map から ai-operator paper への
+                  reference link のみ)
+                </li>
+                <li>実送金 trigger / 実 master data 更新</li>
+                <li>国際送金業務の UI 画面化 + Dashboard カード化</li>
+                <li>
+                  承認者 (Business Approval) の画面化 (Chip + slide-only mock
+                  で代替、route / page / smoke test 対象外)
+                </li>
+                <li>hands-on workshop (Session 4 は説明 + demo のみ)</li>
+                <li>
+                  旧 repo (<code class="text-xs bg-white px-1 rounded"
+                    >backoffice-ai</code
+                  >,
+                  <code class="text-xs bg-white px-1 rounded">ai-operator</code
+                  >) の archive 移動 (v2 完成まで
+                  <code class="text-xs bg-white px-1 rounded"
+                    >~/code/active/</code
+                  >
+                  に保持)
+                </li>
+                <li>
+                  <code class="text-xs bg-white px-1 rounded"
+                    >cowork-workshop/session-{1,2,3}-narrative.md</code
+                  >
+                  の編集 (S1-3 SSOT、Day 19 で touch しない)
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="ov-4" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              4. Flywheel 1 枚図
+              <span class="text-amber-600 text-base">★ 重要</span>
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-emerald-200 review-shadow p-6 mb-4"
+            >
+              <pre class="ascii text-slate-700">
+                ┌──────────────────────────────────────────────────────────┐
+                │                                                          │
+                ▼                                                          │
+        ┌──────────────┐  入力者確認   ┌─────────────┐  AI auto-draft  ┌─────────────┐
+        │ ① AI 入力   │  差戻し +     │ ② staging   │  ─────────────► │ ③ compiled │
+        │   結果       │  5-category   │   knowledge │  Batch +        │   knowledge │
+        │   (Case)     │  ──────────►  │   (即時)    │  手順承認       │   (正式)    │
+        └──────────────┘               └─────────────┘  ─────────────► └─────────────┘
+              ▲                                                                │
+              │                                                                ▼
+              │                                                  ┌──────────────────────┐
+              │      新 case で citation                          │ 業務手順ファイル群    │
+              │  ◄──────────────────────────────────────────────  │ workflow.md /         │
+              │                                                  │ agent-instructions /   │
+              │                                                  │ approval-policy        │
+              │                                                  └──────────────────────┘
+              │                                                                │
+              │                                                                │ AI 設定変更
+              │                                                                │ 必要時のみ
+              │                                                                ▼
+              │                                                  ┌──────────────────────┐
+              │                                                  │ ④ 設定承認           │
+              │      反映後の新 case                              │   (Type A/B/C)       │
+              │  ◄──────────────────────────────────────────────  └──────────────────────┘
+              │
+              └─ ⑤ 過去 case は遡って書き換えない (audit trail 保護)</pre
+              >
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr
+                    class="bg-slate-100 text-left text-xs uppercase tracking-wider text-slate-600"
+                  >
+                    <th class="border border-slate-200 px-3 py-2">段</th>
+                    <th class="border border-slate-200 px-3 py-2">
+                      Owner (起票)
+                    </th>
+                    <th class="border border-slate-200 px-3 py-2">Approver</th>
+                    <th class="border border-slate-200 px-3 py-2">
+                      反映タイミング
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td class="border border-slate-200 px-3 py-2 font-medium">
+                      ① 差戻し送信
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">入力者</td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      入力者 (self、reject)
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      送信時 (prototype では同一セッション内)
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-3 py-2 font-medium">
+                      ② staging 生成
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      AI (auto-draft)
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      人間承認不要、weight 低
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      prototype では同一セッション内。<span
+                        class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded"
+                        >本番 SLO は Phase 1 で要定義</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-200 px-3 py-2 font-medium">
+                      ③ compiled 昇格
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      Manual 管理者
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      業務責任者 (手順承認)
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      Batch (週次想定、<span
+                        class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded"
+                        >[仮説]</span
+                      >)
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-3 py-2 font-medium">
+                      ④ 設定承認 (条件付き)
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">AI 管理者</td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      Type 別 co-A
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      Ad-hoc + batch
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-200 px-3 py-2 font-medium">
+                      ⑤ 反映後の波及
+                    </td>
+                    <td class="border border-slate-200 px-3 py-2">(自動)</td>
+                    <td class="border border-slate-200 px-3 py-2">(自動)</td>
+                    <td class="border border-slate-200 px-3 py-2">
+                      次の case 処理から、過去 case は不変
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="ov-5" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              5. 想定 outcome
+            </h3>
+            <div class="space-y-3">
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <div
+                  class="text-[11px] font-semibold text-indigo-700 uppercase tracking-wider mb-1"
+                >
+                  outcome 1
+                </div>
+                <p class="text-slate-800">
+                  Session 4 (60 min) で audience 10
+                  名が「<strong>自社で来週、サンプル業務を選んで設計検討を始められる</strong>」と感じる
+                  prototype demo を提供する
+                  <span class="text-slate-500"
+                    >(=
+                    本番運用開始という意味ではない、設計検討に踏み出せる感触の獲得)</span
+                  >
+                </p>
+              </div>
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <div
+                  class="text-[11px] font-semibold text-indigo-700 uppercase tracking-wider mb-1"
+                >
+                  outcome 2
+                </div>
+                <p class="text-slate-800">
+                  設計書 10 docs + 業務文書 (2 業務 × 5 文書 + 1 boundary pack ×
+                  3 文書) + UI 9 画面 prototype + Session 4 narrative + demo
+                  script + 1 static-mock html を
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >backoffice-ai-v2/</code
+                  >
+                  repo として gitable な状態で残す
+                </p>
+              </div>
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <div
+                  class="text-[11px] font-semibold text-indigo-700 uppercase tracking-wider mb-1"
+                >
+                  outcome 3
+                </div>
+                <p class="text-slate-800">
+                  実 LLM / Computer use / 実規制 / 実送金は scope-out
+                  しつつ、後日 Phase 1 (生 ops 投入) の foundation
+                  として再利用できる skeleton
+                </p>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- ====================================================================== -->
+        <!-- DOC-FW-01 -->
+        <!-- ====================================================================== -->
+        <section class="mb-16">
+          <div
+            class="flex items-center gap-3 mb-6 pb-3 border-b-2 border-emerald-200"
+          >
+            <span
+              class="bg-emerald-600 text-white text-xs font-semibold px-2.5 py-1 rounded"
+              >DOC-FW-01</span
+            >
+            <h2 class="text-3xl font-semibold text-slate-900">
+              Flywheel と Knowledge Loop
+            </h2>
+          </div>
+
+          <section id="fw-1" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              1. 全体構造 (5 段)
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr
+                    class="bg-emerald-50 text-left text-xs uppercase tracking-wider text-emerald-800"
+                  >
+                    <th class="border border-emerald-200 px-3 py-2">段</th>
+                    <th class="border border-emerald-200 px-3 py-2">
+                      主要動詞
+                    </th>
+                    <th class="border border-emerald-200 px-3 py-2">
+                      Owner / Approver
+                    </th>
+                    <th class="border border-emerald-200 px-3 py-2">詳細</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td class="border border-emerald-200 px-3 py-2 font-medium">
+                      ① 差戻し送信
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      入力者が AI 結果を reject + 5-category
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      入力者 self
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">§2</td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-emerald-200 px-3 py-2 font-medium">
+                      ② staging 生成
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      AI が自動 draft、低 weight、即時参照可
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      AI (auto-draft)
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">§3</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-emerald-200 px-3 py-2 font-medium">
+                      ③ compiled 昇格
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      Manual 管理者起票 → 業務責任者承認 (手順承認)
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      Manual 管理者 / 業務責任者
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">§4</td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-emerald-200 px-3 py-2 font-medium">
+                      ④ 設定承認 (条件付き)
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      AI 設定変更必要時のみ trigger
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      AI 管理者 / Type 別 co-A
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">§5</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-emerald-200 px-3 py-2 font-medium">
+                      ⑤ 反映後の波及
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">
+                      新 case で citation、過去 case は不変
+                    </td>
+                    <td class="border border-emerald-200 px-3 py-2">(自動)</td>
+                    <td class="border border-emerald-200 px-3 py-2">§6</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-sm text-slate-600 mt-3 italic">
+              責任分界の静的構造 (RACI) は DOC-APP-02 が SSOT。本 doc は
+              <strong>loop 因果 + 各段のステージ詳細 + Loop の不変条件</strong>
+              を SSOT とする。
+            </p>
+          </section>
+
+          <section id="fw-2" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              2. ① 起点: 入力者確認による差戻し
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                2.1 入力者の役割
+              </h4>
+              <p class="text-slate-700 leading-relaxed">
+                入力者は 4-eyes flow の 1 段目で AI 入力結果を確認する。これを
+                <strong>入力者確認</strong> と呼ぶ。
+              </p>
+              <div
+                class="bg-amber-50 border-l-4 border-amber-400 px-4 py-3 mt-3 rounded-r-md"
+              >
+                <p class="text-sm text-amber-900">
+                  <strong>入力者確認 単独では 4-eyes と呼ばない</strong>。4-eyes
+                  は 入力者 + 承認者 の 2
+                  者が揃って案件承認全体を構成するときの呼称。
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                2.2 差戻しの構造 — 5-category
+              </h4>
+              <p class="text-sm text-slate-700 mb-3">
+                入力者は SendBackComment 画面 (<code
+                  class="text-xs bg-slate-100 px-1 rounded"
+                  >/cases/:id/comment</code
+                >) で 5-category + free-text コメント + case context (PDF /
+                screenshot / agent output) を送信。
+              </p>
+              <div class="grid md:grid-cols-5 gap-2 text-xs">
+                <div class="border border-slate-200 rounded-md p-3">
+                  <div class="font-mono font-medium text-slate-900 mb-1">
+                    misunderstanding
+                  </div>
+                  <div class="text-slate-600">AI の意図誤解</div>
+                </div>
+                <div class="border border-slate-200 rounded-md p-3">
+                  <div class="font-mono font-medium text-slate-900 mb-1">
+                    ui_change
+                  </div>
+                  <div class="text-slate-600">業務システム UI 変更</div>
+                </div>
+                <div class="border border-slate-200 rounded-md p-3">
+                  <div class="font-mono font-medium text-slate-900 mb-1">
+                    edge_case
+                  </div>
+                  <div class="text-slate-600">想定外パターン</div>
+                </div>
+                <div class="border border-slate-200 rounded-md p-3">
+                  <div class="font-mono font-medium text-slate-900 mb-1">
+                    judgment_gap
+                  </div>
+                  <div class="text-slate-600">判断ルール不足</div>
+                </div>
+                <div class="border border-slate-200 rounded-md p-3">
+                  <div class="font-mono font-medium text-slate-900 mb-1">
+                    data_error
+                  </div>
+                  <div class="text-slate-600">入力データ誤り (AI 責でない)</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="fw-3" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              3. ② Staging knowledge 生成 (即時、AI auto-draft)
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                3.1 AI による draft
+              </h4>
+              <p class="text-sm text-slate-700">
+                配置:
+                <code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded"
+                  >workflows/{業務}/knowledge/staging/{YYYY-MM-DD}-{slug}.md</code
+                >
+              </p>
+              <pre
+                class="bg-slate-900 text-slate-100 p-4 rounded-md mt-3 text-xs overflow-x-auto"
+              ><span class="text-slate-500">---</span>
+<span class="text-emerald-300">date:</span> 2026-06-08
+<span class="text-emerald-300">category:</span> ui_change
+<span class="text-emerald-300">source_case:</span> CASE-2026-051
+<span class="text-emerald-300">weight:</span> low (staging)
+<span class="text-slate-500">---</span>
+
+<span class="text-amber-300"># 福岡支店の住所マスタが旧形式</span>
+
+法人住所変更を福岡支店適用で実行する際、住所マスタが旧形式 (郵便番号なし) のまま登録されているケースがある。
+AI が 7 桁郵便番号を自動補完してしまうと差戻しになる。
+
+<span class="text-amber-300">## 暫定対応</span>
+入力者は新形式適用前に郵便番号 field を空にすることを確認。
+
+<span class="text-amber-300">## 関連 case</span>
+- CASE-2026-051 (本件 source)</pre>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <h4
+                  class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+                >
+                  3.2 反映タイミング
+                </h4>
+                <ul
+                  class="text-sm text-slate-700 space-y-1.5 list-disc list-inside"
+                >
+                  <li>
+                    <strong>prototype</strong>: 同一セッション内に mock state を
+                    AppContext で immediate update、永続化なし
+                  </li>
+                  <li>
+                    <strong>本番 SLO</strong>:
+                    <span
+                      class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded"
+                      >Phase 1 で要定義</span
+                    >
+                  </li>
+                  <li>
+                    「数秒以内」「リアルタイム」等の SLO 値は本 doc に書かない
+                    (Evidence-safe 原則)
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <h4
+                  class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+                >
+                  3.3 Weight
+                </h4>
+                <ul
+                  class="text-sm text-slate-700 space-y-1.5 list-disc list-inside"
+                >
+                  <li>staging の weight: <strong>低</strong></li>
+                  <li>
+                    AI runtime は staging を参照可、ただし compiled より優先度低
+                  </li>
+                  <li>人間レビュー前、誤った snippet が混在しうる</li>
+                  <li>
+                    weight 上げ (compiled 昇格) には複数 case 再発 +
+                    手順承認が必要
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section id="fw-4" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              4. ③ Compiled 昇格 (Batch、手順承認 trigger)
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                4.1 昇格 trigger
+              </h4>
+              <ul
+                class="text-sm text-slate-700 space-y-1.5 list-disc list-inside"
+              >
+                <li>
+                  同種の差戻しが <strong>複数 case で再発</strong> (demo mock
+                  では 3 件まとめて表示する想定。<span
+                    class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded"
+                    >本番 threshold は Phase 1 で要定義</span
+                  >、本 doc では数値断定しない)
+                </li>
+                <li>
+                  Manual 管理者が curate して
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >proposals/pending/</code
+                  >
+                  に手順更新提案を起票
+                </li>
+              </ul>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                4.2 RACI
+              </h4>
+              <div class="grid grid-cols-4 gap-3 text-sm">
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >R 起票</span
+                  >
+                  <div class="font-medium">Manual 管理者</div>
+                </div>
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >A 承認</span
+                  >
+                  <div class="font-medium">業務責任者</div>
+                </div>
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >C 合議</span
+                  >
+                  <div class="font-medium">SME / AI 管理者</div>
+                </div>
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >I 通知</span
+                  >
+                  <div class="font-medium">入力者 / 承認者</div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                4.3 反映範囲 (diff 適用)
+              </h4>
+              <ul
+                class="text-sm text-slate-700 space-y-1 list-disc list-inside mb-3"
+              >
+                <li>
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >workflows/{業務}/workflow.md</code
+                  >
+                </li>
+                <li>
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >workflows/{業務}/agent-instructions.md</code
+                  >
+                </li>
+                <li>
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >workflows/{業務}/approval-policy.md</code
+                  >
+                </li>
+                <li>
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >workflows/{業務}/knowledge/staging/*.md</code
+                  >
+                  →
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >.../compiled/*.md</code
+                  >
+                  (move、weight 上げ)
+                </li>
+              </ul>
+              <div
+                class="bg-rose-50 border border-rose-200 rounded-md p-4 mt-3"
+              >
+                <p class="text-sm text-rose-900">
+                  <strong
+                    ><code class="text-xs bg-white px-1 rounded"
+                      >workflows/{業務}/BOUNDARY.md</code
+                    >
+                    は通常 loop の更新対象外</strong
+                  >。BOUNDARY.md 変更は scope
+                  拡張・自動化禁止条件見直しを伴うため、明示的な<strong
+                    >設定承認 + plan update</strong
+                  >
+                  を経る別 process で扱う。Flywheel の通常 loop で staging →
+                  compiled → BOUNDARY.md の diff という経路は発生しない。
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section id="fw-5" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              5. ④ 設定承認 (条件付き)
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                5.1 trigger 条件
+              </h4>
+              <p class="text-sm text-slate-700 mb-2">
+                手順承認の影響範囲が AI 設定 (Agent / Model / Tool / Prompt /
+                権限) に及ぶ場合のみ trigger:
+              </p>
+              <ul
+                class="text-sm text-slate-700 space-y-1 list-disc list-inside"
+              >
+                <li>agent-instructions.md の更新で新 tool 呼び出しが必要</li>
+                <li>参照ナレッジ範囲拡大で Agent の権限変更が必要</li>
+                <li>Automation Maturity の昇格 (Supervised → Checkpoint)</li>
+              </ul>
+            </div>
+            <div class="bg-slate-100 border border-slate-300 rounded-lg p-5">
+              <p class="text-sm text-slate-700">
+                <strong>Type A / B / C の詳細</strong> は
+                <a
+                  href="#app-4"
+                  class="text-violet-700 hover:underline font-medium"
+                  >DOC-APP-02 §4 設定承認</a
+                >
+                が SSOT。本 doc は Flywheel における trigger 経路 + §5.3
+                手順承認のみで完結する case の切り分けのみ扱う。
+              </p>
+            </div>
+          </section>
+
+          <section id="fw-6" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              6. ⑤ 反映後の Case Review への波及
+            </h3>
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <h4
+                  class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+                >
+                  6.1 新 case の citation
+                </h4>
+                <ul
+                  class="text-sm text-slate-700 space-y-1 list-disc list-inside"
+                >
+                  <li>
+                    compiled knowledge を AiProposalPanel の citation list
+                    に明示
+                  </li>
+                  <li>confidence score 上昇 (引用ナレッジ ↑ → 不確実性 ↓)</li>
+                  <li>
+                    Alert ルール更新 (approval-policy.md 反映時、新 case
+                    から適用)
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="bg-white rounded-lg border border-slate-200 review-shadow p-5"
+              >
+                <h4
+                  class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+                >
+                  6.2 KPI 観測
+                </h4>
+                <ul
+                  class="text-sm text-slate-700 space-y-1 list-disc list-inside"
+                >
+                  <li>AI 入力承認率 ↑ (差戻し率 ↓)</li>
+                  <li>人手上書き率 ↓</li>
+                  <li>Alert 命中率 (新 rule の有効性)</li>
+                </ul>
+                <p class="text-xs text-slate-500 mt-2">
+                  数値は全件
+                  <span
+                    class="bg-amber-100 text-amber-800 text-xs px-1.5 rounded"
+                    >[仮説]</span
+                  >
+                  ラベル
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-indigo-50 border-l-4 border-indigo-500 px-5 py-4 rounded-r-md"
+            >
+              <div
+                class="text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-1"
+              >
+                6.3 過去 case は遡って書き換えない
+              </div>
+              <p class="text-sm text-indigo-900">
+                <strong>反映後も過去 case の AI proposal は不変</strong>。理由:
+                audit trail 保護 (過去判断の根拠を後から書き換えない) /
+                入力者・承認者の判断履歴を変更しない / 「いつ何が変わったか」を
+                Audit Trail (<code class="text-xs bg-white px-1 rounded"
+                  >/audit</code
+                >) で trace できる。Mock data でも踏襲。
+              </p>
+            </div>
+          </section>
+
+          <section id="fw-7" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              7. Loop の不変条件
+              <span class="text-amber-600 text-base"
+                >★ Session 4 Slide 7 message の核</span
+              >
+            </h3>
+            <div
+              class="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-6 mb-4"
+            >
+              <div
+                class="text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-2"
+              >
+                7.1 Matrix B 原則 (Automation Maturity との関係)
+              </div>
+              <p class="text-emerald-900 font-medium leading-relaxed mb-4">
+                Automation Maturity が進化しても、<strong
+                  >知識・設定承認 loop は縮小しない</strong
+                >。縮小するのは案件承認 (= 入力者確認 + 承認者承認)
+                の介在頻度のみ。
+              </p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse bg-white">
+                  <thead>
+                    <tr
+                      class="bg-emerald-100 text-left text-xs uppercase tracking-wider text-emerald-800"
+                    >
+                      <th class="border border-emerald-300 px-3 py-2">
+                        Automation 段階
+                      </th>
+                      <th class="border border-emerald-300 px-3 py-2">
+                        案件承認の介在
+                      </th>
+                      <th class="border border-emerald-300 px-3 py-2">
+                        手順承認
+                      </th>
+                      <th class="border border-emerald-300 px-3 py-2">
+                        設定承認
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        class="border border-emerald-200 px-3 py-2 font-medium"
+                      >
+                        Supervised
+                      </td>
+                      <td class="border border-emerald-200 px-3 py-2">
+                        全件 (入力者 + 承認者)
+                      </td>
+                      <td class="border border-emerald-200 px-3 py-2">通常</td>
+                      <td class="border border-emerald-200 px-3 py-2">通常</td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="border border-emerald-200 px-3 py-2 font-medium"
+                      >
+                        Checkpoint
+                      </td>
+                      <td class="border border-emerald-200 px-3 py-2">
+                        重要分岐のみ
+                      </td>
+                      <td class="border border-emerald-200 px-3 py-2">通常</td>
+                      <td class="border border-emerald-200 px-3 py-2">通常</td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="border border-emerald-200 px-3 py-2 font-medium"
+                      >
+                        Autonomous (将来)
+                      </td>
+                      <td class="border border-emerald-200 px-3 py-2">
+                        サンプリング
+                      </td>
+                      <td class="border border-emerald-200 px-3 py-2">通常</td>
+                      <td class="border border-emerald-200 px-3 py-2">通常</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="bg-slate-100 border border-slate-300 rounded-lg p-5">
+              <div
+                class="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2"
+              >
+                7.2 出典 (prior art pointer)
+              </div>
+              <p class="text-sm text-slate-700">
+                <code class="text-xs bg-white px-1 rounded"
+                  >ai-operator/docs/01-hitl-policy.md</code
+                >
+                line 198-204 (Matrix B 該当)。<strong
+                  >外部規制根拠ではなく、ai-operator paper の設計判断を v2
+                  が継承したもの</strong
+                >。本 v2 では prior art reference として扱い、外部規制論拠
+                (NYDFS / SR 11-7 等) としては主張しない。
+              </p>
+            </div>
+            <div
+              class="mt-4 bg-white rounded-lg border border-slate-200 review-shadow p-5"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                7.3 Loop は単方向 / 7.4 停止条件
+              </h4>
+              <ul
+                class="text-sm text-slate-700 space-y-1 list-disc list-inside"
+              >
+                <li>
+                  差戻し → staging → compiled → 手順承認 → (設定承認) → 反映
+                  の順に進む
+                </li>
+                <li>
+                  staging から workflow.md に
+                  <strong>直接 diff は飛ばない</strong> (compiled 昇格 +
+                  業務責任者承認 必須)
+                </li>
+                <li>BOUNDARY.md は通常 loop の更新対象外 (§4.3)</li>
+                <li>
+                  v2 scope 内では「差戻し 0 件」「threshold 未達」「業務責任者
+                  reject」の 3 case のみ Loop 停止
+                </li>
+                <li>
+                  緊急停止 (Forced Downgrade / Emergency stop) は
+                  <a href="#app-8" class="text-violet-700 hover:underline"
+                    >DOC-APP-02 Matrix C</a
+                  >
+                  の範疇、本 doc scope 外
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+
+        <!-- ====================================================================== -->
+        <!-- DOC-APP-02 -->
+        <!-- ====================================================================== -->
+        <section class="mb-16">
+          <div
+            class="flex items-center gap-3 mb-6 pb-3 border-b-2 border-violet-200"
+          >
+            <span
+              class="bg-violet-600 text-white text-xs font-semibold px-2.5 py-1 rounded"
+              >DOC-APP-02</span
+            >
+            <h2 class="text-3xl font-semibold text-slate-900">
+              承認モデル (Approval Model)
+            </h2>
+          </div>
+
+          <section id="app-1" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              1. 全体構造 (3 軸の交差)
+              <span class="text-amber-600 text-base">★ 重要</span>
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-violet-200 review-shadow p-6 mb-4"
+            >
+              <pre class="ascii text-slate-700">
+                          ┌───────────────────────────────────────┐
+                          │   3 軸の交差                          │
+                          │                                       │
+  3 層承認 ──────────────►│  ① 案件承認 (4-eyes)                  │
+  (何を承認)              │  ② 手順承認 (knowledge → procedure)   │
+                          │  ③ 設定承認 (Agent / Model / Tool)    │
+                          │                                       │
+  4-eyes ────────────────►│  入力者確認 + 承認者承認 = 案件承認   │
+  (案件承認の構造)        │  (単独では 4-eyes と呼ばない)         │
+                          │                                       │
+  Automation Maturity ───►│  Supervised: 全件 4-eyes              │
+  (頻度)                  │  Checkpoint: 重要分岐のみ             │
+                          │  Autonomous: サンプリング (将来)      │
+                          │  ▸ 知識・設定承認 loop は不変         │
+                          └───────────────────────────────────────┘</pre
+              >
+            </div>
+          </section>
+
+          <section id="app-2" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              2. 案件承認 (Case Approval)
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6 mb-4"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider"
+              >
+                2.2 4-eyes 構造
+              </h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm border-collapse">
+                  <thead>
+                    <tr
+                      class="bg-slate-100 text-left text-xs uppercase tracking-wider text-slate-600"
+                    >
+                      <th class="border border-slate-200 px-3 py-2">段階</th>
+                      <th class="border border-slate-200 px-3 py-2">役割</th>
+                      <th class="border border-slate-200 px-3 py-2">内容</th>
+                      <th class="border border-slate-200 px-3 py-2">
+                        反映タイミング
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="border border-slate-200 px-3 py-2 font-medium">
+                        入力者確認
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2">入力者</td>
+                      <td class="border border-slate-200 px-3 py-2">
+                        AI 入力結果を accept / 差戻し (5-category + free-text)
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2">
+                        送信時 (prototype では同一セッション内)
+                      </td>
+                    </tr>
+                    <tr class="bg-slate-50">
+                      <td class="border border-slate-200 px-3 py-2 font-medium">
+                        承認者承認
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2">承認者</td>
+                      <td class="border border-slate-200 px-3 py-2">
+                        入力者承認済の最終確認
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2">
+                        承認時 (prototype では同一セッション内)
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div
+                class="bg-amber-50 border-l-4 border-amber-400 px-4 py-3 mt-4 rounded-r-md"
+              >
+                <p class="text-sm text-amber-900">
+                  <strong>4-eyes</strong> はこの 2
+                  者が揃った案件承認全体を指す呼称。入力者確認単独 /
+                  承認者承認単独に対しては使わない。<strong>SoD</strong>: 入力者
+                  ≠ 承認者 (システム制約として強制、同一人物による self-approval
+                  は禁止)。
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6"
+            >
+              <h4
+                class="text-sm font-semibold text-slate-700 mb-2 uppercase tracking-wider"
+              >
+                2.4 エスカレーション条件
+              </h4>
+              <ul
+                class="text-sm text-slate-700 space-y-1 list-disc list-inside"
+              >
+                <li>Alert 発火 + 入力者・承認者の判断不能</li>
+                <li>業務責任者の介入が必要 (高リスク要素検知)</li>
+                <li>
+                  データ整合性異常 (5-category の
+                  <code class="text-xs bg-slate-100 px-1 rounded"
+                    >data_error</code
+                  >)
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="app-3" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              3. 手順承認 (Procedure Approval)
+            </h3>
+            <div
+              class="bg-white rounded-lg border border-slate-200 review-shadow p-6"
+            >
+              <p class="text-sm text-slate-700 mb-3">
+                差戻しコメントを正式手順に反映する承認。knowledge → procedure /
+                workflow.md / agent-instructions.md / approval-policy.md
+                への昇格 trigger。
+              </p>
+              <div class="grid grid-cols-4 gap-3 text-sm mb-3">
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >R 起票</span
+                  >
+                  <div class="font-medium">Manual 管理者</div>
+                </div>
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >A 承認</span
+                  >
+                  <div class="font-medium">業務責任者</div>
+                </div>
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >C 合議</span
+                  >
+                  <div class="font-medium">SME / AI 管理者</div>
+                </div>
+                <div>
+                  <span
+                    class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold"
+                    >I 通知</span
+                  >
+                  <div class="font-medium">入力者 / 承認者</div>
+                </div>
+              </div>
+              <p class="text-xs text-slate-600">
+                <strong>SoD</strong>: Manual 管理者 ≠ 業務責任者
+                (システム制約として強制、起票者と承認者の同一人物化は禁止)。
+              </p>
+            </div>
+          </section>
+
+          <section id="app-4" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              4. 設定承認 (Configuration Approval) — Type A/B/C
+            </h3>
+            <div class="space-y-3 mb-4">
+              <!-- Type A -->
+              <div
+                class="bg-white rounded-lg border-2 border-emerald-200 review-shadow p-5"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <span
+                    class="bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded"
+                    >Type A</span
+                  >
+                  <span class="font-semibold text-slate-900">通常</span>
+                  <span class="text-xs text-slate-500 ml-auto">co-A なし</span>
+                </div>
+                <div class="text-sm text-slate-700">
+                  <strong>対象</strong>: Prompt minor update / 既存 Tool 範囲内
+                  / Model patch release
+                </div>
+                <div class="text-sm text-slate-700 mt-1">
+                  <strong>R</strong>: AI 管理者 / <strong>A</strong>: AI 管理者
+                  <span class="text-rose-700"
+                    >(起票者 ≠ 承認者の SoD 強制)</span
+                  >
+                </div>
+                <div class="text-xs text-slate-600 mt-2 italic">
+                  例: Agent-X の prompt v1.3 → v1.4
+                </div>
+              </div>
+              <!-- Type B -->
+              <div
+                class="bg-white rounded-lg border-2 border-amber-200 review-shadow p-5"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <span
+                    class="bg-amber-600 text-white text-xs font-bold px-2 py-0.5 rounded"
+                    >Type B</span
+                  >
+                  <span class="font-semibold text-slate-900"
+                    >Security-impacting</span
+                  >
+                  <span class="text-xs text-amber-700 ml-auto font-medium"
+                    >co-A 必須</span
+                  >
+                </div>
+                <div class="text-sm text-slate-700">
+                  <strong>対象</strong>: 新 external tool / 権限拡張 / data
+                  boundary 変更 / 認証方式変更
+                </div>
+                <div class="text-sm text-slate-700 mt-1">
+                  <strong>R</strong>: AI 管理者 / <strong>A</strong>: AI 管理者
+                  +
+                  <span class="bg-slate-100 px-1.5 py-0.5 rounded text-xs"
+                    >Security 関係者</span
+                  >
+                </div>
+                <div class="text-xs text-slate-600 mt-2 italic">
+                  例: 外部 vendor LLM 新規採用、PII scope 拡大
+                </div>
+              </div>
+              <!-- Type C -->
+              <div
+                class="bg-white rounded-lg border-2 border-rose-200 review-shadow p-5"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <span
+                    class="bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded"
+                    >Type C</span
+                  >
+                  <span class="font-semibold text-slate-900"
+                    >Automation Maturity 変更</span
+                  >
+                  <span class="text-xs text-rose-700 ml-auto font-medium"
+                    >co-A 必須</span
+                  >
+                </div>
+                <div class="text-sm text-slate-700">
+                  <strong>対象</strong>: Supervised → Checkpoint → Autonomous
+                  の段階変更
+                </div>
+                <div class="text-sm text-slate-700 mt-1">
+                  <strong>R</strong>: AI 管理者 / <strong>A</strong>: AI 管理者
+                  + <strong>業務責任者</strong> (業務リスク受容)
+                </div>
+                <div class="text-xs text-slate-600 mt-2 italic">
+                  例: UC-BO-01 法人住所変更処理を Supervised → Checkpoint
+                </div>
+              </div>
+            </div>
+            <div class="bg-rose-50 border-2 border-rose-300 rounded-lg p-5">
+              <div
+                class="text-xs font-semibold text-rose-700 uppercase tracking-wider mb-2"
+              >
+                4.3 Type A の SoD (重要)
+              </div>
+              <p class="text-sm text-slate-800 mb-3">
+                Type A は AI 管理者の承認 path だが、<strong
+                  >同一 change の起票者本人によるセルフ承認は禁止</strong
+                >。起票者 ≠ 承認者であることをシステム制約として強制。
+              </p>
+              <ul
+                class="text-sm text-slate-700 space-y-1 list-disc list-inside"
+              >
+                <li>
+                  <strong>複数 AI 管理者体制 (default)</strong>: 組織内の AI
+                  管理者ロールを持つ別人物が承認
+                </li>
+                <li>
+                  <strong>1 人体制の組織 (fallback)</strong>: Type A も co-A (=
+                  業務責任者 または Security 関係者) を必須とする
+                </li>
+                <li>
+                  起票と承認を別 commit / 別 timestamp で記録、AuditTrail に SoD
+                  evidence として残す
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="app-5" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              5. 役割定義 (5 主要 + 1 補助)
+            </h3>
+            <div class="overflow-x-auto mb-4">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr
+                    class="bg-violet-50 text-left text-xs uppercase tracking-wider text-violet-800"
+                  >
+                    <th class="border border-violet-200 px-3 py-2">役割</th>
+                    <th class="border border-violet-200 px-3 py-2">主要責任</th>
+                    <th class="border border-violet-200 px-3 py-2">
+                      主に関与する承認
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td
+                      class="border border-violet-200 px-3 py-2 font-semibold"
+                    >
+                      入力者
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      業務実行、AI draft レビュー、修正コメント入力
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      案件承認の前段確認 (入力者確認)
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td
+                      class="border border-violet-200 px-3 py-2 font-semibold"
+                    >
+                      承認者
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      案件承認の業務側最終確認
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      案件承認の最終確認 (承認者承認)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="border border-violet-200 px-3 py-2 font-semibold"
+                    >
+                      業務責任者
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      業務の正解を決める、手順承認の最終 approver
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      手順承認 (A) / 設定承認 Type C (co-A)
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td
+                      class="border border-violet-200 px-3 py-2 font-semibold"
+                    >
+                      Manual 管理者
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      業務手順ファイル群の curator、手順更新提案の起票者
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      手順承認 (R)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="border border-violet-200 px-3 py-2 font-semibold"
+                    >
+                      AI 管理者
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      Agent 登録・更新・停止、設定承認主導
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      設定承認 (R + A)
+                    </td>
+                  </tr>
+                  <tr class="bg-amber-50">
+                    <td
+                      class="border border-violet-200 px-3 py-2 font-semibold"
+                    >
+                      Auditor <span class="text-xs text-amber-700">(補助)</span>
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      監査 trail の reader、独立検証
+                    </td>
+                    <td class="border border-violet-200 px-3 py-2">
+                      承認なし (read-only)、AuditTrail 画面 owner
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bg-slate-100 border border-slate-300 rounded-lg p-5">
+              <div
+                class="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2"
+              >
+                5.3 docs 内部の補助語彙 (Tier 3 裏設計の総称、UI/slide
+                には出さない)
+              </div>
+              <p class="text-sm text-slate-700">
+                ai-operator paper では Risk / MRM / Compliance / CISO
+                が固有部署として登場するが、v2 では:
+              </p>
+              <div class="grid md:grid-cols-2 gap-3 mt-3">
+                <div class="border border-slate-300 bg-white rounded-md p-3">
+                  <div class="text-xs font-mono font-semibold text-slate-900">
+                    Security 関係者
+                  </div>
+                  <div class="text-xs text-slate-600 mt-1">
+                    = CISO + Security Officer + Risk (Security 側)
+                  </div>
+                  <div class="text-[11px] text-slate-500 mt-1">
+                    出現箇所: §4.2 Type B co-A、§8 Emergency stop
+                  </div>
+                </div>
+                <div class="border border-slate-300 bg-white rounded-md p-3">
+                  <div class="text-xs font-mono font-semibold text-slate-900">
+                    Compliance 関係者
+                  </div>
+                  <div class="text-xs text-slate-600 mt-1">
+                    = Compliance Officer + Legal + MRM
+                  </div>
+                  <div class="text-[11px] text-slate-500 mt-1">
+                    出現箇所: §3 手順承認 C (escalation 時)
+                  </div>
+                </div>
+              </div>
+              <p class="text-xs text-slate-500 mt-3 italic">
+                これら総称は <strong>docs 内部限定</strong>。Session 4 slide /
+                UI label / mock data には出さない。CLAUDE.md Tier 2 (UI label
+                OK) には含めず、本 doc + Matrix RACI 内部のみで使用する。
+              </p>
+            </div>
+          </section>
+
+          <section id="app-6" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              6. Matrix A — 承認対象ごとの基本責任 (RACI)
+              <span class="text-amber-600 text-base">★ 重要</span>
+            </h3>
+            <p class="text-xs text-slate-600 mb-3">
+              <strong>R</strong>: 起票責任 / <strong>A</strong>: 最終承認 /
+              <strong>C</strong>: 合議 / <strong>I</strong>: 通知
+            </p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs border-collapse">
+                <thead>
+                  <tr class="bg-violet-100 text-violet-900">
+                    <th class="border border-violet-300 px-2 py-2 text-left">
+                      活動
+                    </th>
+                    <th class="border border-violet-300 px-2 py-2">入力者</th>
+                    <th class="border border-violet-300 px-2 py-2">承認者</th>
+                    <th class="border border-violet-300 px-2 py-2">
+                      業務責任者
+                    </th>
+                    <th class="border border-violet-300 px-2 py-2">
+                      Manual 管理者
+                    </th>
+                    <th class="border border-violet-300 px-2 py-2">
+                      AI 管理者
+                    </th>
+                    <th class="border border-violet-300 px-2 py-2">Auditor</th>
+                    <th class="border border-violet-300 px-2 py-2">
+                      Security 関係者
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 font-medium"
+                    >
+                      案件承認 (入力者確認)
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-rose-700"
+                    >
+                      R+A
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center"
+                    >
+                      C
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 font-medium"
+                    >
+                      案件承認 (承認者承認)
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-rose-700"
+                    >
+                      R+A
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center"
+                    >
+                      C
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 font-medium"
+                    >
+                      手順承認
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-emerald-700"
+                    >
+                      A
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-indigo-700"
+                    >
+                      R
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center"
+                    >
+                      C
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 font-medium"
+                    >
+                      設定承認 Type A
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-rose-700"
+                    >
+                      R+A (別人)
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 font-medium"
+                    >
+                      設定承認 Type B
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold"
+                    >
+                      R+A
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-amber-700"
+                    >
+                      A (co-A)
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 font-medium"
+                    >
+                      設定承認 Type C
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold text-rose-700"
+                    >
+                      A (co-A)
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center font-bold"
+                    >
+                      R+A
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-500"
+                    >
+                      I
+                    </td>
+                    <td
+                      class="border border-violet-200 px-2 py-1.5 text-center text-slate-400"
+                    >
+                      -
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bg-rose-50 border border-rose-200 rounded-lg p-5 mt-4">
+              <div
+                class="text-xs font-semibold text-rose-700 uppercase tracking-wider mb-2"
+              >
+                6.1 SoD 原則
+              </div>
+              <ul
+                class="text-sm text-slate-800 space-y-1 list-disc list-inside"
+              >
+                <li>案件承認: 入力者 ≠ 承認者 (4-eyes)</li>
+                <li>手順承認: Manual 管理者 ≠ 業務責任者 (起票 ≠ 承認)</li>
+                <li>
+                  設定承認 Type A: 同一 change の起票者 ≠ 承認者 (組織内 AI
+                  管理者ロールの別人物、または fallback で co-A 必須)
+                </li>
+                <li>設定承認 Type B: AI 管理者 + Security 関係者 co-A 必須</li>
+                <li>設定承認 Type C: AI 管理者 + 業務責任者 co-A 必須</li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="app-7" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              7. Matrix B — Automation Maturity 別の最低人間関与
+            </h3>
+            <div
+              class="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-6"
+            >
+              <p class="text-emerald-900 font-medium leading-relaxed mb-3">
+                7.1 不変条件:
+                <strong
+                  >Automation Maturity が進化しても、知識・設定承認 loop
+                  は縮小しない</strong
+                >。縮小するのは案件承認の介在頻度のみ。
+              </p>
+              <p class="text-sm text-emerald-800 italic">
+                → DOC-FW-01 §7.1 と整合、<strong
+                  >Session 4 Slide 7 で参加者に伝える核</strong
+                >
+                となる。
+              </p>
+            </div>
+          </section>
+
+          <section id="app-8" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              8. Matrix C — 例外・緊急時の権限
+              <span class="text-slate-500 text-base font-normal"
+                >(policy-only)</span
+              >
+            </h3>
+            <div
+              class="bg-amber-50 border border-amber-300 rounded-lg p-5 mb-4"
+            >
+              <p class="text-sm text-amber-900">
+                <strong>本 §8 は policy 記述のみ</strong>。Exception Center /
+                Incident Console 等の専用 UI 画面は v2
+                で実装しない。AuditTrailPage (<code
+                  class="text-xs bg-white px-1 rounded"
+                  >/audit</code
+                >) で過去の Matrix C 発動を timeline 表示するのみ。
+              </p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 text-left text-slate-700">
+                    <th class="border border-slate-200 px-2 py-2">活動</th>
+                    <th class="border border-slate-200 px-2 py-2">発動条件</th>
+                    <th class="border border-slate-200 px-2 py-2">R / A</th>
+                    <th class="border border-slate-200 px-2 py-2">
+                      反映タイミング
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td class="border border-slate-200 px-2 py-2 font-medium">
+                      Escalation
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      高リスク要素検知 / 不確実性 / ルール衝突
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      R: 入力者または承認者、A: 業務責任者 (受領)
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      案件処理中に即時
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-2 py-2 font-medium">
+                      Emergency stop
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      Incident (drift / データ漏洩疑い / 異常出力)
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      R+A: AI 管理者 または Security 関係者 (即時可、事後 co-A)
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      即時可
+                      <span class="bg-amber-100 text-amber-800 px-1.5 rounded"
+                        >本番 SLO は Phase 1 で要定義</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-200 px-2 py-2 font-medium">
+                      Rollback
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      Emergency stop 後の restore 判断
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      R: AI 管理者、A: 業務責任者 (事後承認 = retroactive
+                      設定承認)
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      早期に完了 (本番 SLO は未定)
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-2 py-2 font-medium">
+                      Forced Downgrade
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      KPI 悪化 / UI drift 検知 / 例外発生率異常
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      R+A: AI 管理者 または Security 関係者 (単独可、事後 co-A)
+                    </td>
+                    <td class="border border-slate-200 px-2 py-2">
+                      早期 (本番 SLO は未定)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="app-9" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              9. Automation Maturity 詳細
+            </h3>
+            <div class="grid md:grid-cols-3 gap-3 mb-4">
+              <div
+                class="bg-white rounded-lg border-2 border-emerald-200 review-shadow p-5"
+              >
+                <div class="flex items-center gap-2 mb-2">
+                  <span
+                    class="bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5 rounded"
+                    >Supervised</span
+                  >
+                  <span class="text-xs text-slate-600"
+                    >v2 prototype default</span
+                  >
+                </div>
+                <p class="text-sm text-slate-700">
+                  全ステップ入力者確認 + 承認者承認、人間介入率
+                  <strong>100%</strong>
+                </p>
+                <p class="text-xs text-slate-500 mt-2 italic">
+                  適用: UC-BO-01 + 口座開設 (mock-cases.ts 全件)
+                </p>
+              </div>
+              <div
+                class="bg-white rounded-lg border-2 border-amber-200 review-shadow p-5"
+              >
+                <div class="flex items-center gap-2 mb-2">
+                  <span
+                    class="bg-amber-600 text-white text-xs font-semibold px-2 py-0.5 rounded"
+                    >Checkpoint</span
+                  >
+                  <span class="text-xs text-slate-600">中間</span>
+                </div>
+                <p class="text-sm text-slate-700">
+                  重要分岐 (金額 / 顧客リスク変化 / 例外) のみ
+                  4-eyes、人間介入率は分岐発生 case のみ
+                </p>
+                <p class="text-xs text-slate-500 mt-2 italic">
+                  v2 prototype: visual 表示のみ、実挙動なし
+                </p>
+              </div>
+              <div
+                class="bg-white rounded-lg border-2 border-rose-200 review-shadow p-5"
+              >
+                <div class="flex items-center gap-2 mb-2">
+                  <span
+                    class="bg-rose-600 text-white text-xs font-semibold px-2 py-0.5 rounded"
+                    >Autonomous</span
+                  >
+                  <span class="text-xs text-slate-600">将来モデル</span>
+                </div>
+                <p class="text-sm text-slate-700">
+                  事前ルール内完結 + サンプリングレビュー + Mandatory Human
+                  Checkpoint
+                </p>
+                <p class="text-xs text-rose-700 mt-2 font-medium italic">
+                  v2 prototype では実挙動なし
+                </p>
+              </div>
+            </div>
+            <div class="bg-rose-50 border-2 border-rose-300 rounded-lg p-5">
+              <div
+                class="text-xs font-semibold text-rose-700 uppercase tracking-wider mb-3"
+              >
+                9.6 非対象業務 (Autonomous 永続禁止)
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs border-collapse bg-white">
+                  <thead>
+                    <tr class="bg-rose-100 text-left text-rose-900">
+                      <th class="border border-rose-200 px-2 py-2">業務</th>
+                      <th class="border border-rose-200 px-2 py-2">
+                        v2 での扱い
+                      </th>
+                      <th class="border border-rose-200 px-2 py-2">理由</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        class="border border-rose-200 px-2 py-1.5 font-medium"
+                      >
+                        国際送金
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        <code class="text-xs bg-slate-100 px-1 rounded"
+                          >workflows/international-transfer-boundary/</code
+                        >
+                        に boundary spec のみ
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        高額・規制リスク・国境を越えた人間判断必須
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="border border-rose-200 px-2 py-1.5 font-medium"
+                      >
+                        KYC 最終判定
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        v2 では boundary 文書化しない (Phase 2+ scope)
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        顧客リスク区分の最終判断は人間
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="border border-rose-200 px-2 py-1.5 font-medium"
+                      >
+                        与信最終承認
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        v2 では boundary 文書化しない (Phase 2+ scope)
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        与信判断の最終承認は人間
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        class="border border-rose-200 px-2 py-1.5 font-medium"
+                      >
+                        組織的判断・規制要件で禁止される業務
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        業務責任者 + Security 関係者の判断
+                      </td>
+                      <td class="border border-rose-200 px-2 py-1.5">
+                        case-by-case
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section id="app-10" class="mb-8 scroll-mt">
+            <h3 class="text-xl font-semibold text-slate-900 mb-3">
+              10. 規制 cite の hedge (prior art pointer 一覧)
+            </h3>
+            <div
+              class="bg-slate-100 border border-slate-300 rounded-lg p-5 mb-3"
+            >
+              <p class="text-sm text-slate-700">
+                本 doc の各 section で参照する prior art pointer。すべて
+                <code class="text-xs bg-white px-1 rounded"
+                  >ai-operator/docs/01-hitl-policy.md</code
+                >
+                への reference link、<strong>外部規制論拠ではない</strong>。v2
+                docs 内では
+                <span
+                  class="bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded text-xs"
+                  >MRM / CISO / NYDFS / SR 11-7 / CCPA / OFAC / BSA / SAR / CTR
+                  / ECOA</span
+                >
+                を事実主張せず、prior art pointer のみを使う。Session 4 slide /
+                UI label / mock data には完全に出さない。
+              </p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 text-left text-slate-700">
+                    <th class="border border-slate-200 px-2 py-2">
+                      本 doc section
+                    </th>
+                    <th class="border border-slate-200 px-2 py-2">
+                      参照箇所 (ai-operator/docs/01-hitl-policy.md)
+                    </th>
+                    <th class="border border-slate-200 px-2 py-2">内容</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  <tr>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §3 手順承認
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 94-103
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      knowledge → procedure 昇格の主体・反映範囲
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §4 設定承認 Type A/B/C
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 105-148
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      Type 区分・co-A 条件
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §4.3 Type A SoD
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 81-103
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      起票者 ≠ 承認者原則
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §6 Matrix A
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 175-194
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      RACI 表構造
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §7 Matrix B
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 198-204
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      Automation Maturity との関係、不変条件
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §8 Matrix C
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 206-213
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      例外・緊急時の権限
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §9 Automation Maturity
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 217-243
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      各段階の行動 spec
+                    </td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      §9.6 非対象業務
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5 font-mono">
+                      line 240-242
+                    </td>
+                    <td class="border border-slate-200 px-2 py-1.5">
+                      Autonomous 永続禁止業務
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- Review points -->
+        <section id="review-points" class="mb-12 scroll-mt">
+          <h2 class="text-2xl font-semibold text-slate-900 mb-4">
+            特に確認してほしい点
+          </h2>
+          <div class="space-y-3">
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 1. 中核 message と Flywheel 図
+              </div>
+              <p class="text-sm text-slate-700">
+                OV-00 §1.2 + §4 / FW-01 §1 で表現される「<strong
+                  >業務別ファイルを育てる Flywheel</strong
+                >」。Session 4 audience に対してこの一文が core message
+                として刺さるか、別表現が必要か
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 2. 4-eyes 用語の整合
+              </div>
+              <p class="text-sm text-slate-700">
+                「入力者確認 単独では 4-eyes と呼ばない」原則が 3
+                文書すべてで守られている。OV-00 §2.2 / FW-01 §2.1 / APP-02
+                §2.2。誤読リスクが残っていないか
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 3. Matrix B 不変条件 (Session 4 Slide 7 message の核)
+              </div>
+              <p class="text-sm text-slate-700">
+                「Automation Maturity 進化しても 知識・設定承認 loop
+                は縮小しない」が Session 4 audience に伝わる表現か。FW-01 §7.1 +
+                APP-02 §7.1 で 2 度明示、prior art pointer
+                表現で外部規制論拠を避けている
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 4. Type A の SoD (セルフ承認禁止)
+              </div>
+              <p class="text-sm text-slate-700">
+                APP-02 §4.3 で 1 人体制 fallback
+                まで明記。これが実装制約として現実的か、書きすぎていないか
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 5. 規制語 hedge と Security/Compliance 関係者の表現
+              </div>
+              <p class="text-sm text-slate-700">
+                Tier 3 (MRM/CISO/NYDFS 等) は v2 docs 内でも事実主張禁止、prior
+                art pointer のみ。docs 内部の補助語彙として「Security
+                関係者」「Compliance 関係者」総称を使う設計。CLAUDE.md Tier 2
+                (UI label OK) には含めない区別がついているか
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 6. BOUNDARY.md を通常 loop から除外
+              </div>
+              <p class="text-sm text-slate-700">
+                FW-01 §4.3 / APP-02 §3.4 で BOUNDARY.md は手順承認の diff
+                適用対象外。明示的な設定承認 + plan update で扱う。これが業務
+                scope の一貫性を守れるか
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 7. 過去 case は遡って書き換えない (audit trail 保護)
+              </div>
+              <p class="text-sm text-slate-700">
+                FW-01 §6.3 で原則明示。Mock data / Audit Trail / Metrics
+                画面の設計に波及する。実装時に違反しないように、原則を強く出しているか
+              </p>
+            </div>
+            <div
+              class="bg-white rounded-lg border border-amber-300 review-shadow p-5"
+            >
+              <div
+                class="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-2"
+              >
+                ★ 8. SLO 数値を断定しない (Evidence-safe 原則)
+              </div>
+              <p class="text-sm text-slate-700">
+                「リアルタイム」「数秒以内」「15 分」「24 時間」等の SLO 数値は
+                v2 docs では断定しない。本番 SLO は Phase 1 で要定義。FW-01 §3.2
+                / APP-02 §2.3 / Matrix C で一貫しているか
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer
+          class="mt-16 pt-8 border-t border-slate-200 text-xs text-slate-500"
+        >
+          <p>
+            Backoffice AI v2 — Day 1-4 docs review · 2026-05-25 (Day 5 / 22)
+          </p>
+          <p class="mt-1">
+            原本:
+            <code class="bg-slate-100 px-1.5 py-0.5 rounded"
+              >docs/00-overview.md</code
+            >
+            ·
+            <code class="bg-slate-100 px-1.5 py-0.5 rounded"
+              >docs/01-flywheel-and-knowledge.md</code
+            >
+            ·
+            <code class="bg-slate-100 px-1.5 py-0.5 rounded"
+              >docs/02-approval-model.md</code
+            >
+          </p>
+          <p class="mt-1">
+            Plan:
+            <code class="bg-slate-100 px-1.5 py-0.5 rounded"
+              >~/.claude/plans/ai-backoffice-ai-virtual-muffin.md</code
+            >
+            (v1.1.2 lock)
+          </p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

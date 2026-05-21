@@ -127,6 +127,13 @@ UI / slide / docs / workflow 内の copy は日本語のみ。英語 string は 
 
 非自明な変更は実装前に plan 化 + user review。Plan に書かれていない変更は禁止。Plan update は `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` を直接編集 (現 lock v1.1.2)。
 
+## Archived artifacts
+
+- `docs-review.html` (root) は Day 5 整合化 update (Plan v1.3 final patch) 以前の review artifact。**以降参照しない / 再生成しない**。
+- 過去の review 版は `archive/docs-review-{YYYY-MM-DD}-pre-{version}.html` に退避済。
+- `.gitignore` で root の `docs-review*.html` は untracked 運用、`archive/` 配下のみ git 管理。
+- 進捗管理 + Day 1-22 status + Plan v1.3 影響分析は `docs/_PROGRESS.md` を参照 (Day 5 起稿)。
+
 ## Demo / Session 4
 
 - Demo Chapter 1+2 の進行 = `demo/demo-script.md` (Day 20 起稿)

@@ -43,4 +43,4 @@ update_history:
     version: v0.1
     change: Initial workflow pack creation (Day 6)
     by: backoffice-ai-v2 maintainer
-    related_commit: pending
+    related_commit: e173e2a

@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00, DOC-FW-01, DOC-APP-02, DOC-UI-03, DOC-KNW-04, DOC-MON-05, DOC-ROOT-\_SSOT (特に「Session 4 表層表現規範」)                                                                            |
 | SSOT 区分       | 8 slide message + Demo Chapter 1/2 message spine + BusinessApprovalView mock figure spec の SSOT (demo の execution step は `demo/demo-script.md` Day 20 起稿に分離)                             |
 | Evidence Status | N/A (narrative 設計のみ、定量値は DOC-MON-05 を pointer)                                                                                                                                         |
-| 改版履歴        | v0.1 (2026-05-29): 初版作成 (Day 9、Plan v1.4 P0-4 (国際送金 Session 4 表層抽象化) + P2-11 (Autonomous footnote) + DOC-MON-05 connection (Slide 8)、Session 4 表層表現規範 `docs/_SSOT.md` 適用)。v0.2 (2026-05-29): CR R12+R13 hygiene patch (Blocking 2 規制語 gate self-contradictory 解消 §1.3 / §5 で Tier 3 exact list を paraphrase、Day 19/21 grep scope 明示、Minor 60 min summary math fix [Slide 1-8 28→32 / Q&A 4→2]、Minor Demo Chapter 1「Hero 1/2/3 画面遷移」を「Hero 1、Hero 2/3 は Demo 2」に clarify、Minor Demo Chapter 2 SoD enforcement explicit 1 行追加) |
+| 改版履歴        | v0.1 (2026-05-29): 初版作成 (Day 9、Plan v1.4 P0-4 (国際送金 Session 4 表層抽象化) + P2-11 (Autonomous footnote) + DOC-MON-05 connection (Slide 8)、Session 4 表層表現規範 `docs/_SSOT.md` 適用)。v0.2 (2026-05-29): CR R12+R13 hygiene patch (Blocking 2 規制語 gate self-contradictory 解消 §1.3 / §5 で Tier 3 exact list を paraphrase、Day 19/21 grep scope 明示、Minor 60 min summary math fix [Slide 1-8 28→32 / Q&A 4→2]、Minor Demo Chapter 1「Hero 1/2/3 画面遷移」を「Hero 1、Hero 2/3 は Demo 2」に clarify、Minor Demo Chapter 2 SoD enforcement explicit 1 行追加)。v0.3 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、Slide 7 注記の $10M exact text を「具体閾値 (`BOUNDARY.md` §2)」に paraphrase、§1.1 60min summary table Q&A 4→2 min transitive 適用 [v0.2 で記録した math fix が table row に未適用だった漏れを解消]、関連 P0-1 / Minor) |
 
 ---
 
@@ -31,7 +31,7 @@
 | 38-46      | Slide 5-7 | Flywheel 全景 → 過去 case 不変 + Alert → Matrix B (各 ~2.5 min)                                            |
 | 46-54      | Demo 2    | Demo Chapter 2: AI 日次分析 → ProposalReview → 手順承認 → Metrics 観測                                     |
 | 54-58      | Slide 8   | Metrics 4 KPI multi-criteria 仮説 gate + 9 KRI                                                             |
-| 58-60      | Q&A       | 想定 4 min (収まらない場合 follow-up channel 明示)                                                         |
+| 58-60      | Q&A       | 想定 2 min (収まらない場合 follow-up channel 明示)                                                         |
 
 合計: Intro 2 min + Slide 1-8 32 min (Slide 1-4 = 5×4 / Slide 5-7 ≈ 2.5×3 / Slide 8 = 4) + Demo 1/2 計 24 min + Q&A 2 min = **60 min**。Q&A は table の 58-60 段 (2 min buffer) で扱う。
 
@@ -170,7 +170,7 @@
 
 **注**:
 
-- `$10M` 数値は出さない (内部 docs / `_meta.yaml` の `[hypothesis_requires_validation]` ラベル付き仮値のみ)
+- 高額閾値の具体数値は出さない (具体閾値は boundary pack 内部 `workflows/international-transfer-boundary/BOUNDARY.md` §2 + `_meta.yaml` の `[hypothesis_requires_validation]` ラベル付き仮値のみ)
 - Tier 3 規制語 (詳細 list は `CLAUDE.md` §Tier 3 語彙 / `docs/prior-art-map.md` 参照) は出さない (DOC-APP-02 §10 hedge、self-hit 回避のため本 doc には exact list を置かない)
 - demo 操作なし (DOC-WF-international-transfer-workflow §5)
 

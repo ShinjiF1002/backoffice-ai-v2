@@ -36,5 +36,5 @@ weight: low
 ## 性質 (本 snippet)
 
 - `weight: low` (staging、未承認、AI auto-draft 直後)
-- 外国法人 + 国際送金 boundary pack と関連 (国際送金 restricted の閾値 `$10M [仮説 / 要検証]` とは別軸の「国外法人」軸)
+- 外国法人 + 国際送金 boundary pack と関連 (国際送金 restricted の高額閾値 (`workflows/international-transfer-boundary/BOUNDARY.md` §2) とは別軸の「国外法人」軸)
 - Manual 管理者 (Queue owner) の triage を待つ

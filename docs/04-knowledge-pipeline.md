@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §1.2, DOC-FW-01 §3-§4, DOC-APP-02 §3 / §9.8, DOC-UI-03 §6 / §9, DOC-MON-05 (Day 9), DOC-ROOT-\_SSOT §1.4 / §1.5                                                                                                       |
 | SSOT 区分       | AI 日次分析 logic + 5-category routing 詳細 + Staging usage rules (UI 表示 + agent prompt embedding) + Staging lifecycle + Audit evidence event model (15 行、paired field 含む実 18) + LLMOps framework + Connection control matrix reference の SSOT |
 | Evidence Status | N/A (knowledge pipeline 設計のみ。判断基準 / lifecycle 期間 / KPI gate 仮閾値はすべて `[仮説 / 要検証]`)                                                                                                                        |
-| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1/Fix 4 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§8.1 audit event「15 field event model」→「15-row audit event model (paired field 含む実 field 数 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§5.3 + §11 関連文書 で DOC-MON-05 + DOC-S4-06 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10 Design Gate transitive fix (R14 規範 `[仮値]` → `[仮説 / 要検証]` 統一を 04 + workflows knowledge files + _PROGRESS にも transitive 適用、04 内 7 箇所 [Evidence Status / §2.1 頻度 / §2.2 判断基準 heading / §2.2 末尾 / §7 heading / §7.1 期間列 / §7.1 末尾] + workflows knowledge 5 箇所 + _PROGRESS 1 箇所 = 計 13 箇所 fix) |
+| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1/Fix 4 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§8.1 audit event「15 field event model」→「15-row audit event model (paired field 含む実 field 数 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§5.3 + §11 関連文書 で DOC-MON-05 + DOC-S4-06 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10 Design Gate transitive fix (R14 規範 `[仮値]` → `[仮説 / 要検証]` 統一を 04 + workflows knowledge files + _PROGRESS にも transitive 適用、04 内 7 箇所 [Evidence Status / §2.1 頻度 / §2.2 判断基準 heading / §2.2 末尾 / §7 heading / §7.1 期間列 / §7.1 末尾] + workflows knowledge 5 箇所 + _PROGRESS 1 箇所 = 計 13 箇所 fix)。v0.5 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.5 data_error 「任意 weight」→「`weight: low` fixed、citation 不可、compiled 昇格不可」整合化、関連 P1) |
 
 ---
 
@@ -180,7 +180,7 @@ AI runtime が prompt を組み立てる際の knowledge embedding 規則:
 | `weight: high` (compiled approved)  | **Authoritative rules (citation source)** | ✅ AI が citation 根拠として使用可 |
 | `weight: medium` (reviewed staging) | **Reference (uncertified hints)**         | ❌ citation 対象外、hint のみ      |
 | `weight: low` (staging)             | **Reference (uncertified hints)**         | ❌ citation 対象外、hint のみ      |
-| `data_error` (任意 weight)          | **(参照外)**                              | ❌ runtime 完全参照外              |
+| `data_error` (`weight: low` fixed)  | **(参照外)**                              | ❌ runtime 完全参照外、citation 不可、compiled 昇格不可 |
 
 - AI が tool call / proposal generation 時に **citation する根拠** として使用できるのは `weight: high` (compiled approved) のみ
 - `weight: low` / `medium` は (1) confidence 低下シグナル / (2) human reviewer への hint / (3) AI が追加確認質問を生成する trigger に限定

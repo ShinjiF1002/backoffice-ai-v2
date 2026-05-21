@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §2.3, DOC-FW-01 §3.5, DOC-APP-02 §9.8, DOC-KNW-04, DOC-S4-06, DOC-ROOT-\_SSOT §1.4 / §1.5                                           |
 | SSOT 区分       | 9 画面 UI Screen Card + Stripe 風 design language + AiProposalPanel Alert UI (3 適用範囲) + Prototype mode label + Staging UI pattern の SSOT |
 | Evidence Status | N/A (UI 設計のみ。polish target 9 画面 ALL 95% target equal は v1.4.1 Fix 3 / v1.4.2 Rule 6 確定、Hero 3 区分は demo-script 遷移順序のみ)     |
-| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P1-1 + P1-5 (audit event reference) + v1.4 P0-3 / v1.4.1 Fix 3 / Fix 5 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§4.1 「Hero 起点」→「Demo Chapter 1 起点」 / §10 AiProposalPanel utilizers から ProposalReview 削除 / §4.7 audit event「15 field」→「15-row (paired field 含む実 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§4.8 Metrics + §13 関連文書 で DOC-MON-05 を実 path pointer に置換)                    |
+| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P1-1 + P1-5 (audit event reference) + v1.4 P0-3 / v1.4.1 Fix 3 / Fix 5 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§4.1 「Hero 起点」→「Demo Chapter 1 起点」 / §10 AiProposalPanel utilizers から ProposalReview 削除 / §4.7 audit event「15 field」→「15-row (paired field 含む実 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§4.8 Metrics + §13 関連文書 で DOC-MON-05 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.1 Hero polish drift 解消「Hero 1-3 polish target equal」→「9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない」、Plan v1.4.1 Fix 3 / v1.4.2 Rule 6 と整合化、関連 P1)            |
 
 ---
 
@@ -149,7 +149,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 6. **表示要素**: case list table (workflow / case_id / 状態 badge / 経過時間 / Alert 件数 / progress)、filter (workflow / 状態)、sort (受付順 / 経過時間順)、PageHeader、Prototype mode label
 7. **遷移**: case row click → `/cases/:id`、filter / sort interaction
 8. **mock data 依存**: `mock-cases.ts` (case list)
-9. **Day 11+ 実装メモ**: Wireframe で table layout + filter chip + 状態 badge 配置確定。Demo Chapter 1 開始画面 (Hero 1-3 polish target equal、本画面は demo 起点として遷移順序上の意味のみ)
+9. **Day 11+ 実装メモ**: Wireframe で table layout + filter chip + 状態 badge 配置確定。Demo Chapter 1 開始画面 (9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない、本画面は demo 起点として遷移順序上の意味のみ)
 
 ### 4.2 CaseReview (`/cases/:id`) [Hero 1]
 

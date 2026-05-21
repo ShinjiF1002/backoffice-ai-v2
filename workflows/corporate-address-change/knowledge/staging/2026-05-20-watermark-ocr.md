@@ -24,7 +24,7 @@ weight: low
 本 snippet は `category: data_error` (入力データの誤り、AI 責でない)。**通常の compiled 昇格対象外** (DOC-WF-corporate-address-agent-instructions §2.2、DOC-FW-01 §2.3、DOC-APP-02 §3.3):
 
 - log / audit / 別 routing 扱い
-- AI runtime の参照対象外 (citation せず)
+- AI runtime の参照対象外 (citation 不可、`weight: low` fixed、compiled 昇格不可)
 - Manual 管理者 (Queue owner) の triage 時に「business 側へ feedback」処理
 - Audit Trail (`/audit`) に記録、Manual 管理者が定期 review
 

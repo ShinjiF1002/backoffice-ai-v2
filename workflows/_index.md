@@ -13,7 +13,7 @@
 | 関連文書        | DOC-WF-corporate-address-_ (UC-BO-01), DOC-WF-account-opening-_ (UC-BO-02), DOC-WF-international-transfer-\* (boundary), DOC-APP-02 §7 (Matrix B), DOC-ROOT-\_SSOT |
 | SSOT 区分       | 業務一覧 + Trust Level Progression の SSOT (per-業務の現在値は各 `_meta.yaml`、本 doc は集約 view)                                                                 |
 | Evidence Status | N/A (集約 view のみ、閾値は各 boundary pack の `[仮説 / 要検証]` ラベルに従う)                                                                                     |
-| 改版履歴        | v0.1 (2026-05-27): 初版作成 (Day 7、3 業務並列の集約 view として起稿)                                                                                              |
+| 改版履歴        | v0.1 (2026-05-27): 初版作成 (Day 7、3 業務並列の集約 view として起稿)。v0.2 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§3 restricted boundary pack 表で $10M exact text を `BOUNDARY.md` §2 pointer 化、関連 P0-1)                                  |
 
 ---
 
@@ -59,7 +59,7 @@ Automation Maturity 進化条件 (4 KPI multi-criteria 仮説 gate) は DOC-MON-
 | 軸                              | 意味                                                                                                                                                                            |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `trust_level: n/a`              | Trust Level Progression の対象外 (AI 自律実行対象外のため進化 path がない)                                                                                                      |
-| `automation_status: restricted` | 条件付き制限 (`$10M` 相当以上 `[仮説 / 要検証]` は AI 自動化不可、未満は将来限定自動化検討)                                                                                     |
+| `automation_status: restricted` | 条件付き制限 (`BOUNDARY.md` §2 の高額閾値以上は AI 自動化不可 `[仮説 / 要検証]`、未満は将来限定自動化検討)                                                                       |
 | 通常 loop 適用                  | **対象外**。差戻し → staging → compiled → workflow diff の経路では BOUNDARY.md を更新しない (DOC-FW-01 §4.3、DOC-APP-02 §3.4)                                                   |
 | 更新経路                        | boundary review proposal mechanism (DOC-APP-02 §9.7) 経由のみ。Proposal source = AI、A = 設定承認 Type A / Type C                                                               |
 | Demo / Session 4                | Demo 操作なし / UI 画面化なし / Dashboard カードなし。Session 4 では Slide 7 または本 `_index.md` の境界例として 1 行だけ言及可 (Tier 3 規制語は出さない、DOC-APP-02 §10 hedge) |

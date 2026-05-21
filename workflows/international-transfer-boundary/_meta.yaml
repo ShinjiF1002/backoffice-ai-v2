@@ -44,4 +44,4 @@ update_history:
     version: v0.1
     change: Initial boundary pack creation (Day 7)
     by: backoffice-ai-v2 maintainer
-    related_commit: pending
+    related_commit: b2b8876

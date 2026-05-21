@@ -81,7 +81,7 @@ dark mode は v2 scope-out (Phase 1 / 将来検討)。
 | `ease-in`     | `cubic-bezier(0.55, 0, 0.45, 1)` | 退場 / dismiss      |
 | `ease-in-out` | default                          | toggle / state 切替 |
 
-duration: `duration-150` (instant feedback) / `duration-250` (default) / `duration-400` (heavy transition)。real-time guarantee 風表現は使わない (DOC-ROOT-\_SSOT SLO 表現規範参照)。
+duration: `duration-150` (instant feedback) / `duration-250` (default) / `duration-400` (heavy transition)。real-time guarantee 風表現は使わない (DOC-ROOT-\_SSOT の表現規範参照、real-time 風表現の exact list は `docs/prior-art-map.md` 参照)。
 
 ### 2.6 マイクロインタラクション 8 例 (Day 16-18 high-fi で実装)
 

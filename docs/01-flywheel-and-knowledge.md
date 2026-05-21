@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00, DOC-APP-02, DOC-KNW-04, DOC-MON-05, DOC-S4-06, DOC-ROOT-prior-art-map |
 | SSOT 区分       | Flywheel 因果 + 5 段ステージ詳細 + Loop の不変条件 の SSOT                       |
 | Evidence Status | N/A (設計のみ、定量値なし。本番 SLO は Phase 1 で要定義の旨を §3.2 で明示)       |
-| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message 連携 / Snippet schema 8 field / SLO _SSOT 参照 / Compiled 昇格 AI 日次 + Proposal source = AI + R = Manual 管理者 / BOUNDARY review proposal / 過去 case Alert / Matrix B 表現 rewrite、Plan v1.3 final patch 反映) |
+| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message 連携 / Snippet schema 8 field / SLO _SSOT 参照 / Compiled 昇格 AI 日次 + Proposal source = AI + R = Manual 管理者 / BOUNDARY review proposal / 過去 case Alert / Matrix B 表現 rewrite、Plan v1.3 final patch 反映)。v0.3 (2026-05-27): CR R8 patch 反映 (§3.5 staging knowledge runtime 利用範囲 (Safety boundary) 新規 subsection 追加、core message Sub message 2「承認された手順だけを AI に覚えさせる」と staging visibility の論理衝突を解消、Plan v1.4 P0-1 / v1.4.1 Fix 1) |
 
 ---
 

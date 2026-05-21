@@ -13,7 +13,7 @@
 | 関連文書        | DOC-FW-01, DOC-APP-02, DOC-UI-03, DOC-S4-06, DOC-ROOT-prior-art-map                                                                                                                                                                             |
 | SSOT 区分       | 構想 / スコープ / 非スコープ / Flywheel 1 枚図 の SSOT                                                                                                                                                                                          |
 | Evidence Status | N/A (設計のみ、定量値なし)                                                                                                                                                                                                                      |
-| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message rewrite / 国際送金 restricted / 接続層 tier 化 callout / UI Wireframe-first 3 段 / Flywheel table Proposal source 列追加、Plan v1.3 final patch 反映) |
+| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)。v0.2 (2026-05-25): Day 5 整合化 update (Core message rewrite / 国際送金 restricted / 接続層 tier 化 callout / UI Wireframe-first 3 段 / Flywheel table Proposal source 列追加、Plan v1.3 final patch 反映)。v0.3 (2026-05-27): CR R8 patch 反映 (§1.2 staging knowledge runtime safety boundary 注追加 / §2.1 国際送金 Session 4 表層「高額・高リスク取引」抽象化 / §2.3 prototype mode label 必須条件 + UI scope 「9 画面 ALL 95% target equal」統一 (Hero 3 区分は demo-script 遷移順序のみ)、Plan v1.4 P0-1 / P0-3 / P0-4 + v1.4.1 Fix 1 / Fix 3 / Fix 5)。v0.4 (2026-05-28): Day 8 update (§2.2 接続層メモ callout を control matrix bullet 形式 (Read / Write / 証跡 / 失敗時制御 / Phase 1 優先度) に拡張、Plan v1.4 P1-6) |
 
 ---
 

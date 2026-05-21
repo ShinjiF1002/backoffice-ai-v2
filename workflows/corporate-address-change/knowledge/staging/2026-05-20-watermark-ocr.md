@@ -24,7 +24,7 @@ weight: low
 本 snippet は `category: data_error` (入力データの誤り、AI 責でない)。**通常の compiled 昇格対象外** (DOC-WF-corporate-address-agent-instructions §2.2、DOC-FW-01 §2.3、DOC-APP-02 §3.3):
 
 - log / audit / 別 routing 扱い
-- AI runtime の参照対象外 (citation 不可、`weight: low` fixed、compiled 昇格不可)
+- AI runtime の参照対象外 (citation 不可、`weight: low` fixed、compiled 昇格不可、DOC-KNW-04 stale forward reference は Day 10.2 で実 path `docs/04-knowledge-pipeline.md` §4.5 + §8 へ張替済 = CR R16 Blocking 解消)
 - Manual 管理者 (Queue owner) の triage 時に「business 側へ feedback」処理
 - Audit Trail (`/audit`) に記録、Manual 管理者が定期 review
 
@@ -40,7 +40,7 @@ weight: low
 
 ## 次の改善方向 (未確定)
 
-`data_error` 経路の handling は DOC-KNW-04 (Day 8 起稿予定) で詳述。本 snippet は compiled 昇格対象外なので、agent-instructions / approval-policy への diff 適用は行わない。
+`data_error` 経路の handling は DOC-KNW-04 (`docs/04-knowledge-pipeline.md` §4.5 data_error 例外 + §8 audit event model) で詳述。本 snippet は compiled 昇格対象外なので、agent-instructions / approval-policy への diff 適用は行わない。
 
 ## 性質 (本 snippet)
 

@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §1.2, DOC-FW-01 §3-§4, DOC-APP-02 §3 / §9.8, DOC-UI-03 §6 / §9, DOC-MON-05 (Day 9), DOC-ROOT-\_SSOT §1.4 / §1.5                                                                                                       |
 | SSOT 区分       | AI 日次分析 logic + 5-category routing 詳細 + Staging usage rules (UI 表示 + agent prompt embedding) + Staging lifecycle + Audit evidence event model (15 行、paired field 含む実 18) + LLMOps framework + Connection control matrix reference の SSOT |
 | Evidence Status | N/A (knowledge pipeline 設計のみ。判断基準 / lifecycle 期間 / KPI gate 仮閾値はすべて `[仮説 / 要検証]`)                                                                                                                        |
-| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1/Fix 4 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§8.1 audit event「15 field event model」→「15-row audit event model (paired field 含む実 field 数 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§5.3 + §11 関連文書 で DOC-MON-05 + DOC-S4-06 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10 Design Gate transitive fix (R14 規範 `[仮値]` → `[仮説 / 要検証]` 統一を 04 + workflows knowledge files + _PROGRESS にも transitive 適用、04 内 7 箇所 [Evidence Status / §2.1 頻度 / §2.2 判断基準 heading / §2.2 末尾 / §7 heading / §7.1 期間列 / §7.1 末尾] + workflows knowledge 5 箇所 + _PROGRESS 1 箇所 = 計 13 箇所 fix)。v0.5 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.5 data_error 「任意 weight」→「`weight: low` fixed、citation 不可、compiled 昇格不可」整合化、関連 P1) |
+| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P0-1 (staging safety) + P1-1 (staging usage rules) + P1-5 (audit event model) + P1-6 (connection control matrix reference) + P1-8 (staging lifecycle) + v1.4.1 Fix 1/Fix 4 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§8.1 audit event「15 field event model」→「15-row audit event model (paired field 含む実 field 数 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§5.3 + §11 関連文書 で DOC-MON-05 + DOC-S4-06 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10 Design Gate transitive fix (R14 規範 `[仮値]` → `[仮説 / 要検証]` 統一を 04 + workflows knowledge files + _PROGRESS にも transitive 適用、04 内 7 箇所 [Evidence Status / §2.1 頻度 / §2.2 判断基準 heading / §2.2 末尾 / §7 heading / §7.1 期間列 / §7.1 末尾] + workflows knowledge 5 箇所 + _PROGRESS 1 箇所 = 計 13 箇所 fix)。v0.5 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.5 data_error 「任意 weight」→「`weight: low` fixed、citation 不可、compiled 昇格不可」整合化、関連 P1)。v0.6 (2026-05-30): Day 10.2 hygiene patch (CR R16 Major 反映、§2.1 L44 prototype SLO 参照を `_SSOT` から `docs/05-metrics-and-gates.md` §3 へ張替 [Day 9 移管済]、Day 10.1 verification failure 解消) |
 
 ---
 
@@ -41,7 +41,7 @@
 - **対象**: 過去 N 日分の staging knowledge (`workflows/{業務}/knowledge/staging/*.md`、frontmatter 8 field 準拠)
 - **scope**: workflow 単位で実行 (workflow_id ごと)
 
-prototype では同一セッション内で mock 簡略化 (`mock-knowledge.ts` 経由)、本番 SLO 仮値は DOC-ROOT-\_SSOT「SLO 仮値」表参照。
+prototype では同一セッション内で mock 簡略化 (`mock-knowledge.ts` 経由)、本番 SLO 仮値は DOC-MON-05 §3 SLO 仮値表参照 (Day 9 で `_SSOT.md` §1.3 から移管済)。
 
 ### 2.2 判断基準 [仮説 / 要検証]
 

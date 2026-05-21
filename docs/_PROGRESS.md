@@ -27,7 +27,7 @@ Refresh: 各 Day 末で Status table 更新。Day 10 Design Gate / Day 19 SSOT R
 | Day 2     | 2026-05-22 | ✅ completed  | `3f7fee7`   | \_HEADER_TEMPLATE.md (12 項目 header SSOT)                                                          |
 | Day 3     | 2026-05-23 | ✅ completed  | `c1e952d`   | 00-overview.md + 01-flywheel-and-knowledge.md                                                       |
 | Day 4     | 2026-05-24 | ✅ completed  | `35b67a8`   | 02-approval-model.md                                                                                |
-| Day 5     | 2026-05-25 | ✅ completed  | `fb0df04`   | **整合化 update (Plan v1.3 final patch、6 docs rewrite + docs/\_PROGRESS.md 起稿 + archive 退避)** |
+| Day 5     | 2026-05-25 | ✅ completed  | `fb0df04` + `1bd5385` | **整合化 update (Plan v1.3 final patch、6 docs rewrite) + progress tracker + archive 退避 + hygiene patch** |
 | Day 6     | 2026-05-26 | 🟡 pending    | -           | workflows/corporate-address-change/ 5 docs + knowledge 6 件 (Snippet 8 field schema 適用)           |
 | Day 7     | 2026-05-27 | 🟡 pending    | -           | workflows/account-opening-completeness + workflows/international-transfer-boundary (restricted)     |
 | Day 8     | 2026-05-28 | 🟡 pending    | -           | 03-ui-prototype-design.md (Stripe 風 + Wireframe 段階) + 04-knowledge-pipeline.md (AI 日次分析)     |
@@ -134,7 +134,7 @@ Plan v1.1.2 (22-day base) に Plan v1.3 final patch (Day 5 整合化 update) を
 - **SLO 仮値表移管**: `docs/_SSOT.md` §1.3 → 05 が SSOT、`_SSOT.md` は pointer 化 (本 v1.3 final patch では `_SSOT.md` が暫定 SSOT、Day 9 で移管)
 - **4 KPI multi-criteria 仮説 gate** (AI 入力承認率 / 人手上書き率 / Alert 発生率 / 承認者差戻し率)、すべて `[仮説 / 要検証]` ラベル必須
 - **7 KPI catalogue + 9 KRI catalogue**: 旧 ai-operator 24 §3.2 + §4.1 圧縮
-- **「即時 / リアルタイム / 数秒以内」表現禁止**: SLO 表現は `[仮説 / 要検証]` 付き具体値で統一
+- **real-time guarantee 風表現は禁止** (該当語彙の trace は `docs/prior-art-map.md` で記録): SLO 表現は `[仮説 / 要検証]` 付き具体値 (同一セッション内 / 当日中 / 日次 / 次回 AI 処理から) で統一
 
 **06 影響**:
 

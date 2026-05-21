@@ -1,0 +1,145 @@
+# Backoffice AI v2 — 構想概要 (Overview)
+
+| 項目            | 値                                                                  |
+| --------------- | ------------------------------------------------------------------- |
+| 文書 ID         | DOC-OV-00                                                           |
+| 文書名          | 構想概要 (Overview)                                                 |
+| 版数            | v0.1                                                                |
+| ステータス      | Draft                                                               |
+| オーナー        | backoffice-ai-v2 maintainer                                         |
+| 承認者          | self — 設定承認 (構想の確定)                                        |
+| 閲覧対象        | Internal / Project team / Session 4 facilitator                     |
+| 機密区分        | Internal                                                            |
+| 関連文書        | DOC-FW-01, DOC-APP-02, DOC-UI-03, DOC-S4-06, DOC-ROOT-prior-art-map |
+| SSOT 区分       | 構想 / スコープ / 非スコープ / Flywheel 1 枚図 の SSOT              |
+| Evidence Status | N/A (設計のみ、定量値なし)                                          |
+| 改版履歴        | v0.1 (2026-05-23): 初版作成 (Day 3)                                 |
+
+---
+
+## 1. 課題と中核 message
+
+### 1.1 解く課題
+
+バックオフィス業務は、ベテラン担当者の暗黙知に依存してきた領域である。組織として AI 導入を検討するとき、選択肢は実務上「**一括自動化** (高リスク、例外対応の難しさ・規制対応の重さで実装が止まる)」か「**諦める** (現状維持、人手不足と退職リスクで持続不可能)」の二択に陥りやすい。
+
+v2 が解こうとするのは、この二択の間に **段階的な自動化 + 暗黙知の組織知への蒸留** という第 3 の選択肢を提示することである。
+
+### 1.2 中核 message
+
+**業務別ナレッジ文書を人間承認で育てる Flywheel** を中心に据える。
+
+- AI が業務手順を実行 → 入力者が結果を確認 / 差戻し
+- 差戻しコメントは即時 staging knowledge として AI runtime に visible になる
+- 複数 case で再発した staging は batch で手順承認を経て compiled knowledge に昇格、業務手順ファイル群 (workflow.md / agent-instructions.md / approval-policy.md) に diff 適用される
+- 手順変更が AI 設定 (Agent / Model / Tool / Prompt / 権限) に及ぶ場合は設定承認を通る
+- Automation Maturity (Supervised / Checkpoint / Autonomous) は知識・設定承認 loop を縮小せず、業務承認 (案件承認) の介在頻度だけ縮小する
+
+「コメントを貯める仕組み」ではなく「**業務別ファイルを育てる仕組み**」として設計するのが v2 の差別化点。Flywheel 詳細は DOC-FW-01、承認モデルの静的構造は DOC-APP-02 を参照。
+
+## 2. 解くスコープ
+
+### 2.1 対象業務
+
+- **UC-BO-01 法人住所変更処理** (主役、Demo Chapter 1/2 の起点): 法人顧客の登記住所変更依頼を、PDF 受領から業務システム反映まで AI が実行し、入力者確認 + 承認者承認の 2 段で確認する
+- **口座開設書類完備チェック** (Dashboard 並列カード、Demo で 1 シーン open): 書類完備性のチェック + Alert を AI が draft、入力者が確認
+- **国際送金 boundary** (`workflows/international-transfer-boundary/`): 自動化禁止業務として boundary spec のみ記述、UI 画面化なし、Dashboard カード化なし
+
+### 2.2 起点 (本番想定の flow) と v2 prototype の見せ方
+
+**本番想定の flow**:
+
+1. 依頼書 PDF が特定フォルダに置かれる
+2. AI watcher が検知、自動的に業務システム操作を開始
+3. 入力結果 (スクショ stack + PDF preview + Alert) を入力者の Case Review 画面に提示
+4. **入力者確認**: 承認 / 差戻し
+5. 入力者承認後、**承認者承認**: 同じ証跡を見て最終確認
+
+入力者確認 + 承認者承認 が揃って **案件承認** 全体を構成する。「4-eyes」はこの 2 者が揃った案件承認全体を指す呼称であり、入力者確認単独 / 承認者承認単独には使わない。
+
+**v2 prototype の見せ方** (上記 flow を非実行で見せる):
+
+- PDF Inbox 画面 (`/inbox`) で「AI 処理中」状態から開始 (実 PDF watcher は実装しない)
+- Case Review 画面 (`/cases/:id`) で mock evidence (PDF サムネ / スクショ stack / Alert / agent proposal) を表示
+- 入力者確認 / 承認者承認 の遷移は画面上の mock state 更新のみ、業務システム実操作 / 永続化 は scope-out
+- 詳細は DOC-UI-03 (`docs/03-ui-prototype-design.md`) 参照
+
+### 2.3 UI scope
+
+- フロントエンドのみ (React 19 + Vite 8 + Tailwind v4 + shadcn/ui)
+- in-memory mock state、永続化なし
+- 9 画面 prototype (Hero 3 = 95% / 残り 6 = 85% 仕上げ)
+- 承認者画面は実装せず、CaseReview 内 `BusinessApprovalChip` + slide-only static mock で代替
+- 詳細は DOC-UI-03 参照
+
+## 3. 非スコープ (scope-out)
+
+CLAUDE.md §scope-out を SSOT とし、本 doc では要点のみ:
+
+- 実 LLM API 呼び出し / Computer use / desktop control / 外部システム接続 / 完全自動化
+- 実 customer data / 実 PDF (mock のみ、サンプル画像で代替)
+- 実規制 cite (NYDFS / SR 11-7 等は v2 docs 内でも事実主張せず、DOC-ROOT-prior-art-map から ai-operator paper への reference link のみ)
+- 実送金 trigger / 実 master data 更新
+- 国際送金業務の UI 画面化 + Dashboard カード化 (`workflows/international-transfer-boundary/` に 3 文書のみ)
+- 承認者 (Business Approval) の画面化 (`case/BusinessApprovalChip.tsx` + slide-only static mock で代替、route / page / smoke test 対象外)
+- hands-on workshop (Session 4 は説明 + demo のみ)
+- 旧 repo (`backoffice-ai`, `ai-operator`) の archive 移動 (v2 完成まで `~/code/active/` に保持)
+- `cowork-workshop/session-{1,2,3}-narrative.md` の編集 (S1-3 SSOT、Day 19 で touch しない)
+
+## 4. Flywheel 1 枚図 (ASCII)
+
+```
+                ┌──────────────────────────────────────────────────────────┐
+                │                                                          │
+                ▼                                                          │
+        ┌──────────────┐  入力者確認   ┌─────────────┐  AI auto-draft  ┌─────────────┐
+        │ ① AI 入力   │  差戻し +     │ ② staging   │  ─────────────► │ ③ compiled │
+        │   結果       │  5-category   │   knowledge │  Batch +        │   knowledge │
+        │   (Case)     │  ──────────►  │   (即時)    │  手順承認       │   (正式)    │
+        └──────────────┘               └─────────────┘  ─────────────► └─────────────┘
+              ▲                                                                │
+              │                                                                ▼
+              │                                                  ┌──────────────────────┐
+              │      新 case で citation                          │ 業務手順ファイル群    │
+              │  ◄──────────────────────────────────────────────  │ workflow.md /         │
+              │                                                  │ agent-instructions /   │
+              │                                                  │ approval-policy        │
+              │                                                  └──────────────────────┘
+              │                                                                │
+              │                                                                │ AI 設定変更
+              │                                                                │ 必要時のみ
+              │                                                                ▼
+              │                                                  ┌──────────────────────┐
+              │                                                  │ ④ 設定承認           │
+              │      反映後の新 case                              │   (Type A/B/C)       │
+              │  ◄──────────────────────────────────────────────  └──────────────────────┘
+              │
+              └─ ⑤ 過去 case は遡って書き換えない (audit trail 保護)
+```
+
+| 段                    | Owner (起票)    | Approver                  | 反映タイミング                                               |
+| --------------------- | --------------- | ------------------------- | ------------------------------------------------------------ |
+| ① 差戻し送信          | 入力者          | 入力者 (self、reject)     | 送信時 (prototype では同一セッション内)                      |
+| ② staging 生成        | AI (auto-draft) | (人間承認不要、weight 低) | prototype では同一セッション内。本番 SLO は Phase 1 で要定義 |
+| ③ compiled 昇格       | Manual 管理者   | 業務責任者 (手順承認)     | Batch (週次想定、`[仮説]`)                                   |
+| ④ 設定承認 (条件付き) | AI 管理者       | Type 別 co-A              | Ad-hoc + batch                                               |
+| ⑤ 反映後の波及        | (自動)          | (自動)                    | 次の case 処理から、過去 case は不変                         |
+
+詳細は DOC-FW-01 で各段を section 化。
+
+## 5. 想定 outcome (Plan §1 抜粋)
+
+1. Session 4 (60 min) で audience 10 名が「**自社で来週、サンプル業務を選んで設計検討を始められる**」と感じる prototype demo を提供する (= 本番運用開始という意味ではない、設計検討に踏み出せる感触の獲得)
+2. 設計書 10 docs + 業務文書 (2 業務 × 5 文書 + 1 boundary pack × 3 文書) + UI 9 画面 prototype + Session 4 narrative + demo script + 1 static-mock html を `backoffice-ai-v2/` repo として gitable な状態で残す
+3. 実 LLM / Computer use / 実規制 / 実送金は scope-out しつつ、後日 Phase 1 (生 ops 投入) の foundation として再利用できる skeleton
+
+## 6. 関連文書
+
+- DOC-FW-01 (`docs/01-flywheel-and-knowledge.md`): 本 doc §4 Flywheel 図の詳細版、各段のステージ詳細 + Loop の不変条件
+- DOC-APP-02 (`docs/02-approval-model.md`): 3 層承認 (案件 / 手順 / 設定) + 4-eyes (入力者確認 / 承認者承認) + Matrix A/B/C RACI + Automation Maturity の SSOT
+- DOC-UI-03 (`docs/03-ui-prototype-design.md`): 9 画面 Screen Card (9-field × 9)
+- DOC-KNW-04 (`docs/04-knowledge-pipeline.md`): 5-category routing + staging/compiled file 配置 + LLMOps framework
+- DOC-MON-05 (`docs/05-metrics-and-gates.md`): 4 KPI multi-criteria 仮説 gate + 7 KPI catalogue + 9 KRI
+- DOC-S4-06 (`docs/06-session4-narrative.md`): 8 slide × 60 min + Demo Chapter 1/2 script
+- DOC-ROOT-prior-art-map (`docs/prior-art-map.md`): 旧 repo (v1 + ai-operator) 参照関係 + 継承 / 再編 / 捨てる の SSOT
+- Plan: `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.1.2 lock)

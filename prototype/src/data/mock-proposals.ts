@@ -22,7 +22,7 @@ export const mockProposals: ProposalRecord[] = [
     workflowName: '法人住所変更',
     proposalTitle: 'OCR 信頼度閾値の段階引き上げ提案 (0.85 → 0.88)',
     status: 'pending-triage',
-    statusLabel: 'Manual 管理者 整理待ち',
+    statusLabel: '手順管理者の整理待ち',
     createdAt: '2026-05-31 06:30:00',
     elapsedLabel: '01:42:18',
     summary:
@@ -106,7 +106,7 @@ export const mockProposals: ProposalRecord[] = [
     ],
     raci: {
       proposalSource: 'AI (日次分析)',
-      r: 'Manual 管理者 (Queue owner)',
+      r: '手順管理者 (整理担当)',
       a: '業務責任者',
       c: ['SME (法人事務 SME)', 'AI 管理者'],
       i: ['入力者', '承認者'],

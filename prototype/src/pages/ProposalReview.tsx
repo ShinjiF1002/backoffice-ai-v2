@@ -2,6 +2,19 @@ import { useParams, Link } from 'react-router-dom'
 import { ChevronRight, Send, X, Sparkles, Users } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getProposalById } from '@/data/mock-proposals'
+import { ProposalLifecycleStepper } from '@/components/proposal/ProposalLifecycleStepper'
+import type { ProposalSourceCase } from '@/data/types'
+
+/**
+ * 差戻し category (5-category enum 中 data_error 除外、§DOC-KNW-04 §4.5) を UI 表示文言に変換。
+ * Day 12.4 CR R31 M3: ProposalReview 元案件 row に同種差戻し pattern を視覚化、判定基準 panel の「共通 pattern 一致度」を補完。
+ */
+const categoryLabel: Record<ProposalSourceCase['category'], string> = {
+  misunderstanding: '誤読',
+  ui_change: 'UI 差異',
+  edge_case: '境界条件',
+  judgment_gap: '判断境界',
+}
 
 /**
  * ProposalReview — Hero 2 (Demo Chapter 2 主画面、手順承認 loop)、Day 12 Page 2 wireframe
@@ -12,12 +25,12 @@ import { getProposalById } from '@/data/mock-proposals'
  *  - docs/04 §4 Compiled 昇格 logic (同種差戻し 3+ 件 / 共通 pattern 確認可 / staging 内部矛盾なし [仮説 / 要検証])
  *
  * Layout (CaseReview visual grammar 継承):
- *  - PageHeader (sticky): breadcrumb (受信トレイ › AI 提案レビュー › {proposal_id}) + h1 提案 title + workflow chip + status badge + 経過 + Proposal source annotation
+ *  - PageHeader (sticky): breadcrumb (受信トレイ › AI 提案レビュー › {proposal_id}) + h1 提案 title + workflow chip + status badge + 経過 + 提案ソース annotation + ProposalLifecycleStepper (整理 → 承認 → 反映、Day 12.4 CR R31 M1)
  *  - 3-column main body:
- *     左 (3/12): 判定基準 + source case 一覧 + 元 staging snippets (citation 対象外 panel inset)
- *     中 (6/12): summary + proposed diff sections (target file + § section + before/after color coded)
- *     右 (3/12): RACI box (Proposal source / R / A / C / I + SoD note) + 提案 metadata
- *  - Footer (sticky): status-conditional actions (Day 12 wireframe では disabled state、CR R28 lesson: enabled no-op 複製禁止)
+ *     左 (3/12): 判定基準 + 元案件 一覧 (caseId + 差戻し category chip JP / Day 12.4 CR R31 M3) + 未承認ヒント (元 staging snippets、citation 対象外 panel inset)
+ *     中 (6/12): summary + 提案 差分 sections (target file + § section + 変更前 / 変更後、border-l-2 hairline + tint /20、文書テキスト diff 明示 / Day 12.4 CR R31 M2)
+ *     右 (3/12): RACI box (提案ソース / R · 整理担当 / A · 承認 / C · 相談 / I · 情報共有 + 職務分離 (SoD) note、JP-only / Day 12.4 CR R31 B1+B2+B3) + 提案メタ情報
+ *  - Footer (sticky): status-conditional disabled actions (CR R28 lesson)、差戻し / 業務責任者へ送付 buttons に per-button JP tooltip (Day 12.4 CR R31 M5、Hero 2 demo climax 説明)
  *  - Prototype mode label は AppShell 経由
  *
  * CR R28 lesson 適用:
@@ -73,9 +86,14 @@ export function ProposalReview() {
         <div className="mt-2.5 flex items-center gap-2 text-[11px] text-slate-600">
           <Sparkles className="h-3 w-3 text-[var(--color-primary)]" aria-hidden="true" />
           <span>
-            Proposal source: <span className="font-medium text-slate-800">{p.raci.proposalSource}</span>
+            提案ソース: <span className="font-medium text-slate-800">{p.raci.proposalSource}</span>
             <span className="text-slate-500"> · 判断根拠は左の判定基準 + 元案件 を参照</span>
           </span>
+        </div>
+
+        {/* ProposalLifecycleStepper (Day 12.4 CR R31 M1: CaseReview LifecycleStepper grammar 継承) */}
+        <div className="mt-2.5">
+          <ProposalLifecycleStepper status={p.status} />
         </div>
       </header>
 
@@ -116,12 +134,20 @@ export function ProposalReview() {
               <ul className="space-y-3">
                 {p.sourceCases.map((sc) => (
                   <li key={sc.caseId} className="text-xs">
-                    <Link
-                      to={`/cases/${sc.caseId}`}
-                      className="inline-flex items-center gap-1 font-mono font-medium text-[var(--color-primary)] tabular hover:underline"
-                    >
-                      {sc.caseId}
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        to={`/cases/${sc.caseId}`}
+                        className="inline-flex items-center gap-1 font-mono font-medium text-[var(--color-primary)] tabular hover:underline"
+                      >
+                        {sc.caseId}
+                      </Link>
+                      <span
+                        className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700"
+                        title="差戻し category (同種 pattern detection の根拠)"
+                      >
+                        {categoryLabel[sc.category]}
+                      </span>
+                    </div>
                     <p className="mt-0.5 text-slate-700">{sc.title}</p>
                     <p className="mt-0.5 text-[10px] leading-relaxed text-slate-500">{sc.sendbackReason}</p>
                   </li>
@@ -163,9 +189,12 @@ export function ProposalReview() {
           {/* Middle: summary + proposed diff === 6/12 */}
           <section className="lg:col-span-6">
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-slate-900">提案 差分 (変更前 / 変更後)</h2>
-                <span className="font-mono text-[10px] text-slate-500">{p.proposedDiff.length} ファイル</span>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  提案 差分 (変更前 / 変更後)
+                  <span className="ml-2 font-mono text-[10px] font-normal text-slate-500">· 文書テキスト diff (住所 inline diff とは別道具)</span>
+                </h2>
+                <span className="shrink-0 font-mono text-[10px] text-slate-500">{p.proposedDiff.length} ファイル</span>
               </div>
               <p className="mb-4 text-xs leading-relaxed text-slate-700">{p.summary}</p>
 
@@ -176,15 +205,15 @@ export function ProposalReview() {
                       <p className="font-mono text-[11px] text-slate-600 tabular">{d.targetFile}</p>
                       <p className="mt-0.5 text-[11px] font-medium text-slate-900">{d.section}</p>
                     </div>
-                    {/* 変更前 */}
-                    <div className="border-b border-slate-100 bg-red-50/40 p-3">
+                    {/* 変更前 (Day 12.4 CR R31 M2: border-l-2 hairline + tint /40 → /20 で Operational Premium Light §2.7.3 hairline-first grammar へ寄せる) */}
+                    <div className="border-b border-slate-100 border-l-2 border-l-[var(--color-error)] bg-red-50/20 p-3">
                       <p className="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-error)]">
                         − 変更前
                       </p>
                       <p className="text-xs leading-relaxed text-slate-700">{d.before}</p>
                     </div>
                     {/* 変更後 */}
-                    <div className="bg-emerald-50/40 p-3">
+                    <div className="border-l-2 border-l-[var(--color-success)] bg-emerald-50/20 p-3">
                       <p className="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-success)]">
                         ＋ 変更後
                       </p>
@@ -205,35 +234,35 @@ export function ProposalReview() {
               </h2>
               <dl className="space-y-2.5 text-xs">
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">Proposal source</dt>
+                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">提案ソース</dt>
                   <dd className="mt-0.5 font-medium text-slate-800">{p.raci.proposalSource}</dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">R · Queue owner</dt>
+                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">R · 整理担当</dt>
                   <dd className="mt-0.5 font-medium text-slate-800">{p.raci.r}</dd>
                   <dd className="mt-0.5 text-[10px] text-slate-500">{p.queueOwner}</dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">A · Approver</dt>
+                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">A · 承認</dt>
                   <dd className="mt-0.5 font-medium text-slate-800">{p.raci.a}</dd>
                   <dd className="mt-0.5 text-[10px] text-slate-500">{p.approver}</dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">C · Consult</dt>
+                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">C · 相談</dt>
                   <dd className="mt-0.5 text-slate-700">{p.raci.c.join(' / ')}</dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">I · Inform</dt>
+                  <dt className="font-mono text-[10px] uppercase tracking-wide text-slate-500">I · 情報共有</dt>
                   <dd className="mt-0.5 text-slate-700">{p.raci.i.join(' / ')}</dd>
                 </div>
               </dl>
               <p className="mt-3 border-t border-slate-100 pt-2 text-[10px] leading-relaxed text-slate-500">
-                SoD: Queue owner ≠ Approver (同一人物化禁止、Type A 既定)
+                職務分離 (SoD): 整理担当 ≠ 承認者 (同一人物化禁止、Type A 既定)
               </p>
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <h2 className="mb-3 text-sm font-semibold text-slate-900">提案 metadata</h2>
+              <h2 className="mb-3 text-sm font-semibold text-slate-900">提案メタ情報</h2>
               <dl className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
                   <dt className="text-slate-500">提案 ID</dt>
@@ -269,6 +298,7 @@ export function ProposalReview() {
               type="button"
               disabled
               aria-disabled="true"
+              title="差戻し理由をコメント付きで AI 日次分析にフィードバック (動作は次の実装段階で対応)"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-400 opacity-70 cursor-not-allowed"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -278,6 +308,7 @@ export function ProposalReview() {
               type="button"
               disabled
               aria-disabled="true"
+              title={`業務責任者 (${p.approver}) の承認待ちへ転送 (動作は次の実装段階で対応)`}
               className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60 cursor-not-allowed"
             >
               <Send className="h-3.5 w-3.5" />

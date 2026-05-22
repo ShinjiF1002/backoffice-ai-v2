@@ -82,7 +82,7 @@ CaseReview の header lifecycle stepper:
 
 - **active workflow only**: UC-BO-01 (法人住所変更) + UC-BO-02 (口座開設書類完備チェック) のみ。
 - **国際送金 (restricted) は UI / Dashboard カード化なし** (`docs/00` §2.1)。
-- **具体閾値の数値は出さない**: `$10M` / 高額閾値 exact は mock data / UI に出さない (boundary pack 内部のみ、`workflows/international-transfer-boundary/BOUNDARY.md` §2)。
+- **具体閾値の数値は出さない**: 高額閾値 exact (具体数値含む) は mock data / UI / active instruction に出さない (boundary pack 内部のみ、`workflows/international-transfer-boundary/BOUNDARY.md` §2 + `_meta.yaml` `restricted_conditions`)。
 - **Tier 3 規制語 exact list は出さない**: 具体 list は `docs/prior-art-map.md` 参照、UI / mock copy には category 表現「Tier 3 規制語」も出さない。
 - **KPI / SLO 閾値**: 表示時は必ず `[仮説 / 要検証]` ラベル付き、Phase 1 hypothesis 明示。
 - **citation = compiled approved のみ**: `mock-knowledge.ts` で `weight: high` の compiled のみ citation 候補に使用、`low` / `medium` の staging は staging hint のみ。

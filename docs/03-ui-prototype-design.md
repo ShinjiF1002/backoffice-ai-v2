@@ -22,7 +22,7 @@
 本 doc は v2 prototype の **UI 設計 SSOT**。Stripe 風の高密度・高信頼 SaaS UI を 9 画面で構成、Wireframe → medium-fi → high-fi の 3 段階で詳細化する。
 
 - **9 画面 ALL 95% target equal** (Hero 3 区分は `demo-script` (Day 20) の画面遷移順序としてのみ残し、polish target には適用しない、v1.4.1 Fix 3 / v1.4.2 Rule 6)
-- React 19 + Vite 8 + Tailwind v4 + shadcn/ui (in-memory mock state、永続化なし)
+- React 19 + Vite 8 + Tailwind v4 (in-memory mock state、永続化なし、Day 11 Step 3 では custom component で進行、shadcn/ui は未導入 = Day 14 以降必要時に判断)
 - 承認者画面は実装せず、`BusinessApprovalChip` + slide-only static mock (`demo/static-mocks/business-approval-view.html`) で代替
 
 ## 2. Stripe 風 design language SSOT
@@ -148,7 +148,7 @@ Day 11 Step 1 で 3 reference mockup を ChatGPT 画像生成で並列生成、4
 
 ### 2.7.5 9-screen routing 明確化 (CR R20 Major Fix 6)
 
-`prototype/src/App.tsx` は **以下 9 page component を React Router v6 にて exactly 9 routes でマウント**:
+`prototype/src/App.tsx` は **以下 9 page component を React Router v7 にて exactly 9 routes でマウント**:
 
 1. `Dashboard` (`/dashboard` または `/`)
 2. `Inbox` (`/inbox`)
@@ -322,7 +322,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 - **Sidebar (left)**: Dashboard / Inbox / ProposalReview queue (counter badge) / AgentSettings list / AuditTrail / Metrics / KnowledgeBrowser
 - **Header (top)**: PageBreadcrumb (left) + StatusBadge + **Prototype mode label** (UserMenu 左隣、§8 参照) + UserMenu (right)
 - **BottomNav (mobile fallback、scope-out 候補)**: 主要 5 画面 (Dashboard / Inbox / ProposalReview / Metrics / Knowledge)
-- **Route SSOT**: `prototype/src/App.tsx` で React Router v6 にて exactly 9 page route をマウント (§2.7.5 詳細、`/cases/:id/comment` は SendBackComment = 9 画面の 1 つ、10 番目ではない)
+- **Route SSOT**: `prototype/src/App.tsx` で React Router v7 にて exactly 9 page route をマウント (§2.7.5 詳細、`/cases/:id/comment` は SendBackComment = 9 画面の 1 つ、10 番目ではない)
 
 ## 6. AiProposalPanel 過去 case 関連ルール更新 Alert UI 仕様 (3 適用範囲)
 

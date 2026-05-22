@@ -126,13 +126,14 @@ export function CaseReview() {
             </div>
           </section>
 
-          {/* Right: AI Proposal (citation + staging hint + related rule alert) === 4/12 */}
+          {/* Right: AI Proposal (related rule alert TOP + citation + staging hint) === 4/12
+            * Day 11.1 Fix 1 (CR R22): RelatedRuleAlert を section 最上部に移動 (docs/03 §6.1 SSOT 「citation list の前」と整合、初期 viewport 内に可視) */}
           <section className="space-y-3 lg:col-span-4">
+            <RelatedRuleAlert updates={c.relatedRuleUpdates} />
             <div className="rounded-lg border border-slate-200 bg-white p-4">
               <CitationPanel citations={c.citations} />
             </div>
             <StagingHintPanel hints={c.stagingHints} />
-            <RelatedRuleAlert updates={c.relatedRuleUpdates} />
           </section>
         </div>
       </div>

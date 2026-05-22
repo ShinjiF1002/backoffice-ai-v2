@@ -3,8 +3,9 @@ import { useState } from 'react'
 
 /**
  * Prototype mode label (必須、全画面 persistent pill)
- * SSOT: docs/03-ui-prototype-design.md §8 + prototype/CLAUDE.md
+ * SSOT: docs/03-ui-prototype-design.md §8 + §10 + prototype/CLAUDE.md
  *
+ * 配置: `shared/` (1 file 1 component、9 画面横断 + BusinessApprovalView mock 共通)
  * 文言: "プロトタイプ表示 — 外部システム未接続 / 証跡はモック"
  * 色: muted (slate-100 background + slate-600 text)、警告色は使わない
  * a11y: role="status" + aria-label="prototype mode indicator"

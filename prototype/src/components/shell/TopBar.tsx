@@ -1,4 +1,4 @@
-import { PrototypeModeLabel } from './PrototypeModeLabel'
+import { PrototypeModeLabel } from '@/components/shared/PrototypeModeLabel'
 import { Search, Bell } from 'lucide-react'
 
 /**

@@ -10,6 +10,9 @@ export type AutomationStatus = 'active' | 'restricted' | 'prohibited'
 export type Weight = 'low' | 'medium' | 'high'
 export type SendBackCategory = 'misunderstanding' | 'ui_change' | 'edge_case' | 'judgment_gap' | 'data_error'
 
+/** 設定承認 Type (DOC-APP-02 §4): A 通常 / B Security-impacting / C Automation Maturity 変更 */
+export type ApprovalType = 'A' | 'B' | 'C'
+
 // === Case lifecycle (docs/03 §2.7.2 + Day 11 Step 2 訂正後、手順承認 を含まない) ===
 export type CaseLifecycleStep = '受付' | 'AI処理' | '入力者確認' | '承認者承認' | '反映'
 export type CaseStatus = 'pending' | 'ready' | 'sent-back' | 'business-approval-waiting' | 'reflected'

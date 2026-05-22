@@ -81,8 +81,10 @@ function formatSourcePathLabel(weight: Weight, date: string): string {
 }
 
 interface WeightStyle {
-  /** JP label (R47 paradigm、§9.2 SSOT) */
+  /** JP full label (filter chip / badge / detail panel chip 用、§9.2 SSOT) */
   label: string
+  /** JP short label (PageHeader counter / framing banner 3 状態並列 用、CR R50 M2) */
+  shortLabel: string
   /** dot 色 (§9.2 SSOT) */
   dotClass: string
   /** badge tint (snippet card 用) */
@@ -91,21 +93,26 @@ interface WeightStyle {
   chipClass: string
 }
 
+// CR R50 M2: 3 状態並列 (承認済 / 確認済 (未承認) / 未承認) を ws.label / ws.shortLabel 経由で single source 統一。
+// 「レビュー済み」 → 「確認済 (未承認)」 (Page 6+ review → 確認 規範 + 送り仮名 trim)。
 const WEIGHT_STYLE: Record<Weight, WeightStyle> = {
   high: {
     label: '承認済',
+    shortLabel: '承認済',
     dotClass: 'bg-emerald-600',
     badgeClass: 'bg-emerald-50 text-emerald-700',
     chipClass: 'bg-emerald-100 text-emerald-800',
   },
   medium: {
-    label: '確認済み (未承認)',
+    label: '確認済 (未承認)',
+    shortLabel: '確認済',
     dotClass: 'bg-amber-500',
     badgeClass: 'bg-amber-50 text-amber-700',
     chipClass: 'bg-amber-100 text-amber-800',
   },
   low: {
     label: '未承認',
+    shortLabel: '未承認',
     dotClass: 'bg-slate-400',
     badgeClass: 'bg-slate-100 text-slate-700',
     chipClass: 'bg-slate-200 text-slate-700',
@@ -161,7 +168,7 @@ export function KnowledgeBrowser() {
               全期間 (検証用)
             </span>
             <span className="font-mono text-[10px] text-slate-500 tabular">
-              {filteredSnippets.length} 件 (承認済 {counts.high} · 確認済 {counts.medium} · 未承認 {counts.low})
+              {filteredSnippets.length} 件 ({WEIGHT_STYLE.high.shortLabel} {counts.high} · {WEIGHT_STYLE.medium.shortLabel} {counts.medium} · {WEIGHT_STYLE.low.shortLabel} {counts.low})
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -199,10 +206,10 @@ export function KnowledgeBrowser() {
               <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-slate-900">
-                  ナレッジは <span className="font-mono text-[11px]">承認済 / 確認済 / 未承認</span> の 3 段階で管理されます
+                  ナレッジは <span className="font-mono text-[11px]">{WEIGHT_STYLE.high.shortLabel} / {WEIGHT_STYLE.medium.shortLabel} / {WEIGHT_STYLE.low.shortLabel}</span> の 3 段階で管理されます
                 </p>
                 <p className="mt-0.5 text-slate-600">
-                  AI が <strong>引用根拠</strong> として使えるのは <strong>承認済</strong> ナレッジのみです。確認済 / 未承認 は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
+                  AI が <strong>引用根拠</strong> として使えるのは <strong>{WEIGHT_STYLE.high.shortLabel}</strong> ナレッジのみです。{WEIGHT_STYLE.medium.shortLabel} / {WEIGHT_STYLE.low.shortLabel} は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
                 </p>
               </div>
             </div>
@@ -500,8 +507,8 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
           wide
         />
       </dl>
-      {/* 本文 (markdown 体裁 = 段落 + 改行保持) */}
-      <div className="mt-4 rounded-md border border-slate-200 bg-white p-3">
+      {/* 本文 (markdown 体裁 = 段落 + 改行保持、CR R50 M3 で 3 段 nested card → border-t flat divider に圧縮、AuditTrail / Metrics expanded panel density と整合) */}
+      <div className="mt-4 border-t border-slate-200 pt-3">
         <div className="mb-1.5 flex items-center gap-2">
           <span className="text-[11px] font-medium text-slate-700">本文</span>
           <span className="font-mono text-[9px] text-slate-400 tabular">body</span>

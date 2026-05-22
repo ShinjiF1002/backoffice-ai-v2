@@ -24,7 +24,7 @@ import type { CaseRecord, CaseStatus } from '@/data/types'
  *  - prototype/CLAUDE.md (active workflow UC-BO-01 + UC-BO-02 のみ、国際送金 restricted boundary pack は card 化しない)
  *
  * Layout (CaseReview / Inbox / ProposalReview と register 共通、Dashboard 固有 page-specific layout):
- *  - PageHeader (sticky): breadcrumb (ダッシュボード、root level) + h1 + 件数 chip × 3 (案件数 / 注意 / 承認待ち) + 全 [仮説 / 要検証] label
+ *  - PageHeader (sticky): breadcrumb (ダッシュボード、root level) + h1 + 件数 chip × 3 (案件数 / 注意 / 承認待ち) + workflow scope chip
  *  - 任意 attention strip (queue-level 注意 1 本まで、CaseReview の case alert strip と register 統一)
  *  - Main (scrollable):
  *    - 業務 card grid (2 並列、UC-BO-01 + UC-BO-02、card click → `/inbox?workflow=...` で filter 適用)
@@ -124,20 +124,12 @@ function deriveAttention(cases: CaseRecord[]): Array<{
   if (critical) {
     out.push({
       id: 'attn-sla-high-elapsed',
-      message: `入力者確認待ちで 3 時間以上経過した案件があります (${critical.id} · ${critical.workflowName} · 経過 ${critical.elapsedLabel} [仮説 / 要検証])`,
+      message: `入力者確認待ちで 3 時間 [仮説 / 要検証] 以上経過した案件があります (${critical.id} · ${critical.workflowName} · 経過 ${critical.elapsedLabel})`,
       linkTo: `/cases/${critical.id}`,
     })
   }
   return out
 }
-
-const WORKFLOW_LANE_STEPS = [
-  { to: '/inbox', label: '受信トレイ', icon: InboxIcon, hint: '案件一覧の起点' },
-  { to: '/cases/CASE-2026-0142', label: '案件レビュー', icon: FileText, hint: 'AI 入力結果 + 証跡 + ナレッジ' },
-  { to: '/cases/CASE-2026-0142/comment', label: 'コメント付き差戻し', icon: MessageSquare, hint: '5 分類 + 自由記述' },
-  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, hint: '手順承認の循環' },
-  { to: '/metrics', label: 'メトリクス確認', icon: Gauge, hint: 'KPI / KRI 観測 [仮説 / 要検証]' },
-] as const
 
 export function Dashboard() {
   const statsMap = useMemo(() => deriveStats(mockCases), [])
@@ -147,6 +139,18 @@ export function Dashboard() {
   const totalCases = stats.reduce((a, s) => a + s.total, 0)
   const totalAlerts = stats.reduce((a, s) => a + s.totalAlerts, 0)
   const totalBusinessApprovalWaiting = stats.reduce((a, s) => a + s.businessApprovalWaiting, 0)
+
+  // Workflow lane 5 node の operational metadata。受信トレイは mockCases から live derive (CR R35 P2)、他は stable mock seed counts/structural label
+  const workflowLaneSteps = useMemo(
+    () => [
+      { to: '/inbox', label: '受信トレイ', icon: InboxIcon, hint: '案件一覧の起点', meta: `案件 ${totalCases} · 注意 ${totalAlerts}` },
+      { to: '/cases/CASE-2026-0142', label: '案件レビュー', icon: FileText, hint: 'AI 入力結果 + 証跡 + ナレッジ', meta: 'AI 提案 + 差戻し動線' },
+      { to: '/cases/CASE-2026-0142/comment', label: 'コメント付き差戻し', icon: MessageSquare, hint: '差戻し分類の起点', meta: '5 分類 + 自由記述' },
+      { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, hint: '手順承認の循環', meta: '元案件 3 · 判定基準 3' },
+      { to: '/metrics', label: 'メトリクス確認', icon: Gauge, hint: 'KPI / KRI 観測', meta: '4 KPI [仮説 / 要検証]' },
+    ],
+    [totalCases, totalAlerts]
+  )
 
   return (
     <div className="flex h-full flex-col bg-[var(--color-canvas)]">
@@ -187,7 +191,7 @@ export function Dashboard() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[11px] text-slate-500 tabular">UC-BO-01 + UC-BO-02 [仮説 / 要検証]</span>
+            <span className="font-mono text-[11px] text-slate-500 tabular">UC-BO-01 + UC-BO-02</span>
           </div>
         </div>
       </header>
@@ -332,14 +336,20 @@ export function Dashboard() {
                   {/* Sparkline */}
                   <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                     <span className="text-[10px] text-slate-500">
-                      直近 7 日件数推移 <span className="font-mono">[仮説 / 要検証]</span>
+                      直近 7 日 注意発生率 <span className="font-mono">[仮説 / 要検証]</span>
                     </span>
                     {trend && (
                       <Sparkline
-                        data={trend.caseVolume7Day}
+                        data={trend.alertRatio7Day}
                         width={88}
                         height={20}
-                        color="var(--color-primary)"
+                        color={
+                          s.state === 'busy'
+                            ? 'var(--color-alert)'
+                            : s.state === 'active'
+                              ? 'var(--color-primary)'
+                              : '#94a3b8'
+                        }
                       />
                     )}
                   </div>
@@ -358,7 +368,7 @@ export function Dashboard() {
           </div>
         </section>
 
-        {/* Workflow lane (Demo Chapter 1+2 動線、5 node × 5 route Link) */}
+        {/* Workflow lane (業務操作 5 node × 5 route Link、enabled no-op 0) */}
         <section
           aria-labelledby="dashboard-workflow-lane"
           className="rounded-lg border border-slate-200 bg-white p-5"
@@ -368,13 +378,13 @@ export function Dashboard() {
               業務オペレーション動線
             </h2>
             <p className="mt-0.5 text-[11px] text-slate-500">
-              Demo Chapter 1+2 で辿る画面遷移。各ノードから該当画面へ遷移します。
+              業務の流れに沿った 5 画面構成。各ノードから該当画面に遷移します。
             </p>
           </div>
           <ol className="flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1">
-            {WORKFLOW_LANE_STEPS.map((step, idx) => {
+            {workflowLaneSteps.map((step, idx) => {
               const Icon = step.icon
-              const isLast = idx === WORKFLOW_LANE_STEPS.length - 1
+              const isLast = idx === workflowLaneSteps.length - 1
               return (
                 <li key={step.to} className="flex flex-1 items-stretch gap-1">
                   <Link
@@ -389,11 +399,16 @@ export function Dashboard() {
                       <span className="text-xs font-medium text-slate-800">{step.label}</span>
                     </div>
                     <p className="mt-1 text-[10px] leading-relaxed text-slate-500">{step.hint}</p>
-                    <span className="mt-1 font-mono text-[10px] text-slate-400 tabular">{step.to}</span>
+                    <span className="mt-1 font-mono text-[10px] text-slate-400 tabular">{step.meta}</span>
                   </Link>
                   {!isLast && (
-                    <span className="hidden items-center text-slate-300 lg:flex" aria-hidden="true">
-                      <ArrowRight className="h-4 w-4" />
+                    <span className="hidden flex-col items-center justify-center text-slate-300 lg:flex">
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      {idx === 2 && (
+                        <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-slate-400">
+                          AI 日次集約
+                        </span>
+                      )}
                     </span>
                   )}
                 </li>
@@ -407,7 +422,7 @@ export function Dashboard() {
       <footer className="border-t border-slate-200 bg-white px-6 py-3 text-xs text-slate-500">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span>
-            業務カード・動線・注意行は画面内モック状態からの集計。検証用 KPI 表示の拡張を予定 <span className="font-mono">[仮説 / 要検証]</span>。
+            業務カード・動線・注意行は画面内モック状態からの集計。検証用 KPI 表示の拡張を予定。
           </span>
           <span className="font-mono text-[10px] text-slate-400 tabular">
             表示対象: UC-BO-01 + UC-BO-02 (登録済み 2 業務)

@@ -239,11 +239,11 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 2. **目的**: 入力者が差戻し理由を 5-category + free-text で送信する
 3. **主要ユーザー**: 入力者
 4. **主要 action**: 5-category 選択 + コメント入力 + 送信 → staging knowledge 生成
-5. **状態**: `composing` / `submitting` / `submitted` (toast 表示 + CaseReview / Inbox 戻る)
-6. **表示要素**: PageHeader、case context summary、5-category radio (`misunderstanding / ui_change / edge_case / judgment_gap / data_error`)、コメント textarea、関連 evidence checklist (PDF / screenshot / agent output どれが該当か)、submit button、Prototype mode label
-7. **遷移**: submit → toast 「差戻しを記録しました (staging knowledge に反映)」+ CaseReview 戻る
-8. **mock data 依存**: `mock-cases.ts` (case context) + 新規 mock state (差戻し送信 → staging 反映、同一セッション内)
-9. **Day 11+ 実装メモ**: 5-category radio + `data_error` 選択時は warning「`data_error` は AI 責ではない判定、log / audit / 別 routing に回ります」を表示 (DOC-KNW-04 §4.5 と整合)
+5. **状態**: `composing` (Day 12 Page 4 wireframe phase、`useState` で category default `misunderstanding` / comment empty / evidenceSelected empty array)、`submitting` → `submitted` transition は Day 14-15+ で AppContext 経由 staging 反映 + toast feedback
+6. **表示要素**: Sticky PageHeader (breadcrumb 3-level 受信トレイ › CASE-ID › 差戻しコメント + h1 + workflow chip + StatusBadge + 経過 + LifecycleStepper)、案件概要 card (AI 入力結果 4 field + 案件レビュー戻り link)、5-category radio (5 分類: 誤読 / UI 差異 / 境界条件 / 判断境界 / 入力誤り、enum identifier は user UI 非露出 = JP label + 1-line description のみ表示、CR R37 B1 反映)、`data_error` 選択時 amber warning banner (conditional)、差戻し理由 textarea (resize-y + 文字数 counter)、関連根拠 checklist (`case.evidence` から動的、actor·source mono metadata)、Sticky footer (キャンセル real navigate + 差戻しを記録 disabled wrapper span title pattern)、Prototype mode label (AppShell 経由)
+7. **遷移**: Day 12 wireframe では submit button disabled (キャンセル real navigate `/cases/:id` のみ、wrapper span title pattern で送信動作 scope-out signal)、Day 14-15+ で submit → toast 「差戻しを記録しました (未承認ナレッジに反映)」+ CaseReview 戻る
+8. **mock data 依存**: `mock-cases.ts` (case context、`getCaseById` で AI 入力結果 + evidence 動的)、Day 12 wireframe は composing のみ・新規 mock state なし、新規 mock state (差戻し送信 → staging 反映、同一セッション内) は Day 14-15+ AppContext 経由
+9. **Day 12 Page 4 実装注記** (commit `5a82838` + CR R37 patch): JP-only first principle で user-facing 内部語 (`log` / `audit` / `routing` / `staging knowledge` / `compiled` / `evidence` / `field`) を localize (記録・監査用別経路 / 未承認ナレッジ / 根拠 / 項目)、enum identifier (`misunderstanding` 等) も radio UI から削除、docs SSOT 内の governance term は internal context のため keep (CR R37 B1+B2+M1 反映)。`data_error` 選択時 warning は DOC-KNW-04 §4.5 と整合
 
 ### 4.4 Dashboard (`/dashboard` または `/`)
 

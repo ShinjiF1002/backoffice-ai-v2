@@ -40,7 +40,7 @@ const SENDBACK_CATEGORIES: ReadonlyArray<{
   {
     value: 'ui_change',
     label: 'UI 差異',
-    description: '業務システム側の UI が変更されている (旧フォーマット表示、項目位置変更、新規 field 追加)',
+    description: '業務システム側の UI が変更されている (旧フォーマット表示、項目位置変更、新規項目の追加)',
   },
   {
     value: 'edge_case',
@@ -55,7 +55,7 @@ const SENDBACK_CATEGORIES: ReadonlyArray<{
   {
     value: 'data_error',
     label: '入力誤り',
-    description: '入力データ自体が誤り (AI 責ではない、log / audit / 別 routing に回る、staging 昇格対象外)',
+    description: '入力データ自体が誤り (AI 責ではない、記録・監査用の別経路で扱う、未承認ナレッジへの昇格対象外)',
   },
 ] as const
 
@@ -175,7 +175,7 @@ export function SendBackComment() {
                   差戻し分類
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  5 分類から最も近いものを選択 (入力誤りは AI 責ではないため別 routing)
+                  5 分類から最も近いものを選択 (入力誤りは AI 責ではないため別経路)
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">5 分類</span>
@@ -204,19 +204,14 @@ export function SendBackComment() {
                       aria-describedby={`cat-desc-${cat.value}`}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            'font-medium',
-                            isSelected ? 'text-[var(--color-primary)]' : 'text-slate-800'
-                          )}
-                        >
-                          {cat.label}
-                        </span>
-                        <span className="font-mono text-[10px] text-slate-400 tabular">
-                          {cat.value}
-                        </span>
-                      </div>
+                      <span
+                        className={cn(
+                          'font-medium',
+                          isSelected ? 'text-[var(--color-primary)]' : 'text-slate-800'
+                        )}
+                      >
+                        {cat.label}
+                      </span>
                       <p
                         id={`cat-desc-${cat.value}`}
                         className="mt-0.5 leading-relaxed text-slate-500"
@@ -241,7 +236,7 @@ export function SendBackComment() {
                 <div className="min-w-0 flex-1 text-[12px] leading-relaxed text-amber-900">
                   <p className="font-medium">入力誤りは AI 責ではない判定です</p>
                   <p className="mt-0.5 text-amber-800">
-                    log / audit / 別 routing に回り、staging knowledge への compiled 昇格対象外となります。AI 入力結果の修正は通常の案件処理側で対応してください。
+                    記録・監査用の別経路に回り、未承認ナレッジへの昇格対象外となります。AI 入力結果の修正は通常の案件処理側で対応してください。
                   </p>
                 </div>
               </div>
@@ -259,7 +254,7 @@ export function SendBackComment() {
                   差戻し理由
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  具体的な差戻し理由・修正提案を記述 (AI 日次分析の staging knowledge 入力になります)
+                  具体的な差戻し理由・修正提案を記述 (AI 日次分析の未承認ナレッジ候補になります)
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">
@@ -285,10 +280,10 @@ export function SendBackComment() {
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
                   <h2 id="sendback-evidence" className="text-sm font-semibold text-slate-900">
-                    関連 evidence (任意)
+                    関連根拠 (任意)
                   </h2>
                   <p className="mt-1 text-[11px] text-slate-500">
-                    差戻し対象の根拠を選択 (audit trail で staging knowledge に紐付け)
+                    差戻し対象の根拠を選択 (監査記録で未承認ナレッジ候補に紐付け)
                   </p>
                 </div>
                 <span className="font-mono text-[10px] text-slate-500 tabular">
@@ -355,7 +350,7 @@ export function SendBackComment() {
           </div>
           <span
             className="inline-flex"
-            title="差戻しを staging knowledge に記録 (動作は次の実装段階で対応)"
+            title="差戻しを未承認ナレッジに記録 (動作は次の実装段階で対応)"
           >
             <button
               type="button"

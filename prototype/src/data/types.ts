@@ -129,3 +129,82 @@ export interface CaseRecord {
   /** 担当者 (入力者 mock 氏名、Inbox queue 列で表示、Day 12 追加) */
   assignee?: string
 }
+
+// === Proposal (procedure update proposal、Day 12 Page 2 ProposalReview 追加) ===
+// docs/03 §4.5 + docs/02 §3 (RACI: Proposal source = AI / R = Manual 管理者 / A = 業務責任者) と整合
+export type ProposalStatus = 'pending-triage' | 'forwarded' | 'approved' | 'rejected'
+
+/** 提案の判定基準 1 行 ([仮説 / 要検証] ラベル必須、AI 日次分析 logic から派生) */
+export interface ProposalDecisionCriterion {
+  label: string
+  value: string
+  threshold: string
+  met: boolean
+}
+
+/** 提案の元になった差戻し case (source_case link 用) */
+export interface ProposalSourceCase {
+  caseId: string
+  /** case タイトル (workflow + 簡易識別) */
+  title: string
+  /** 差戻し category (5-category enum、data_error は除外) */
+  category: Exclude<SendBackCategory, 'data_error'>
+  /** 差戻し理由 (入力者コメント抜粋) */
+  sendbackReason: string
+}
+
+/** 提案を支える staging knowledge snippet (citation 対象外、weight: low/medium のみ) */
+export interface ProposalStagingSnippet {
+  knowledgeId: string
+  title: string
+  weight: 'low' | 'medium'
+  excerpt: string
+}
+
+/** 提案で変更される workflow 文書の before/after */
+export interface ProposalDiffSection {
+  /** 対象 file path (workflow.md / agent-instructions.md / approval-policy.md) */
+  targetFile: string
+  /** § section identifier */
+  section: string
+  before: string
+  after: string
+}
+
+/** RACI box (Proposal source 列を追加した final patch 整合) */
+export interface ProposalRaci {
+  proposalSource: string
+  r: string
+  a: string
+  c: string[]
+  i: string[]
+}
+
+export interface ProposalRecord {
+  id: string
+  workflowId: string
+  workflowName: string
+  /** 提案 short title (PageHeader h1 + 一覧 row 用) */
+  proposalTitle: string
+  status: ProposalStatus
+  statusLabel: string
+  /** AI 日次分析の生成日時 */
+  createdAt: string
+  /** 経過時間 label */
+  elapsedLabel: string
+  /** 提案 summary (1 段落、AI 日次分析の判断根拠を要約) */
+  summary: string
+  /** 判定基準 (3-5 件、各 [仮説 / 要検証] ラベル付き threshold + value 比較) */
+  decisionCriteria: ProposalDecisionCriterion[]
+  /** 元 source case 一覧 (link 元、3+ 件で「同種差戻し pattern」を満たす) */
+  sourceCases: ProposalSourceCase[]
+  /** 元 staging knowledge snippets (citation 対象外、weight: medium 中心) */
+  stagingSnippets: ProposalStagingSnippet[]
+  /** 提案 diff (workflow.md / agent-instructions.md / approval-policy.md before/after) */
+  proposedDiff: ProposalDiffSection[]
+  raci: ProposalRaci
+  /** Queue owner (Manual 管理者 mock 氏名、SoD 上 approver と別人) */
+  queueOwner: string
+  /** Approver (業務責任者 mock 氏名、SoD 上 queueOwner と別人) */
+  approver: string
+}

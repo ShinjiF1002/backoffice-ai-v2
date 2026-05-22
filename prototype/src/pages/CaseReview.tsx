@@ -23,7 +23,7 @@ import { LifecycleStepper } from '@/components/case/LifecycleStepper'
  *  - 3-column main:
  *     左: AI 入力結果 (form with ConfidenceBar per field + AddressDiffBlock for new address)
  *     中央: EvidenceTimeline (PDF + 4 step timeline rail + Alert chips)
- *     右: CitationPanel (high only) + StagingHintPanel (低/中 separated) + RelatedRuleAlert (amber banner)
+ *     右: RelatedRuleAlert (amber banner、最上部、Day 11.1 Fix 1) + CitationPanel (high only) + StagingHintPanel (低/中 separated)
  *  - Footer: sticky bottom action bar (差戻し / 承認 / BusinessApprovalChip)
  */
 export function CaseReview() {

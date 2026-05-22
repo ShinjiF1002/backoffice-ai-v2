@@ -101,9 +101,9 @@ prototype/
 │   ├── App.tsx           # Router + 9 routes
 │   ├── index.css         # Tailwind v4 + @theme inline
 │   ├── components/
-│   │   ├── shell/        # AppShell / Sidebar / TopBar / PrototypeModeLabel
-│   │   ├── case/         # CaseReview-specific (AddressDiffBlock / EvidenceTimeline / CitationPanel / StagingHintPanel / BusinessApprovalChip / ConfidenceBar / StatusBadge / LifecycleStepper)
-│   │   └── shared/       # 全画面共通 (Button / Badge / Card / etc.)
+│   │   ├── shell/        # AppShell 構造 (AppShell / Sidebar / TopBar)
+│   │   ├── case/         # CaseReview-specific (AddressDiffBlock / EvidenceTimeline / CitationPanel / StagingHintPanel / RelatedRuleAlert / BusinessApprovalChip / ConfidenceBar / StatusBadge / LifecycleStepper / Sparkline)
+│   │   └── shared/       # cross-page 共通 (PrototypeModeLabel + 将来 Button / Badge / Card / etc.)
 │   ├── pages/            # 9 page component
 │   │   ├── Dashboard.tsx
 │   │   ├── Inbox.tsx

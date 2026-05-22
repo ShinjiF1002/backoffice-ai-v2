@@ -39,8 +39,8 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     sourceCase: 'CASE-2026-031',
     category: 'judgment_gap',
     weight: 'high',
-    title: 'OCR 信頼度閾値 0.85 — 手動 review 要求',
-    body: 'OCR 信頼度が 0.85 を下回る case は AI 自動化対象外とし、入力者の手動 review を要求する。閾値以上の case は通常フロー。',
+    title: 'OCR 信頼度閾値 0.85 — 手動確認 要求',
+    body: 'OCR 信頼度が 0.85 を下回る案件は AI 自動化対象外とし、入力者の手動確認を要求する。閾値以上の案件は通常フロー。',
     sourcePath: 'workflows/corporate-address-change/knowledge/compiled/ocr-confidence-threshold.md',
   },
   {
@@ -54,7 +54,7 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     category: 'edge_case',
     weight: 'high',
     title: '多店舗法人の住所変更 — 全店舗一括処理',
-    body: '本店住所変更に伴い全支店も同住所に揃える法人の case では、業務システム上で全店舗一括更新の API を使用する。',
+    body: '本店住所変更に伴い全支店も同住所に揃える法人の案件では、業務システム上で全店舗一括更新の API を使用する。',
     sourcePath: 'workflows/corporate-address-change/knowledge/compiled/multi-branch-address.md',
   },
   {
@@ -67,8 +67,8 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     sourceCase: 'CASE-2026-078',
     category: 'misunderstanding',
     weight: 'high',
-    title: '法人格変更を伴う住所変更 — 別 workflow 移行',
-    body: '住所変更と同時に法人格 (合同会社 → 株式会社等) も変更する case は本 workflow 対象外とし、法人格変更 workflow に移行する。',
+    title: '法人格変更を伴う住所変更 — 別業務へ移行',
+    body: '住所変更と同時に法人格 (合同会社 → 株式会社等) も変更する案件は本業務 対象外とし、法人格変更 業務に移行する。',
     sourcePath: 'workflows/corporate-address-change/knowledge/compiled/corporate-form-change.md',
   },
 
@@ -98,7 +98,7 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     category: 'edge_case',
     weight: 'low',
     title: '国外住所の郵便番号フォーマット',
-    body: '国外法人住所では郵便番号が日本形式でないため、郵便番号 field は空欄 OK の扱いを検討。',
+    body: '国外法人住所では郵便番号が日本形式でないため、郵便番号項目は空欄 OK の扱いを検討。',
     sourcePath: 'workflows/corporate-address-change/knowledge/staging/2026-05-18-foreign-postal-code.md',
   },
 
@@ -113,8 +113,8 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     sourceCase: 'CASE-2026-061',
     category: 'judgment_gap',
     weight: 'high',
-    title: '印鑑照合 信頼度閾値 0.90 — 手動 review 要求',
-    body: '印鑑照合の信頼度が 0.90 を下回る case は AI 自動化対象外とし、入力者の手動 review を要求する。閾値以上の case は通常フロー。',
+    title: '印鑑照合 信頼度閾値 0.90 — 手動確認 要求',
+    body: '印鑑照合の信頼度が 0.90 を下回る案件は AI 自動化対象外とし、入力者の手動確認を要求する。閾値以上の案件は通常フロー。',
     sourcePath: 'workflows/account-opening/knowledge/compiled/seal-confidence-threshold.md',
   },
   {
@@ -127,8 +127,8 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     sourceCase: 'CASE-2026-094',
     category: 'edge_case',
     weight: 'high',
-    title: '法人口座 + 個人口座 同時開設 — 別 workflow へ分離',
-    body: '法人口座と代表者個人口座を同時に開設する case は本 workflow 対象外とし、書類群を法人 / 個人で分離して別 workflow に移行する。',
+    title: '法人口座 + 個人口座 同時開設 — 別業務へ分離',
+    body: '法人口座と代表者個人口座を同時に開設する案件は本業務 対象外とし、書類群を法人 / 個人で分離して別業務に移行する。',
     sourcePath: 'workflows/account-opening/knowledge/compiled/joint-corporate-personal.md',
   },
   {
@@ -141,8 +141,8 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     sourceCase: 'CASE-2026-141',
     category: 'ui_change',
     weight: 'medium',
-    title: '新フォーム (2026-05 改訂) の印鑑欄レイアウト',
-    body: '2026-05 改訂の口座開設新フォームでは印鑑欄が右下から左下に移動。OCR の照合座標 update が必要。レビュー済み、手順承認待ち。',
+    title: '新フォーム (2026-05 改訂) の印鑑欄 表示構成',
+    body: '2026-05 改訂の口座開設新フォームでは印鑑欄が右下から左下に移動。OCR の照合座標 更新が必要。確認済み、手順承認待ち。',
     sourcePath: 'workflows/account-opening/knowledge/staging/2026-05-20-new-form-layout.md',
   },
 ]

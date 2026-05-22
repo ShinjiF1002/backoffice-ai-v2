@@ -44,6 +44,12 @@ const WORKFLOW_LABEL: Record<string, string> = {
   'UC-BO-02': '口座開設書類完備',
 }
 
+// CR R49 B2: Agent identifier 表示の JP 一次表記 (mock-agents.ts agentRecord.name と対応、3 箇所重複は Day 14-15 で統合)
+const AGENT_LABEL: Record<string, string> = {
+  'agent-corporate-address-change': '法人住所変更 Agent',
+  'agent-account-opening': '口座開設 Agent',
+}
+
 // CR R47 paradigm: 5 分類 enum を user-facing で JP 表示。
 // AuditTrail.tsx と重複しているが Day 14-15 で shared module 化 (R47 Minor 2 defer)。
 const CATEGORY_JP: Record<SendBackCategory, string> = {
@@ -52,6 +58,26 @@ const CATEGORY_JP: Record<SendBackCategory, string> = {
   edge_case: '境界条件',
   judgment_gap: '判断境界',
   data_error: '入力誤り',
+}
+
+// CR R49 M3: data_error は staging から除外される SSOT (DOC-KNW-04 §4.5、別経路 個別差戻し 扱い)、
+// 本一覧 filter chip は disabled 状態で表示。click は no-op、title で根拠を提示。
+const CATEGORY_DISABLED: Record<SendBackCategory, boolean> = {
+  misunderstanding: false,
+  ui_change: false,
+  edge_case: false,
+  judgment_gap: false,
+  data_error: true,
+}
+
+/**
+ * source_path から「未承認 / 承認済 ナレッジ + 記録日」の JP 一次表記を生成 (CR R49 B2)。
+ * snake_case raw path は schemaKey sub-caption + note で keep、primary value は user-facing JP description。
+ */
+function formatSourcePathLabel(weight: Weight, date: string): string {
+  if (weight === 'high') return `承認済ナレッジ · ${date}`
+  if (weight === 'medium') return `確認済 (未承認) ナレッジ · ${date}`
+  return `未承認ナレッジ · ${date}`
 }
 
 interface WeightStyle {
@@ -73,7 +99,7 @@ const WEIGHT_STYLE: Record<Weight, WeightStyle> = {
     chipClass: 'bg-emerald-100 text-emerald-800',
   },
   medium: {
-    label: 'レビュー済み (未承認)',
+    label: '確認済み (未承認)',
     dotClass: 'bg-amber-500',
     badgeClass: 'bg-amber-50 text-amber-700',
     chipClass: 'bg-amber-100 text-amber-800',
@@ -135,7 +161,7 @@ export function KnowledgeBrowser() {
               全期間 (検証用)
             </span>
             <span className="font-mono text-[10px] text-slate-500 tabular">
-              {filteredSnippets.length} 件 (承認済 {counts.high} · レビュー済 {counts.medium} · 未承認 {counts.low})
+              {filteredSnippets.length} 件 (承認済 {counts.high} · 確認済 {counts.medium} · 未承認 {counts.low})
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -173,10 +199,10 @@ export function KnowledgeBrowser() {
               <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-slate-900">
-                  ナレッジは <span className="font-mono text-[11px]">承認済 / レビュー済 / 未承認</span> の 3 段階で管理されます
+                  ナレッジは <span className="font-mono text-[11px]">承認済 / 確認済 / 未承認</span> の 3 段階で管理されます
                 </p>
                 <p className="mt-0.5 text-slate-600">
-                  AI が <strong>引用根拠</strong> として使えるのは <strong>承認済</strong> ナレッジのみです。レビュー済 / 未承認 は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
+                  AI が <strong>引用根拠</strong> として使えるのは <strong>承認済</strong> ナレッジのみです。確認済 / 未承認 は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
                 </p>
               </div>
             </div>
@@ -208,21 +234,41 @@ export function KnowledgeBrowser() {
                 </button>
                 {(Object.keys(CATEGORY_JP) as SendBackCategory[]).map((cat) => {
                   const isActive = cat === categoryFilter
-                  return (
+                  const isDisabled = CATEGORY_DISABLED[cat]
+                  // CR R49 M3: data_error は staging から除外 SSOT (DOC-KNW-04 §4.5)、
+                  // 本一覧では disabled chip + title note で根拠提示、active 系 4 分類のみ filter 動作。
+                  const button = (
                     <button
                       key={cat}
                       type="button"
-                      onClick={() => setCategoryFilter(cat)}
+                      onClick={() => {
+                        if (isDisabled) return
+                        setCategoryFilter(cat)
+                      }}
+                      disabled={isDisabled}
                       className={cn(
                         'rounded-md px-2 py-0.5 text-[11px] transition-colors',
-                        isActive
-                          ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        isDisabled
+                          ? 'cursor-not-allowed bg-slate-50 text-slate-400'
+                          : isActive
+                            ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       )}
                       aria-pressed={isActive}
+                      aria-disabled={isDisabled}
                     >
                       {CATEGORY_JP[cat]}
                     </button>
+                  )
+                  return isDisabled ? (
+                    <span
+                      key={cat}
+                      title="入力誤りは個別差戻し時に処理するため、本一覧の対象外 (DOC-KNW-04 §4.5)"
+                    >
+                      {button}
+                    </span>
+                  ) : (
+                    button
                   )
                 })}
               </div>
@@ -416,12 +462,14 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
         <DetailRow
           label="業務"
           schemaKey="workflow_id + workflow_slug"
-          value={`${snippet.workflowId} · ${snippet.workflowSlug}`}
+          value={`${WORKFLOW_LABEL[snippet.workflowId]} · ${snippet.workflowId}`}
+          note={snippet.workflowSlug}
         />
         <DetailRow
           label="Agent"
           schemaKey="agent_id + agent_version"
-          value={`${snippet.agentId} · ${snippet.agentVersion}`}
+          value={`${AGENT_LABEL[snippet.agentId] ?? snippet.agentId} · ${snippet.agentVersion}`}
+          note={snippet.agentId}
         />
         <DetailRow
           label="元 案件"
@@ -447,7 +495,8 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
         <DetailRow
           label="ファイル"
           schemaKey="source_path"
-          value={snippet.sourcePath}
+          value={formatSourcePathLabel(snippet.weight, snippet.date)}
+          note={snippet.sourcePath}
           wide
         />
       </dl>

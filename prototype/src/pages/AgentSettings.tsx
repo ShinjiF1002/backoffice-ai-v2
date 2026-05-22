@@ -7,10 +7,10 @@ import { TrustLevelBadge } from '@/components/shared/TrustLevelBadge'
 import type { ApprovalType } from '@/data/types'
 
 /**
- * AgentSettings — 9 画面の 1 つ、Day 12 Page 5 wireframe
+ * AgentSettings — 9 画面の 1 つ (`/agents/:id`)、Day 12 Page 5 wireframe
  *
  * SSOT:
- *  - docs/03-ui-prototype-design.md §4.6 (SCR-06 AgentSettings)
+ *  - docs/03-ui-prototype-design.md §4.6 (SCR-06 AgentSettings、route = `/agents/:id`)
  *  - docs/02-approval-model.md §4 (Type A/B/C 設定承認) + §7 (Matrix B 主表現)
  *  - workflows/_index.md §2 (Trust Level Progression: Supervised → Checkpoint → Autonomous)
  *  - prototype/CLAUDE.md (Operational Premium Light tokens + JP-only + enabled no-op 0)
@@ -38,6 +38,7 @@ interface KpiProgressionEntry {
   target: string
 }
 
+// CR R40 M5: KPI label/target は本 const に inline、Page 6 Metrics 実装時に `mock-metrics.ts` へ統合予定 (drift 防止)
 const KPI_PROGRESSION: ReadonlyArray<KpiProgressionEntry> = [
   { id: 'k1', label: 'AI 入力承認率', target: '≥ 99%' },
   { id: 'k2', label: '人手上書き率', target: '≤ 1%' },
@@ -61,15 +62,16 @@ const SIMULATION_SCENARIOS: ReadonlyArray<SimulationScenario> = [
     title: 'Prompt v0.1 → v0.2 (minor update)',
     description: '既存 prompt の信頼度閾値調整、新規 tool 追加なし、Trust Level 不変',
     approvers: 'AI 管理者 (起票 ≠ 承認 SoD 強制)、別 AI 管理者または fallback で業務責任者 co-A',
-    rule: '判定 logic mock: model / prompt 変更 + Trust Level 不変 → Type A',
+    rule: '判定ルール例: model / prompt 変更 + Trust Level 不変 → Type A',
   },
   {
     id: 'sim-b',
     type: 'B',
-    title: '新 external tool 追加 (PII access 拡張)',
-    description: '外部 vendor LLM や新規 PII scope 拡張、認証方式変更等の Security-impacting 変更',
-    approvers: 'AI 管理者 + Security 関係者 (CISO + Security Officer + Risk) の co-A 必須',
-    rule: '判定 logic mock: 新 external tool 追加 + 権限拡張 → Type B',
+    title: '新 external tool 追加 (個人情報アクセス範囲の拡張)',
+    description:
+      '外部 AI サービスの追加や新規 個人情報アクセス範囲の拡張、認証方式変更等、情報管理に影響する変更',
+    approvers: 'AI 管理者 + 情報管理責任者 + リスク確認担当 の co-A 必須',
+    rule: '判定ルール例: 新 external tool 追加 + 権限拡張 → Type B',
   },
   {
     id: 'sim-c',
@@ -78,7 +80,7 @@ const SIMULATION_SCENARIOS: ReadonlyArray<SimulationScenario> = [
     description:
       'Automation Maturity 段階変更、案件確認の介在頻度を全件 → 重要分岐のみに縮小、4 KPI 進化要件の達成が前提',
     approvers: 'AI 管理者 + 業務責任者 (業務リスク受容) の co-A 必須',
-    rule: '判定 logic mock: Trust Level 変更 → Type C',
+    rule: '判定ルール例: Trust Level 変更 → Type C',
   },
 ] as const
 
@@ -160,7 +162,7 @@ export function AgentSettings() {
                 </p>
               </div>
               <span className="shrink-0 font-mono text-[10px] text-slate-500 tabular">
-                Matrix B · DOC-APP-02 §7.1
+                統制原則
               </span>
             </div>
 
@@ -172,7 +174,7 @@ export function AgentSettings() {
               <div className="mb-3 flex items-center gap-2">
                 <Gauge className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
                 <h3 className="text-xs font-semibold text-slate-800">
-                  進化要件 — 4 KPI multi-criteria 仮説 gate
+                  4 KPI 進化要件
                 </h3>
                 <span className="font-mono text-[10px] text-slate-500 tabular">
                   DOC-MON-05 §3
@@ -229,7 +231,7 @@ export function AgentSettings() {
                   Agent 構成
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  5 領域の現状設定 (read-only)、編集は次の実装段階で対応
+                  5 領域の現状設定 (閲覧のみ)、編集は次の実装段階で対応
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">5 領域</span>
@@ -309,7 +311,7 @@ export function AgentSettings() {
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h2 id="agent-simulation" className="text-sm font-semibold text-slate-900">
-                  変更 simulation
+                  変更影響の試算
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
                   変更内容を選ぶと、設定承認 Type 区分と co-A 要件が自動判定されます (Day 12 wireframe 用 mock)
@@ -339,7 +341,7 @@ export function AgentSettings() {
                         'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-xs font-semibold tabular',
                         scen.type === 'A' && 'bg-slate-100 text-slate-700',
                         scen.type === 'B' && 'bg-amber-50 text-amber-700',
-                        scen.type === 'C' && 'bg-emerald-50 text-emerald-700'
+                        scen.type === 'C' && 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
                       )}
                     >
                       {scen.type}
@@ -398,7 +400,7 @@ export function AgentSettings() {
                       'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-semibold tabular',
                       entry.type === 'A' && 'bg-slate-100 text-slate-700',
                       entry.type === 'B' && 'bg-amber-50 text-amber-700',
-                      entry.type === 'C' && 'bg-emerald-50 text-emerald-700'
+                      entry.type === 'C' && 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
                     )}
                   >
                     {entry.type}

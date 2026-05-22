@@ -36,7 +36,7 @@ function App() {
         <Route path="cases/:id" element={<CaseReview />} />
         <Route path="cases/:id/comment" element={<SendBackComment />} />
         <Route path="proposals/:id" element={<ProposalReview />} />
-        <Route path="agents/:id/settings" element={<AgentSettings />} />
+        <Route path="agents/:id" element={<AgentSettings />} />
         <Route path="audit" element={<AuditTrail />} />
         <Route path="metrics" element={<Metrics />} />
         <Route path="knowledge" element={<KnowledgeBrowser />} />

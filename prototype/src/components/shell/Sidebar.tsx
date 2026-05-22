@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
   { to: '/inbox', label: '受信トレイ', icon: InboxIcon, shortcut: '⌘2' },
   { to: '/inbox', label: '案件処理', icon: FileText, shortcut: '⌘3', activePrefix: '/cases/' },
   { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, shortcut: '⌘4', activePrefix: '/proposals/' },
-  { to: '/agents/agent-corporate-address-change/settings', label: 'Agent 設定', icon: Cog, shortcut: '⌘5', activePrefix: '/agents/' },
+  { to: '/agents/agent-corporate-address-change', label: 'Agent 設定', icon: Cog, shortcut: '⌘5', activePrefix: '/agents/' },
   { to: '/audit', label: '監査証跡', icon: ShieldCheck, shortcut: '⌘6' },
   { to: '/metrics', label: 'メトリクス', icon: Gauge, shortcut: '⌘7' },
   { to: '/knowledge', label: 'ナレッジ', icon: BookOpen, shortcut: '⌘8' },

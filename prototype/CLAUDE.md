@@ -17,7 +17,7 @@
 3. `CaseReview` — `/cases/:id`
 4. `SendBackComment` — `/cases/:id/comment` (9 画面の 1 つ、CaseReview の子 detail route、**10 番目の独立画面ではない**)
 5. `ProposalReview` — `/proposals/:id`
-6. `AgentSettings` — `/agents/:id/settings`
+6. `AgentSettings` — `/agents/:id`
 7. `AuditTrail` — `/audit`
 8. `Metrics` — `/metrics`
 9. `KnowledgeBrowser` — `/knowledge`

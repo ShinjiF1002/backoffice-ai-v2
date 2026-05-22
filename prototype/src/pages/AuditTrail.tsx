@@ -131,7 +131,7 @@ export function AuditTrail() {
   }, [workflowFilter])
 
   const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id))
+    setExpandedId(expandedId === id ? null : id)
   }
 
   return (
@@ -152,7 +152,7 @@ export function AuditTrail() {
               直近 30 日 (検証用)
             </span>
             <span className="font-mono text-[10px] text-slate-500 tabular">
-              15 項目 schema · 関連項目 含む実 18
+              15 項目構造 · 関連項目 含む実 18
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -190,11 +190,11 @@ export function AuditTrail() {
               <History className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-slate-900">
-                  監査イベントは <span className="font-mono text-[11px]">15 項目 schema</span>{' '}
+                  監査イベントは <span className="font-mono text-[11px]">15 項目構造</span>{' '}
                   (関連項目 含む実 18) で記録されます
                 </p>
                 <p className="mt-0.5 text-slate-600">
-                  各 event row を click すると、案件 ID / 業務 / Agent 版数 / AI 提案 ID / 5 分類 / 承認済ナレッジ 参照 / 承認時刻 / 反映差分 等の詳細項目が展開されます。関連エンティティへの navigation は次の実装段階で対応。
+                  行を選択すると、案件 ID / 業務 / Agent 版数 / AI 提案 ID / 5 分類 / 承認済ナレッジ 参照 / 承認時刻 / 反映差分 等の詳細項目が展開されます。関連画面への遷移は次の実装段階で対応。
                 </p>
               </div>
             </div>
@@ -214,7 +214,7 @@ export function AuditTrail() {
                   監査イベント 時系列
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  最新が上、event row click で 15 項目 schema 詳細展開
+                  最新が上、行を選択すると 15 項目 詳細展開
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">
@@ -262,7 +262,7 @@ export function AuditTrail() {
                           </span>
                           {isRuleUpdate && (
                             <span className="inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-amber-800 tabular">
-                              適用範囲 2
+                              過去案件への影響
                             </span>
                           )}
                         </div>
@@ -311,102 +311,122 @@ export function AuditTrail() {
   )
 }
 
-/** Expanded panel showing 15-row event model schema (SSOT snake_case label + JP value) */
+/** Expanded panel showing 15-row event model (JP label primary、SSOT snake_case key は sub-caption) */
 function DetailPanel({ event }: { event: AuditEvent }) {
   return (
     <div className="border-t border-slate-100 bg-slate-50/30 px-5 py-4">
       <div className="mb-3 flex items-center gap-2">
         <h3 className="text-[11px] font-semibold text-slate-700">
-          監査イベント 詳細 — 15 項目 schema
+          監査イベント 詳細 (15 項目)
         </h3>
         <span className="font-mono text-[10px] text-slate-500 tabular">
           DOC-KNW-04 §8.1
         </span>
       </div>
       <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-[11px] sm:grid-cols-2">
-        <DetailRow label="case_id" value={event.caseId} />
+        <DetailRow label="案件 ID" schemaKey="case_id" value={event.caseId} />
         <DetailRow
-          label="workflow_id + workflow_version"
+          label="業務"
+          schemaKey="workflow_id + workflow_version"
           value={`${event.workflowId} · ${event.workflowVersion}`}
         />
         {event.agentId && (
           <DetailRow
-            label="agent_id + agent_version"
+            label="Agent"
+            schemaKey="agent_id + agent_version"
             value={`${event.agentId} · ${event.agentVersion ?? '—'}`}
           />
         )}
         {event.promptConfigVersion && (
           <DetailRow
-            label="prompt_config_version"
+            label="Prompt 設定 版数"
+            schemaKey="prompt_config_version"
             value={event.promptConfigVersion}
-            note="Phase 1 で実装、本 v2 では skeleton"
+            note="次の実装段階で実装予定 (検証用項目)"
           />
         )}
         {event.toolConfigVersion && (
           <DetailRow
-            label="tool_config_version"
+            label="Tool 設定 版数"
+            schemaKey="tool_config_version"
             value={event.toolConfigVersion}
-            note="skeleton"
+            note="検証用項目"
           />
         )}
         {event.modelConfigVersion && (
           <DetailRow
-            label="model_config_version"
+            label="Model 設定 版数"
+            schemaKey="model_config_version"
             value={event.modelConfigVersion}
-            note="skeleton"
+            note="検証用項目"
           />
         )}
         {event.inputArtifactHash && (
-          <DetailRow label="input_artifact_hash" value={event.inputArtifactHash} />
+          <DetailRow
+            label="入力 PDF ハッシュ"
+            schemaKey="input_artifact_hash"
+            value={event.inputArtifactHash}
+          />
         )}
         {event.aiProposalId && (
-          <DetailRow label="ai_proposal_id" value={event.aiProposalId} />
+          <DetailRow
+            label="AI 提案 ID"
+            schemaKey="ai_proposal_id"
+            value={event.aiProposalId}
+          />
         )}
         {event.humanDecisionId && (
           <DetailRow
-            label="human_decision_id"
+            label="人手判断 ID"
+            schemaKey="human_decision_id"
             value={event.humanDecisionId}
           />
         )}
         {event.sendbackCategory && (
           <DetailRow
-            label="sendback_category"
+            label="差戻し分類"
+            schemaKey="sendback_category"
             value={`${event.sendbackCategory} (5 分類)`}
           />
         )}
         {event.compiledKnowledgeCitationIds && (
           <DetailRow
-            label="compiled_knowledge_citation_ids"
+            label="承認済ナレッジ 参照 ID"
+            schemaKey="compiled_knowledge_citation_ids"
             value={event.compiledKnowledgeCitationIds.join(', ')}
-            note="承認済ナレッジ 参照、関連 navigation は次の実装段階"
+            note="関連画面への遷移は次の実装段階で対応"
             wide
           />
         )}
         {event.approvalTimestamp && (
           <DetailRow
-            label="approval_timestamp + approver_id"
+            label="承認時刻 + 承認者"
+            schemaKey="approval_timestamp + approver_id"
             value={`${event.approvalTimestamp} · ${event.approverId ?? '—'}`}
           />
         )}
         {event.diffId && (
           <DetailRow
-            label="diff_id"
+            label="反映差分 ID"
+            schemaKey="diff_id"
             value={event.diffId}
-            note="反映差分、関連 navigation は次の実装段階"
+            note="関連画面への遷移は次の実装段階で対応"
           />
         )}
         {event.rollbackRef && (
           <DetailRow
-            label="rollback_ref"
+            label="ロールバック参照"
+            schemaKey="rollback_ref"
             value={event.rollbackRef}
-            note="緊急時 段階の強制引き下げ、本 v2 では scope-out"
+            note="緊急時 段階の強制引き下げ、本 v2 では次の実装段階で対応"
           />
         )}
         {event.screenshotStackId && (
           <DetailRow
-            label="screenshot_stack_id"
+            label="操作画面記録 ID"
+            schemaKey="screenshot_stack_id"
             value={event.screenshotStackId}
-            note="操作 screenshot 連、scope-out"
+            note="操作画面記録、次の実装段階で対応"
           />
         )}
       </dl>
@@ -415,13 +435,16 @@ function DetailPanel({ event }: { event: AuditEvent }) {
 }
 
 interface DetailRowProps {
+  /** JP-localized primary label */
   label: string
+  /** SSOT snake_case schema key (sub-caption) */
+  schemaKey: string
   value: string
   note?: string
   wide?: boolean
 }
 
-function DetailRow({ label, value, note, wide }: DetailRowProps) {
+function DetailRow({ label, schemaKey, value, note, wide }: DetailRowProps) {
   return (
     <div
       className={cn(
@@ -429,15 +452,14 @@ function DetailRow({ label, value, note, wide }: DetailRowProps) {
         wide && 'sm:col-span-2'
       )}
     >
-      <dt className="shrink-0 font-mono text-[10px] text-slate-500 tabular">
-        {label}
+      <dt className="shrink-0">
+        <div className="text-[11px] font-medium text-slate-700">{label}</div>
+        <div className="font-mono text-[9px] text-slate-400 tabular">{schemaKey}</div>
       </dt>
       <dd className="min-w-0 flex-1 text-right">
         <div className="font-mono text-[11px] text-slate-800 tabular">{value}</div>
         {note && (
-          <div className="mt-0.5 font-mono text-[9px] text-slate-400 tabular">
-            {note}
-          </div>
+          <div className="mt-0.5 text-[10px] text-slate-500">{note}</div>
         )}
       </dd>
     </div>

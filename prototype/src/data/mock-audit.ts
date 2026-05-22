@@ -212,7 +212,7 @@ export const mockAuditEvents: AuditEvent[] = [
     actor: 'system',
     actorLabel: 'システム',
     type: 'rule_update_alert',
-    summary: '2026-05-17 に 住所マスタ照合 v0.2 が承認されました (本 case 処理時の版は当時のまま 監査証跡 に保持)',
+    summary: '2026-05-17 に 住所マスタ照合 v0.2 が承認されました (本案件の処理時の版は当時のまま 監査証跡 に保持)',
     diffId: 'DIFF-2026-005',
   },
   {

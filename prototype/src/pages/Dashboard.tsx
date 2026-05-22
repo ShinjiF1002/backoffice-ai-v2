@@ -132,10 +132,10 @@ function deriveAttention(cases: CaseRecord[]): Array<{
 }
 
 const WORKFLOW_LANE_STEPS = [
-  { to: '/inbox', label: '受信トレイ', icon: InboxIcon, hint: '案件 queue 起点' },
+  { to: '/inbox', label: '受信トレイ', icon: InboxIcon, hint: '案件一覧の起点' },
   { to: '/cases/CASE-2026-0142', label: '案件レビュー', icon: FileText, hint: 'AI 入力結果 + 証跡 + ナレッジ' },
   { to: '/cases/CASE-2026-0142/comment', label: 'コメント付き差戻し', icon: MessageSquare, hint: '5 分類 + 自由記述' },
-  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, hint: '手順承認 flywheel' },
+  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, hint: '手順承認の循環' },
   { to: '/metrics', label: 'メトリクス確認', icon: Gauge, hint: 'KPI / KRI 観測 [仮説 / 要検証]' },
 ] as const
 
@@ -232,7 +232,7 @@ export function Dashboard() {
               業務別の状況
             </h2>
             <span className="font-mono text-[10px] text-slate-500">
-              国際送金は表示対象外 (restricted boundary pack)
+              表示対象: 登録済み 2 業務
             </span>
           </div>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -368,7 +368,7 @@ export function Dashboard() {
               業務オペレーション動線
             </h2>
             <p className="mt-0.5 text-[11px] text-slate-500">
-              Demo Chapter 1+2 で辿る画面遷移。各ノードを click で該当画面へ遷移します。
+              Demo Chapter 1+2 で辿る画面遷移。各ノードから該当画面へ遷移します。
             </p>
           </div>
           <ol className="flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1">
@@ -407,10 +407,10 @@ export function Dashboard() {
       <footer className="border-t border-slate-200 bg-white px-6 py-3 text-xs text-slate-500">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span>
-            業務 card / 動線 / 注意 strip は in-memory mock state からの集計。次の実装段階で実 KPI 接続を予定 <span className="font-mono">[仮説 / 要検証]</span>。
+            業務カード・動線・注意行は画面内モック状態からの集計。検証用 KPI 表示の拡張を予定 <span className="font-mono">[仮説 / 要検証]</span>。
           </span>
           <span className="font-mono text-[10px] text-slate-400 tabular">
-            UC-BO-01 + UC-BO-02 / 国際送金は表示対象外
+            表示対象: UC-BO-01 + UC-BO-02 (登録済み 2 業務)
           </span>
         </div>
       </footer>

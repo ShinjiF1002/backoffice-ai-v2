@@ -94,41 +94,42 @@ export function Inbox() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
-            >
+            {/* Day 12 CR R33 B2: 並び順は現状 read-only 表示 (sort 切替は次の実装段階)。span 化で enabled no-op を排除。 */}
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-500">
               <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
               並び順: 受付順
-            </button>
+            </span>
           </div>
         </div>
 
-        {/* Filter chip row */}
+        {/* Filter chip row (Day 12 CR R33 B2): active workflow filter のみ button (解除動線)、未実装 chip は span 化 */}
         <div className="mt-2.5 flex items-center gap-2">
           <Filter className="h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
           {filterOptions.map((f) => {
             const isActive = f.value !== 'すべて'
+            const isActiveWorkflowFilter = f.key === 'workflow' && isActive
+            if (isActiveWorkflowFilter) {
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => navigate('/inbox')}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-primary)] bg-[var(--color-primary-soft)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary-soft)]"
+                >
+                  <span>{f.label}:</span>
+                  <span>{f.value}</span>
+                  <X className="h-3 w-3 text-[var(--color-primary)]" aria-label="filter 解除" />
+                </button>
+              )
+            }
             return (
-              <button
+              <span
                 key={f.key}
-                type="button"
-                onClick={() => {
-                  if (f.key === 'workflow' && workflowFilter) navigate('/inbox')
-                }}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] transition-colors',
-                  isActive
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)]'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                )}
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700"
               >
                 <span className="font-medium">{f.label}:</span>
-                <span className={isActive ? 'font-medium' : 'text-slate-500'}>{f.value}</span>
-                {isActive && f.key === 'workflow' && (
-                  <X className="h-3 w-3 text-[var(--color-primary)]" aria-label="filter 解除" />
-                )}
-              </button>
+                <span className="text-slate-500">{f.value}</span>
+              </span>
             )
           })}
         </div>

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   Inbox as InboxIcon,
@@ -16,6 +16,11 @@ import { cn } from '@/lib/cn'
  * SSOT: docs/03-ui-prototype-design.md §5 + §2.7.5
  *
  * Exactly 9 routes (10 番目禁止)。SendBackComment は CaseReview の子 detail route。
+ *
+ * Active 判定 (Day 12.2 / CR R28 B1 対応):
+ *  - `activePrefix` 未指定: NavLink デフォルト isActive (`to` 完全一致)
+ *  - `activePrefix` 指定: location.pathname.startsWith(activePrefix) で評価し、
+ *    `to` は queue / list page 等の安定先に固定 (hard-coded ID demo brittleness 回避)
  */
 
 interface NavItem {
@@ -23,21 +28,26 @@ interface NavItem {
   label: string
   icon: typeof LayoutDashboard
   shortcut?: string
+  /** 指定時、isActive を path prefix match で評価 (queue alias 動線用) */
+  activePrefix?: string
 }
 
 // SendBackComment は CaseReview の子 route なので sidebar には出さない (9 navigable + 1 detail = 9 page components 維持)
+// 案件処理 = Inbox queue alias (Day 12.2 CR R28 B1): /cases/:id へは Inbox row click から、sidebar からは queue へ戻る動線
+// AI 提案レビュー / Agent 設定 = 現状 demo seed ID で固定 (Day 13 で localStorage based last-visited 化を検討)
 const navItems: NavItem[] = [
   { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard, shortcut: '⌘1' },
   { to: '/inbox', label: '受信トレイ', icon: InboxIcon, shortcut: '⌘2' },
-  { to: '/cases/CASE-2026-0142', label: '案件処理', icon: FileText, shortcut: '⌘3' },
-  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, shortcut: '⌘4' },
-  { to: '/agents/agent-corporate-address-change/settings', label: 'Agent 設定', icon: Cog, shortcut: '⌘5' },
+  { to: '/inbox', label: '案件処理', icon: FileText, shortcut: '⌘3', activePrefix: '/cases/' },
+  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, shortcut: '⌘4', activePrefix: '/proposals/' },
+  { to: '/agents/agent-corporate-address-change/settings', label: 'Agent 設定', icon: Cog, shortcut: '⌘5', activePrefix: '/agents/' },
   { to: '/audit', label: '監査証跡', icon: ShieldCheck, shortcut: '⌘6' },
   { to: '/metrics', label: 'メトリクス', icon: Gauge, shortcut: '⌘7' },
   { to: '/knowledge', label: 'ナレッジ', icon: BookOpen, shortcut: '⌘8' },
 ]
 
 export function Sidebar() {
+  const location = useLocation()
   return (
     <aside className="flex h-full w-56 flex-col border-r border-slate-200 bg-white">
       {/* Brand */}
@@ -58,18 +68,23 @@ export function Sidebar() {
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon
+            // activePrefix 指定時は path prefix で active 判定 (queue alias 動線)
+            const prefixActive = item.activePrefix
+              ? location.pathname.startsWith(item.activePrefix)
+              : undefined
             return (
-              <li key={item.to}>
+              <li key={`${item.to}-${item.label}`}>
                 <NavLink
                   to={item.to}
-                  className={({ isActive }) =>
-                    cn(
+                  className={({ isActive }) => {
+                    const active = prefixActive ?? isActive
+                    return cn(
                       'group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors',
-                      isActive
+                      active
                         ? 'bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
                         : 'text-slate-700 hover:bg-slate-50'
                     )
-                  }
+                  }}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                   <span className="flex-1 truncate">{item.label}</span>

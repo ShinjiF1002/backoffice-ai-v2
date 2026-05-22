@@ -215,11 +215,11 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 2. **目的**: 入力者が AI 処理待ち案件の queue を見て、優先度順に着手する
 3. **主要ユーザー**: 入力者
 4. **主要 action**: case を click → CaseReview に遷移
-5. **状態**: `pending` (AI 処理中) / `ready` (入力者確認待ち) / `sent-back` (再処理中) / `business-approval-waiting` (承認者送出済)
-6. **表示要素**: case list table (workflow / case_id / 状態 badge / 経過時間 / Alert 件数 / progress)、filter (workflow / 状態)、sort (受付順 / 経過時間順)、PageHeader、Prototype mode label
+5. **状態**: `pending` (AI 処理中) / `ready` (入力者確認待ち) / `sent-back` (再処理中) / `business-approval-waiting` (承認者送出済) / `reflected` (反映済、Day 11.3 訂正で追加された 5 番目の lifecycle 状態、Inbox queue では完了後 N 時間以内のみ可視想定)
+6. **表示要素**: case list table (workflow / case_id / 状態 badge / 経過時間 [status 連動 SLA tint、Day 12.2 CR R28 M1] / 担当者 [Day 12 追加、ai-operator paper の queue assignment SSOT と整合] / 注意 chip [alertCount > 0 のみ amber-soft、CaseReview register と統一、Day 12.1 CR R27 P2])、filter (業務 / 状態 / 担当者 / 経過時間 の 4 chip、Day 12 で 2 → 4 拡張)、sort (受付順 / 経過時間順)、footer (一括承認 / 一括差戻し disabled wireframe + 件数 summary、Day 14-15+ で interactive 化)、PageHeader、Prototype mode label
 7. **遷移**: case row click → `/cases/:id`、filter / sort interaction
 8. **mock data 依存**: `mock-cases.ts` (case list)
-9. **Day 11+ 実装メモ**: Wireframe で table layout + filter chip + 状態 badge 配置確定。Demo Chapter 1 開始画面 (9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない、本画面は demo 起点として遷移順序上の意味のみ)
+9. **Day 11+ 実装メモ**: Wireframe で table layout + filter chip + 状態 badge 配置確定。Demo Chapter 1 開始画面 (9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない、本画面は demo 起点として遷移順序上の意味のみ)。Screen Card 旧 "progress" 列は Day 12 で 担当者 列に置換 (mini-stepper による進捗可視化は Day 14-15 medium-fi で別途検討、現状の Inbox grammar は status badge + 経過列 SLA tint で進捗 signal を 2 軸で表現)
 
 ### 4.2 CaseReview (`/cases/:id`) [Hero 1]
 

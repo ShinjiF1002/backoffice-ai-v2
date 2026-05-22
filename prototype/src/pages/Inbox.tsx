@@ -4,6 +4,7 @@ import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X } from
 import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/case/StatusBadge'
+import type { CaseStatus } from '@/data/types'
 
 /**
  * Inbox — Demo Chapter 1 起点画面、Day 12 wireframe (CaseReview visual grammar 継承)
@@ -15,16 +16,25 @@ import { StatusBadge } from '@/components/case/StatusBadge'
  *
  * Layout:
  *  - PageHeader: breadcrumb + h1 + 件数 chip + (右) 並び順 selector / 下段 filter chip row (業務 / 状態 / 担当者 / 経過時間)
- *  - Main body: queue table (案件 ID mono / 業務名 / 状態 StatusBadge / 経過 mono SLA-tinted / 担当者 / 注意 chip [amber-soft、alertCount > 0 のみ] / →)
- *  - Footer: bulk action chips (一括承認 / 一括差戻し、disabled state、動作は次の実装段階) + 件数 summary
- *  - filter chip / sort selector / pagination は visual のみ (動作は次の実装段階以降、tooltip に明示)
+ *  - Main body: queue table (案件 ID mono / 業務名 / 状態 StatusBadge / 経過 mono SLA-tinted [status 連動: pending/ready/sent-back のみ tint、business-approval-waiting/reflected は normal 固定] / 担当者 / 注意 chip [amber-soft、alertCount > 0 のみ] / →)
+ *  - Row click: navigate + Enter/Space keyboard、focus visibility は global :focus-visible (indigo 2px outline) で表現 (Day 12.2 CR R28 B2)
+ *  - Footer: bulk action chips (一括承認 / 一括差戻し、disabled state) + 件数 summary。「(一括操作は次の実装段階で対応)」caption が wireframe の唯一の signal
+ *  - filter chip / sort selector / pagination は visual のみ、動作は次の実装段階以降 (tooltip は demo noise 回避のため非表示、footer caption に集約 — Day 12.2 CR R28 M3)
  *  - Prototype mode label は AppShell 経由で自動表示
  *
  * CR R27 (Day 12.1 patch): JP-only tooltip + bulk action disabled + Alert 列 header → 注意 (CaseReview 注意 strip と register 統一)。
+ * CR R28 (Day 12.2 patch): B2 row focus visibility に global :focus-visible 委譲 + M1 slaTone(status) で SLA 適用範囲を入力者 queue 対象に限定 + M3 tooltip 6 hit 集約 (footer caption 1 行のみ)。
  */
 
-/** SLA color band based on elapsed `HH:MM:SS` 先頭時間で 3 帯に分類 */
-function slaTone(label: string): 'normal' | 'warn' | 'critical' {
+/**
+ * SLA color band based on elapsed `HH:MM:SS` 先頭時間で 3 帯に分類。
+ *
+ * Day 12.2 / CR R28 M1: status により SLA 適用範囲を分岐。
+ * 入力者 queue の SLA 対象 = `pending` / `ready` / `sent-back` のみ。
+ * `business-approval-waiting` (承認者 queue 移行済) / `reflected` (完了) は normal 固定 (入力者責任範囲外、誤読防止)。
+ */
+function slaTone(label: string, status: CaseStatus): 'normal' | 'warn' | 'critical' {
+  if (status === 'business-approval-waiting' || status === 'reflected') return 'normal'
   const hh = parseInt(label.split(':')[0] ?? '0', 10)
   if (isNaN(hh)) return 'normal'
   if (hh >= 3) return 'critical'
@@ -66,7 +76,6 @@ export function Inbox() {
             <button
               type="button"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
-              title="並び順の切替は次の実装段階で対応 (現状は表示のみ)"
             >
               <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
               並び順: 受付順
@@ -82,7 +91,6 @@ export function Inbox() {
               key={f.key}
               type="button"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700 transition-colors hover:bg-slate-50"
-              title="絞り込みは次の実装段階で対応 (現状は表示のみ)"
             >
               <span className="font-medium">{f.label}:</span>
               <span className="text-slate-500">すべて</span>
@@ -108,7 +116,7 @@ export function Inbox() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rows.map((c) => {
-                const tone = slaTone(c.elapsedLabel)
+                const tone = slaTone(c.elapsedLabel, c.status)
                 return (
                   <tr
                     key={c.id}
@@ -122,7 +130,7 @@ export function Inbox() {
                     role="button"
                     tabIndex={0}
                     aria-label={`案件 ${c.id} ${c.workflowName} を開く`}
-                    className="cursor-pointer transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
+                    className="cursor-pointer transition-colors hover:bg-slate-50"
                   >
                     <td className="px-3 py-2 font-mono text-xs text-slate-700 tabular">{c.id}</td>
                     <td className="px-3 py-2 text-xs text-slate-900">{c.workflowName}</td>
@@ -170,7 +178,6 @@ export function Inbox() {
               disabled
               aria-disabled="true"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70 cursor-not-allowed"
-              title="一括承認は次の実装段階で対応 (現状は無効、案件を個別に開いて操作してください)"
             >
               <CheckSquare className="h-3 w-3" aria-hidden="true" />
               一括承認
@@ -180,7 +187,6 @@ export function Inbox() {
               disabled
               aria-disabled="true"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70 cursor-not-allowed"
-              title="一括差戻しは次の実装段階で対応 (現状は無効、案件を個別に開いて操作してください)"
             >
               <X className="h-3 w-3" aria-hidden="true" />
               一括差戻し

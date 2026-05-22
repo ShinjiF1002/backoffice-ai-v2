@@ -301,13 +301,9 @@ export const mockCases: CaseRecord[] = [
         severity: 'amber',
         message: '本人確認書類 2 点目が未受領 — 補完依頼が必要',
       },
-      {
-        id: 'al-6',
-        severity: 'amber',
-        message: '受付から 3 時間経過 — SLA 注意水準',
-      },
+      // SLA 経過 signal は Inbox 経過列 (status 連動 tint) が担う、注意 chip との二重表現を回避 (Day 12.2 CR R28 M2)
     ],
-    alertCount: 2,
+    alertCount: 1,
     citations: [],
     stagingHints: [],
     relatedRuleUpdates: [],

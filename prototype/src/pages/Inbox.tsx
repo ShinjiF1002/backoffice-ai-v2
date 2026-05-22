@@ -14,11 +14,13 @@ import { StatusBadge } from '@/components/case/StatusBadge'
  *  - prototype/CLAUDE.md (active workflow UC-BO-01 + UC-BO-02 のみ、国際送金 / Tier 3 規制語は mock 0)
  *
  * Layout:
- *  - PageHeader: breadcrumb + h1 + 件数 chip + (右) 並び順 selector / 下段 filter chip row (業務 / status / 担当者 / 経過時間)
- *  - Main body: queue table (案件 ID mono / 業務名 / 状態 StatusBadge / 経過 mono SLA-tinted / 担当者 / Alert chip / →)
- *  - Footer: bulk action chips (一括承認 / 一括差戻し) + 件数 summary。bulk action は wireframe (動作は Day 14-15+ interactive phase)
- *  - filter chip / sort selector / pagination は wireframe (現状 visual のみ、動作は Day 14-15+ 以降)
+ *  - PageHeader: breadcrumb + h1 + 件数 chip + (右) 並び順 selector / 下段 filter chip row (業務 / 状態 / 担当者 / 経過時間)
+ *  - Main body: queue table (案件 ID mono / 業務名 / 状態 StatusBadge / 経過 mono SLA-tinted / 担当者 / 注意 chip [amber-soft、alertCount > 0 のみ] / →)
+ *  - Footer: bulk action chips (一括承認 / 一括差戻し、disabled state、動作は次の実装段階) + 件数 summary
+ *  - filter chip / sort selector / pagination は visual のみ (動作は次の実装段階以降、tooltip に明示)
  *  - Prototype mode label は AppShell 経由で自動表示
+ *
+ * CR R27 (Day 12.1 patch): JP-only tooltip + bulk action disabled + Alert 列 header → 注意 (CaseReview 注意 strip と register 統一)。
  */
 
 /** SLA color band based on elapsed `HH:MM:SS` 先頭時間で 3 帯に分類 */
@@ -64,7 +66,7 @@ export function Inbox() {
             <button
               type="button"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
-              title="Wireframe — 並び順切替は Day 14-15+ の interactive phase で実装"
+              title="並び順の切替は次の実装段階で対応 (現状は表示のみ)"
             >
               <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
               並び順: 受付順
@@ -80,7 +82,7 @@ export function Inbox() {
               key={f.key}
               type="button"
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700 transition-colors hover:bg-slate-50"
-              title="Wireframe — filter 適用は Day 14-15+ の interactive phase で実装"
+              title="絞り込みは次の実装段階で対応 (現状は表示のみ)"
             >
               <span className="font-medium">{f.label}:</span>
               <span className="text-slate-500">すべて</span>
@@ -100,7 +102,7 @@ export function Inbox() {
                 <th className="px-3 py-2 text-left">状態</th>
                 <th className="px-3 py-2 text-left">経過</th>
                 <th className="px-3 py-2 text-left">担当者</th>
-                <th className="px-3 py-2 text-left">Alert</th>
+                <th className="px-3 py-2 text-left">注意</th>
                 <th className="px-3 py-2 text-right" aria-label="開く" />
               </tr>
             </thead>
@@ -165,21 +167,25 @@ export function Inbox() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
-              title="Wireframe — 一括承認の動作は Day 14-15+ の interactive phase で実装"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70 cursor-not-allowed"
+              title="一括承認は次の実装段階で対応 (現状は無効、案件を個別に開いて操作してください)"
             >
               <CheckSquare className="h-3 w-3" aria-hidden="true" />
               一括承認
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
-              title="Wireframe — 一括差戻しの動作は Day 14-15+ の interactive phase で実装"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70 cursor-not-allowed"
+              title="一括差戻しは次の実装段階で対応 (現状は無効、案件を個別に開いて操作してください)"
             >
               <X className="h-3 w-3" aria-hidden="true" />
               一括差戻し
             </button>
-            <span className="ml-1 text-[10px] text-slate-400">(動作は次 phase)</span>
+            <span className="ml-1 text-[10px] text-slate-400">(一括操作は次の実装段階で対応)</span>
           </div>
           <div className="font-mono text-xs text-slate-500 tabular">
             1 - {total} / {total} 件

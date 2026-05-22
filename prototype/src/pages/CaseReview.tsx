@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronRight, Send } from 'lucide-react'
+import { ChevronRight, Send, AlertTriangle } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { getCaseById } from '@/data/mock-cases'
 import { ConfidenceBar } from '@/components/case/ConfidenceBar'
 import { AddressDiffBlock } from '@/components/case/AddressDiffBlock'
@@ -73,6 +74,44 @@ export function CaseReview() {
         </div>
       </header>
 
+      {/* === Case alert strip (Day 11.3 #3a: timeline event と分離、case-level alerts を LifecycleStepper 直下に集約) === */}
+      {c.alerts.length > 0 && (
+        <div className="border-b border-amber-200 bg-amber-50/40 px-6 py-2.5">
+          <div className="flex items-start gap-3">
+            <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-wide text-amber-700">
+              注意 · {c.alerts.length} 件
+            </span>
+            <div className="flex flex-1 flex-wrap gap-2">
+              {c.alerts.map((al) => (
+                <div
+                  key={al.id}
+                  className={cn(
+                    'inline-flex max-w-xl items-start gap-1.5 rounded-md border bg-white px-2.5 py-1.5 text-[11px]',
+                    al.severity === 'amber' ? 'border-amber-200' : 'border-red-200'
+                  )}
+                >
+                  <AlertTriangle
+                    className={cn(
+                      'mt-0.5 h-3 w-3 shrink-0',
+                      al.severity === 'amber' ? 'text-[var(--color-alert)]' : 'text-[var(--color-error)]'
+                    )}
+                    aria-hidden="true"
+                  />
+                  <div className="flex-1">
+                    <p className="leading-relaxed text-slate-800">{al.message}</p>
+                    {al.sourceStep && (
+                      <p className="mt-0.5 font-mono text-[10px] text-slate-500">
+                        source: <span className="text-slate-700">{al.sourceStep}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* === 3-column main work area === */}
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-12">
@@ -89,9 +128,13 @@ export function CaseReview() {
                   <div key={f.label}>
                     <div className="mb-1 flex items-center justify-between">
                       <label className="text-[11px] font-medium text-slate-600">{f.label}</label>
-                      <span className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] text-slate-500 ring-1 ring-slate-200">
-                        AI 提案
-                      </span>
+                      {/* Day 11.3 #5c: AI 提案 5 連噪音 → tiny indigo dot + tooltip に density 化 */}
+                      <span
+                        className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]"
+                        role="img"
+                        aria-label="AI 提案"
+                        title="AI 提案"
+                      />
                     </div>
 
                     {f.hasDiff && f.oldValue ? (
@@ -107,7 +150,11 @@ export function CaseReview() {
                       />
                     )}
 
-                    <ConfidenceBar value={f.confidence} className="mt-1.5" />
+                    <ConfidenceBar
+                      value={f.confidence}
+                      showThresholdChip={f.hasDiff}
+                      className="mt-1.5"
+                    />
                   </div>
                 ))}
               </div>
@@ -121,7 +168,6 @@ export function CaseReview() {
                 pdfName={c.pdfName}
                 pdfPages={c.pdfPages}
                 steps={c.evidence}
-                alerts={c.alerts}
               />
             </div>
           </section>

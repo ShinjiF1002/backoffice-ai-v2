@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn'
  */
 
 interface Props {
-  status: '未着手' | '承認待ち' | '承認済' | '差戻し'
+  status: '未送付' | '承認待ち' | '承認済' | '差戻し'
 }
 
 export function BusinessApprovalChip({ status }: Props) {

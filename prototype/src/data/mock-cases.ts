@@ -35,7 +35,7 @@ export const mockCases: CaseRecord[] = [
       },
       {
         label: '新住所',
-        value: '東京都港区六本木 6 丁目 10 番 1 号 サンプルタワー 12F',
+        value: '東京都千代田区丸の内 2 丁目 3 番 5 号 サンプルビル 8F',
         oldValue: '東京都千代田区丸の内 1 丁目 1 番 1 号 サンプルビル 8F',
         confidence: 0.84,
         hasDiff: true,
@@ -62,6 +62,7 @@ export const mockCases: CaseRecord[] = [
         name: '受付',
         timestamp: '2026-05-31 09:00:14',
         actor: 'system',
+        source: 'intake.pdf-upload-v1',
         thumbnailLabel: 'PDF',
         status: 'completed',
       },
@@ -70,6 +71,7 @@ export const mockCases: CaseRecord[] = [
         name: 'OCR 抽出',
         timestamp: '2026-05-31 09:01:02',
         actor: 'AI',
+        source: 'ocr-engine-v2.3',
         thumbnailLabel: 'IMG',
         confidence: 0.78,
         status: 'warning',
@@ -79,6 +81,7 @@ export const mockCases: CaseRecord[] = [
         name: 'マスタ照合',
         timestamp: '2026-05-31 09:01:48',
         actor: 'AI',
+        source: 'db.address_master',
         thumbnailLabel: 'DB',
         confidence: 0.91,
         status: 'completed',
@@ -88,6 +91,7 @@ export const mockCases: CaseRecord[] = [
         name: 'AI 入力結果生成',
         timestamp: '2026-05-31 09:02:11',
         actor: 'AI',
+        source: 'ai.address-extractor-v2.3',
         thumbnailLabel: 'AI',
         confidence: 0.92,
         status: 'completed',
@@ -159,7 +163,7 @@ export const mockCases: CaseRecord[] = [
         approvedAt: '2026-05-28',
       },
     ],
-    businessApprovalStatus: '未着手',
+    businessApprovalStatus: '未送付',
   },
   {
     id: 'CASE-2026-0143',
@@ -188,7 +192,7 @@ export const mockCases: CaseRecord[] = [
     citations: [],
     stagingHints: [],
     relatedRuleUpdates: [],
-    businessApprovalStatus: '未着手',
+    businessApprovalStatus: '未送付',
   },
   {
     id: 'CASE-2026-0144',
@@ -207,7 +211,7 @@ export const mockCases: CaseRecord[] = [
     citations: [],
     stagingHints: [],
     relatedRuleUpdates: [],
-    businessApprovalStatus: '未着手',
+    businessApprovalStatus: '未送付',
   },
 ]
 

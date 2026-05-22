@@ -47,6 +47,8 @@ export interface EvidenceStep {
   timestamp: string
   /** 実行 actor (AI / 入力者 / system) */
   actor: 'AI' | '入力者' | '承認者' | 'system'
+  /** Source identifier (mono metadata line で表示、e.g. ocr-engine-v2.3 / db.address_master / ai.address-extractor-v2.3) */
+  source?: string
   /** Thumbnail label (mock では絵文字 or 文字、Day 14-18 で実 image 想定) */
   thumbnailLabel: string
   /** Confidence at this step */
@@ -122,6 +124,6 @@ export interface CaseRecord {
   stagingHints: StagingHintRef[]
   /** 関連手順更新 Alert (本 case 作成後に承認されたルール) */
   relatedRuleUpdates: RelatedRuleUpdate[]
-  /** Business approval status (chip 表示) */
-  businessApprovalStatus: '未着手' | '承認待ち' | '承認済' | '差戻し'
+  /** Business approval status (chip 表示、Day 11.3 #5b: 未着手 → 未送付 semantic accuracy) */
+  businessApprovalStatus: '未送付' | '承認待ち' | '承認済' | '差戻し'
 }

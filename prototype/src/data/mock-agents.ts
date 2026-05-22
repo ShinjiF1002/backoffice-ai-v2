@@ -61,7 +61,7 @@ export const mockAgents: AgentRecord[] = [
     riskLevel: 'medium',
     automationStatus: 'active',
     version: 'v0.1',
-    modelLabel: 'AI ベースモデル A (mock)',
+    modelLabel: 'AI ベースモデル A (検証用)',
     promptVersion: 'v0.1',
     promptSummary:
       '住所変更の OCR 抽出 + 住所マスタ照合 + 信頼度 0.85 閾値 + 多店舗 / 法人格 / 海外住所 の境界判定',
@@ -69,7 +69,7 @@ export const mockAgents: AgentRecord[] = [
       {
         id: 'tool-ocr',
         name: 'OCR 抽出',
-        description: 'PDF → text 抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
+        description: 'PDF → テキスト抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
       },
       {
         id: 'tool-master-lookup',
@@ -105,7 +105,7 @@ export const mockAgents: AgentRecord[] = [
         id: 'chg-uc01-001',
         date: '2026-04-22',
         type: 'C',
-        summary: 'Trust Level Supervised 確立 (初回設定、Automation Maturity 開始)',
+        summary: 'Trust Level Supervised 確立 (初回設定、自動化段階の初期設定)',
         approver: '渡辺 真理 (業務責任者) + 佐藤 隆 (AI 管理者)',
       },
     ],
@@ -118,7 +118,7 @@ export const mockAgents: AgentRecord[] = [
     riskLevel: 'medium',
     automationStatus: 'active',
     version: 'v0.1',
-    modelLabel: 'AI ベースモデル A (mock)',
+    modelLabel: 'AI ベースモデル A (検証用)',
     promptVersion: 'v0.1',
     promptSummary:
       '口座開設書類の OCR 抽出 + 印鑑照合 + 本人確認書類 2 点完備チェック + 有効期限確認',
@@ -126,7 +126,7 @@ export const mockAgents: AgentRecord[] = [
       {
         id: 'tool-ocr',
         name: 'OCR 抽出',
-        description: 'PDF → text 抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
+        description: 'PDF → テキスト抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
       },
       {
         id: 'tool-seal-verification',
@@ -155,7 +155,7 @@ export const mockAgents: AgentRecord[] = [
         id: 'chg-uc02-001',
         date: '2026-04-22',
         type: 'C',
-        summary: 'Trust Level Supervised 確立 (初回設定、Automation Maturity 開始)',
+        summary: 'Trust Level Supervised 確立 (初回設定、自動化段階の初期設定)',
         approver: '渡辺 真理 (業務責任者) + 伊藤 翔 (AI 管理者)',
       },
     ],

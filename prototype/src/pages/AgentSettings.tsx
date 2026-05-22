@@ -71,7 +71,7 @@ const SIMULATION_SCENARIOS: ReadonlyArray<SimulationScenario> = [
     description:
       '外部 AI サービスの追加や新規 個人情報アクセス範囲の拡張、認証方式変更等、情報管理に影響する変更',
     approvers: 'AI 管理者 + 情報管理責任者 + リスク確認担当 の co-A 必須',
-    rule: '判定ルール例: 新 external tool 追加 + 権限拡張 → Type B',
+    rule: '判定ルール例: 外部 AI サービス追加 + 権限拡張 → Type B',
   },
   {
     id: 'sim-c',

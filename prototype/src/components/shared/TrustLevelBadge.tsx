@@ -72,7 +72,7 @@ export function TrustLevelBadge({ current, variant = 'compact' }: TrustLevelBadg
   return (
     <ol
       className="flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-3"
-      aria-label="Trust Level Progression"
+      aria-label="Trust Level の進化段階"
     >
       {TRUST_LEVELS.map((level, idx) => {
         const state = getStageState(current, level.value)

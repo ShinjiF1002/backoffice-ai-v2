@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ChevronRight, Send, TrendingUp, Gauge, Wrench } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getAgentById } from '@/data/mock-agents'
+import { mockKpiHypotheses } from '@/data/mock-metrics'
 import { TrustLevelBadge } from '@/components/shared/TrustLevelBadge'
 import type { ApprovalType } from '@/data/types'
 
@@ -38,13 +39,12 @@ interface KpiProgressionEntry {
   target: string
 }
 
-// CR R40 M5: KPI label/target は本 const に inline、Page 6 Metrics 実装時に `mock-metrics.ts` へ統合予定 (drift 防止)
-const KPI_PROGRESSION: ReadonlyArray<KpiProgressionEntry> = [
-  { id: 'k1', label: 'AI 入力承認率', target: '≥ 99%' },
-  { id: 'k2', label: '人手上書き率', target: '≤ 1%' },
-  { id: 'k3', label: 'Alert 発生率', target: '≤ 5%' },
-  { id: 'k4', label: '承認者差戻し率', target: '≤ 1%' },
-] as const
+// CR R40 M5 closure (Day 12 Page 6 で実施): `mock-metrics.ts` の mockKpiHypotheses (4 KPI gate) を import で再利用、SSOT 単一化、KPI label/target drift 防止
+const KPI_PROGRESSION: ReadonlyArray<KpiProgressionEntry> = mockKpiHypotheses.map((k) => ({
+  id: k.id,
+  label: k.name,
+  target: k.target,
+}))
 
 interface SimulationScenario {
   id: string

@@ -89,11 +89,13 @@ export interface StagingHintRef {
 }
 
 export interface RelatedRuleUpdate {
-  /** 関連手順更新 Alert (3 適用範囲、本 case 作成後に承認されたルール) */
+  /** 関連手順更新 Alert (3 適用範囲、本案件作成後に承認されたルール) */
   ruleId: string
   ruleName: string
   /** 承認日 */
   approvedAt: string
+  /** 該当 proposal ID (有る update のみ「更新内容を見る」link 表示、Day 14 P1 Spec gap 3) */
+  proposalId?: string
 }
 
 export interface CaseRecord {
@@ -125,7 +127,7 @@ export interface CaseRecord {
   citations: CitationRef[]
   /** Staging hints (low / medium、別 panel で視覚分離、citation 対象外) */
   stagingHints: StagingHintRef[]
-  /** 関連手順更新 Alert (本 case 作成後に承認されたルール) */
+  /** 関連手順更新 Alert (本案件作成後に承認されたルール) */
   relatedRuleUpdates: RelatedRuleUpdate[]
   /** Business approval status (chip 表示、Day 11.3 #5b: 未着手 → 未送付 semantic accuracy) */
   businessApprovalStatus: '未送付' | '承認待ち' | '承認済' | '差戻し'

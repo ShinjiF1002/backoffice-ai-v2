@@ -348,7 +348,7 @@ export function Dashboard() {
                             ? 'var(--color-alert)'
                             : s.state === 'active'
                               ? 'var(--color-primary)'
-                              : '#94a3b8'
+                              : 'var(--color-fg-subtle)'
                         }
                       />
                     )}

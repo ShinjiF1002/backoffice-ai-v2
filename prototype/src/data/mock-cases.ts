@@ -161,6 +161,7 @@ export const mockCases: CaseRecord[] = [
         ruleId: 'RULE-CORP-OCR-2026-05-28',
         ruleName: 'OCR 信頼度閾値の段階引き上げ (0.80 → 0.85)',
         approvedAt: '2026-05-28',
+        proposalId: 'PROP-2026-031',
       },
     ],
     businessApprovalStatus: '未送付',

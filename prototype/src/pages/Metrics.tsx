@@ -223,7 +223,7 @@ export function Metrics() {
                         data={k.trend}
                         width={80}
                         height={20}
-                        color={meets ? '#10B981' : '#F59E0B'}
+                        color={meets ? 'var(--color-success)' : 'var(--color-alert)'}
                       />
                     </div>
                   </div>
@@ -466,7 +466,7 @@ export function Metrics() {
                           data={t.alertRatio7Day}
                           width={160}
                           height={30}
-                          color="#F59E0B"
+                          color="var(--color-alert)"
                         />
                       </div>
                     </div>

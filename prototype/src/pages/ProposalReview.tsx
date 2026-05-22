@@ -27,8 +27,8 @@ const categoryLabel: Record<ProposalSourceCase['category'], string> = {
  * Layout (CaseReview visual grammar 継承):
  *  - PageHeader (sticky): breadcrumb (受信トレイ › AI 提案レビュー › {proposal_id}) + h1 提案 title + workflow chip + status badge + 経過 + 提案ソース annotation + ProposalLifecycleStepper (整理 → 承認 → 反映、Day 12.4 CR R31 M1)
  *  - 3-column main body:
- *     左 (3/12): 判定基準 + 元案件 一覧 (caseId + 差戻し category chip JP / Day 12.4 CR R31 M3) + 未承認ヒント (元 staging snippets、citation 対象外 panel inset)
- *     中 (6/12): summary + 提案 差分 sections (target file + § section + 変更前 / 変更後、border-l-2 hairline + tint /20、文書テキスト diff 明示 / Day 12.4 CR R31 M2)
+ *     左 (3/12): 判定基準 + 元案件 一覧 (caseId + 差戻し分類 chip JP / Day 12.4 CR R31 M3) + 未承認ヒント (元 staging snippets、citation 対象外 panel inset)
+ *     中 (6/12): summary + 提案 差分 sections (target file + § section + 変更前 / 変更後、border-l-2 hairline + tint /20、文書テキスト差分 明示 / Day 12.4 CR R31 M2)
  *     右 (3/12): RACI box (提案ソース / R · 整理担当 / A · 承認 / C · 相談 / I · 情報共有 + 職務分離 (SoD) note、JP-only / Day 12.4 CR R31 B1+B2+B3) + 提案メタ情報
  *  - Footer (sticky): status-conditional disabled actions (CR R28 lesson)、差戻し / 業務責任者へ送付 buttons に per-button JP tooltip (Day 12.4 CR R31 M5、Hero 2 demo climax 説明)
  *  - Prototype mode label は AppShell 経由
@@ -143,7 +143,7 @@ export function ProposalReview() {
                       </Link>
                       <span
                         className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700"
-                        title="差戻し category (同種 pattern detection の根拠)"
+                        title="差戻し分類 (同種傾向の根拠)"
                       >
                         {categoryLabel[sc.category]}
                       </span>
@@ -192,7 +192,7 @@ export function ProposalReview() {
               <div className="mb-2 flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold text-slate-900">
                   提案 差分 (変更前 / 変更後)
-                  <span className="ml-2 font-mono text-[10px] font-normal text-slate-500">· 文書テキスト diff (住所 inline diff とは別道具)</span>
+                  <span className="ml-2 font-mono text-[10px] font-normal text-slate-500">· 文書テキスト差分 (住所の行内差分とは別)</span>
                 </h2>
                 <span className="shrink-0 font-mono text-[10px] text-slate-500">{p.proposedDiff.length} ファイル</span>
               </div>
@@ -294,26 +294,35 @@ export function ProposalReview() {
             提案を整理し、業務責任者へ送付するか差戻しを判断してください
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
+            {/* CR R32 Major 1: disabled button は hover/focus が抑制されるため wrapper span に title を移動 */}
+            <span
+              className="inline-flex"
               title="差戻し理由をコメント付きで AI 日次分析にフィードバック (動作は次の実装段階で対応)"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-400 opacity-70 cursor-not-allowed"
             >
-              <X className="h-3.5 w-3.5" aria-hidden="true" />
-              差戻し
-            </button>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-400 opacity-70 cursor-not-allowed"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+                差戻し
+              </button>
+            </span>
+            <span
+              className="inline-flex"
               title={`業務責任者 (${p.approver}) の承認待ちへ転送 (動作は次の実装段階で対応)`}
-              className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60 cursor-not-allowed"
             >
-              <Send className="h-3.5 w-3.5" />
-              業務責任者へ送付
-            </button>
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60 cursor-not-allowed"
+              >
+                <Send className="h-3.5 w-3.5" />
+                業務責任者へ送付
+              </button>
+            </span>
             <span className="ml-1 text-[10px] text-slate-400">(承認動作は次の実装段階で対応)</span>
           </div>
         </div>

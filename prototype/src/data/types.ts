@@ -131,7 +131,7 @@ export interface CaseRecord {
 }
 
 // === Proposal (procedure update proposal、Day 12 Page 2 ProposalReview 追加) ===
-// docs/03 §4.5 + docs/02 §3 (RACI: Proposal source = AI / R = Manual 管理者 / A = 業務責任者) と整合
+// docs/03 §4.5 + docs/02 §3 (RACI: 提案ソース = AI / R = 手順管理者 / A = 業務責任者) と整合
 export type ProposalStatus = 'pending-triage' | 'forwarded' | 'approved' | 'rejected'
 
 /** 提案の判定基準 1 行 ([仮説 / 要検証] ラベル必須、AI 日次分析 logic から派生) */
@@ -161,7 +161,7 @@ export interface ProposalStagingSnippet {
   excerpt: string
 }
 
-/** 提案で変更される workflow 文書の before/after */
+/** 提案で変更される workflow 文書の 変更前 / 変更後 */
 export interface ProposalDiffSection {
   /** 対象 file path (workflow.md / agent-instructions.md / approval-policy.md) */
   targetFile: string
@@ -171,7 +171,7 @@ export interface ProposalDiffSection {
   after: string
 }
 
-/** RACI box (Proposal source 列を追加した final patch 整合) */
+/** RACI box (提案ソース 列を追加した final patch 整合) */
 export interface ProposalRaci {
   proposalSource: string
   r: string
@@ -203,8 +203,8 @@ export interface ProposalRecord {
   /** 提案 差分 (workflow.md / agent-instructions.md / approval-policy.md 変更前 / 変更後) */
   proposedDiff: ProposalDiffSection[]
   raci: ProposalRaci
-  /** Queue owner (Manual 管理者 mock 氏名、SoD 上 approver と別人) */
+  /** 整理担当 (手順管理者 mock 氏名、SoD 上 承認者 と別人) */
   queueOwner: string
-  /** Approver (業務責任者 mock 氏名、SoD 上 queueOwner と別人) */
+  /** 承認者 (業務責任者 mock 氏名、SoD 上 整理担当 と別人) */
   approver: string
 }

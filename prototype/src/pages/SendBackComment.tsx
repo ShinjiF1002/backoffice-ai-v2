@@ -55,7 +55,7 @@ const SENDBACK_CATEGORIES: ReadonlyArray<{
   {
     value: 'data_error',
     label: '入力誤り',
-    description: '入力データ自体が誤り (AI 責ではない、記録・監査用の別経路で扱う、未承認ナレッジへの昇格対象外)',
+    description: '入力データそのものが誤っている (印字ミス、記入漏れ、不鮮明スキャン 等)',
   },
 ] as const
 
@@ -234,7 +234,7 @@ export function SendBackComment() {
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1 text-[12px] leading-relaxed text-amber-900">
-                  <p className="font-medium">入力誤りは AI 責ではない判定です</p>
+                  <p className="font-medium">入力誤りは AI の学習対象になりません</p>
                   <p className="mt-0.5 text-amber-800">
                     記録・監査用の別経路に回り、未承認ナレッジへの昇格対象外となります。AI 入力結果の修正は通常の案件処理側で対応してください。
                   </p>
@@ -254,7 +254,7 @@ export function SendBackComment() {
                   差戻し理由
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  具体的な差戻し理由・修正提案を記述 (AI 日次分析の未承認ナレッジ候補になります)
+                  具体的な差戻し理由・修正提案を記述してください
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">
@@ -283,7 +283,7 @@ export function SendBackComment() {
                     関連根拠 (任意)
                   </h2>
                   <p className="mt-1 text-[11px] text-slate-500">
-                    差戻し対象の根拠を選択 (監査記録で未承認ナレッジ候補に紐付け)
+                    差戻し対象に関連する根拠を選択してください (任意)
                   </p>
                 </div>
                 <span className="font-mono text-[10px] text-slate-500 tabular">
@@ -316,9 +316,6 @@ export function SendBackComment() {
                             aria-hidden="true"
                           />
                           <span className="font-medium text-slate-800">{ev.name}</span>
-                          <span className="font-mono text-[10px] text-slate-400 tabular">
-                            {ev.actor} · {ev.source}
-                          </span>
                         </div>
                         <p className="mt-0.5 font-mono text-[10px] text-slate-500 tabular">
                           {ev.timestamp}
@@ -350,7 +347,7 @@ export function SendBackComment() {
           </div>
           <span
             className="inline-flex"
-            title="差戻しを未承認ナレッジに記録 (動作は次の実装段階で対応)"
+            title="差戻し理由を記録し AI の改善材料に反映"
           >
             <button
               type="button"

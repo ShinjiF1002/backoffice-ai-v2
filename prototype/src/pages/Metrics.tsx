@@ -166,7 +166,7 @@ export function Metrics() {
                   <span className="font-mono text-[11px]">[仮説 / 要検証]</span> です
                 </p>
                 <p className="mt-0.5 text-slate-600">
-                  本番導入可否を判定する gate ではなく、Phase 1 で測定・再設定する検証仮説。Session 4 で示す数値は target hypothesis であり実績値ではありません。
+                  本番導入可否を判定する基準ではなく、Phase 1 で測定・再設定する検証仮説。本画面に表示される数値は目標仮説値であり、実績値ではありません。
                 </p>
               </div>
             </div>
@@ -186,7 +186,7 @@ export function Metrics() {
                   4 KPI 進化要件
                 </h2>
                 <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
-                  全 4 KPI が target hypothesis を満たすと{' '}
+                  全 4 KPI が目標仮説値を満たすと{' '}
                   <strong className="font-medium text-slate-800">
                     自動化段階 進化検討対象
                   </strong>
@@ -205,7 +205,7 @@ export function Metrics() {
                 ) : (
                   <AlertTriangle className="h-3 w-3" aria-hidden="true" />
                 )}
-                {metCount} / 4 達成
+                仮判定 {metCount} / 4
               </span>
             </div>
 
@@ -290,7 +290,7 @@ export function Metrics() {
                       内容
                     </th>
                     <th className="px-3 py-2 text-right text-[11px] font-medium text-slate-700">
-                      target
+                      目標仮説
                     </th>
                     <th className="px-3 py-2 text-right text-[11px] font-medium text-slate-700">
                       現在値
@@ -345,7 +345,7 @@ export function Metrics() {
                   9 KRI 監視
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  異常検知 trigger、閾値超過時は手順管理者 / AI 管理者に通知
+                  異常検知の検知条件、閾値超過時は手順管理者 / AI 管理者に通知
                 </p>
               </div>
               <div className="flex items-center gap-2 font-mono text-[10px] tabular">
@@ -394,7 +394,10 @@ export function Metrics() {
                       </span>
                     </div>
                     <p className="mt-1.5 leading-relaxed text-slate-600">
-                      {k.triggerCondition}
+                      {k.triggerCondition}{' '}
+                      <span className="font-mono text-[10px] text-slate-500 tabular">
+                        [仮説 / 要検証]
+                      </span>
                     </p>
                     <p className="mt-1 font-mono text-[10px] leading-relaxed text-slate-500 tabular">
                       対応: {k.responseAction}
@@ -448,7 +451,7 @@ export function Metrics() {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <p className="mb-1 font-mono text-[10px] text-slate-500 tabular">
-                          案件数 推移
+                          案件数 (推移)
                         </p>
                         <Sparkline
                           data={t.caseVolume7Day}
@@ -459,7 +462,7 @@ export function Metrics() {
                       </div>
                       <div>
                         <p className="mb-1 font-mono text-[10px] text-slate-500 tabular">
-                          Alert 発生率 推移
+                          Alert 発生率 (推移)
                         </p>
                         <Sparkline
                           data={t.alertRatio7Day}
@@ -487,7 +490,7 @@ export function Metrics() {
             ダッシュボードに戻る
           </Link>
           <span className="font-mono text-[10px] text-slate-400 tabular">
-            実 KPI 接続は次の実装段階で対応
+            検証用 KPI 表示の拡張は次の実装段階で対応
           </span>
         </div>
       </footer>

@@ -9,7 +9,7 @@ import type { CaseLifecycleStep } from '@/data/types'
  * 受付 → AI 処理 → 入力者確認 → 承認者承認 → 反映
  * **`手順承認` は current case stepper に含めない** (手順承認は別 flywheel / Proposal loop、§6 Alert UI 適用範囲 3)
  *
- * Day 11.3 #5d: current step indicator を `[now]` text → indigo dot + font-semibold に変更
+ * Day 11.3 #5d: current step indicator を旧 bracketed text marker → indigo dot + font-semibold に変更
  */
 
 const steps: CaseLifecycleStep[] = ['受付', 'AI処理', '入力者確認', '承認者承認', '反映']

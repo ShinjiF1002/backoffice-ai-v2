@@ -23,7 +23,7 @@ import { LifecycleStepper } from '@/components/case/LifecycleStepper'
  *  - Header: breadcrumb + case_id + workflow + status + LifecycleStepper (手順承認 除外)
  *  - 3-column main:
  *     左: AI 入力結果 (form with ConfidenceBar per field + AddressDiffBlock for new address)
- *     中央: EvidenceTimeline (PDF + 4 step timeline rail + Alert chips)
+ *     中央: EvidenceTimeline (PDF + 4 step timeline rail + per-step mono metadata `actor · source · conf`、alerts は LifecycleStepper 直下の case alert strip に分離、Day 11.3 #3a)
  *     右: RelatedRuleAlert (amber banner、最上部、Day 11.1 Fix 1) + CitationPanel (high only) + StagingHintPanel (低/中 separated)
  *  - Footer: sticky bottom action bar (差戻し / 承認 / BusinessApprovalChip)
  */

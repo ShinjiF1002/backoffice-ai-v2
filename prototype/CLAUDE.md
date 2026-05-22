@@ -73,7 +73,7 @@ UI 上で **絶対に守る**:
 CaseReview の header lifecycle stepper:
 
 ```
-受付 → AI 処理 → 入力者確認 [now] → 承認者承認 → 反映
+受付 → AI 処理 → 入力者確認 → 承認者承認 → 反映 (current step は indigo dot + font-semibold で UI 表示、`LifecycleStepper.tsx` SSOT)
 ```
 
 **`手順承認` は current case stepper に含めない** (手順承認は別 flywheel / Proposal loop、`docs/02` §3 SSOT)。`docs/03` §6 Alert UI 適用範囲 3 の Audit Trail 内で別 entry point として表示。

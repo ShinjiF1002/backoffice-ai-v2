@@ -116,7 +116,7 @@ Day 11 Step 1 で 3 reference mockup を ChatGPT 画像生成で並列生成、4
 | 関連手順更新 Alert (過去 case Alert UI) | Citation borrow | 別 amber banner、citation panel + staging hint とは視覚的に独立 (§6 Alert UI 3 適用範囲) |
 | BusinessApproval chip | Primary + Diff borrow | sticky bottom action bar の右端、UI 表示文言は **`業務承認: 承認待ち`** または **`業務責任者承認`** (component 名 `BusinessApprovalChip` は internal、UI 表示には出さない) |
 | Prototype mode label | All references | AppShell header right pill 常時表示 |
-| Case lifecycle stepper | Primary (訂正後) | **`受付 → AI 処理 → 入力者確認 [now] → 承認者承認 → 反映`** のみ。**`手順承認` は current case stepper に含めない** (手順承認は別 flywheel / Proposal loop = §6 Alert UI 適用範囲 3 で別 entry point として表示) |
+| Case lifecycle stepper | Primary (訂正後) | **`受付 → AI 処理 → 入力者確認 → 承認者承認 → 反映`** のみ (current step は indigo dot + font-semibold で UI 表示、`LifecycleStepper.tsx` SSOT、Day 11.3 #5d で旧 text indicator (bracketed inline marker) から訂正済)。**`手順承認` は current case stepper に含めない** (手順承認は別 flywheel / Proposal loop = §6 Alert UI 適用範囲 3 で別 entry point として表示) |
 
 ### 2.7.3 Design token (Operational Premium Light、§2.1-§2.6 と整合)
 
@@ -228,7 +228,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 3. **主要ユーザー**: 入力者 (主)、承認者 (read)
 4. **主要 action**: 承認 / 差戻し (5-category 選択 → SendBackComment 遷移) / BusinessApprovalChip click
 5. **状態**: `ready` / `sent-back` / `approved` / `business-approval-waiting`
-6. **表示要素**: PageHeader (case_id + workflow + 状態 badge)、左 panel (AI 入力結果 + 編集可能 form)、中 panel (PDF preview / screenshot stack / Alert list)、右 panel (`AiProposalPanel` = citation list + staging hint + Alert UI 適用範囲 1)、footer (承認 / 差戻し ボタン + `BusinessApprovalChip`)、Prototype mode label
+6. **表示要素**: PageHeader (case_id + workflow + 状態 badge + LifecycleStepper)、case alert strip (LifecycleStepper 直下、Day 11.3 #3a で構造移動、case-level alerts 専用)、左 panel (AI 入力結果 + 編集可能 form)、中 panel (PDF preview / `EvidenceTimeline` = 4 step rail + per-step mono metadata `actor · source · conf`、alerts は除外)、右 panel (`AiProposalPanel` = `RelatedRuleAlert` 最上部 + citation list + staging hint、Alert UI 適用範囲 1)、footer (承認 / 差戻し ボタン + `BusinessApprovalChip`)、Prototype mode label
 7. **遷移**: 差戻し click → `/cases/:id/comment`、承認 click → state 変更 + Inbox queue 戻る、`BusinessApprovalChip` click → static mock new tab
 8. **mock data 依存**: `mock-cases.ts` (case detail) + `mock-knowledge.ts` (citation list) + `mock-audit.ts` (state transition log)
 9. **Day 11+ 実装メモ**: AiProposalPanel は §6 Alert UI と §9 Staging UI pattern を組み込む。Hero 1 (Demo Chapter 1 主画面)

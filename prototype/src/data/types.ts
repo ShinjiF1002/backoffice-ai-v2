@@ -126,4 +126,6 @@ export interface CaseRecord {
   relatedRuleUpdates: RelatedRuleUpdate[]
   /** Business approval status (chip 表示、Day 11.3 #5b: 未着手 → 未送付 semantic accuracy) */
   businessApprovalStatus: '未送付' | '承認待ち' | '承認済' | '差戻し'
+  /** 担当者 (入力者 mock 氏名、Inbox queue 列で表示、Day 12 追加) */
+  assignee?: string
 }

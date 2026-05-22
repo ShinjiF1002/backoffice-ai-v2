@@ -121,31 +121,8 @@ export function Metrics() {
               直近 7 日 (検証用)
             </span>
             <span className="font-mono text-[10px] text-slate-500 tabular">
-              4 KPI 進化要件 + 7 KPI 補助 + 9 KRI
+              4 KPI 進化判断 目安 + 補助 3 KPI + 9 KRI
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-500">業務:</span>
-            {(['all', 'UC-BO-01', 'UC-BO-02'] as const).map((wid) => {
-              const isActive = wid === workflowFilter
-              const label = wid === 'all' ? '全業務' : WORKFLOW_LABEL[wid]
-              return (
-                <button
-                  key={wid}
-                  type="button"
-                  onClick={() => setWorkflowFilter(wid)}
-                  className={cn(
-                    'rounded-md px-2 py-0.5 font-mono text-[11px] tabular transition-colors',
-                    isActive
-                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  )}
-                  aria-pressed={isActive}
-                >
-                  {label}
-                </button>
-              )
-            })}
           </div>
         </div>
       </header>
@@ -183,7 +160,7 @@ export function Metrics() {
                   id="metrics-gate"
                   className="text-base font-semibold text-slate-900"
                 >
-                  4 KPI 進化要件
+                  4 KPI 進化判断 目安
                 </h2>
                 <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
                   全 4 KPI が目標仮説値を満たすと{' '}
@@ -269,7 +246,7 @@ export function Metrics() {
                   補助 KPI 一覧
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  進化判断には直接使わない trend 観測対象 (K5-K7)
+                  進化判断には直接使わない 推移 観測対象 (K5-K7)
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">
@@ -425,14 +402,35 @@ export function Metrics() {
                   <p className="mt-1 text-[11px] text-slate-500">
                     件数推移 + Alert 発生率、
                     {workflowFilter === 'all'
-                      ? '全業務 並列'
-                      : WORKFLOW_LABEL[workflowFilter]}{' '}
-                    のみ表示
+                      ? '全業務 を並べて表示'
+                      : `${WORKFLOW_LABEL[workflowFilter]} のみ表示`}
                   </p>
                 </div>
-                <span className="font-mono text-[10px] text-slate-500 tabular">
-                  {filteredTrends.length} 業務
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {(['all', 'UC-BO-01', 'UC-BO-02'] as const).map((wid) => {
+                    const isActive = wid === workflowFilter
+                    const label = wid === 'all' ? '全業務' : WORKFLOW_LABEL[wid]
+                    return (
+                      <button
+                        key={wid}
+                        type="button"
+                        onClick={() => setWorkflowFilter(wid)}
+                        className={cn(
+                          'rounded-md px-2 py-0.5 font-mono text-[11px] tabular transition-colors',
+                          isActive
+                            ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        )}
+                        aria-pressed={isActive}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                  <span className="font-mono text-[10px] text-slate-500 tabular">
+                    {filteredTrends.length} 業務
+                  </span>
+                </div>
               </div>
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {filteredTrends.map((t) => (

@@ -315,8 +315,8 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 6. **表示要素** (Day 12 wireframe 実装実態、CR R50 で weight label 表記統一): Sticky PageHeader (breadcrumb 2-level + h1 + 全期間 (検証用) chip + meta「N 件 (承認済 / 確認済 / 未承認 内訳)」+ 業務 filter chip)、SSOT framing 注 (slate-50 inset + BookOpen icon、3 段階 weight semantics + 引用根拠 governance を明示)、絞り込み chip row (分類 5 + 全分類 / 重要度 3 (承認済 / 確認済 (未承認) / 未承認) + 全段階)、ナレッジ一覧 (snippet card 折りたたみ式、各 card: weight dot + title + 抜粋 line-clamp-2 + meta line `記録日 · 業務 JP · 分類 JP (5 分類) · source_case mono`、`data_error` category には「AI 引用対象外」badge defensive 表示)、detail expanded panel (`ナレッジ詳細 (8 項目)` h3 + weight chip + 2-col `<dl>` で 8 frontmatter field を JP label primary + snake_case sub-caption + value JP-localized、本文は border-t hairline divider 経由 flat 配置 (CR R50 M3 で 3 段 nested card → flat に圧縮、AuditTrail / Metrics expanded panel density と整合))、Sticky footer (ダッシュボード戻り link + 未承認 → 提案レビュー送付 は次の実装段階で対応 caption)、Prototype mode label (AppShell 経由)、**全 weight 視覚化は §9.2 SSOT と整合** (`low` 灰色 dot + 「未承認」 / `medium` amber dot + 「確認済 (未承認)」 / `high` emerald dot + 「承認済」)
 7. **遷移**: source_case link → CaseReview (次の実装段階で対応、Day 12 wireframe は表示のみ note 付き)、未承認スニペット → 提案レビュー送付 action は Day 14-15+ で実装
 8. **mock data 依存**: `mock-knowledge.ts` (staging + compiled、frontmatter 8 field 準拠)。UC-BO-01 (compiled 3 + staging 2 = 5 件) + UC-BO-02 (compiled 2 + staging 1 = 3 件) で計 8 件、workflow filter demo 用に両 workflow を網羅
-9. **Day 11+ 実装メモ**: weight 表現は §9.2 (Staging UI pattern) と整合。`data_error` category snippet は「**AI 引用対象外**」badge (灰色) を defensive UI として表示 (DOC-FW-01 §3.5、DOC-KNW-04 §4.5)。**`mock-knowledge.ts` には `category: 'data_error'` snippet を登録しない** (DOC-KNW-04 §4.5 SSOT 厳守、staging から除外 + 別経路 個別差戻し 扱い)、CR R50 で確認: mock 追加して「入力誤り」filter を demonstrable にする案は SSOT と矛盾するため不採用、`CATEGORY_DISABLED` map による disabled chip + wrapper span title「入力誤りは個別差戻し時に処理するため、本一覧の対象外」で governance boundary を UI で表現する方針を維持。`AI 引用対象外` badge logic は defensive code として keep (将来 SSOT 改訂時に有効化)
-10. **Day 12 Page 8 実装注記** (commit `b4d5583` + CR R49 micro patch): **CR R37+R40+R44+R46+R47 paradigm 踏襲**: enum identifier は raw UI 露出禁止、`CATEGORY_JP` map (5 分類) + `WEIGHT_STYLE` map (3 段階) + `AGENT_LABEL` map (R49 追加) で JP-localize、`category` / `weight` 等 field 値は AuditTrail と同じ JP label primary + snake_case sub-caption + JP-localized value paradigm (R46 dual-display + R47 enum JP map mandatory)。StrictMode setState toggle bug 回避 (`setExpandedId(expandedId === id ? null : id)` 直接 closure 形式、CR R46 lesson)。governance term paraphrase: `staging` → 未承認 / `compiled approved` → 承認済 / `citation` → 引用根拠 / `runtime citation 対象外` → AI 引用対象外。`CATEGORY_JP` map は `AuditTrail.tsx` の `SENDBACK_CATEGORY_JP` と重複定義中 (Day 14-15 で `lib/sendback-categories.ts` shared module 化 検討、CR R37 M4 + R47 Minor 2 defer)。`WEIGHT_STYLE` の dot 色は §9.2 SSOT pixel match (slate-400 / amber-500 / emerald-600)。filter 状態は page-level 3 軸 (workflow / category / weight)、全て chip 切替で immediate filtering、empty state 対応あり。Detail panel の `body` field は markdown render なしで whitespace-pre-wrap pre-formatted (本 mock データは段落 1-3 文で markdown 体裁 不要、Day 14-18 で実 snippet 投入時に micromark 等検討)。restricted boundary pack (国際送金) は mock-knowledge.ts に未登録 (DOC-OV-00 §2.1)、本 page UI 露出対象外。**CR R49 micro patch 反映** (B1+B2+M1+M2+M3 = 5 patch、deliverable 直後 hygiene): **B1** `mock-knowledge.ts` の title/body 内 raw English を JP 化 = `手動 review 要求` → `手動確認 要求` / `case` → `案件` / `本 workflow` → `本業務` / `別 workflow` → `別業務` / `workflow に移行` → `業務に移行` / `field` → `項目` / `update` → `更新` / `レビュー済み` → `確認済み` / `レイアウト` → `表示構成` (全 8 snippet 一括) / **B2** detail panel value の raw slug / agent_id / source_path primary 表示を JP 一次表記に置換 = 業務 row `UC-BO-01 · corporate-address-change` → `法人住所変更 · UC-BO-01` (slug は note sub-caption) / Agent row `agent-account-opening · v0.1` → `口座開設 Agent · v0.1` (agent_id は note) / ファイル row `workflows/account-opening/knowledge/staging/2026-05-20-new-form-layout.md` → `確認済 (未承認) ナレッジ · 2026-05-20` (raw path は note + schemaKey で keep)、`AGENT_LABEL` map + `formatSourcePathLabel(weight, date)` helper 新規 / **M1** docs §4.9 #10 commit placeholder `<TBD>` → `b4d5583` + R49 反映追記 / **M2** `WEIGHT_STYLE.medium.label`「レビュー済み (未承認)」 → 「確認済み (未承認)」、framing 注 / count meta も同 paraphrase で Page 6+ `review → 確認` 規範統一 / **M3** `data_error` filter chip に `CATEGORY_DISABLED` map + disabled wrapper span title pattern 適用 (click 不可 + 灰色 + title「入力誤りは個別差戻し時に処理するため、本一覧の対象外 (DOC-KNW-04 §4.5)」)、empty state 空振り回避。Build pass 162ms / 1780 modules / 31.27 kB CSS / 414.52 kB JS (+0.61)、pre-flight grep: user-facing English residue 0 hit、レビュー済 残存 0、AGENT_LABEL / CATEGORY_DISABLED / formatSourcePathLabel 全 import 使用。**CR R50 補記** (R49 patch 後 2 round review で詳細 R49 vs 簡略 R49 の M1/M2 推奨齟齬を user 判断で resolve): **M2** `WEIGHT_STYLE.medium.label` `確認済み (未承認)` → `確認済 (未承認)` 送り仮名 trim + `WeightStyle` に `shortLabel` field 追加 (承認済 / 確認済 / 未承認、3 状態並列用)、PageHeader counter + framing 注 の hardcoded 3 状態並列を `WEIGHT_STYLE.{high,medium,low}.shortLabel` 経由化で single source 統一、§9.2 table row `medium label` 同期 / **M3** detail panel 本文 subpanel を `mt-4 rounded-md border bg-white p-3` (3 段 nested card) → `mt-4 border-t border-slate-200 pt-3` (flat hairline divider) に圧縮、AuditTrail / Metrics expanded panel density と整合 / **Mn3** §9.6 `runtime citation 対象外` badge 文言 → `AI 引用対象外` JP-paraphrase に同期 (R44 paradigm)、§9.6 に「`mock-knowledge.ts` には data_error snippet 登録しない」defensive UI scope 明記。**M1 disable 維持 (詳細 R49 推奨 mock 追加 を user 判断で却下)**: DOC-KNW-04 §4.5 SSOT「data_error は staging から除外 + 別経路」厳守、「demo 可能性のため mock 1 件追加」案は SSOT 矛盾で不採用、disabled chip + wrapper span title pattern を維持、§4.9 #9 + §9.6 に「mock 登録なし」明記
+9. **Day 11+ 実装メモ**: weight 表現は §9.2 (Staging UI pattern) と整合。`data_error` category snippet は「**AI 引用対象外**」badge (灰色) を defensive UI として表示 (DOC-FW-01 §3.5、DOC-KNW-04 §4.5)。**`mock-knowledge.ts` には `category: 'data_error'` snippet を登録しない** (DOC-KNW-04 §4.5 SSOT 厳守、staging から除外 + 別経路 個別差戻し 扱い)、CR R50 で確認: mock 追加して「入力誤り」filter を demonstrable にする案は SSOT と矛盾するため不採用、`KNOWLEDGE_CATEGORY_DISABLED` による disabled chip + wrapper span title「入力誤りは個別差戻し時に処理するため、本一覧の対象外」で governance boundary を UI で表現する方針を維持。`AI 引用対象外` badge logic は defensive code として keep (将来 SSOT 改訂時に有効化)
+10. **Day 12 Page 8 実装注記** (commit `b4d5583` + CR R49/R50 + Day14 前 closure): **CR R37+R40+R44+R46+R47 paradigm 踏襲**: enum identifier は raw UI 露出禁止、5 分類は `lib/sendback-categories.ts` (`SENDBACK_CATEGORIES` / `SENDBACK_CATEGORY_LABELS` / `getSendbackCategoryLabel`)、weight 表示は `lib/knowledge-labels.ts` (`KNOWLEDGE_WEIGHT_STYLE` / `KNOWLEDGE_CATEGORY_DISABLED` / `formatKnowledgeSourceLabel`) を single source とする。Agent 表示名は `mock-agents.ts` の `getAgentById(snippet.agentId)?.name` を SoT とし、AGENT 専用 local map は持たない。`category` / `weight` 等 field 値は AuditTrail と同じ JP label primary + snake_case sub-caption + JP-localized value paradigm (R46 dual-display + R47 enum JP map mandatory)。Detail panel の `workflowSlug` / `agentId` / `sourcePath` raw trace note は通常 business UI から外し、raw field は mock data / 型に保持する。raw trace expandable toggle は Day16-18 high-fi で再判定。StrictMode setState toggle bug 回避 (`setExpandedId(expandedId === id ? null : id)` 直接 closure 形式、CR R46 lesson)。governance term paraphrase: `staging` → 未承認 / `compiled approved` → 承認済 / `citation` → 引用根拠 / `runtime citation 対象外` → AI 引用対象外。filter 状態は page-level 3 軸 (workflow / category / weight)、全て chip 切替で immediate filtering、empty state 対応あり。Detail panel の `body` field は markdown render なしで whitespace-pre-wrap pre-formatted、本文 subpanel は `border-t` hairline divider で flat 表示。restricted boundary pack (国際送金) は mock-knowledge.ts に未登録 (DOC-OV-00 §2.1)、本 page UI 露出対象外。
 
 ## 5. ナビゲーション + AppShell 構造
 
@@ -325,36 +325,36 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 - **BottomNav (mobile fallback、scope-out 候補)**: 主要 5 画面 (Dashboard / Inbox / ProposalReview / Metrics / Knowledge)
 - **Route SSOT**: `prototype/src/App.tsx` で React Router v7 にて exactly 9 page route をマウント (§2.7.5 詳細、`/cases/:id/comment` は SendBackComment = 9 画面の 1 つ、10 番目ではない)
 
-## 6. AiProposalPanel 過去 case 関連ルール更新 Alert UI 仕様 (3 適用範囲)
+## 6. AiProposalPanel 過去案件 関連ルール更新 Alert UI 仕様 (3 適用範囲)
 
-DOC-FW-01 §6.3 「過去 case は遡って書き換えない + 関連ルール更新 Alert」の UI 実装。3 適用範囲を分離:
+DOC-FW-01 §6.3 「過去案件は遡って書き換えない + 関連ルール更新 Alert」の UI 実装。3 適用範囲を分離:
 
-### 6.1 適用範囲 1: 未承認・承認待ち case (CaseReview 内 AiProposalPanel)
+### 6.1 適用範囲 1: 未承認・承認待ち案件 (CaseReview 内 AiProposalPanel)
 
-- **配置**: `AiProposalPanel` 最上部、citation list の前 (banner Alert 形式)
-- **文言**: 「**関連手順が更新されています** / このcase作成後に承認されたルールがあります / AI提案本文は当時のまま保持されています」
+- **配置**: `AiProposalPanel` 最上部、引用根拠リストの前 (banner Alert 形式)
+- **文言**: 「**関連手順が更新されています** / この案件作成後に承認されたルールがあります / AI提案本文は当時のまま保持されています」
 - **色 token**: `bg-amber-50` + `border-amber-200` + `text-amber-800` (warning tone、critical ではない)
 - **icon**: `AlertCircleIcon` (lucide、amber-600)
 - **dismiss**: user dismissible (close icon)、`auto-hide なし`、reload で再表示
 - **link**: 「更新内容を見る」→ 該当 ProposalReview page
 
-### 6.2 適用範囲 2: 承認済み過去 case (AuditTrail)
+### 6.2 適用範囲 2: 承認済み過去案件 (AuditTrail)
 
-- **表示位置**: `/audit` page timeline、該当 case event の inline
-- **形式**: timeline 上に independent row として inline 表示 (banner ではない、bg-amber-50/30 tint + 「過去案件への影響」chip で視覚分離、CR R46 / §4.7 #9 で row inline pattern に確定、旧 nested item 案は deprecated)
-- **文言**: 「YYYY-MM-DD に [手順名] v0.X が承認されました (本 case 処理時の版は当時のまま audit trail に保持)」
+- **表示位置**: `/audit` page timeline、該当案件 event と同じ時系列上
+- **形式**: timeline 上に独立した行として表示 (banner ではない、bg-amber-50/30 tint + 「過去案件への影響」chip で視覚分離、CR R46 / §4.7 #9 で row pattern に確定、旧 nested item 案は旧案として廃止)
+- **文言**: 「YYYY-MM-DD に [手順名] v0.X が承認されました (本案件処理時の版は当時のまま監査証跡に保持)」
 - **link**: 該当 procedure version の diff 画面へ (proposal_id link)
 
-### 6.3 適用範囲 3: 新規 case (AiProposalPanel citation list)
+### 6.3 適用範囲 3: 新規案件 (AiProposalPanel 引用根拠リスト)
 
-- **表示位置**: AiProposalPanel citation list 内
-- **形式**: 通常 citation として表示 (Alert なし、§9.2 weight インジケータで `high` 表示)
+- **表示位置**: AiProposalPanel 引用根拠リスト内
+- **形式**: 通常の引用根拠として表示 (Alert なし、§9.2 weight インジケータで `high` 表示)
 - **文言**: 「[手順名] v0.2 (承認 YYYY-MM-DD)」
 - **link**: KnowledgeBrowser 該当 compiled snippet
 
 ### 6.4 mock data 連携
 
-`prototype/src/data/mock-cases.ts` の過去 case AI proposal 本文は **不変** (DOC-FW-01 §6.3)、関連 procedure_version_diff のみ追加。`mock-audit.ts` の state transition log で「いつ どの workflow / agent-instructions / approval-policy 版が適用された case か」を明示し、関連 case の Alert source を提供する。
+`prototype/src/data/mock-cases.ts` の過去案件 AI proposal 本文は **不変** (DOC-FW-01 §6.3)、関連 procedure_version_diff のみ追加。`mock-audit.ts` の state transition log で「いつ どの workflow / agent-instructions / approval-policy 版が適用された案件か」を明示し、関連案件の Alert source を提供する。
 
 ## 7. BusinessApprovalChip 仕様
 
@@ -422,7 +422,7 @@ DOC-FW-01 §3.5 (staging safety boundary) + DOC-ROOT-\_SSOT §1.4「staging know
 ### 9.6 `data_error` 例外表示
 
 - `data_error` category の staging snippet は KnowledgeBrowser で「**AI 引用対象外**」badge (灰色) を defensive UI として表示 (CR R44+R47 paradigm 経由、`runtime citation 対象外` は internal pipeline 用語のため UI 露出禁止)
-- ただし `mock-knowledge.ts` には `data_error` snippet を登録しない (DOC-KNW-04 §4.5 SSOT、staging から除外 + 別経路 個別差戻し 扱い)、本 badge logic は将来 SSOT 改訂時の defensive UI として keep (CR R50 で確認、`KnowledgeBrowser` の `入力誤り` filter は `CATEGORY_DISABLED` map で disabled state にし、tooltip で根拠提示)
+- ただし `mock-knowledge.ts` には `data_error` snippet を登録しない (DOC-KNW-04 §4.5 SSOT、staging から除外 + 別経路 個別差戻し 扱い)、本 badge logic は将来 SSOT 改訂時の defensive UI として keep (CR R50 で確認、`KnowledgeBrowser` の `入力誤り` filter は `KNOWLEDGE_CATEGORY_DISABLED` で disabled state にし、tooltip で根拠提示)
 - AiProposalPanel には表示されない (runtime 参照外)
 - 詳細 routing は DOC-KNW-04 §4.5
 

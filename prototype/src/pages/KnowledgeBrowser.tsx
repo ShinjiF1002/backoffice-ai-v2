@@ -8,7 +8,17 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import {
+  getSendbackCategoryLabel,
+  SENDBACK_CATEGORY_LABELS,
+} from '@/lib/sendback-categories'
+import {
+  KNOWLEDGE_CATEGORY_DISABLED,
+  KNOWLEDGE_WEIGHT_STYLE,
+  formatKnowledgeSourceLabel,
+} from '@/lib/knowledge-labels'
 import { mockKnowledge, type KnowledgeSnippet } from '@/data/mock-knowledge'
+import { getAgentById } from '@/data/mock-agents'
 import type { SendBackCategory, Weight } from '@/data/types'
 
 /**
@@ -30,7 +40,7 @@ import type { SendBackCategory, Weight } from '@/data/types'
  *  - Sticky footer: ダッシュボード戻り link + 検証用 caption
  *
  * 規範 (CR R37+R40+R44+R46+R47 paradigm):
- *  - enum value は JP map 経由 (SendBackCategory + Weight)、raw enum identifier UI 露出禁止
+ *  - enum value は shared label helper 経由 (SendBackCategory + Weight)、raw enum identifier UI 露出禁止
  *  - JP label primary (11px) + snake_case sub-caption (9px mono) dual display (R46 paradigm)
  *  - staging → 未承認、compiled approved → 承認済 (Tier 1 語彙)、citation → 引用根拠
  *  - StrictMode setState 直接 closure 形式優先 (R46 bug fix)
@@ -42,81 +52,6 @@ import type { SendBackCategory, Weight } from '@/data/types'
 const WORKFLOW_LABEL: Record<string, string> = {
   'UC-BO-01': '法人住所変更',
   'UC-BO-02': '口座開設書類完備',
-}
-
-// CR R49 B2: Agent identifier 表示の JP 一次表記 (mock-agents.ts agentRecord.name と対応、3 箇所重複は Day 14-15 で統合)
-const AGENT_LABEL: Record<string, string> = {
-  'agent-corporate-address-change': '法人住所変更 Agent',
-  'agent-account-opening': '口座開設 Agent',
-}
-
-// CR R47 paradigm: 5 分類 enum を user-facing で JP 表示。
-// AuditTrail.tsx と重複しているが Day 14-15 で shared module 化 (R47 Minor 2 defer)。
-const CATEGORY_JP: Record<SendBackCategory, string> = {
-  misunderstanding: '誤読',
-  ui_change: 'UI 差異',
-  edge_case: '境界条件',
-  judgment_gap: '判断境界',
-  data_error: '入力誤り',
-}
-
-// CR R49 M3: data_error は staging から除外される SSOT (DOC-KNW-04 §4.5、別経路 個別差戻し 扱い)、
-// 本一覧 filter chip は disabled 状態で表示。click は no-op、title で根拠を提示。
-const CATEGORY_DISABLED: Record<SendBackCategory, boolean> = {
-  misunderstanding: false,
-  ui_change: false,
-  edge_case: false,
-  judgment_gap: false,
-  data_error: true,
-}
-
-/**
- * source_path から「未承認 / 承認済 ナレッジ + 記録日」の JP 一次表記を生成 (CR R49 B2)。
- * snake_case raw path は schemaKey sub-caption + note で keep、primary value は user-facing JP description。
- */
-function formatSourcePathLabel(weight: Weight, date: string): string {
-  if (weight === 'high') return `承認済ナレッジ · ${date}`
-  if (weight === 'medium') return `確認済 (未承認) ナレッジ · ${date}`
-  return `未承認ナレッジ · ${date}`
-}
-
-interface WeightStyle {
-  /** JP full label (filter chip / badge / detail panel chip 用、§9.2 SSOT) */
-  label: string
-  /** JP short label (PageHeader counter / framing banner 3 状態並列 用、CR R50 M2) */
-  shortLabel: string
-  /** dot 色 (§9.2 SSOT) */
-  dotClass: string
-  /** badge tint (snippet card 用) */
-  badgeClass: string
-  /** detail panel chip 用 */
-  chipClass: string
-}
-
-// CR R50 M2: 3 状態並列 (承認済 / 確認済 (未承認) / 未承認) を ws.label / ws.shortLabel 経由で single source 統一。
-// 「レビュー済み」 → 「確認済 (未承認)」 (Page 6+ review → 確認 規範 + 送り仮名 trim)。
-const WEIGHT_STYLE: Record<Weight, WeightStyle> = {
-  high: {
-    label: '承認済',
-    shortLabel: '承認済',
-    dotClass: 'bg-emerald-600',
-    badgeClass: 'bg-emerald-50 text-emerald-700',
-    chipClass: 'bg-emerald-100 text-emerald-800',
-  },
-  medium: {
-    label: '確認済 (未承認)',
-    shortLabel: '確認済',
-    dotClass: 'bg-amber-500',
-    badgeClass: 'bg-amber-50 text-amber-700',
-    chipClass: 'bg-amber-100 text-amber-800',
-  },
-  low: {
-    label: '未承認',
-    shortLabel: '未承認',
-    dotClass: 'bg-slate-400',
-    badgeClass: 'bg-slate-100 text-slate-700',
-    chipClass: 'bg-slate-200 text-slate-700',
-  },
 }
 
 export function KnowledgeBrowser() {
@@ -168,7 +103,7 @@ export function KnowledgeBrowser() {
               全期間 (検証用)
             </span>
             <span className="font-mono text-[10px] text-slate-500 tabular">
-              {filteredSnippets.length} 件 ({WEIGHT_STYLE.high.shortLabel} {counts.high} · {WEIGHT_STYLE.medium.shortLabel} {counts.medium} · {WEIGHT_STYLE.low.shortLabel} {counts.low})
+              {filteredSnippets.length} 件 ({KNOWLEDGE_WEIGHT_STYLE.high.shortLabel} {counts.high} · {KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} {counts.medium} · {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel} {counts.low})
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -206,10 +141,10 @@ export function KnowledgeBrowser() {
               <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-slate-900">
-                  ナレッジは <span className="font-mono text-[11px]">{WEIGHT_STYLE.high.shortLabel} / {WEIGHT_STYLE.medium.shortLabel} / {WEIGHT_STYLE.low.shortLabel}</span> の 3 段階で管理されます
+                  ナレッジは <span className="font-mono text-[11px]">{KNOWLEDGE_WEIGHT_STYLE.high.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel}</span> の 3 段階で管理されます
                 </p>
                 <p className="mt-0.5 text-slate-600">
-                  AI が <strong>引用根拠</strong> として使えるのは <strong>{WEIGHT_STYLE.high.shortLabel}</strong> ナレッジのみです。{WEIGHT_STYLE.medium.shortLabel} / {WEIGHT_STYLE.low.shortLabel} は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
+                  AI が <strong>引用根拠</strong> として使えるのは <strong>{KNOWLEDGE_WEIGHT_STYLE.high.shortLabel}</strong> ナレッジのみです。{KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel} は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
                 </p>
               </div>
             </div>
@@ -239,9 +174,9 @@ export function KnowledgeBrowser() {
                 >
                   全分類
                 </button>
-                {(Object.keys(CATEGORY_JP) as SendBackCategory[]).map((cat) => {
+                {(Object.keys(SENDBACK_CATEGORY_LABELS) as SendBackCategory[]).map((cat) => {
                   const isActive = cat === categoryFilter
-                  const isDisabled = CATEGORY_DISABLED[cat]
+                  const isDisabled = KNOWLEDGE_CATEGORY_DISABLED[cat]
                   // CR R49 M3: data_error は staging から除外 SSOT (DOC-KNW-04 §4.5)、
                   // 本一覧では disabled chip + title note で根拠提示、active 系 4 分類のみ filter 動作。
                   const button = (
@@ -264,7 +199,7 @@ export function KnowledgeBrowser() {
                       aria-pressed={isActive}
                       aria-disabled={isDisabled}
                     >
-                      {CATEGORY_JP[cat]}
+                      {getSendbackCategoryLabel(cat)}
                     </button>
                   )
                   return isDisabled ? (
@@ -296,7 +231,7 @@ export function KnowledgeBrowser() {
                 </button>
                 {(['high', 'medium', 'low'] as Weight[]).map((w) => {
                   const isActive = w === weightFilter
-                  const ws = WEIGHT_STYLE[w]
+                  const ws = KNOWLEDGE_WEIGHT_STYLE[w]
                   return (
                     <button
                       key={w}
@@ -348,7 +283,7 @@ export function KnowledgeBrowser() {
               <ol className="divide-y divide-slate-100">
                 {filteredSnippets.map((snippet) => {
                   const isExpanded = snippet.id === expandedId
-                  const ws = WEIGHT_STYLE[snippet.weight]
+                  const ws = KNOWLEDGE_WEIGHT_STYLE[snippet.weight]
                   const isDataError = snippet.category === 'data_error'
                   return (
                     <li key={snippet.id}>
@@ -396,7 +331,7 @@ export function KnowledgeBrowser() {
                             <span aria-hidden="true">·</span>
                             <span>{WORKFLOW_LABEL[snippet.workflowId]}</span>
                             <span aria-hidden="true">·</span>
-                            <span>{CATEGORY_JP[snippet.category]} (5 分類)</span>
+                            <span>{getSendbackCategoryLabel(snippet.category)} (5 分類)</span>
                             <span aria-hidden="true">·</span>
                             <span>{snippet.sourceCase}</span>
                           </div>
@@ -439,7 +374,8 @@ export function KnowledgeBrowser() {
 
 /** Expanded panel: 8 項目 frontmatter 詳細 (JP label primary + snake_case sub-caption) + 本文 */
 function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
-  const ws = WEIGHT_STYLE[snippet.weight]
+  const ws = KNOWLEDGE_WEIGHT_STYLE[snippet.weight]
+  const agentName = getAgentById(snippet.agentId)?.name ?? snippet.agentId
   return (
     <div className="border-t border-slate-100 bg-slate-50/30 px-5 py-4">
       <div className="mb-3 flex items-center gap-2">
@@ -470,13 +406,11 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
           label="業務"
           schemaKey="workflow_id + workflow_slug"
           value={`${WORKFLOW_LABEL[snippet.workflowId]} · ${snippet.workflowId}`}
-          note={snippet.workflowSlug}
         />
         <DetailRow
           label="Agent"
           schemaKey="agent_id + agent_version"
-          value={`${AGENT_LABEL[snippet.agentId] ?? snippet.agentId} · ${snippet.agentVersion}`}
-          note={snippet.agentId}
+          value={`${agentName} · ${snippet.agentVersion}`}
         />
         <DetailRow
           label="元 案件"
@@ -487,7 +421,7 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
         <DetailRow
           label="分類"
           schemaKey="category"
-          value={`${CATEGORY_JP[snippet.category]} (5 分類)`}
+          value={`${getSendbackCategoryLabel(snippet.category)} (5 分類)`}
         />
         <DetailRow
           label="重要度"
@@ -502,8 +436,7 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
         <DetailRow
           label="ファイル"
           schemaKey="source_path"
-          value={formatSourcePathLabel(snippet.weight, snippet.date)}
-          note={snippet.sourcePath}
+          value={formatKnowledgeSourceLabel(snippet.weight, snippet.date)}
           wide
         />
       </dl>

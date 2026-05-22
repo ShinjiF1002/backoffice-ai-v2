@@ -142,7 +142,7 @@ export const mockKnowledge: KnowledgeSnippet[] = [
     category: 'ui_change',
     weight: 'medium',
     title: '新フォーム (2026-05 改訂) の印鑑欄 表示構成',
-    body: '2026-05 改訂の口座開設新フォームでは印鑑欄が右下から左下に移動。OCR の照合座標 更新が必要。確認済み、手順承認待ち。',
+    body: '2026-05 改訂の口座開設新フォームでは印鑑欄が右下から左下に移動。OCR の照合座標 更新が必要。確認済 (未承認)、手順承認待ち。',
     sourcePath: 'workflows/account-opening/knowledge/staging/2026-05-20-new-form-layout.md',
   },
 ]

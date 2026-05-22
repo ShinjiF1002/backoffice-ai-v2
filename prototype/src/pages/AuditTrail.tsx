@@ -13,8 +13,8 @@ import {
   Cog,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { getSendbackCategoryLabel } from '@/lib/sendback-categories'
 import { mockAuditEvents, type AuditEvent, type EventType } from '@/data/mock-audit'
-import type { SendBackCategory } from '@/data/types'
 
 /**
  * AuditTrail — 9 画面の 1 つ (`/audit`)、Day 12 Page 7 wireframe
@@ -44,17 +44,6 @@ import type { SendBackCategory } from '@/data/types'
 const WORKFLOW_LABEL: Record<string, string> = {
   'UC-BO-01': '法人住所変更',
   'UC-BO-02': '口座開設書類完備',
-}
-
-// CR R47 B1: sendback_category enum identifier を user-facing で JP 表示 (CR R37 paradigm 整合)。
-// Page 8 KnowledgeBrowser の frontmatter category 同型 risk pre-empt も意図。
-// Day 14-15+ で SendBackComment SENDBACK_CATEGORIES と single source 化検討 (CR R37 M4 defer 解消)。
-const SENDBACK_CATEGORY_JP: Record<SendBackCategory, string> = {
-  misunderstanding: '誤読',
-  ui_change: 'UI 差異',
-  edge_case: '境界条件',
-  judgment_gap: '判断境界',
-  data_error: '入力誤り',
 }
 
 const EVENT_TYPE_LABEL: Record<EventType, string> = {
@@ -398,7 +387,7 @@ function DetailPanel({ event }: { event: AuditEvent }) {
           <DetailRow
             label="差戻し分類"
             schemaKey="sendback_category"
-            value={`${SENDBACK_CATEGORY_JP[event.sendbackCategory]} (5 分類)`}
+            value={`${getSendbackCategoryLabel(event.sendbackCategory)} (5 分類)`}
           />
         )}
         {event.compiledKnowledgeCitationIds && (

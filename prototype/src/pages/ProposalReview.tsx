@@ -74,7 +74,7 @@ export function ProposalReview() {
           <Sparkles className="h-3 w-3 text-[var(--color-primary)]" aria-hidden="true" />
           <span>
             Proposal source: <span className="font-medium text-slate-800">{p.raci.proposalSource}</span>
-            <span className="text-slate-500"> · 判断根拠は左 panel の 判定基準 + 元 case を参照</span>
+            <span className="text-slate-500"> · 判断根拠は左の判定基準 + 元案件 を参照</span>
           </span>
         </div>
       </header>
@@ -107,10 +107,10 @@ export function ProposalReview() {
               </ul>
             </div>
 
-            {/* source case */}
+            {/* 元 案件 */}
             <div className="rounded-lg border border-slate-200 bg-white p-4">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-slate-900">元 case</h2>
+                <h2 className="text-sm font-semibold text-slate-900">元 案件</h2>
                 <span className="font-mono text-[10px] text-slate-500">{p.sourceCases.length} 件</span>
               </div>
               <ul className="space-y-3">
@@ -164,7 +164,7 @@ export function ProposalReview() {
           <section className="lg:col-span-6">
             <div className="rounded-lg border border-slate-200 bg-white p-4">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-slate-900">提案 diff (変更前 / 変更後)</h2>
+                <h2 className="text-sm font-semibold text-slate-900">提案 差分 (変更前 / 変更後)</h2>
                 <span className="font-mono text-[10px] text-slate-500">{p.proposedDiff.length} ファイル</span>
               </div>
               <p className="mb-4 text-xs leading-relaxed text-slate-700">{p.summary}</p>
@@ -262,7 +262,7 @@ export function ProposalReview() {
         <div className="flex items-center justify-between gap-3">
           <div className="text-xs text-slate-500">
             <span className="font-medium text-slate-700">{p.raci.r}:</span>{' '}
-            提案を triage し、業務責任者へ送付するか差戻しを判断してください
+            提案を整理し、業務責任者へ送付するか差戻しを判断してください
           </div>
           <div className="flex items-center gap-2">
             <button

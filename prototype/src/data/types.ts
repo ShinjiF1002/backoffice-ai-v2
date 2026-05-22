@@ -200,7 +200,7 @@ export interface ProposalRecord {
   sourceCases: ProposalSourceCase[]
   /** 元 staging knowledge snippets (citation 対象外、weight: medium 中心) */
   stagingSnippets: ProposalStagingSnippet[]
-  /** 提案 diff (workflow.md / agent-instructions.md / approval-policy.md before/after) */
+  /** 提案 差分 (workflow.md / agent-instructions.md / approval-policy.md 変更前 / 変更後) */
   proposedDiff: ProposalDiffSection[]
   raci: ProposalRaci
   /** Queue owner (Manual 管理者 mock 氏名、SoD 上 approver と別人) */

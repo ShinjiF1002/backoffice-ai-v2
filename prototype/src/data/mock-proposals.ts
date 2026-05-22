@@ -22,11 +22,11 @@ export const mockProposals: ProposalRecord[] = [
     workflowName: '法人住所変更',
     proposalTitle: 'OCR 信頼度閾値の段階引き上げ提案 (0.85 → 0.88)',
     status: 'pending-triage',
-    statusLabel: 'Manual 管理者 triage 待ち',
+    statusLabel: 'Manual 管理者 整理待ち',
     createdAt: '2026-05-31 06:30:00',
     elapsedLabel: '01:42:18',
     summary:
-      '直近 3 週間の差戻し履歴を AI が日次分析した結果、OCR 信頼度 0.85-0.88 の範囲で人手上書き率が高い (推定 12 件中 9 件) ことが判明。現行閾値 0.85 を 0.88 に引き上げ、0.85-0.88 範囲を manual review queue に回す手順変更を提案。提案本体の数値はすべて [仮説 / 要検証]、Phase 1 で実値を検証・再設定する。',
+      '直近 3 週間の差戻し履歴を AI が日次分析した結果、OCR 信頼度 0.85-0.88 の範囲で人手上書き率が高い (推定 12 件中 9 件) ことが判明。現行閾値 0.85 を 0.88 に引き上げ、0.85-0.88 範囲を人手確認に回す手順変更を提案。提案本体の数値はすべて [仮説 / 要検証]、Phase 1 で実値を検証・再設定する。',
     decisionCriteria: [
       {
         label: '同種差戻し件数',
@@ -94,7 +94,7 @@ export const mockProposals: ProposalRecord[] = [
         before:
           'AI 抽出後に信頼度が 0.85 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。',
         after:
-          'AI 抽出後に信頼度が 0.88 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。0.85-0.88 の場合は manual review queue に回す。',
+          'AI 抽出後に信頼度が 0.88 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。0.85-0.88 の場合は人手確認に回す。',
       },
       {
         targetFile: 'workflows/corporate-address-change/approval-policy.md',

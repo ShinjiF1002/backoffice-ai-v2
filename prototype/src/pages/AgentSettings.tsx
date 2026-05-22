@@ -67,7 +67,7 @@ const SIMULATION_SCENARIOS: ReadonlyArray<SimulationScenario> = [
   {
     id: 'sim-b',
     type: 'B',
-    title: '新 external tool 追加 (個人情報アクセス範囲の拡張)',
+    title: '外部 AI サービス 追加 (個人情報アクセス範囲の拡張)',
     description:
       '外部 AI サービスの追加や新規 個人情報アクセス範囲の拡張、認証方式変更等、情報管理に影響する変更',
     approvers: 'AI 管理者 + 情報管理責任者 + リスク確認担当 の co-A 必須',
@@ -118,7 +118,7 @@ export function AgentSettings() {
           <ChevronRight className="h-3 w-3" aria-hidden="true" />
           <span className="text-slate-700">Agent 設定</span>
           <ChevronRight className="h-3 w-3" aria-hidden="true" />
-          <span className="font-mono text-slate-700">{a.id}</span>
+          <span className="text-slate-700">{a.name}</span>
         </nav>
 
         {/* Title row + meta */}
@@ -132,7 +132,7 @@ export function AgentSettings() {
           </div>
           <div className="flex items-center gap-3">
             <span className="font-mono text-[11px] text-slate-500 tabular">
-              agent_version {a.version}
+              Agent 版数 {a.version}
             </span>
           </div>
         </div>
@@ -152,7 +152,7 @@ export function AgentSettings() {
                   id="agent-trust-progression"
                   className="text-base font-semibold text-slate-900"
                 >
-                  Trust Level Progression
+                  Trust Level の進化段階
                 </h2>
                 <p className="mt-1 text-[12px] leading-relaxed text-slate-700">
                   <span className="font-medium text-slate-900">
@@ -176,9 +176,6 @@ export function AgentSettings() {
                 <h3 className="text-xs font-semibold text-slate-800">
                   4 KPI 進化要件
                 </h3>
-                <span className="font-mono text-[10px] text-slate-500 tabular">
-                  DOC-MON-05 §3
-                </span>
               </div>
               <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-4">
                 {KPI_PROGRESSION.map((kpi) => (
@@ -242,9 +239,9 @@ export function AgentSettings() {
                 <dt className="font-medium text-slate-700">Model</dt>
                 <dd>
                   <span className="font-mono tabular text-slate-900">{a.modelLabel}</span>
-                  <p className="mt-1 font-mono text-[10px] text-slate-500 tabular">
-                    agent_version {a.version}
-                  </p>
+                  <span className="ml-2 inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-600 tabular">
+                    {a.version}
+                  </span>
                 </dd>
               </div>
               {/* Prompt */}
@@ -311,15 +308,12 @@ export function AgentSettings() {
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h2 id="agent-simulation" className="text-sm font-semibold text-slate-900">
-                  変更影響の試算
+                  変更影響の事前確認
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  変更内容を選ぶと、設定承認 Type 区分と co-A 要件が自動判定されます (Day 12 wireframe 用 mock)
+                  変更内容を選ぶと、設定承認 Type 区分と co-A 要件の判定例を確認できます
                 </p>
               </div>
-              <span className="font-mono text-[10px] text-slate-500 tabular">
-                DOC-APP-02 §4
-              </span>
             </div>
             <div className="space-y-2">
               {SIMULATION_SCENARIOS.map((scen) => {
@@ -379,10 +373,10 @@ export function AgentSettings() {
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h2 id="agent-history" className="text-sm font-semibold text-slate-900">
-                  設定承認 history
+                  設定承認 履歴
                 </h2>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  直近 {a.changeHistory.length} 件の設定変更 (詳細は監査証跡で展開、Day 14-15+ で接続)
+                  直近 {a.changeHistory.length} 件の設定変更 (詳細表示は次の実装段階で対応)
                 </p>
               </div>
               <span className="font-mono text-[10px] text-slate-500 tabular">

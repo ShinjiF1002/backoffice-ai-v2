@@ -69,22 +69,22 @@ export const mockAgents: AgentRecord[] = [
       {
         id: 'tool-ocr',
         name: 'OCR 抽出',
-        description: 'PDF → text 抽出 (信頼度 0.85 閾値、未達 → 注意 raise)',
+        description: 'PDF → text 抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
       },
       {
         id: 'tool-master-lookup',
         name: '住所マスタ照合',
-        description: '都道府県マスタ + 郵便番号 cross-check (未登録 → 注意 raise)',
+        description: '都道府県マスタ + 郵便番号 突合 (未登録時は 注意 を発する)',
       },
       {
         id: 'tool-staging-knowledge',
         name: '未承認ナレッジ参照',
-        description: '未承認 entry を prompt 注入 (citation 対象外、引用根拠には使わない)',
+        description: '未承認のナレッジを プロンプトに付加 (引用根拠としては使わない)',
       },
     ],
     permissions: {
-      dataScope: 'UC-BO-01 法人住所変更 内の個別顧客データ (read-only)',
-      boundary: 'active (通常 AI 自動化対象、Trust Level Supervised で全件 確認)',
+      dataScope: 'UC-BO-01 法人住所変更 内の個別顧客データ (閲覧のみ)',
+      boundary: '通常 AI 自動化対象、Trust Level Supervised で全件確認',
     },
     changeHistory: [
       {
@@ -98,7 +98,7 @@ export const mockAgents: AgentRecord[] = [
         id: 'chg-uc01-002',
         date: '2026-05-15',
         type: 'A',
-        summary: '住所マスタ照合 tool に都道府県 cross-check 機能を追加',
+        summary: '住所マスタ照合 ツールに 都道府県 突合機能を追加',
         approver: '佐藤 隆 (AI 管理者)',
       },
       {
@@ -126,7 +126,7 @@ export const mockAgents: AgentRecord[] = [
       {
         id: 'tool-ocr',
         name: 'OCR 抽出',
-        description: 'PDF → text 抽出 (信頼度 0.85 閾値、未達 → 注意 raise)',
+        description: 'PDF → text 抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
       },
       {
         id: 'tool-seal-verification',
@@ -140,8 +140,8 @@ export const mockAgents: AgentRecord[] = [
       },
     ],
     permissions: {
-      dataScope: 'UC-BO-02 口座開設書類完備 内の個別顧客データ (read-only)',
-      boundary: 'active (通常 AI 自動化対象、Trust Level Supervised で全件 確認)',
+      dataScope: 'UC-BO-02 口座開設書類完備 内の個別顧客データ (閲覧のみ)',
+      boundary: '通常 AI 自動化対象、Trust Level Supervised で全件確認',
     },
     changeHistory: [
       {

@@ -248,14 +248,14 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 ### 4.4 Dashboard (`/dashboard` または `/`)
 
 1. **画面 ID**: SCR-04 Dashboard
-2. **目的**: 入力者 / 承認者 / 業務責任者が複数業務 (UC-BO-01 + UC-BO-02) の進捗 + Alert を俯瞰する
+2. **目的**: 入力者 / 承認者 / 業務責任者が複数業務 (UC-BO-01 + UC-BO-02) の進捗 + 注意 + 承認待ちを俯瞰する。Demo Chapter 1/2 の入口でもある
 3. **主要ユーザー**: 全 role (read access)
-4. **主要 action**: 業務 card click → 業務別 Inbox (`/inbox?workflow=...`)、Alert click → 該当 CaseReview
-5. **状態**: 業務 active / busy / quiet (case 件数で表現)
-6. **表示要素**: PageHeader、業務 card grid (UC-BO-01 + UC-BO-02 並列、各 card に case 件数 / Alert 件数 / pending business-approval 件数 / 直近 7 日 KPI sparkline)、Prototype mode label。**国際送金は restricted boundary pack のため card 表示しない** (DOC-OV-00 §3、`workflows/_index.md`)
-7. **遷移**: card click → Inbox filtered view、Alert click → CaseReview
-8. **mock data 依存**: `mock-cases.ts` (件数集計) + `mock-metrics.ts` (sparkline data)
-9. **Day 11+ 実装メモ**: 業務 card は 2 並列 (UC-BO-01 Hero + UC-BO-02 並列カード)。restricted 業務は表示しない原則を mock data から徹底 (DOC-OV-00 §3 / `workflows/_index.md` §1 と整合)
+4. **主要 action**: 業務 card click → 業務別 Inbox (`/inbox?workflow=...` で workflow filter 適用)、attention strip 注意 click → 該当 CaseReview、workflow lane 5 node click → 各 page route
+5. **状態**: 業務 active / busy / quiet (alert 比率 + sent-back 件数で 3 段階分類、wireframe 段階の placeholder heuristic [仮説 / 要検証]、Day 14-15 で thresholds 精緻化)
+6. **表示要素**: PageHeader (breadcrumb ダッシュボード + h1 + 案件数 / 注意 / 承認待ち の 3 compact chip + UC-BO-01 + UC-BO-02 [仮説 / 要検証] meta)、(任意) attention strip (queue-level 注意 1 本まで、CaseReview の case alert strip と register 統一)、業務 card grid (UC-BO-01 + UC-BO-02 並列、各 card に business id + 業務名 + state chip [要注意 / 通常稼働 / 静穏] + 3 metric [案件数 / 注意 / 承認待ち] + 5 status breakdown [AI 処理中 / 入力者確認待ち / 再処理中 / 承認者承認待ち / 反映済] + 直近 7 日件数推移 sparkline [仮説 / 要検証] + CTA Link)、workflow lane (Demo Chapter 1+2 動線、5 node: 受信トレイ → 案件レビュー → コメント付き差戻し → AI 提案レビュー → メトリクス確認、各 node 実 route Link で enabled no-op 0)、footer (mock state + 次の実装段階 scope、PrototypeModeLabel と内容重複なし)。**国際送金は restricted boundary pack のため card / metric / sparkline / attention 全て表示しない** (DOC-OV-00 §3、`workflows/_index.md`)。PrototypeModeLabel は AppShell TopBar 経由で自動表示、本 page 内で重複しない
+7. **遷移**: card click → Inbox `?workflow=` filter (Day 12 Page 3 で Inbox 側 useSearchParams + 業務 filter chip active state 実装で実機能化)、attention strip 確認 → 該当 CaseReview、workflow lane node → 該当 page
+8. **mock data 依存**: `mock-cases.ts` (13 件、件数集計 + status breakdown + alertCount + businessApprovalStatus) + `mock-metrics.ts` (mockKpiHypotheses + Day 12 Page 3 で `mockWorkflowTrends` + `getWorkflowTrend` 追加、業務別 7 日件数推移 + alert ratio 7 日推移)
+9. **Day 11+ 実装メモ**: 業務 card は 2 並列 (UC-BO-01 + UC-BO-02、国際送金は restricted boundary pack で表示しない原則を mock data から徹底)。Day 12 Page 3 で wireframe 実装、CaseReview / Inbox / ProposalReview と同 Operational Premium Light tokens + JP-only + mono cadence、Dashboard 固有 page-specific layout (3-column body は CaseReview 専用、Dashboard は 業務 card grid + workflow lane が主役)。Inbox 側 `?workflow=` filter 連携で card click 動線を enabled no-op なく実機能化 (Day 12 Page 3 で Inbox.tsx に useSearchParams + workflowFilter chip active state を minimal 追加)
 
 ### 4.5 ProposalReview (`/proposals/:id`) [Hero 2]
 

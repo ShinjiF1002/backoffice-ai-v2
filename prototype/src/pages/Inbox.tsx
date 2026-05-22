@@ -1,10 +1,19 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/case/StatusBadge'
 import type { CaseStatus } from '@/data/types'
+
+/**
+ * 業務 ID (workflowId) → UI 表示名。Dashboard card link で `?workflow=UC-BO-01` 等を渡された時に
+ * filter chip 表示と filter logic で参照する。Day 12 Page 3 (Dashboard) 連携で追加。
+ */
+const workflowLabel: Record<string, string> = {
+  'UC-BO-01': '法人住所変更',
+  'UC-BO-02': '口座開設書類完備',
+}
 
 /**
  * Inbox — Demo Chapter 1 起点画面、Day 12 wireframe (CaseReview visual grammar 継承)
@@ -19,11 +28,13 @@ import type { CaseStatus } from '@/data/types'
  *  - Main body: queue table (案件 ID mono / 業務名 / 状態 StatusBadge / 経過 mono SLA-tinted [status 連動: pending/ready/sent-back のみ tint、business-approval-waiting/reflected は normal 固定] / 担当者 / 注意 chip [amber-soft、alertCount > 0 のみ] / →)
  *  - Row click: navigate + Enter/Space keyboard、focus visibility は global :focus-visible (indigo 2px outline) で表現 (Day 12.2 CR R28 B2)
  *  - Footer: bulk action chips (一括承認 / 一括差戻し、disabled state) + 件数 summary。「(一括操作は次の実装段階で対応)」caption が wireframe の唯一の signal
- *  - filter chip / sort selector / pagination は visual のみ、動作は次の実装段階以降 (tooltip は demo noise 回避のため非表示、footer caption に集約 — Day 12.2 CR R28 M3)
+ *  - URL search param `?workflow=UC-BO-XX` で業務別 filter 適用 (Day 12 Page 3 Dashboard card 動線連携、enabled no-op 0 を維持)、filter active 時は workflow chip が indigo soft で active state + X icon で解除可能
+ *  - sort 切替 / 状態 / 担当者 / 経過時間 filter chip / pagination は visual のみ、動作は次の実装段階以降 (tooltip は demo noise 回避のため非表示、footer caption に集約 — Day 12.2 CR R28 M3)
  *  - Prototype mode label は AppShell 経由で自動表示
  *
  * CR R27 (Day 12.1 patch): JP-only tooltip + bulk action disabled + Alert 列 header → 注意 (CaseReview 注意 strip と register 統一)。
  * CR R28 (Day 12.2 patch): B2 row focus visibility に global :focus-visible 委譲 + M1 slaTone(status) で SLA 適用範囲を入力者 queue 対象に限定 + M3 tooltip 6 hit 集約 (footer caption 1 行のみ)。
+ * Day 12 Page 3 (Dashboard 連携): useSearchParams で `?workflow=` を読み、workflow filter chip を active state + 解除動線として実機能化 (Dashboard card click → /inbox?workflow=UC-BO-XX で工程連動)。
  */
 
 /**
@@ -42,18 +53,28 @@ function slaTone(label: string, status: CaseStatus): 'normal' | 'warn' | 'critic
   return 'normal'
 }
 
-const FILTER_OPTIONS = [
-  { key: 'workflow', label: '業務' },
-  { key: 'status', label: '状態' },
-  { key: 'assignee', label: '担当者' },
-  { key: 'elapsed', label: '経過時間' },
-] as const
-
 export function Inbox() {
   const navigate = useNavigate()
-  // Sort by 受付順 default (= mock data 配列順、Day 14-15 で interactive sort 切替)
-  const rows = useMemo(() => mockCases, [])
+  const [searchParams] = useSearchParams()
+  const workflowFilter = searchParams.get('workflow')
+  /**
+   * Day 12 Page 3 (Dashboard) 連携: `/inbox?workflow=UC-BO-XX` で業務別 filter。
+   * filter param 不一致 ID は完全空 list を返す (no fallback to all)、Dashboard card 動線が安全。
+   * sort 切替 / 他 filter chip (状態 / 担当者 / 経過時間) は wireframe (Day 14-15 で interactive 化)。
+   */
+  const rows = useMemo(
+    () => (workflowFilter ? mockCases.filter((c) => c.workflowId === workflowFilter) : mockCases),
+    [workflowFilter]
+  )
   const total = rows.length
+  const workflowFilterLabel = workflowFilter ? workflowLabel[workflowFilter] ?? workflowFilter : 'すべて'
+
+  const filterOptions = [
+    { key: 'workflow', label: '業務', value: workflowFilterLabel },
+    { key: 'status', label: '状態', value: 'すべて' },
+    { key: 'assignee', label: '担当者', value: 'すべて' },
+    { key: 'elapsed', label: '経過時間', value: 'すべて' },
+  ]
 
   return (
     <div className="flex h-full flex-col bg-[var(--color-canvas)]">
@@ -86,16 +107,30 @@ export function Inbox() {
         {/* Filter chip row */}
         <div className="mt-2.5 flex items-center gap-2">
           <Filter className="h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
-          {FILTER_OPTIONS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              <span className="font-medium">{f.label}:</span>
-              <span className="text-slate-500">すべて</span>
-            </button>
-          ))}
+          {filterOptions.map((f) => {
+            const isActive = f.value !== 'すべて'
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => {
+                  if (f.key === 'workflow' && workflowFilter) navigate('/inbox')
+                }}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] transition-colors',
+                  isActive
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)]'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                <span className="font-medium">{f.label}:</span>
+                <span className={isActive ? 'font-medium' : 'text-slate-500'}>{f.value}</span>
+                {isActive && f.key === 'workflow' && (
+                  <X className="h-3 w-3 text-[var(--color-primary)]" aria-label="filter 解除" />
+                )}
+              </button>
+            )
+          })}
         </div>
       </header>
 

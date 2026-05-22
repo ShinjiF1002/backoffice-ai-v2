@@ -53,3 +53,35 @@ export const mockKpiHypotheses: KpiHypothesis[] = [
     status: '仮説 / 要検証',
   },
 ]
+
+/**
+ * 業務別 7 日推移 (Dashboard card sparkline + 件数推移 表示用)。
+ *
+ * Day 12 Page 3 (Dashboard) 追加。値はすべて wireframe placeholder = `[仮説 / 要検証]`、Phase 1 で実値検証。
+ * 国際送金 (restricted boundary pack) は表示対象外のため本 mock にも含めない。
+ */
+export interface WorkflowTrend {
+  workflowId: string
+  /** 7 日推移 (日次 case 件数の正規化、0-1)、Dashboard sparkline 用 [仮説 / 要検証] */
+  caseVolume7Day: number[]
+  /** 7 日推移 (日次 alert 発生率、0-1)、Dashboard 補助 sparkline 候補 [仮説 / 要検証] */
+  alertRatio7Day: number[]
+}
+
+export const mockWorkflowTrends: WorkflowTrend[] = [
+  {
+    workflowId: 'UC-BO-01',
+    caseVolume7Day: [0.62, 0.65, 0.78, 0.72, 0.81, 0.74, 0.76],
+    alertRatio7Day: [0.18, 0.22, 0.25, 0.21, 0.28, 0.24, 0.20],
+  },
+  {
+    workflowId: 'UC-BO-02',
+    caseVolume7Day: [0.42, 0.48, 0.55, 0.61, 0.52, 0.45, 0.48],
+    alertRatio7Day: [0.40, 0.45, 0.50, 0.60, 0.65, 0.70, 0.75],
+  },
+]
+
+/** Get workflow trend by ID (mock helper) */
+export function getWorkflowTrend(workflowId: string): WorkflowTrend | undefined {
+  return mockWorkflowTrends.find((t) => t.workflowId === workflowId)
+}

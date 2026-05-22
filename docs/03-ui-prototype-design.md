@@ -13,7 +13,7 @@
 | 関連文書        | DOC-OV-00 §2.3, DOC-FW-01 §3.5, DOC-APP-02 §9.8, DOC-KNW-04, DOC-S4-06, DOC-ROOT-\_SSOT §1.4 / §1.5                                           |
 | SSOT 区分       | 9 画面 UI Screen Card + Stripe 風 design language + AiProposalPanel Alert UI (3 適用範囲) + Prototype mode label + Staging UI pattern の SSOT |
 | Evidence Status | N/A (UI 設計のみ。polish target 9 画面 ALL 95% target equal は v1.4.1 Fix 3 / v1.4.2 Rule 6 確定、Hero 3 区分は demo-script 遷移順序のみ)     |
-| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P1-1 + P1-5 (audit event reference) + v1.4 P0-3 / v1.4.1 Fix 3 / Fix 5 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§4.1 「Hero 起点」→「Demo Chapter 1 起点」 / §10 AiProposalPanel utilizers から ProposalReview 削除 / §4.7 audit event「15 field」→「15-row (paired field 含む実 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§4.8 Metrics + §13 関連文書 で DOC-MON-05 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.1 Hero polish drift 解消「Hero 1-3 polish target equal」→「9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない」、Plan v1.4.1 Fix 3 / v1.4.2 Rule 6 と整合化、関連 P1)            |
+| 改版履歴        | v0.1 (2026-05-28): 初版作成 (Day 8、Plan v1.4 P1-1 + P1-5 (audit event reference) + v1.4 P0-3 / v1.4.1 Fix 3 / Fix 5 反映)。v0.2 (2026-05-28): CR R10+R11 hygiene patch (§4.1 「Hero 起点」→「Demo Chapter 1 起点」 / §10 AiProposalPanel utilizers から ProposalReview 削除 / §4.7 audit event「15 field」→「15-row (paired field 含む実 18)」paraphrase)。v0.3 (2026-05-29): CR R12+R13 hygiene patch (Major 2「Day 9 起稿予定」stale pointer 解消、§4.8 Metrics + §13 関連文書 で DOC-MON-05 を実 path pointer に置換)。v0.4 (2026-05-30): Day 10.1 hygiene patch (CR R15 反映、§4.1 Hero polish drift 解消「Hero 1-3 polish target equal」→「9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない」、Plan v1.4.1 Fix 3 / v1.4.2 Rule 6 と整合化、関連 P1)。v0.5 (2026-05-31): Day 11 Step 2 visual direction lock (CR R18+R19+R20 統合 = 4 AI converged: Operational Premium Light section §2.7 新規追加 [3 reference mockup paths / composition rules / design token / UI label vs component name 分離原則 / 9-screen routing 明確化]、§2.6 chip ripple radial gradient overlay → subtle press feedback に置換 [装飾 gradient scope-out]、§5 Route SSOT 表記 「9 画面 + /cases/:id/comment」→ 「exactly 9 page route」明確化、Day 11 Step 3-4 scaffolding + CaseReview 実装 anchor SSOT 確定) |
 
 ---
 
@@ -92,7 +92,77 @@ duration: `duration-150` (instant feedback) / `duration-250` (default) / `durati
 5. **toast slide-in**: top-right、`translate-y-[-100%] → translate-y-0`、`duration-250 ease-out`
 6. **tooltip fade**: `opacity-0 → opacity-100`、`duration-150`、`delay-150` で hover 確定
 7. **accordion expand**: `h-0 → h-auto` (実際は `max-h-0 → max-h-screen`)、`duration-250 ease-out`
-8. **chip ripple**: radial gradient overlay、`duration-150` on click
+8. **chip press feedback**: subtle outline + `bg-opacity-90` for `duration-150` on click (NO radial gradient / NO ripple decoration、Operational Premium Light 規範: 装飾 gradient effect は scope-out)
+
+## 2.7 Operational Premium Light (Day 11 visual direction lock、4 AI CR converged)
+
+Day 11 Step 1 で 3 reference mockup を ChatGPT 画像生成で並列生成、4 AI review (3 別 AI + 自己評価) すべて Direction B (Stripe + Controlled operational heterogeneity) を primary と判定、Image 3 の citation governance + Image 1 の diff block を hybrid composition で取り込み。**Direction name = "Operational Premium Light"**。装飾 Wow ではなく、**統制・証跡・AI 判断・承認状態が一目で分かる operational Wow** を狙う。
+
+### 2.7.1 3 reference mockup paths (Day 11 Step 1 成果物)
+
+- **Primary**: `docs/design-references/day-11-visual-direction-lock/direction-b-controlled-operational-heterogeneity-PRIMARY.png` (Stripe restraint base + per-column heterogeneity)
+- **Citation boundary borrow**: `docs/design-references/day-11-visual-direction-lock/direction-c-linear-dense-light.png` (compiled approved only + citation 対象外 separation)
+- **Diff block borrow**: `docs/design-references/day-11-visual-direction-lock/direction-a-stripe-operational-restraint.png` (old/new address red/green inline diff)
+
+### 2.7.2 Composition rules (Day 11+ 実装 anchor)
+
+| 要素 | Source reference | 実装方針 |
+| ---- | ---------------- | -------- |
+| 3-column CaseReview layout | Primary | 左 AI 入力 / 中央 証跡 timeline / 右 AI Proposal panel |
+| 証跡 timeline rail | Primary + Citation borrow | CaseReview 中央 column 主役、PDF / OCR / マスタ照合 を timeline rail (6-8px dots + 1px line) で表示 |
+| 住所 diff highlight | Diff borrow | 旧住所 (red strikethrough) / 新住所 (green underline) を inline char-level 表示、AddressDiffBlock primitive |
+| Citation panel (高 only) | Citation borrow | 見出し `引用根拠 — 承認済みナレッジのみ`、weight badge "high" の compiled knowledge のみ表示 |
+| Staging hint panel (low/medium 分離) | Citation borrow | 見出し `未承認ヒント — citation 対象外`、別 background tint (#F1F5F9) で視覚分離、weight badge "low" / "medium"、`citation 対象外` ラベル明示 |
+| 関連手順更新 Alert (過去 case Alert UI) | Citation borrow | 別 amber banner、citation panel + staging hint とは視覚的に独立 (§6 Alert UI 3 適用範囲) |
+| BusinessApproval chip | Primary + Diff borrow | sticky bottom action bar の右端、UI 表示文言は **`業務承認: 承認待ち`** または **`業務責任者承認`** (component 名 `BusinessApprovalChip` は internal、UI 表示には出さない) |
+| Prototype mode label | All references | AppShell header right pill 常時表示 |
+| Case lifecycle stepper | Primary (訂正後) | **`受付 → AI 処理 → 入力者確認 [now] → 承認者承認 → 反映`** のみ。**`手順承認` は current case stepper に含めない** (手順承認は別 flywheel / Proposal loop = §6 Alert UI 適用範囲 3 で別 entry point として表示) |
+
+### 2.7.3 Design token (Operational Premium Light、§2.1-§2.6 と整合)
+
+- **Background**: `slate-50` (#F8FAFC) app shell base、white (#FFFFFF) panel surface
+- **Border / Surface separation**: 1px hairline (#E5E7EB) を panel separation の primary tool、shadow は restrained (shadow-sm 程度) のみ
+- **Primary**: indigo (#635BFF) — CTA / status / focus
+- **Success / citation high**: emerald (#10B981) — compiled approved citation badge
+- **Alert**: amber (#F59E0B) — Alert chip / 関連手順更新 banner
+- **Error / delete diff**: red (#DC2626) — Alert critical / diff strikethrough
+- **Radius**: `--radius-card: 8px` / `--radius-control: 6px` (大丸角 16-24px は scope-out、Operational density 維持)
+- **Typography**: Inter (en) + Noto Sans JP (jp) mixed、headings text-2xl semibold、body text-sm regular、monospace (JetBrains Mono) for case_id / weight / version / numeric data / timestamps / source paths
+- **Density**: medium-high tabular、24/32 px grid、operational dashboard density
+- **Motion**: 150-250ms subtle hover / focus / status transition のみ、装飾 gradient / ripple は scope-out
+
+### 2.7.4 UI label vs component name 分離原則 (CR R20 Major Fix 3)
+
+| Internal component name | UI 表示文言 (user-facing) |
+| ----------------------- | -------------------------- |
+| `BusinessApprovalChip` | `業務承認: 承認待ち` / `業務責任者承認` |
+| `AiProposalPanel` (heading) | `AI 提案` |
+| `CitationPanel` (heading) | `引用根拠 — 承認済みナレッジのみ` |
+| `StagingHintPanel` (heading) | `未承認ヒント — citation 対象外` |
+| `EvidenceTimeline` (heading) | `証跡` |
+| `ConfidenceBar` | (label なし、視覚的 indicator のみ) |
+| `StatusBadge` | (case 状態の Japanese 文言: `入力者確認待ち` / `承認者承認待ち` / `反映済` 等) |
+| `PrototypeModeLabel` | `プロトタイプ表示 — 外部システム未接続 / 証跡はモック` |
+
+**原則**: Component 名 (`BusinessApprovalChip` 等) は実装 internal にのみ存在、user-facing UI には出さない。`docs/03` 本文 + Screen Card 内の component 名は **implementation reference**、UI に出す表示文言は本 §2.7.4 table で SSOT 化。
+
+### 2.7.5 9-screen routing 明確化 (CR R20 Major Fix 6)
+
+`prototype/src/App.tsx` は **以下 9 page component を React Router v6 にて exactly 9 routes でマウント**:
+
+1. `Dashboard` (`/dashboard` または `/`)
+2. `Inbox` (`/inbox`)
+3. `CaseReview` (`/cases/:id`)
+4. **`SendBackComment` (`/cases/:id/comment`)** ← 9 画面の 1 つ、CaseReview の子 detail route として実装、**ただし 10 番目の独立画面ではなく 9 画面 polish target equal 内の 1 つ**
+5. `ProposalReview` (`/proposals/:id`)
+6. `AgentSettings` (`/agents/:id/settings`)
+7. `AuditTrail` (`/audit`)
+8. `Metrics` (`/metrics`)
+9. `KnowledgeBrowser` (`/knowledge`)
+
+**10 番目の画面 (例: BusinessApprovalView の route 化、Cases queue の独立画面等) は禁止** (Plan v1.4.1 Fix 3 / v1.4.2 Rule 6 「9 画面 ALL 95% target equal」に整合)。
+
+`BusinessApprovalView` は `demo/static-mocks/business-approval-view.html` (Day 20 起稿) として static mock のみ、React route 対象外。CaseReview footer の `BusinessApprovalChip` click で別 tab で開く。
 
 ## 3. 段階詳細化 SSOT (Wireframe → medium-fi → high-fi)
 
@@ -252,7 +322,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 - **Sidebar (left)**: Dashboard / Inbox / ProposalReview queue (counter badge) / AgentSettings list / AuditTrail / Metrics / KnowledgeBrowser
 - **Header (top)**: PageBreadcrumb (left) + StatusBadge + **Prototype mode label** (UserMenu 左隣、§8 参照) + UserMenu (right)
 - **BottomNav (mobile fallback、scope-out 候補)**: 主要 5 画面 (Dashboard / Inbox / ProposalReview / Metrics / Knowledge)
-- **Route SSOT**: `prototype/src/App.tsx` で React Router v6 にて 9 画面 + `/cases/:id/comment` をマウント
+- **Route SSOT**: `prototype/src/App.tsx` で React Router v6 にて exactly 9 page route をマウント (§2.7.5 詳細、`/cases/:id/comment` は SendBackComment = 9 画面の 1 つ、10 番目ではない)
 
 ## 6. AiProposalPanel 過去 case 関連ルール更新 Alert UI 仕様 (3 適用範囲)
 

@@ -28,7 +28,7 @@
 `automation_status: restricted` (`_meta.yaml`、docs/\_SSOT.md §1.1) は、以下を意味する:
 
 - **業務全体の自動化禁止 (prohibited) ではない**: 国際送金業務自体を AI 自動化対象外と扱うわけではない
-- **高額・高リスク条件で AI 自動化不可**: `$10M` 相当以上 `[仮説 / 要検証]` の case は AI 自動化対象外、人間判断必須
+- **高額・高リスク条件で AI 自動化不可**: 具体閾値は `BOUNDARY.md` §2 と `_meta.yaml` を参照 `[仮説 / 要検証]`、閾値以上の case は AI 自動化対象外、人間判断必須
 - **閾値未満は将来限定自動化検討**: フレームワーク信頼性が確認された後 (Phase 2+) に限定自動化を検討
 - **本 v2 では UI 画面化なし / Dashboard カード化なし**: prototype scope-out、boundary spec のみ docs として残す
 
@@ -55,7 +55,7 @@
 - **反映先**: 本 workflow.md + BOUNDARY.md + `_meta.yaml` (`restricted_conditions` 等) + plan update
 - **発生頻度想定**: 月次以下 `[仮説 / 要検証]`、頻発する場合は通常 loop 組み込み再評価
 
-国際送金 `$10M [仮説 / 要検証]` 閾値変更も本 mechanism の対象。実閾値は Phase 1 で検証・決定。
+国際送金高額閾値の変更も本 mechanism の対象 (具体閾値は `BOUNDARY.md` §2 + `_meta.yaml`、実閾値は Phase 1 で検証・決定)。
 
 ## 5. 本 v2 prototype での扱い
 
@@ -66,7 +66,7 @@
 
 ## 6. 関連文書
 
-- BOUNDARY.md: scope 画定詳細 ($10M [仮説 / 要検証] 閾値 / boundary review proposal mechanism 詳細)
+- BOUNDARY.md: scope 画定詳細 (具体閾値 `[仮説 / 要検証]` / boundary review proposal mechanism 詳細)
 - `_meta.yaml`: machine-readable metadata (`restricted_conditions` schema)
 - DOC-FW-01 §4.3: 通常 loop の boundary 適用外 (Flywheel side)
 - DOC-APP-02 §3.4: BOUNDARY 通常 loop 対象外 (Approval side)

@@ -411,7 +411,7 @@
 - `案件処理` (Sidebar.tsx:41 nav item `to=/inbox` + activePrefix=/cases/) vs `案件レビュー` (Dashboard workflow lane button) vs `案件処理` (Inbox PageHeader breadcrumb) vs `案件処理` (CaseReview PageHeader breadcrumb middle segment "受信トレイ › 案件処理 › CASE-...")
   - **統一案**: `案件処理` (`/cases/:id` 主呼称)、Dashboard workflow lane の `案件レビュー` button は F-7 で削除済になるため考慮不要
 
-**Tier 3 規制語 leak check**: 
+**Tier 3 規制語 leak check**:
 - `prototype/src/` source 内に Tier 3 規制語 (`docs/prior-art-map.md` §規制語 hedge ルール) **0 件** (Day 19 grep target で確認推奨、本 audit 視認では 0 hit)
 - **pass**
 

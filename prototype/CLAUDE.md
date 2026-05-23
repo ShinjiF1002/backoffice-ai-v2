@@ -49,7 +49,7 @@
 
 ### Soft 背景上の foreground 規範 (Day 14 P1.5 C1)
 
-`bg-{success,alert,error}-soft` (= `bg-emerald-50` / `bg-amber-50` / `bg-red-50` 等の soft 背景) と組み合わせる **foreground は必ず `text-[var(--color-*-soft-fg)]` token 経由**:
+`bg-{success,alert,error}-soft` (= `bg-emerald-50` / `bg-amber-50` / `bg-red-50` 等の soft 背景) と組み合わせる **foreground は success / alert / error の `*-soft-fg` token 経由**:
 
 - `text-[var(--color-success-soft-fg)]` (= `#047857`、emerald-700 相当) — bg-success-soft の上
 - `text-[var(--color-alert-soft-fg)]` (= `#78350f`、amber-900 相当) — bg-alert-soft の上

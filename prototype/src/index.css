@@ -47,6 +47,9 @@
   --radius-control: 6px;
   --radius-chip: 4px;
 
+  /* === Layout === */
+  --height-pageheader: 88px;
+
   /* === Typography stacks === */
   --font-sans: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;

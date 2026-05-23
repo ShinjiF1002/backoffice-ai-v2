@@ -48,10 +48,15 @@ export function CaseReview() {
   return (
     <div className="flex h-full flex-col bg-[var(--color-canvas)]">
       {/* === Header (breadcrumb + case meta + LifecycleStepper) === */}
-      <header className="border-b border-slate-200 bg-white px-6 py-3">
+      <header
+        data-page-header
+        className="sticky top-0 z-30 min-h-[var(--height-pageheader)] border-b border-slate-200 bg-white px-6 py-3"
+      >
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500">
           <Link to="/inbox" className="hover:text-slate-700">受信トレイ</Link>
+          <ChevronRight className="h-3 w-3" aria-hidden="true" />
+          <span className="text-slate-600">案件処理</span>
           <ChevronRight className="h-3 w-3" aria-hidden="true" />
           <span className="font-mono text-slate-700">{c.id}</span>
         </nav>
@@ -59,7 +64,7 @@ export function CaseReview() {
         {/* Meta row */}
         <div className="mt-1.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-slate-900">案件処理</h1>
+            <h1 className="text-lg font-semibold text-slate-900">{c.id} {c.workflowName}</h1>
             <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
               {c.workflowName}
             </span>

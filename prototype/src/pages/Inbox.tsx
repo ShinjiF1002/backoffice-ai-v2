@@ -82,7 +82,10 @@ export function Inbox() {
   return (
     <div className="flex h-full flex-col bg-[var(--color-canvas)]">
       {/* === PageHeader === */}
-      <header className="border-b border-slate-200 bg-white px-6 py-3">
+      <header
+        data-page-header
+        className="sticky top-0 z-30 min-h-[var(--height-pageheader)] border-b border-slate-200 bg-white px-6 py-3"
+      >
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500">
           <span className="text-slate-700">受信トレイ</span>

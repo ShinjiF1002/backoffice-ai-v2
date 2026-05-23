@@ -110,7 +110,10 @@ export function AgentSettings() {
   return (
     <div className="flex h-full flex-col bg-[var(--color-canvas)]">
       {/* === PageHeader === */}
-      <header className="border-b border-slate-200 bg-white px-6 py-3">
+      <header
+        data-page-header
+        className="sticky top-0 z-30 min-h-[var(--height-pageheader)] border-b border-slate-200 bg-white px-6 py-3"
+      >
         {/* Breadcrumb (3-level) */}
         <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500">
           <Link to="/dashboard" className="hover:text-slate-700">

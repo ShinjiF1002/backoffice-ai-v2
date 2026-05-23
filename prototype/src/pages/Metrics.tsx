@@ -12,6 +12,8 @@ import {
 import { Sparkline } from '@/components/shared/Sparkline'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
+import { HypothesisChip } from '@/components/shared/HypothesisChip'
+import { PageHelpDisclosure } from '@/components/shared/PageHelpDisclosure'
 
 /**
  * Metrics — 9 画面の 1 つ (`/metrics`)、Day 12 Page 6 wireframe
@@ -135,24 +137,16 @@ export function Metrics() {
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-4 p-4">
-          {/* 1. 仮説 framing 注 (mandatory、PageHeader 直下) */}
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
-            <div className="flex items-start gap-2.5">
-              <AlertTriangle
-                className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
-                aria-hidden="true"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-900">
-                  注: 本画面の閾値・現在値・推移はすべて{' '}
-                  <span className="font-mono text-[11px]">[仮説 / 要検証]</span> です
-                </p>
-                <p className="mt-0.5 text-slate-600">
-                  本番導入可否を判定する基準ではなく、Phase 1 で測定・再設定する検証仮説。本画面に表示される数値は目標仮説値であり、実績値ではありません。
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Day 19 Commit 3a (U-5): framing 注 box (L1 常時表示) → PageHelpDisclosure expand 化 (L4)、default closed、HypothesisChip summary が hedge SSOT を保持 (Commit 1 にて) */}
+          <PageHelpDisclosure title="本画面の説明">
+            <p className="font-medium text-slate-900">
+              注: 本画面の閾値・現在値・推移はすべて{' '}
+              <span className="font-mono text-[11px]">[仮説 / 要検証]</span> です
+            </p>
+            <p className="mt-0.5 text-slate-600">
+              本番導入可否を判定する基準ではなく、Phase 1 で測定・再設定する検証仮説。本画面に表示される数値は目標仮説値であり、実績値ではありません。
+            </p>
+          </PageHelpDisclosure>
 
           {/* 2. Hero — 4 KPI 進化要件 (multi-criteria gate visualization、Slide 8 中核) */}
           <section
@@ -176,26 +170,31 @@ export function Metrics() {
                   <span className="font-mono text-[10px]">[仮説 / 要検証]</span>
                 </p>
                 <p className="mt-1 text-[10px] text-slate-400">
-                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--color-success)]" aria-hidden="true" />{' '}仮判定 met
+                  {/* Day 19 Commit 4 U-9: met/miss → 達成/未達 paraphrase (JP-only)、evaluateGate 関数 enum は code 内 keep */}
+                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--color-success)]" aria-hidden="true" />{' '}仮判定 達成
                   {' '}
-                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--color-alert)]" aria-hidden="true" />{' '}miss
+                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--color-alert)]" aria-hidden="true" />{' '}未達
                   {' '}
                   <span className="text-[9px]">[仮説 / 要検証]</span>
                 </p>
               </div>
-              <span
-                className={cn(
-                  'inline-flex shrink-0 items-center gap-1 rounded px-2 py-1 font-mono text-[11px] font-medium tabular',
-                  gateAllMet ? 'bg-emerald-50 text-[var(--color-success-soft-fg)]' : 'bg-amber-50 text-[var(--color-alert-soft-fg)]'
-                )}
-              >
-                {gateAllMet ? (
-                  <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                ) : (
-                  <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-                )}
-                仮判定 {metCount} / 4
-              </span>
+              {/* Day 19 Commit 1 (U-1): Hero 4 KPI hedge section-level 集約。state signal は per-card border emerald/amber に集約済、hedge 性質は HypothesisChip summary 1 surface に統合 (per-card `[仮説 / 要検証]` × 4 削除) */}
+              <div className="flex shrink-0 items-center gap-2">
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded px-2 py-1 font-mono text-[11px] font-medium tabular',
+                    gateAllMet ? 'bg-emerald-50 text-[var(--color-success-soft-fg)]' : 'bg-amber-50 text-[var(--color-alert-soft-fg)]'
+                  )}
+                >
+                  {gateAllMet ? (
+                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                  ) : (
+                    <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                  )}
+                  仮判定 {metCount} / 4
+                </span>
+                <HypothesisChip kind="summary">4 KPI 全て [仮説 / 要検証]</HypothesisChip>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -227,10 +226,8 @@ export function Metrics() {
                         / {k.target}
                       </span>
                     </div>
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <span className="font-mono text-[10px] text-slate-500 tabular">
-                        [仮説 / 要検証]
-                      </span>
+                    {/* Day 19 Commit 1 (U-1): per-card `[仮説 / 要検証]` mono 削除、section-level HypothesisChip summary 集約 */}
+                    <div className="mt-2 flex items-center justify-end gap-2">
                       <Sparkline
                         data={k.trend}
                         width={80}
@@ -261,9 +258,13 @@ export function Metrics() {
                   進化判断には直接使わない 推移 観測対象 (K5-K7)
                 </p>
               </div>
-              <span className="font-mono text-[10px] text-slate-500 tabular">
-                {mockAuxiliaryKpis.length} 件
-              </span>
+              {/* Day 19 Commit 1 (U-1): per-row hedge 削除 + section-level summary chip 集約 */}
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="font-mono text-[10px] text-slate-500 tabular">
+                  {mockAuxiliaryKpis.length} 件
+                </span>
+                <HypothesisChip kind="summary">補助 KPI {mockAuxiliaryKpis.length} 件 [仮説 / 要検証]</HypothesisChip>
+              </div>
             </div>
             <div className="overflow-hidden rounded-md border border-slate-100">
               <table className="w-full text-[12px]">
@@ -303,12 +304,10 @@ export function Metrics() {
                         {k.target}
                       </td>
                       <td className="px-3 py-2 text-right">
+                        {/* Day 19 Commit 1 (U-1): per-row `[仮説 / 要検証]` 削除、section-level HypothesisChip summary 集約 */}
                         <span className="font-mono font-semibold text-slate-900 tabular">
                           {k.current}
                         </span>
-                        <div className="font-mono text-[10px] text-slate-500 tabular">
-                          [仮説 / 要検証]
-                        </div>
                       </td>
                     </tr>
                   ))}
@@ -334,19 +333,23 @@ export function Metrics() {
                   異常検知の検知条件、閾値超過時は手順管理者 / AI 管理者に通知
                 </p>
               </div>
-              <div className="flex items-center gap-2 font-mono text-[10px] tabular">
-                <span className="inline-flex items-center gap-1 text-[var(--color-success-soft-fg)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                  正常 {kriByState.normal}
-                </span>
-                <span className="inline-flex items-center gap-1 text-[var(--color-alert-soft-fg)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
-                  注意 {kriByState.caution}
-                </span>
-                <span className="inline-flex items-center gap-1 text-[var(--color-error-soft-fg)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
-                  警告 {kriByState.warning}
-                </span>
+              {/* Day 19 Commit 1 (U-1): per-KRI hedge × 9 削除 + section-level summary chip 集約 */}
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 font-mono text-[10px] tabular">
+                  <span className="inline-flex items-center gap-1 text-[var(--color-success-soft-fg)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                    正常 {kriByState.normal}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[var(--color-alert-soft-fg)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
+                    注意 {kriByState.caution}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[var(--color-error-soft-fg)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+                    警告 {kriByState.warning}
+                  </span>
+                </div>
+                <HypothesisChip kind="summary">9 KRI 全て [仮説 / 要検証]</HypothesisChip>
               </div>
             </div>
             <ul className="grid grid-cols-1 gap-2 lg:grid-cols-3">
@@ -379,11 +382,9 @@ export function Metrics() {
                         {stateInfo.label}
                       </span>
                     </div>
+                    {/* Day 19 Commit 1 (U-1): per-KRI `[仮説 / 要検証]` 削除、section-level HypothesisChip summary 集約 */}
                     <p className="mt-1.5 leading-relaxed text-slate-600">
-                      {k.triggerCondition}{' '}
-                      <span className="font-mono text-[10px] text-slate-500 tabular">
-                        [仮説 / 要検証]
-                      </span>
+                      {k.triggerCondition}
                     </p>
                     <p className="mt-1 font-mono text-[10px] leading-relaxed text-slate-500 tabular">
                       対応: {k.responseAction}
@@ -491,7 +492,6 @@ export function Metrics() {
             ダッシュボードに戻る
           </Link>
         }
-        caption={<>検証用 KPI 表示の拡張は次の実装段階で対応</>}
       />
     </div>
   )

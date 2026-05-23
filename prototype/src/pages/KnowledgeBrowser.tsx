@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronRight,
-  BookOpen,
   CheckCircle2,
   CircleDashed,
   AlertCircle,
@@ -22,6 +21,8 @@ import { getAgentById } from '@/data/mock-agents'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
+import { PageHelpDisclosure } from '@/components/shared/PageHelpDisclosure'
+import { SHOW_INTERNAL_METADATA } from '@/lib/show-internal'
 import type { SendBackCategory, Weight } from '@/data/types'
 
 /**
@@ -128,25 +129,24 @@ export function KnowledgeBrowser() {
             })}
           </div>
         </div>
+        {/* L1 subtitle: citation governance core (Tier 1 governance、regulated info、PageHelpDisclosure carve-out 対象外) */}
+        <p className="mt-1 text-[12px] text-slate-600">
+          AI が引用根拠として使えるのは <strong className="font-semibold text-slate-900">{KNOWLEDGE_WEIGHT_STYLE.high.shortLabel}</strong> ナレッジのみ
+        </p>
       </header>
 
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-4 p-4">
-          {/* SSOT framing 注: weight semantics + citation governance */}
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
-            <div className="flex items-start gap-2.5">
-              <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-900">
-                  ナレッジは <span className="font-mono text-[11px]">{KNOWLEDGE_WEIGHT_STYLE.high.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel}</span> の 3 段階で管理されます
-                </p>
-                <p className="mt-0.5 text-slate-600">
-                  AI が <strong>引用根拠</strong> として使えるのは <strong>{KNOWLEDGE_WEIGHT_STYLE.high.shortLabel}</strong> ナレッジのみです。{KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel} は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* L4 expand: weight semantics + 補足 (Tier 1 citation governance core は L1 PageHeader subtitle 残置) */}
+          <PageHelpDisclosure title="本画面の説明">
+            <p className="font-medium text-slate-900">
+              ナレッジは <span className="font-mono text-[11px]">{KNOWLEDGE_WEIGHT_STYLE.high.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel}</span> の 3 段階で管理されます
+            </p>
+            <p className="mt-1.5 text-slate-600">
+              {KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} / {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel} は AI 提案の補助 (未承認ヒント) としては可視ですが、引用根拠 にはなりません。
+            </p>
+          </PageHelpDisclosure>
 
           {/* 分類 + 重要度 filter chip row */}
           <section
@@ -169,6 +169,7 @@ export function KnowledgeBrowser() {
                   const isActive = cat === categoryFilter
                   const isDisabled = KNOWLEDGE_CATEGORY_DISABLED[cat]
                   // CR R49 M3: data_error は staging から除外 SSOT (DOC-KNW-04 §4.5)
+                  // Day 19 v1.4.1 F-2: user-facing title から `DOC-*` SSOT reference 削除 (Commit 2 U-2 paradigm: internal SSOT は audit doc trace で十分、user-facing 不要)
                   return (
                     <FilterChip
                       key={cat}
@@ -177,7 +178,7 @@ export function KnowledgeBrowser() {
                       disabled={isDisabled}
                       title={
                         isDisabled
-                          ? '入力誤りは個別差戻し時に処理するため、本一覧の対象外 (DOC-KNW-04 §4.5)'
+                          ? '入力誤りは個別差戻し時に処理するため、本一覧の対象外'
                           : undefined
                       }
                       onClick={() => setCategoryFilter(cat)}
@@ -290,7 +291,7 @@ export function KnowledgeBrowser() {
                             <span aria-hidden="true">·</span>
                             <span>{WORKFLOW_LABEL[snippet.workflowId]}</span>
                             <span aria-hidden="true">·</span>
-                            <span>{getSendbackCategoryLabel(snippet.category)} (5 分類)</span>
+                            <span>{getSendbackCategoryLabel(snippet.category)}</span>
                             <span aria-hidden="true">·</span>
                             <span>{snippet.sourceCase}</span>
                           </div>
@@ -323,7 +324,6 @@ export function KnowledgeBrowser() {
             ダッシュボードに戻る
           </Link>
         }
-        caption="未承認 → 提案レビューへの送付は次の実装段階で対応"
       />
     </div>
   )
@@ -336,12 +336,10 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
   return (
     <div className="border-t border-slate-100 bg-slate-50/30 px-5 py-4">
       <div className="mb-3 flex items-center gap-2">
+        {/* Day 19 Commit 2 (U-2): `DOC-ROOT-_SSOT §1.4` SSOT pointer 削除 (user-facing 不要、JSDoc trace で十分) */}
         <h3 className="text-[11px] font-semibold text-slate-700">
           ナレッジ詳細 (8 項目)
         </h3>
-        <span className="font-mono text-[10px] text-slate-500 tabular">
-          DOC-ROOT-_SSOT §1.4
-        </span>
         <span
           className={cn(
             'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium',
@@ -378,7 +376,7 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
         <DetailRow
           label="分類"
           schemaKey="category"
-          value={`${getSendbackCategoryLabel(snippet.category)} (5 分類)`}
+          value={getSendbackCategoryLabel(snippet.category)}
         />
         <DetailRow
           label="重要度"
@@ -397,11 +395,13 @@ function DetailPanel({ snippet }: { snippet: KnowledgeSnippet }) {
           wide
         />
       </dl>
-      {/* 本文 (markdown 体裁 = 段落 + 改行保持、CR R50 M3 で 3 段 nested card → border-t flat divider に圧縮、AuditTrail / Metrics expanded panel density と整合) */}
+      {/* 本文 — Day 19 Commit 2 (U-2 + F-13): `body` raw schemaKey 削除 (本文 label のみで十分、user に schema name は不要) */}
       <div className="mt-4 border-t border-slate-200 pt-3">
         <div className="mb-1.5 flex items-center gap-2">
           <span className="text-[11px] font-medium text-slate-700">本文</span>
-          <span className="font-mono text-[9px] text-slate-400 tabular">body</span>
+          {SHOW_INTERNAL_METADATA && (
+            <span className="font-mono text-[9px] text-slate-400 tabular">body</span>
+          )}
         </div>
         <p className="whitespace-pre-wrap text-[12px] leading-relaxed text-slate-800">
           {snippet.body}
@@ -431,7 +431,10 @@ function DetailRow({ label, schemaKey, value, note, wide }: DetailRowProps) {
     >
       <dt className="shrink-0">
         <div className="text-[11px] font-medium text-slate-700">{label}</div>
-        <div className="font-mono text-[9px] text-slate-400 tabular">{schemaKey}</div>
+        {/* Day 19 Commit 2 (U-2): snake_case schemaKey は SHOW_INTERNAL_METADATA gate (?debug=1 query opt-in)、default 非表示 */}
+        {SHOW_INTERNAL_METADATA && (
+          <div className="font-mono text-[9px] text-slate-400 tabular">{schemaKey}</div>
+        )}
       </dt>
       <dd className="min-w-0 flex-1 text-right">
         <div className="font-mono text-[11px] text-slate-800 tabular break-all">{value}</div>

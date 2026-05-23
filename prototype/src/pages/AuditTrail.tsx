@@ -18,6 +18,8 @@ import { mockAuditEvents, type AuditEvent, type EventType } from '@/data/mock-au
 import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
+import { PageHelpDisclosure } from '@/components/shared/PageHelpDisclosure'
+import { SHOW_INTERNAL_METADATA } from '@/lib/show-internal'
 
 /**
  * AuditTrail — 9 画面の 1 つ (`/audit`)、Day 12 Page 7 wireframe
@@ -116,8 +118,9 @@ export function AuditTrail() {
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">監査証跡</h1>
             <MetaChip label="直近 30 日 (検証用)" />
+            {/* Day 19 Commit 2 (U-2): `15 項目構造 · 関連項目 含む実 18` schema metadata leak 削除、`15 項目記録` に paraphrase */}
             <span className="font-mono text-[10px] text-slate-500 tabular">
-              15 項目構造 · 関連項目 含む実 18
+              15 項目記録
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -143,21 +146,15 @@ export function AuditTrail() {
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-4 p-4">
-          {/* SSOT framing 注 */}
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
-            <div className="flex items-start gap-2.5">
-              <History className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-900">
-                  監査イベントは <span className="font-mono text-[11px]">15 項目構造</span>{' '}
-                  (関連項目 含む実 18) で記録されます
-                </p>
-                <p className="mt-0.5 text-slate-600">
-                  行を選択すると、案件 ID / 業務 / Agent 版数 / AI 提案 ID / 5 分類 / 承認済ナレッジ 参照 / 承認時刻 / 反映差分 等の詳細項目が展開されます。関連画面への遷移は次の実装段階で対応。
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Day 19 Commit 3a (U-5): SSOT framing 注 → PageHelpDisclosure expand 化、default closed */}
+          <PageHelpDisclosure title="本画面の説明">
+            <p className="font-medium text-slate-900">
+              監査イベントは 15 項目で記録されます
+            </p>
+            <p className="mt-0.5 text-slate-600">
+              行を選択すると詳細項目が展開されます。
+            </p>
+          </PageHelpDisclosure>
 
           {/* 監査イベント timeline */}
           <section
@@ -262,7 +259,6 @@ export function AuditTrail() {
             ダッシュボードに戻る
           </Link>
         }
-        caption="検証用 監査機能の拡張は次の実装段階で対応"
       />
     </div>
   )
@@ -273,12 +269,10 @@ function DetailPanel({ event }: { event: AuditEvent }) {
   return (
     <div className="border-t border-slate-100 bg-slate-50/30 px-5 py-4">
       <div className="mb-3 flex items-center gap-2">
+        {/* Day 19 Commit 2 (U-2): `DOC-KNW-04 §8.1` SSOT pointer 削除 (user-facing は internal reference 不要、JSDoc / audit doc trace で十分) */}
         <h3 className="text-[11px] font-semibold text-slate-700">
           監査イベント 詳細 (15 項目)
         </h3>
-        <span className="font-mono text-[10px] text-slate-500 tabular">
-          DOC-KNW-04 §8.1
-        </span>
       </div>
       <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-[11px] sm:grid-cols-2">
         <DetailRow label="案件 ID" schemaKey="case_id" value={event.caseId} />
@@ -343,7 +337,7 @@ function DetailPanel({ event }: { event: AuditEvent }) {
           <DetailRow
             label="差戻し分類"
             schemaKey="sendback_category"
-            value={`${getSendbackCategoryLabel(event.sendbackCategory)} (5 分類)`}
+            value={getSendbackCategoryLabel(event.sendbackCategory)}
           />
         )}
         {event.compiledKnowledgeCitationIds && (
@@ -411,7 +405,10 @@ function DetailRow({ label, schemaKey, value, note, wide }: DetailRowProps) {
     >
       <dt className="shrink-0">
         <div className="text-[11px] font-medium text-slate-700">{label}</div>
-        <div className="font-mono text-[9px] text-slate-400 tabular">{schemaKey}</div>
+        {/* Day 19 Commit 2 (U-2): snake_case schemaKey は SHOW_INTERNAL_METADATA gate (?debug=1 query opt-in)、default 非表示 */}
+        {SHOW_INTERNAL_METADATA && (
+          <div className="font-mono text-[9px] text-slate-400 tabular">{schemaKey}</div>
+        )}
       </dt>
       <dd className="min-w-0 flex-1 text-right">
         <div className="font-mono text-[11px] text-slate-800 tabular">{value}</div>

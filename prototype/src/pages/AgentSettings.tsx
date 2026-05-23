@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronRight, Send, TrendingUp, Gauge, Wrench } from 'lucide-react'
+import { ChevronRight, Send, Wrench } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getAgentById } from '@/data/mock-agents'
 import { mockKpiHypotheses } from '@/data/mock-metrics'
 import { TrustLevelBadge } from '@/components/shared/TrustLevelBadge'
 import { DisabledAction } from '@/components/shared/DisabledAction'
+import { Disclosure } from '@/components/shared/Disclosure'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { HypothesisChip } from '@/components/shared/HypothesisChip'
 import type { ApprovalType } from '@/data/types'
 
 /**
@@ -146,74 +148,58 @@ export function AgentSettings() {
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-4 p-4">
-          {/* 1. Hero: Trust Level Progression (Wow 中核、Slide 7 Matrix B 視覚化) */}
+          {/* 1. Hero: Trust Level Progression (Wow 中核、Slide 7 Matrix B 視覚化)
+             * Day 19 Commit 5 U-17: Hero clutter trim
+             *  - `統制原則` mono caption 削除 (operational dashboard density に集約)
+             *  - 4 KPI 進化要件 grid を Disclosure で L4 demote (collapsed default)
+             *  - Hero 内 引き上げ申請 disabled CTA 削除 (footer 既存 `変更を申請` と機能重複)
+             *  - Hero L1 visible: heading + Wow factor slogan + 3-stage stepper のみ */}
           <section
             aria-labelledby="agent-trust-progression"
             className="rounded-lg border-2 border-[var(--color-primary)]/30 bg-white p-6"
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <h2
-                  id="agent-trust-progression"
-                  className="text-base font-semibold text-slate-900"
-                >
-                  Trust Level の進化段階
-                </h2>
-                <p className="mt-1 text-[12px] leading-relaxed text-slate-700">
-                  <span className="font-medium text-slate-900">
-                    AIに任せる量は段階的に増やすが、人によるコントロールは渡さない。
-                  </span>{' '}
-                  案件確認は減らす。手順承認 / 設定承認は同強度で残る。
-                </p>
-              </div>
-              <span className="shrink-0 font-mono text-[10px] text-slate-500 tabular">
-                統制原則
-              </span>
+            <div className="mb-4">
+              <h2
+                id="agent-trust-progression"
+                className="text-base font-semibold text-slate-900"
+              >
+                Trust Level の進化段階
+              </h2>
+              <p className="mt-1 text-[12px] leading-relaxed text-slate-700">
+                <span className="font-medium text-slate-900">
+                  AIに任せる量は段階的に増やすが、人によるコントロールは渡さない。
+                </span>{' '}
+                案件確認は減らす。手順承認 / 設定承認は同強度で残る。
+              </p>
             </div>
 
             {/* 3-stage stepper */}
             <TrustLevelBadge current={a.trustLevel} variant="progression" />
 
-            {/* 4 KPI 進化要件 */}
-            <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 flex items-center gap-2">
-                <Gauge className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
-                <h3 className="text-xs font-semibold text-slate-800">
-                  4 KPI 進化要件
-                </h3>
-              </div>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-4">
-                {KPI_PROGRESSION.map((kpi) => (
-                  <div key={kpi.id} className="flex flex-col">
-                    <dt className="text-[11px] text-slate-600">{kpi.label}</dt>
-                    <dd className="mt-0.5 flex items-baseline gap-1">
-                      <span className="font-mono text-sm font-semibold text-slate-900 tabular">
-                        {kpi.target}
-                      </span>
-                      <span className="font-mono text-[10px] text-slate-500 tabular">
-                        [仮説 / 要検証]
-                      </span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+            {/* 4 KPI 進化要件 — Day 19 Commit 1 (U-1): per-KPI hedge × 4 削除、section-level HypothesisChip summary 1 surface に集約
+              * Commit 5 U-17: Disclosure で L4 demote、Hero L1 内 visible 削減 */}
+            <div className="mt-5">
+              <Disclosure title="4 KPI 進化要件" defaultOpen={false} meta={<HypothesisChip kind="summary">4 KPI 全て [仮説 / 要検証]</HypothesisChip>}>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-4">
+                  {KPI_PROGRESSION.map((kpi) => (
+                    <div key={kpi.id} className="flex flex-col">
+                      <dt className="text-[11px] text-slate-600">{kpi.label}</dt>
+                      <dd className="mt-0.5 flex items-baseline gap-1">
+                        <span className="font-mono text-sm font-semibold text-slate-900 tabular">
+                          {kpi.target}
+                        </span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </Disclosure>
             </div>
 
-            {/* 引き上げ申請 disabled button */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-[11px] leading-relaxed text-slate-600">
-                Trust Level 引き上げは{' '}
-                <span className="font-medium text-slate-800">Type C 設定承認</span> (AI 管理者 + 業務責任者 co-A 必須) で判定されます。
-              </p>
-              <DisabledAction
-                mode="wrapper"
-                reason="Trust Level 引き上げ申請 (動作は次の実装段階で対応)"
-                className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
-              >
-                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                Checkpoint へ引き上げ申請
-              </DisabledAction>
-            </div>
+            {/* Day 19 Commit 5 U-17: Hero 内 `Checkpoint へ引き上げ申請` disabled CTA 削除 (footer 既存 `変更を申請` と機能重複、Type C 設定承認 説明文のみ inline keep) */}
+            <p className="mt-4 text-[11px] leading-relaxed text-slate-600">
+              Trust Level 引き上げは{' '}
+              <span className="font-medium text-slate-800">Type C 設定承認</span> (AI 管理者 + 業務責任者 co-A 必須) で判定されます。
+            </p>
           </section>
 
           {/* 2. Agent 構成 5 領域 (read-only viewing state) */}
@@ -260,6 +246,7 @@ export function AgentSettings() {
                   </span>
                 </dt>
                 <dd>
+                  {/* Day 19 Commit 5 U-17: Tool entries description は Disclosure で L4 demote、tool name のみ default visible */}
                   <ul className="space-y-1.5">
                     {a.tools.map((t) => (
                       <li key={t.id} className="flex items-start gap-2">
@@ -268,10 +255,9 @@ export function AgentSettings() {
                           aria-hidden="true"
                         />
                         <div className="min-w-0 flex-1">
-                          <span className="font-medium text-slate-800">{t.name}</span>
-                          <p className="text-[11px] leading-relaxed text-slate-500">
-                            {t.description}
-                          </p>
+                          <Disclosure title={t.name} defaultOpen={false} className="text-[11px]">
+                            <p className="leading-relaxed text-slate-600">{t.description}</p>
+                          </Disclosure>
                         </div>
                       </li>
                     ))}
@@ -423,17 +409,14 @@ export function AgentSettings() {
         }
         right={
           <DisabledAction
-            mode="caption"
+            mode="wrapper"
             reason="設定変更を Type A/B/C 区分で申請 (動作は次の実装段階で対応)"
-            captionId="agent-footer-caption"
             className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
           >
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
             変更を申請
           </DisabledAction>
         }
-        caption="設定変更・申請は次の実装段階で対応"
-        captionId="agent-footer-caption"
       />
     </div>
   )

@@ -252,3 +252,29 @@ PNG commit policy (v2.1 M1):
 ### Gate sign-off
 
 4 criteria 全 pass → `_PROGRESS.md` §3 Day 15 row `🟡 pending` → `✅ pass (<commit hash>)`
+
+## 7. Day 16 high-fi starting rules (C1a/C1b 確定 token)
+
+Day 16 C1a (chip taxonomy) + C1b (header hygiene) で追加・変更された token / component の SSOT。
+`prototype/CLAUDE.md` §Chip taxonomy / §PageHeader 規範 が詳細 SSOT、本 §7 は inventory 内照合点。
+
+### Chip taxonomy (C1a)
+
+| Component | Radius | Border | Background | 新規 / 変更 |
+| --------- | ------ | ------ | ---------- | ---------- |
+| `StatusBadge` | `rounded-[var(--radius-chip)]` (4px) | なし | tone fill | `rounded-md` → `rounded-[var(--radius-chip)]` 変更 |
+| `FilterChip` | `rounded-md` (6px) | `border border-*` | white / primary-soft | **新規** |
+| `MetaChip` | `rounded-md` (6px) | なし | slate-100 / tone-soft | **新規** |
+
+### Layout token (C1b)
+
+| Token | Value | 追加場所 |
+| ----- | ----- | -------- |
+| `--radius-chip` | `4px` | `src/index.css` `@theme inline` |
+| `--height-pageheader` | `88px` | `src/index.css` `@theme inline` |
+
+### PageHeader attribute (C1b)
+
+9 page 全て: `data-page-header` 属性 + `sticky top-0 z-30 min-h-[var(--height-pageheader)]`
+
+h1 規範: detail pages (CaseReview / SendBackComment) のみ変更。CaseReview breadcrumb は 3 段階 (`受信トレイ › 案件処理 › {c.id}`)。

@@ -39,6 +39,8 @@
 | Error / delete diff | red (#DC2626) | Alert critical / diff strikethrough |
 | Radius (card) | 8px | panel / card |
 | Radius (control) | 6px | button / input / chip |
+| Radius (chip/badge) | `--radius-chip` = 4px | StatusBadge のみ |
+| PageHeader min-height | `--height-pageheader` = 88px | 9 page sticky header (Day 16 C1b) |
 | Font (en) | Inter | numeric / IDs / labels (technical) |
 | Font (jp) | Noto Sans JP | 日本語 label / body |
 | Font (mono) | JetBrains Mono | case_id / weight / version / timestamps |
@@ -46,6 +48,36 @@
 | Motion | 150-250ms | hover / focus / status transition |
 
 **装飾要素 scope-out**: gradient mesh / glow / glassmorphism / 3D icon / illustration / large rounded (>8px) / cream-beige 背景 / dark mode は使わない (`docs/03` §2.7 規範)。
+
+### Chip taxonomy (Day 16 C1a)
+
+chip/badge は 3 系統に分離。系統ごとに radius / border / background が異なる:
+
+| Component | File | Radius | Border | Background | 用途 |
+| --------- | ---- | ------ | ------ | ---------- | ---- |
+| `StatusBadge` | `shared/StatusBadge.tsx` | `rounded-[var(--radius-chip)]` (4px) | なし | tone 色 fill | workflow status 表示 (fill+state) |
+| `FilterChip` | `shared/FilterChip.tsx` | `rounded-md` (6px) | `border border-*` | white / primary-soft | filter 切替 (outline interactive) |
+| `MetaChip` | `shared/MetaChip.tsx` | `rounded-md` (6px) | なし | `slate-100` / tone-soft | 非インタラクティブ meta 情報 |
+
+- **StatusBadge**: `rounded-[var(--radius-chip)]` を必ず使うこと。`rounded-md` (6px) に戻さない
+- **FilterChip disabled + title**: `button[disabled]` は title を無視するため、`<span title={title}><button …/></span>` wrapper が必要
+- **MetaChip**: border なし、inline style 禁止 (`dotClass` 等 Tailwind class を使う)
+
+### PageHeader 規範 (Day 16 C1b)
+
+9 画面の header 要素に **`data-page-header`** 属性 + `sticky top-0 z-30 min-h-[var(--height-pageheader)]` を付与済み:
+- `min-h` を使用 (fixed height は LifecycleStepper 持ち page で高さ不足になる)
+- `data-page-header` は DOM 計測 / Verification Gate で使用
+
+**h1 規範**: h1 = 対象 (具体的名詞句)。**detail pages のみ適用** (CaseReview / SendBackComment)。top-level pages は screen-name h1 を維持:
+
+| Page | h1 |
+| ---- | -- |
+| CaseReview | `{c.id} {c.workflowName}` (例: "CASE-2026-0142 法人住所変更") |
+| SendBackComment | `{c.id} 差戻しコメント` |
+| Dashboard / Inbox / AuditTrail / Metrics / KnowledgeBrowser | screen-name h1 を維持 |
+
+CaseReview breadcrumb: `受信トレイ › 案件処理 › {c.id}` (3 段階、画面名 segment を中間に追加)。
 
 ### Soft 背景上の foreground 規範 (Day 14 P1.5 C1)
 

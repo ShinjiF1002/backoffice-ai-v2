@@ -113,7 +113,7 @@ export function Inbox() {
           </div>
         </div>
 
-        {/* Filter chip row (Day 12 CR R33 B2): active workflow filter のみ button (解除動線)、未実装 chip は span 化 */}
+        {/* Filter chip row (Day 18.5 P0 / P1-2 反映: 未実装 filter は disabled FilterChip + footer caption pattern、active workflow filter は button keep 解除動線) */}
         <div className="mt-2.5 flex items-center gap-2">
           <Filter className="h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
           {filterOptions.map((f) => {
@@ -134,13 +134,14 @@ export function Inbox() {
               )
             }
             return (
-              <span
+              <FilterChip
                 key={f.key}
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-700"
+                disabled
+                aria-describedby="inbox-filter-caption"
               >
                 <span className="font-medium">{f.label}:</span>
                 <span className="text-slate-500">{f.value}</span>
-              </span>
+              </FilterChip>
             )
           })}
         </div>
@@ -232,6 +233,7 @@ export function Inbox() {
               type="button"
               disabled
               aria-disabled="true"
+              aria-describedby="inbox-filter-caption"
               className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
             >
               <CheckSquare className="h-3 w-3" aria-hidden="true" />
@@ -241,6 +243,7 @@ export function Inbox() {
               type="button"
               disabled
               aria-disabled="true"
+              aria-describedby="inbox-filter-caption"
               className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
             >
               <X className="h-3 w-3" aria-hidden="true" />
@@ -248,7 +251,8 @@ export function Inbox() {
             </button>
           </>
         }
-        caption="一括操作は次の実装段階で対応"
+        caption="フィルタ・並び順・一括操作は次の実装段階で対応"
+        captionId="inbox-filter-caption"
       />
     </div>
   )

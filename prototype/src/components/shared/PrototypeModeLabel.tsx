@@ -46,6 +46,8 @@ export function PrototypeModeLabel() {
         ・実顧客データ未使用
         <br />
         ・実規制の引用なし
+        <br />
+        ・検索 / 通知 / 一括操作 / フィルタは次の実装段階で対応
       </div>
     </div>
   )

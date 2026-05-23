@@ -19,6 +19,8 @@ interface FilterChipProps {
   onRemove?: () => void
   /** disabled 時の wrapper tooltip (button[disabled] は title 無効なため span wrapper 経由) */
   title?: string
+  /** disabled 時の SR 用 caption 紐付け (visible footer caption の id、Day 18.5 P1-2 反映、CR R32+R38 wrapper title と共存) */
+  'aria-describedby'?: string
   onClick?: () => void
   'aria-pressed'?: boolean
   className?: string
@@ -34,6 +36,7 @@ export function FilterChip({
   title,
   onClick,
   'aria-pressed': ariaPressedProp,
+  'aria-describedby': ariaDescribedby,
   className,
 }: FilterChipProps) {
   const button = (
@@ -42,6 +45,7 @@ export function FilterChip({
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       aria-pressed={ariaPressedProp ?? active}
+      aria-describedby={ariaDescribedby}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] transition-colors',
         mono && 'font-mono tabular',

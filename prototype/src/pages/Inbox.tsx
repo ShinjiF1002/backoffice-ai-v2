@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
-import { StatusBadge } from '@/components/case/StatusBadge'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { caseStatusToTone } from '@/lib/status-tones'
 import type { CaseStatus } from '@/data/types'
 
 /**
@@ -171,7 +172,7 @@ export function Inbox() {
                     <td className="px-3 py-2 font-mono text-xs text-slate-700 tabular">{c.id}</td>
                     <td className="px-3 py-2 text-xs text-slate-900">{c.workflowName}</td>
                     <td className="px-3 py-2">
-                      <StatusBadge status={c.status} label={c.statusLabel} />
+                      <StatusBadge tone={caseStatusToTone(c.status)} label={c.statusLabel} />
                     </td>
                     <td
                       className={cn(

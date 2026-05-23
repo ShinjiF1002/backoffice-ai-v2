@@ -4,7 +4,8 @@ import { ChevronRight, AlertTriangle, FileText, Send } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { SENDBACK_CATEGORIES } from '@/lib/sendback-categories'
 import { getCaseById } from '@/data/mock-cases'
-import { StatusBadge } from '@/components/case/StatusBadge'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 import type { SendBackCategory } from '@/data/types'
 
@@ -84,7 +85,7 @@ export function SendBackComment() {
             <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
               {c.workflowName}
             </span>
-            <StatusBadge status={c.status} label={c.statusLabel} />
+            <StatusBadge tone={caseStatusToTone(c.status)} label={c.statusLabel} />
           </div>
           <div className="flex items-center gap-3">
             <span className="font-mono text-[11px] text-slate-500 tabular">経過 {c.elapsedLabel}</span>

@@ -3,6 +3,8 @@ import { ChevronRight, Send, X, Sparkles, Users } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getProposalById } from '@/data/mock-proposals'
 import { ProposalLifecycleStepper } from '@/components/proposal/ProposalLifecycleStepper'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { proposalStatusToTone } from '@/lib/status-tones'
 import type { ProposalSourceCase } from '@/data/types'
 
 /**
@@ -73,9 +75,7 @@ export function ProposalReview() {
             <span className="shrink-0 inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
               {p.workflowName}
             </span>
-            <span className="shrink-0 inline-flex items-center rounded-md bg-[var(--color-primary-soft)] px-2 py-0.5 text-xs font-medium text-[var(--color-primary)]">
-              {p.statusLabel}
-            </span>
+            <StatusBadge tone={proposalStatusToTone(p.status)} label={p.statusLabel} className="shrink-0" />
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <span className="font-mono text-[11px] text-slate-500 tabular">経過 {p.elapsedLabel}</span>

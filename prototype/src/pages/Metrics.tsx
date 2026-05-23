@@ -9,7 +9,7 @@ import {
   mockWorkflowTrends,
   type KriState,
 } from '@/data/mock-metrics'
-import { Sparkline } from '@/components/case/Sparkline'
+import { Sparkline } from '@/components/shared/Sparkline'
 
 /**
  * Metrics — 9 画面の 1 つ (`/metrics`)、Day 12 Page 6 wireframe

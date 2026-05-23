@@ -13,7 +13,7 @@ import {
 import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { getWorkflowTrend } from '@/data/mock-metrics'
-import { Sparkline } from '@/components/case/Sparkline'
+import { Sparkline } from '@/components/shared/Sparkline'
 import type { CaseRecord, CaseStatus } from '@/data/types'
 
 /**

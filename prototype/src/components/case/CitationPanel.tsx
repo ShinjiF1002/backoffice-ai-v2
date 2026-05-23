@@ -1,4 +1,4 @@
-import { Sparkline } from './Sparkline'
+import { Sparkline } from '@/components/shared/Sparkline'
 import type { CitationRef } from '@/data/types'
 
 /**

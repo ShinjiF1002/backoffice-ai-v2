@@ -367,7 +367,7 @@ export const mockCases: CaseRecord[] = [
       {
         id: 'al-7',
         severity: 'caution',
-        message: '本店所在地と支店住所マスタの紐付け未確認 — 関連支店一覧の追加確認推奨',
+        message: '本店所在地と支店マスタ紐付け未確認',
       },
     ],
     alertCount: 1,

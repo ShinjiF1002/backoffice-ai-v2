@@ -1,11 +1,16 @@
-import { useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X } from 'lucide-react'
-import { mockCases } from '@/data/mock-cases'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X, AlertCircle } from 'lucide-react'
+import { mockCases, getCaseById } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
+import { DetailDrawer } from '@/components/shared/DetailDrawer'
+import { DisabledAction } from '@/components/shared/DisabledAction'
+import { NextActionStrip } from '@/components/shared/NextActionStrip'
+import { cn } from '@/lib/cn'
+import { parseElapsed } from '@/lib/elapsed'
 import { caseStatusToTone } from '@/lib/status-tones'
 import type { CaseStatus } from '@/data/types'
 
@@ -30,7 +35,7 @@ const workflowLabel: Record<string, string> = {
  *  - PageHeader: breadcrumb + h1 + 件数 chip + (右) 並び順 selector / 下段 filter chip row (業務 / 状態 / 担当者 / 経過時間)
  *  - Main body: queue table (案件 ID mono / 業務名 / 状態 StatusBadge / 経過 mono SLA-tinted [status 連動: pending/ready/sent-back のみ tint、business-approval-waiting/reflected は normal 固定] / 担当者 / 注意 chip [amber-soft、alertCount > 0 のみ] / →)
  *  - Row click: navigate + Enter/Space keyboard、focus visibility は global :focus-visible (indigo 2px outline) で表現 (Day 12.2 CR R28 B2)
- *  - Footer: bulk action chips (一括承認 / 一括差戻し、disabled state) + 件数 summary。「(一括操作は次の実装段階で対応)」caption が wireframe の唯一の signal
+ *  - Footer: bulk action (一括承認 / 一括差戻し、DisabledAction wrapper + per-button reason) + 件数 summary。Day 19 Commit 4 U-7: footer caption 削除 / option Y SSOT (PrototypeModeLabel general framing で集約、page-level caption は重複削除)
  *  - URL search param `?workflow=UC-BO-XX` で業務別 filter 適用 (Day 12 Page 3 Dashboard card 動線連携、enabled no-op 0 を維持)、filter active 時は workflow chip が indigo soft で active state + X icon で解除可能
  *  - sort 切替 / 状態 / 担当者 / 経過時間 filter chip / pagination は visual のみ、動作は次の実装段階以降 (tooltip は demo noise 回避のため非表示、footer caption に集約 — Day 12.2 CR R28 M3)
  *  - Prototype mode label は AppShell 経由で自動表示
@@ -60,6 +65,18 @@ export function Inbox() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const workflowFilter = searchParams.get('workflow')
+  // Day 19 Commit 3b U-12: row click → DetailDrawer preview、drawer 内 CTA で full navigate
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
+  const selectedCase = selectedCaseId ? getCaseById(selectedCaseId) : null
+
+  // Day 19 Commit 3c U-13: NextActionStrip recommended case (v1.2 lock: ?demo=1 で CASE-2026-0142 固定、default は alert + 経過最大 で operational priority、queue table 行順序と無関係)
+  const isDemo = searchParams.get('demo') === '1'
+  const recommendedCase = useMemo(() => {
+    if (isDemo) return mockCases.find((c) => c.id === 'CASE-2026-0142') ?? null
+    const alertCases = mockCases.filter((c) => c.alertCount > 0)
+    if (alertCases.length === 0) return null
+    return [...alertCases].sort((a, b) => parseElapsed(b.elapsedLabel) - parseElapsed(a.elapsedLabel))[0]
+  }, [isDemo])
   /**
    * Day 12 Page 3 (Dashboard) 連携: `/inbox?workflow=UC-BO-XX` で業務別 filter。
    * filter param 不一致 ID は完全空 list を返す (no fallback to all)、Dashboard card 動線が安全。
@@ -137,7 +154,6 @@ export function Inbox() {
               <FilterChip
                 key={f.key}
                 disabled
-                aria-describedby="inbox-filter-caption"
               >
                 <span className="font-medium">{f.label}:</span>
                 <span className="text-slate-500">{f.value}</span>
@@ -146,6 +162,15 @@ export function Inbox() {
           })}
         </div>
       </header>
+
+      {/* === Day 19 Commit 3c U-13: NextActionStrip (L1 primary action anchor、PageHeader 直下、queue table 行と独立した operational priority) === */}
+      {recommendedCase && (
+        <NextActionStrip
+          label="次に処理すべき案件"
+          summary={`${recommendedCase.id} (経過 ${recommendedCase.elapsedLabel})`}
+          actionHref={`/cases/${recommendedCase.id}`}
+        />
+      )}
 
       {/* === Main body queue table === */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -168,16 +193,16 @@ export function Inbox() {
                 return (
                   <tr
                     key={c.id}
-                    onClick={() => navigate(`/cases/${c.id}`)}
+                    onClick={() => setSelectedCaseId(c.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        navigate(`/cases/${c.id}`)
+                        setSelectedCaseId(c.id)
                       }
                     }}
                     role="button"
                     tabIndex={0}
-                    aria-label={`案件 ${c.id} ${c.workflowName} を開く`}
+                    aria-label={`案件 ${c.id} ${c.workflowName} の概要を開く`}
                     className="cursor-pointer transition-colors hover:bg-slate-50"
                   >
                     <td className="px-3 py-2 font-mono text-xs text-slate-700 tabular">{c.id}</td>
@@ -223,37 +248,102 @@ export function Inbox() {
             <span className="font-mono text-xs text-slate-500 tabular">1 - {total} / {total} 件</span>
             <span className="text-slate-300" aria-hidden="true">|</span>
             <span className="text-[10px] text-slate-400">
-              AI処理中 {aiProcessingCount} / 確認待ち {readyCount} / 承認待ち {approvalWaitingCount} / 差戻し {sentBackCount} / 完了 {doneCount}
+              AI処理中 {aiProcessingCount} / 確認待ち {readyCount} / 承認者承認待ち {approvalWaitingCount} / 差戻し {sentBackCount} / 完了 {doneCount}
             </span>
           </div>
         }
         right={
           <>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              aria-describedby="inbox-filter-caption"
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
+            {/* Day 19 Commit 4 U-7: 一括 action は DisabledAction wrapper + per-button reason に SSOT 化、footer caption 重複削除 */}
+            <DisabledAction
+              mode="wrapper"
+              reason="一括承認動作は次の実装段階で対応"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
             >
               <CheckSquare className="h-3 w-3" aria-hidden="true" />
               一括承認
-            </button>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              aria-describedby="inbox-filter-caption"
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
+            </DisabledAction>
+            <DisabledAction
+              mode="wrapper"
+              reason="一括差戻し動作は次の実装段階で対応"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
             >
               <X className="h-3 w-3" aria-hidden="true" />
               一括差戻し
-            </button>
+            </DisabledAction>
           </>
         }
-        caption="フィルタ・並び順・一括操作は次の実装段階で対応"
-        captionId="inbox-filter-caption"
       />
+
+      {/* === Day 19 Commit 3b U-12: row click → DetailDrawer preview (non-modal PDR、background interactive、body scroll 保持) === */}
+      <DetailDrawer
+        open={selectedCaseId !== null}
+        onClose={() => setSelectedCaseId(null)}
+        title={selectedCase ? `${selectedCase.id} 概要` : ''}
+        width="480"
+      >
+        {selectedCase && (
+          <div className="space-y-4 text-xs">
+            <section>
+              <h3 className="mb-2 text-sm font-semibold text-slate-900">{selectedCase.workflowName}</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone={caseStatusToTone(selectedCase.status)} label={selectedCase.statusLabel} />
+                <span className="font-mono text-[11px] text-slate-500 tabular">経過 {selectedCase.elapsedLabel}</span>
+                {selectedCase.alertCount > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded bg-[var(--color-alert-soft)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--color-alert)] tabular">
+                    <AlertTriangle className="h-2.5 w-2.5" aria-hidden="true" />
+                    注意 {selectedCase.alertCount}
+                  </span>
+                )}
+              </div>
+            </section>
+
+            <section className="border-t border-slate-100 pt-3">
+              <h4 className="mb-2 text-[11px] font-medium text-slate-500">主要項目 (先頭 3 件)</h4>
+              <dl className="space-y-2">
+                {selectedCase.fields.slice(0, 3).map((f, i) => (
+                  <div key={i}>
+                    <dt className="text-[11px] text-slate-500">{f.label}</dt>
+                    <dd className={cn('mt-0.5 text-slate-800', f.monospace && 'font-mono')}>{f.value}</dd>
+                    {typeof f.confidence === 'number' && (
+                      <dd className="mt-0.5 font-mono text-[10px] text-slate-400 tabular">信頼度 {f.confidence.toFixed(2)}</dd>
+                    )}
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            {selectedCase.alerts.length > 0 && (
+              <section className="border-t border-slate-100 pt-3">
+                <h4 className="mb-2 flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                  <AlertCircle className="h-3 w-3 text-[var(--color-alert)]" aria-hidden="true" />
+                  注意 ({selectedCase.alerts.length})
+                </h4>
+                <ul className="space-y-1.5">
+                  {selectedCase.alerts.map((a) => (
+                    <li key={a.id} className="text-[11px] leading-relaxed text-slate-700">{a.message}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section className="border-t border-slate-100 pt-3">
+              <h4 className="mb-2 text-[11px] font-medium text-slate-500">引用根拠</h4>
+              <p className="font-mono text-[11px] text-slate-700 tabular">{selectedCase.citations.length} 件 (承認済ナレッジ)</p>
+            </section>
+
+            <div className="border-t border-slate-100 pt-4">
+              <Link
+                to={`/cases/${selectedCase.id}`}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-[var(--color-primary-strong)]"
+              >
+                案件レビューを開く
+                <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        )}
+      </DetailDrawer>
     </div>
   )
 }

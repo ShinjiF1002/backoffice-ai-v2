@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronRight, Send, AlertTriangle } from 'lucide-react'
+import { ChevronRight, Send, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getCaseById } from '@/data/mock-cases'
 import { ConfidenceBar } from '@/components/case/ConfidenceBar'
@@ -12,6 +13,7 @@ import { ConfidenceLegend } from '@/components/case/ConfidenceLegend'
 import { BusinessApprovalChip } from '@/components/shared/BusinessApprovalChip'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { NextActionStrip } from '@/components/shared/NextActionStrip'
 import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 
@@ -26,7 +28,7 @@ import { LifecycleStepper } from '@/components/case/LifecycleStepper'
  *  - Header: breadcrumb + case_id + workflow + status + LifecycleStepper (手順承認 除外)
  *  - 3-column main:
  *     左: AI 入力結果 (form with ConfidenceBar per field + AddressDiffBlock for new address)
- *     中央: EvidenceTimeline (PDF + 4 step timeline rail + per-step mono metadata `actor · source · conf`、alerts は LifecycleStepper 直下の case alert strip に分離、Day 11.3 #3a)
+ *     中央: EvidenceTimeline (PDF + 4 step timeline rail + per-step JP metadata、Day 19 Commit 3b U-4 で raw schema prefix paraphrase + DetailDrawer 化、alerts は LifecycleStepper 直下の case alert strip に分離、Day 11.3 #3a)
  *     右: RelatedRuleAlert (amber banner、最上部、Day 11.1 Fix 1) + CitationPanel (high only) + StagingHintPanel (低/中 separated)
  *  - Footer: sticky bottom action bar (差戻し / 承認 / BusinessApprovalChip)
  */
@@ -34,6 +36,19 @@ export function CaseReview() {
   const { id } = useParams()
   const navigate = useNavigate()
   const c = getCaseById(id || '')
+
+  /**
+   * Day 18.5 拡張 Commit 0 (U-3、Plan v1.4 option A): 承認 button enabled no-op 解消。
+   * in-memory state で実動作化、3 秒間 success flash → /inbox navigate。
+   * Plan v1.4 P0-3 in-memory mock state 原則遵守、Demo Chapter 1 narrative 整合 (承認 → next case 遷移 mock)。
+   * setTimeout は useEffect で cleanup し、unmount 時の double navigate を防ぐ。
+   */
+  const [caseApproved, setCaseApproved] = useState(false)
+  useEffect(() => {
+    if (!caseApproved) return
+    const timer = setTimeout(() => navigate('/inbox'), 3000)
+    return () => clearTimeout(timer)
+  }, [caseApproved, navigate])
 
   if (!c) {
     return (
@@ -79,6 +94,27 @@ export function CaseReview() {
         </div>
       </header>
 
+      {/* === Day 19 Commit 3c U-13 + v1.4.1 F-1: NextActionStrip (summary mode、JP-only paraphrase = `判定要約`、`項目`、L1 anchor、primary CTA は footer 差戻し / 承認) === */}
+      <NextActionStrip
+        label="判定要約"
+        summary={(() => {
+          const fieldCount = c.fields.length
+          const minConfidence = Math.min(...c.fields.map((f) => f.confidence ?? 1.0))
+          const belowThreshold = minConfidence < 0.85
+          if (belowThreshold && c.alertCount > 0) {
+            return `AI 入力結果 ${fieldCount} 項目確認、信頼度 ${minConfidence.toFixed(2)} で閾値未達、注意 ${c.alertCount} 件`
+          }
+          if (belowThreshold) {
+            return `AI 入力結果 ${fieldCount} 項目確認、信頼度 ${minConfidence.toFixed(2)} で閾値未達`
+          }
+          if (c.alertCount > 0) {
+            return `AI 入力結果 ${fieldCount} 項目確認、注意 ${c.alertCount} 件`
+          }
+          return `AI 入力結果 ${fieldCount} 項目確認`
+        })()}
+        actionHref={null}
+      />
+
       {/* === Case alert strip (Day 11.3 #3a: timeline event と分離、case-level alerts を LifecycleStepper 直下に集約) === */}
       {c.alerts.length > 0 && (
         <div className="border-b border-amber-200 bg-amber-50/40 px-6 py-2.5">
@@ -106,7 +142,7 @@ export function CaseReview() {
                     <p className="leading-relaxed text-slate-800">{al.message}</p>
                     {al.sourceStep && (
                       <p className="mt-0.5 font-mono text-[10px] text-slate-500">
-                        source: <span className="text-slate-700">{al.sourceStep}</span>
+                        <span className="text-slate-700">{al.sourceStep}</span>
                       </p>
                     )}
                   </div>
@@ -125,7 +161,7 @@ export function CaseReview() {
             <div className="sticky top-0 rounded-lg border border-slate-200 bg-white p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-slate-900">AI 入力結果</h2>
-                <span className="font-mono text-[10px] text-slate-500">{c.fields.length} field</span>
+                <span className="font-mono text-[10px] text-slate-500">{c.fields.length} 項目</span>
               </div>
 
               <div className="space-y-3">
@@ -190,12 +226,22 @@ export function CaseReview() {
         </div>
       </div>
 
-      {/* === Sticky bottom action bar (Day 14 P1.5 C4: PageFooter primitive 経由) === */}
+      {/* === Sticky bottom action bar (Day 14 P1.5 C4: PageFooter primitive 経由)
+        * Day 18.5 拡張 Commit 0 (U-3、Plan v1.4 option A): 承認後は success flash 表示 + 3 秒で /inbox 遷移。
+        * 承認 button は in-memory state 動作化 (Demo Chapter 1 narrative 整合)、差戻し / 承認 両 button は caseApproved 中 disabled で double-click 防止。 */}
+      {/* Day 19 Commit 5 U-18: footer left explainer 削除 (StatusBadge + footer button で recall 不要、NH6 解消)、success flash は Commit 0 dynamic feedback として keep */}
       <PageFooter
         left={
-          <span className="text-xs text-slate-500">
-            <span className="font-medium text-slate-700">入力者確認:</span> 内容を確認し、承認または差戻しを選択してください
-          </span>
+          caseApproved ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-success-soft-fg)]"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 text-[var(--color-success)]" aria-hidden="true" />
+              本案件は承認されました (モック動作) — 受信トレイへ遷移します
+            </div>
+          ) : null
         }
         right={
           <>
@@ -203,13 +249,16 @@ export function CaseReview() {
             <button
               type="button"
               onClick={() => navigate(`/cases/${c.id}/comment`)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              disabled={caseApproved}
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               差戻し
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+              onClick={() => setCaseApproved(true)}
+              disabled={caseApproved}
+              className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send className="h-3.5 w-3.5" />
               承認

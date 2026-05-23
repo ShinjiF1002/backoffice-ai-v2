@@ -49,9 +49,9 @@ export function AddressDiffBlock({ oldValue, newValue }: { oldValue: string; new
 
   return (
     <div className="space-y-1.5 rounded-md border border-slate-200 bg-slate-50 p-3">
-      {/* Diff scope meta row (Day 11.3 #1b、mono) */}
+      {/* Diff scope meta row (Day 11.3 #1b、mono、v1.4.1 F-1: JP-only paraphrase) */}
       <div className="font-mono text-[10px] text-slate-500">
-        diff: 1 field · {segmentCount} segment
+        差分 1 項目 · {segmentCount} セグメント
       </div>
 
       {/* Inline single-run diff string (Day 11.3 #1a) */}

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ChevronRight,
   AlertTriangle,
@@ -14,6 +14,9 @@ import { mockCases } from '@/data/mock-cases'
 import { getWorkflowTrend } from '@/data/mock-metrics'
 import { Sparkline } from '@/components/shared/Sparkline'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { HypothesisChip } from '@/components/shared/HypothesisChip'
+import { NextActionStrip } from '@/components/shared/NextActionStrip'
+import { parseElapsed } from '@/lib/elapsed'
 import type { CaseRecord, CaseStatus } from '@/data/types'
 
 /**
@@ -24,7 +27,7 @@ import type { CaseRecord, CaseStatus } from '@/data/types'
  *  - prototype/CLAUDE.md (active workflow UC-BO-01 + UC-BO-02 のみ、国際送金 restricted boundary pack は card 化しない)
  *
  * Layout (CaseReview / Inbox / ProposalReview と register 共通、Dashboard 固有 page-specific layout):
- *  - PageHeader (sticky): breadcrumb (ダッシュボード、root level) + h1 + 件数 chip × 3 (案件数 / 注意 / 承認待ち) + workflow scope chip
+ *  - PageHeader (sticky): breadcrumb (ダッシュボード、root level) + h1 + 件数 chip × 3 (案件数 / 注意 / 承認者承認待ち) + workflow scope chip
  *  - 任意 attention strip (queue-level 注意 1 本まで、CaseReview の case alert strip と register 統一)
  *  - Main (scrollable):
  *    - 業務 card grid (2 並列、UC-BO-01 + UC-BO-02、card click → `/inbox?workflow=...` で filter 適用)
@@ -124,7 +127,7 @@ function deriveAttention(cases: CaseRecord[]): Array<{
   if (critical) {
     out.push({
       id: 'attn-sla-high-elapsed',
-      message: `入力者確認待ちで 3 時間 [仮説 / 要検証] 以上経過した案件があります (${critical.id} · ${critical.workflowName} · 経過 ${critical.elapsedLabel})`,
+      message: `入力者確認待ちで 3 時間以上経過した案件があります (${critical.id} · ${critical.workflowName} · 経過 ${critical.elapsedLabel})`,
       linkTo: `/cases/${critical.id}`,
     })
   }
@@ -132,9 +135,19 @@ function deriveAttention(cases: CaseRecord[]): Array<{
 }
 
 export function Dashboard() {
+  const [searchParams] = useSearchParams()
   const statsMap = useMemo(() => deriveStats(mockCases), [])
   const stats = useMemo(() => Array.from(statsMap.values()), [statsMap])
   const attention = useMemo(() => deriveAttention(mockCases), [])
+
+  // Day 19 Commit 3c U-13: NextActionStrip recommended case (v1.2 lock: ?demo=1 で CASE-2026-0142 固定、default は alert + 経過最大 で operational priority)
+  const isDemo = searchParams.get('demo') === '1'
+  const recommendedCase = useMemo(() => {
+    if (isDemo) return mockCases.find((c) => c.id === 'CASE-2026-0142') ?? null
+    const alertCases = mockCases.filter((c) => c.alertCount > 0)
+    if (alertCases.length === 0) return null
+    return [...alertCases].sort((a, b) => parseElapsed(b.elapsedLabel) - parseElapsed(a.elapsedLabel))[0]
+  }, [isDemo])
 
   const totalCases = stats.reduce((a, s) => a + s.total, 0)
   const totalAlerts = stats.reduce((a, s) => a + s.totalAlerts, 0)
@@ -190,14 +203,25 @@ export function Dashboard() {
                   : 'bg-slate-100 text-slate-500'
               )}
             >
-              承認待ち {totalBusinessApprovalWaiting}
+              承認者承認待ち {totalBusinessApprovalWaiting}
             </span>
           </div>
           <div className="flex items-center gap-3">
+            {/* Day 19 Commit 1 (U-1): page-level hedge SSOT 1 surface に集約 (sparkline labels × 2 + attention message × 1 = 3 hedge → 1 PageHeader chip) */}
+            <HypothesisChip kind="summary">推移・SLA 閾値は [仮説 / 要検証]</HypothesisChip>
             <span className="font-mono text-[11px] text-slate-500 tabular">UC-BO-01 + UC-BO-02</span>
           </div>
         </div>
       </header>
+
+      {/* === Day 19 Commit 3c U-13: NextActionStrip (L1 primary action anchor、PageHeader 直下) === */}
+      {recommendedCase && (
+        <NextActionStrip
+          label="次に処理すべき案件"
+          summary={`${recommendedCase.id} (経過 ${recommendedCase.elapsedLabel})`}
+          actionHref={`/cases/${recommendedCase.id}`}
+        />
+      )}
 
       {/* === Attention strip (queue-level、CaseReview の case alert strip と register 統一) === */}
       {attention.length > 0 && (
@@ -295,7 +319,7 @@ export function Dashboard() {
                     </div>
                     <div>
                       <p className="font-mono text-[10px] uppercase tracking-wide text-slate-500">
-                        承認待ち
+                        承認者承認待ち
                       </p>
                       <p
                         className={cn(
@@ -336,10 +360,10 @@ export function Dashboard() {
                     </div>
                   </dl>
 
-                  {/* Sparkline */}
+                  {/* Sparkline — Day 19 Commit 1 (U-1): per-card hedge × 2 削除、PageHeader HypothesisChip summary に集約 */}
                   <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                     <span className="text-[10px] text-slate-500">
-                      直近 7 日 注意発生率 <span className="font-mono">[仮説 / 要検証]</span>
+                      直近 7 日 注意発生率
                     </span>
                     {trend && (
                       <Sparkline
@@ -401,11 +425,10 @@ export function Dashboard() {
         </section>
       </div>
 
-      {/* === Footer (Day 14 P1.5 C4: PageFooter primitive 経由) === */}
+      {/* === Footer (Day 14 P1.5 C4: PageFooter primitive 経由、Day 19 Commit 4 U-7: caption 削除 / option Y = PrototypeModeLabel general framing 集約) === */}
       <PageFooter
         className="text-xs text-slate-500"
         left={<span>業務カード・動線・注意行は画面内モック状態からの集計。検証用 KPI 表示の拡張を予定。</span>}
-        caption={<>表示対象: UC-BO-01 + UC-BO-02 (登録済み 2 業務)</>}
       />
     </div>
   )

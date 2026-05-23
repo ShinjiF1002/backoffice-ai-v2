@@ -64,7 +64,7 @@ export const mockAgents: AgentRecord[] = [
     modelLabel: 'AI ベースモデル A (検証用)',
     promptVersion: 'v0.1',
     promptSummary:
-      '住所変更の OCR 抽出 + 住所マスタ照合 + 信頼度 0.85 閾値 + 多店舗 / 法人格 / 海外住所 の境界判定',
+      'OCR 抽出 + 住所マスタ照合 + 信頼度 0.85 閾値 + 境界判定',
     tools: [
       {
         id: 'tool-ocr',

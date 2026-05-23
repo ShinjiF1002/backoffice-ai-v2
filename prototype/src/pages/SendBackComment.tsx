@@ -6,6 +6,7 @@ import { SENDBACK_CATEGORIES } from '@/lib/sendback-categories'
 import { getCaseById } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DisabledAction } from '@/components/shared/DisabledAction'
+import { Disclosure } from '@/components/shared/Disclosure'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
@@ -161,41 +162,54 @@ export function SendBackComment() {
               {SENDBACK_CATEGORIES.map((cat) => {
                 const isSelected = cat.value === category
                 return (
-                  <label
+                  <div
                     key={cat.value}
                     className={cn(
-                      'flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2.5 text-[12px] transition-colors',
+                      'rounded-md border transition-colors',
                       isSelected
                         ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
                         : 'border-slate-200 bg-white hover:border-slate-300'
                     )}
                   >
-                    <input
-                      type="radio"
-                      name="sendback-category"
-                      value={cat.value}
-                      checked={isSelected}
-                      onChange={() => setCategory(cat.value)}
-                      className="mt-0.5 h-3.5 w-3.5 accent-[var(--color-primary)]"
-                      aria-describedby={`cat-desc-${cat.value}`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span
-                        className={cn(
-                          'font-medium',
-                          isSelected ? 'text-[var(--color-primary)]' : 'text-slate-800'
-                        )}
+                    <label className="flex cursor-pointer items-start gap-3 px-3 py-2.5 text-[12px]">
+                      <input
+                        type="radio"
+                        name="sendback-category"
+                        value={cat.value}
+                        checked={isSelected}
+                        onChange={() => setCategory(cat.value)}
+                        className="mt-0.5 h-3.5 w-3.5 accent-[var(--color-primary)]"
+                        aria-describedby={`cat-desc-${cat.value}`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span
+                          className={cn(
+                            'font-medium',
+                            isSelected ? 'text-[var(--color-primary)]' : 'text-slate-800'
+                          )}
+                        >
+                          {cat.label}
+                        </span>
+                        <p
+                          id={`cat-desc-${cat.value}`}
+                          className="mt-0.5 leading-relaxed text-slate-500"
+                        >
+                          {cat.description}
+                        </p>
+                      </div>
+                    </label>
+                    {/* Day 19 Commit 4 U-14: 詳細 (例 + edge case) は Disclosure で L4 demote、isSelected 時 defaultOpen=true で初期表示 (key 変更で isSelected toggle 時 re-mount) */}
+                    <div className="px-3 pb-2.5 pl-10">
+                      <Disclosure
+                        key={`${cat.value}-${isSelected}`}
+                        title="例を見る"
+                        defaultOpen={isSelected}
+                        className="text-[11px]"
                       >
-                        {cat.label}
-                      </span>
-                      <p
-                        id={`cat-desc-${cat.value}`}
-                        className="mt-0.5 leading-relaxed text-slate-500"
-                      >
-                        {cat.description}
-                      </p>
+                        {cat.detail}
+                      </Disclosure>
                     </div>
-                  </label>
+                  </div>
                 )
               })}
             </fieldset>
@@ -320,17 +334,14 @@ export function SendBackComment() {
         }
         right={
           <DisabledAction
-            mode="caption"
-            reason="差戻し理由を記録し AI の改善材料に反映"
-            captionId="sbc-footer-caption"
+            mode="wrapper"
+            reason="差戻し理由を記録し AI 日次分析に反映 (動作は次の実装段階で対応)"
             className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
           >
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
             差戻しを記録
           </DisabledAction>
         }
-        caption="送信動作は次の実装段階で対応"
-        captionId="sbc-footer-caption"
       />
     </div>
   )

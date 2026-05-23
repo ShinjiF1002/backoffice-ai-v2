@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import { SENDBACK_CATEGORIES } from '@/lib/sendback-categories'
 import { getCaseById } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { PageFooter } from '@/components/shared/PageFooter'
 import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 import type { SendBackCategory } from '@/data/types'
@@ -302,25 +303,19 @@ export function SendBackComment() {
         </div>
       </div>
 
-      {/* === Sticky footer === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigate(`/cases/${c.id}`)}
-              className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-            >
-              キャンセル
-            </button>
-            <span className="font-mono text-[10px] text-slate-400 tabular">
-              送信動作は次の実装段階で対応
-            </span>
-          </div>
-          <span
-            className="inline-flex"
-            title="差戻し理由を記録し AI の改善材料に反映"
+      {/* === Sticky footer (Day 14 P2 D1: PageFooter primitive swap) === */}
+      <PageFooter
+        left={
+          <button
+            type="button"
+            onClick={() => navigate(`/cases/${c.id}`)}
+            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           >
+            キャンセル
+          </button>
+        }
+        right={
+          <span className="inline-flex" title="差戻し理由を記録し AI の改善材料に反映">
             <button
               type="button"
               disabled
@@ -331,8 +326,9 @@ export function SendBackComment() {
               差戻しを記録
             </button>
           </span>
-        </div>
-      </footer>
+        }
+        caption="送信動作は次の実装段階で対応"
+      />
     </div>
   )
 }

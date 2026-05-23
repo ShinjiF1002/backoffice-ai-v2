@@ -4,6 +4,7 @@ import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X } from
 import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { PageFooter } from '@/components/shared/PageFooter'
 import { caseStatusToTone } from '@/lib/status-tones'
 import type { CaseStatus } from '@/data/types'
 
@@ -206,15 +207,18 @@ export function Inbox() {
         </div>
       </div>
 
-      {/* === Sticky bottom action bar === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+      {/* === Sticky bottom action bar (Day 14 P2 D1: PageFooter primitive swap) === */}
+      <PageFooter
+        left={
+          <span className="font-mono text-xs text-slate-500 tabular">1 - {total} / {total} 件</span>
+        }
+        right={
+          <>
             <button
               type="button"
               disabled
               aria-disabled="true"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70 cursor-not-allowed"
+              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
             >
               <CheckSquare className="h-3 w-3" aria-hidden="true" />
               一括承認
@@ -223,18 +227,15 @@ export function Inbox() {
               type="button"
               disabled
               aria-disabled="true"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70 cursor-not-allowed"
+              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-400 opacity-70"
             >
               <X className="h-3 w-3" aria-hidden="true" />
               一括差戻し
             </button>
-            <span className="ml-1 text-[10px] text-slate-400">(一括操作は次の実装段階で対応)</span>
-          </div>
-          <div className="font-mono text-xs text-slate-500 tabular">
-            1 - {total} / {total} 件
-          </div>
-        </div>
-      </footer>
+          </>
+        }
+        caption="一括操作は次の実装段階で対応"
+      />
     </div>
   )
 }

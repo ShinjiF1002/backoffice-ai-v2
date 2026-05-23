@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import { getAgentById } from '@/data/mock-agents'
 import { mockKpiHypotheses } from '@/data/mock-metrics'
 import { TrustLevelBadge } from '@/components/shared/TrustLevelBadge'
+import { PageFooter } from '@/components/shared/PageFooter'
 import type { ApprovalType } from '@/data/types'
 
 /**
@@ -412,24 +413,18 @@ export function AgentSettings() {
         </div>
       </div>
 
-      {/* === Sticky footer === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/dashboard"
-              className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-            >
-              ダッシュボードに戻る
-            </Link>
-            <span className="font-mono text-[10px] text-slate-400 tabular">
-              設定変更・申請は次の実装段階で対応
-            </span>
-          </div>
-          <span
-            className="inline-flex"
-            title="設定変更を Type A/B/C 区分で申請 (動作は次の実装段階で対応)"
+      {/* === Sticky footer (Day 14 P2 D1: PageFooter primitive swap) === */}
+      <PageFooter
+        left={
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           >
+            ダッシュボードに戻る
+          </Link>
+        }
+        right={
+          <span className="inline-flex" title="設定変更を Type A/B/C 区分で申請 (動作は次の実装段階で対応)">
             <button
               type="button"
               disabled
@@ -440,8 +435,9 @@ export function AgentSettings() {
               変更を申請
             </button>
           </span>
-        </div>
-      </footer>
+        }
+        caption="設定変更・申請は次の実装段階で対応"
+      />
     </div>
   )
 }

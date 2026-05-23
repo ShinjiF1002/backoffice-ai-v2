@@ -19,6 +19,7 @@ import {
 } from '@/lib/knowledge-labels'
 import { mockKnowledge, type KnowledgeSnippet } from '@/data/mock-knowledge'
 import { getAgentById } from '@/data/mock-agents'
+import { PageFooter } from '@/components/shared/PageFooter'
 import type { SendBackCategory, Weight } from '@/data/types'
 
 /**
@@ -354,20 +355,18 @@ export function KnowledgeBrowser() {
         </div>
       </div>
 
-      {/* === Sticky footer === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center justify-between gap-3">
+      {/* === Sticky footer (Day 14 P2 D1: PageFooter primitive swap) === */}
+      <PageFooter
+        left={
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           >
             ダッシュボードに戻る
           </Link>
-          <span className="font-mono text-[10px] text-slate-400 tabular">
-            未承認 → 提案レビューへの送付は次の実装段階で対応
-          </span>
-        </div>
-      </footer>
+        }
+        caption="未承認 → 提案レビューへの送付は次の実装段階で対応"
+      />
     </div>
   )
 }

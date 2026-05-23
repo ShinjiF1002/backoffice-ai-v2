@@ -18,7 +18,7 @@ import type { ApprovalType } from '@/data/types'
  *
  * Layout (CaseReview / Inbox / ProposalReview / Dashboard / SendBackComment と register 共通):
  *  - Sticky PageHeader: breadcrumb (ダッシュボード › Agent 設定 › agent_id) + h1 + workflow chip + TrustLevelBadge compact + agent_version
- *  - Main scrollable (max-w-5xl mx-auto):
+ *  - Main scrollable (full-width + p-4、Day 14 P1.5 C5 で max-w-5xl から full-width に統一):
  *    1. Hero: Trust Level Progression (Wow factor 中核、Slide 7 Matrix B 視覚化、3-stage stepper + 4 KPI 進化要件 + 引き上げ申請 disabled)
  *    2. Agent 構成 5 領域 (Model / Prompt / Tool / 権限 / Trust Level、read-only viewing state)
  *    3. 変更 simulation panel (Type A/B/C mock judgment、3 シナリオ click で承認者 / co-A 要件表示)
@@ -140,7 +140,7 @@ export function AgentSettings() {
 
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl space-y-4 p-6">
+        <div className="space-y-4 p-4">
           {/* 1. Hero: Trust Level Progression (Wow 中核、Slide 7 Matrix B 視覚化) */}
           <section
             aria-labelledby="agent-trust-progression"

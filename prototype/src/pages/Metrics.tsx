@@ -22,7 +22,7 @@ import { PageFooter } from '@/components/shared/PageFooter'
  *
  * Layout (CaseReview / Inbox / ProposalReview / Dashboard / SendBackComment / AgentSettings と register 共通):
  *  - Sticky PageHeader: breadcrumb + h1 + 期間 chip + meta + 業務 filter (全業務 / UC-BO-01 / UC-BO-02)
- *  - Main scrollable (max-w-7xl):
+ *  - Main scrollable (full-width + p-4、Day 14 P1.5 C5 で max-w-7xl から full-width に統一):
  *    1. 仮説 framing 注 (mandatory、PageHeader 直下、slate-50 inset、Plan v1.4 P0-2 / v1.4.1 Fix 2)
  *    2. Hero — 4 KPI 進化要件 (multi-criteria gate visualization、border-2 primary 強調、Slide 8 視覚化中核)
  *    3. 補助 KPI 一覧 (K5-K7 表形式、内容 + target + 現在値)
@@ -130,7 +130,7 @@ export function Metrics() {
 
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-7xl space-y-4 p-6">
+        <div className="space-y-4 p-4">
           {/* 1. 仮説 framing 注 (mandatory、PageHeader 直下) */}
           <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
             <div className="flex items-start gap-2.5">

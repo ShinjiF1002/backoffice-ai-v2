@@ -26,7 +26,7 @@ import { mockAuditEvents, type AuditEvent, type EventType } from '@/data/mock-au
  *
  * Layout (Operational Premium Light + 他 7 page と register 共通):
  *  - Sticky PageHeader: breadcrumb + h1 + 期間 chip + 業務 filter + event 数 meta
- *  - Main scrollable (max-w-5xl):
+ *  - Main scrollable (full-width + p-4、Day 14 P1.5 C5 で max-w-5xl から full-width に統一):
  *    監査イベント timeline (時系列順、最新が上、各 row 折りたたみ式 expanded panel)
  *    各 event row: icon + timestamp + event type + case_id + actor + summary
  *    Click で 15-row schema 詳細展開 (snake_case label + JP value)
@@ -184,7 +184,7 @@ export function AuditTrail() {
 
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl space-y-4 p-6">
+        <div className="space-y-4 p-4">
           {/* SSOT framing 注 */}
           <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
             <div className="flex items-start gap-2.5">

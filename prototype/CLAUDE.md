@@ -68,6 +68,26 @@
 
 Color name (amber/red) vs semantic (caution/severe) の混在は禁止 (C1 token 規範 + C2 prop 規範の合わせ技で防止)。
 
+### Body container 規範 (Day 14 P1.5 C5)
+
+9 画面の outer container は **原則 full-width + `p-4`** に統一 (`mx-auto max-w-{3xl,5xl,7xl}` の outer 適用は禁止):
+
+- 9 画面 outer pattern (Day 14 P1.5 C5 で sweep 済): `<div className="space-y-4 p-4">` のみ
+- **例外**: フォーム中心画面 (`SendBackComment` 等) は outer 統一しつつ、**form 本文を inner `<div className="mx-auto max-w-3xl">` で wrap** して readability 維持。outer = full-width + p-4、inner = form constraint の 2 層構造で表現
+
+例 (SendBackComment):
+```tsx
+<div className="flex-1 overflow-y-auto">
+  <div className="space-y-4 p-4">        {/* outer = full-width + p-4 */}
+    <div className="mx-auto max-w-3xl space-y-4">  {/* inner = form max-w 例外 */}
+      ...sections...
+    </div>
+  </div>
+</div>
+```
+
+Demo 中核 3 画面 (CaseReview / ProposalReview / Dashboard) + Inbox は最初から full-width で実装済 (touch 不要)。
+
 ## Persistent Prototype Mode Label (必須、全画面)
 
 AppShell header right に persistent pill を常時表示:

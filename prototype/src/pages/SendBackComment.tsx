@@ -19,7 +19,7 @@ import type { SendBackCategory } from '@/data/types'
  *
  * Layout (CaseReview / Inbox / ProposalReview / Dashboard と register 共通):
  *  - Sticky PageHeader: breadcrumb (受信トレイ › CASE-ID › 差戻しコメント) + h1 + workflow chip + StatusBadge + 経過 + LifecycleStepper
- *  - Main scrollable (max-w-3xl mx-auto): 案件概要 / 差戻し分類 5-category radio / data_error warning (conditional) / 差戻し理由 textarea / 関連 evidence checklist
+ *  - Main scrollable (full-width + p-4 outer + form 本文 inner max-w-3xl wrap、Day 14 P1.5 C5 form 例外): 案件概要 / 差戻し分類 5-category radio / data_error warning (conditional) / 差戻し理由 textarea / 関連 evidence checklist
  *  - Sticky footer: キャンセル link (戻る) + 差戻しを記録 disabled button (送信動作は次の実装段階)
  *
  * 規範:
@@ -98,9 +98,10 @@ export function SendBackComment() {
         </div>
       </header>
 
-      {/* === Main body === */}
+      {/* === Main body (Day 14 P1.5 C5 Option B': outer = full-width + p-4 / form 本文 inner = max-w-3xl wrap) === */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-3xl space-y-4 p-6">
+        <div className="space-y-4 p-4">
+          <div className="mx-auto max-w-3xl space-y-4">
           {/* 1. 案件概要 card */}
           <section
             aria-labelledby="sendback-context"
@@ -297,6 +298,7 @@ export function SendBackComment() {
               </div>
             </section>
           )}
+          </div>
         </div>
       </div>
 

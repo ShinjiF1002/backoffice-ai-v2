@@ -31,7 +31,7 @@ import type { SendBackCategory, Weight } from '@/data/types'
  *
  * Layout (他 8 page と register 共通):
  *  - Sticky PageHeader: breadcrumb + h1 + 期間 chip + 業務 filter + snippet count meta
- *  - Main scrollable (max-w-5xl):
+ *  - Main scrollable (full-width + p-4、Day 14 P1.5 C5 で max-w-5xl から full-width に統一):
  *    framing 注 (承認済 vs 未承認の区別)
  *    分類 + 重要度 filter chip row (section header に局所化)
  *    snippet list (各 row 折りたたみ式 expanded detail panel)
@@ -134,7 +134,7 @@ export function KnowledgeBrowser() {
 
       {/* === Main body === */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl space-y-4 p-6">
+        <div className="space-y-4 p-4">
           {/* SSOT framing 注: weight semantics + citation governance */}
           <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
             <div className="flex items-start gap-2.5">

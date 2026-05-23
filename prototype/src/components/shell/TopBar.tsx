@@ -11,7 +11,7 @@ import { Search, Bell } from 'lucide-react'
  * Day 18.5 audit cleanup (HEAD post-9b935ca):
  *  - Search: enabled no-op input → `<div aria-hidden="true">` silhouette (cursor-default、focus 不可、SR 無視、placeholder noise 回避)
  *  - Notification: enabled no-op button → `<span aria-hidden="true">` static Bell icon (cursor-default、focus 不可、SR 無視、unread dot は visual cue keep)
- *  - `⌘K` kbd badge 削除 (command palette は scope-out、未実装 shortcut hint は trust 違反)
+ *  - kbd shortcut badge 削除 (command palette は scope-out、未実装 shortcut hint は trust 違反)
  *  - 検索 / 通知 / Sidebar shortcut の未実装説明は PrototypeModeLabel 経由で SR に伝達 (§8 SSOT)
  */
 export function TopBar() {

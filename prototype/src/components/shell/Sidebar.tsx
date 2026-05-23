@@ -34,7 +34,7 @@ interface NavItem {
 // SendBackComment は CaseReview の子 route なので sidebar には出さない (9 navigable + 1 detail = 9 page components 維持)
 // 案件処理 = Inbox queue alias (Day 12.2 CR R28 B1): /cases/:id へは Inbox row click から、sidebar からは queue へ戻る動線
 // AI 提案レビュー / Agent 設定 = 現状 demo seed ID で固定 (Day 13 で localStorage based last-visited 化を検討)
-// Day 18.5 audit cleanup: ⌘1-⌘8 shortcut field + group-hover:inline kbd reveal 削除 (command palette / kbd shortcut hint は scope-out)
+// Day 18.5 audit cleanup: keyboard shortcut field + group-hover:inline kbd reveal 削除 (command palette / kbd shortcut hint は scope-out)
 const navItems: NavItem[] = [
   { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard },
   { to: '/inbox', label: '受信トレイ', icon: InboxIcon },

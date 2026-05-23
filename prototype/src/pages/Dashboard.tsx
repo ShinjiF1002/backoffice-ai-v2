@@ -200,7 +200,7 @@ export function Dashboard() {
       {attention.length > 0 && (
         <div className="border-b border-amber-200 bg-amber-50/40 px-6 py-2.5">
           <div className="flex items-start gap-3">
-            <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-wide text-amber-700">
+            <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-wide text-[var(--color-alert-soft-fg)]">
               注意 · {attention.length} 件
             </span>
             <div className="flex flex-1 flex-wrap gap-2">
@@ -260,7 +260,7 @@ export function Dashboard() {
                     <span
                       className={cn(
                         'shrink-0 inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium',
-                        s.state === 'busy' && 'bg-[var(--color-alert-soft)] text-amber-900',
+                        s.state === 'busy' && 'bg-[var(--color-alert-soft)] text-[var(--color-alert-soft-fg)]',
                         s.state === 'active' && 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
                         s.state === 'quiet' && 'bg-slate-100 text-slate-600'
                       )}

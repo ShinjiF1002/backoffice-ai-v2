@@ -334,7 +334,7 @@ export function AgentSettings() {
                       className={cn(
                         'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-xs font-semibold tabular',
                         scen.type === 'A' && 'bg-slate-100 text-slate-700',
-                        scen.type === 'B' && 'bg-amber-50 text-amber-700',
+                        scen.type === 'B' && 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
                         scen.type === 'C' && 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
                       )}
                     >
@@ -393,7 +393,7 @@ export function AgentSettings() {
                     className={cn(
                       'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-semibold tabular',
                       entry.type === 'A' && 'bg-slate-100 text-slate-700',
-                      entry.type === 'B' && 'bg-amber-50 text-amber-700',
+                      entry.type === 'B' && 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
                       entry.type === 'C' && 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
                     )}
                   >

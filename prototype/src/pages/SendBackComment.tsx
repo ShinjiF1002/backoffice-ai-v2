@@ -202,9 +202,9 @@ export function SendBackComment() {
                   className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-alert)]"
                   aria-hidden="true"
                 />
-                <div className="min-w-0 flex-1 text-[12px] leading-relaxed text-amber-900">
+                <div className="min-w-0 flex-1 text-[12px] leading-relaxed text-[var(--color-alert-soft-fg)]">
                   <p className="font-medium">入力誤りは AI の学習対象になりません</p>
-                  <p className="mt-0.5 text-amber-800">
+                  <p className="mt-0.5 text-[var(--color-alert-soft-fg)]">
                     記録・監査用の別経路に回り、未承認ナレッジへの昇格対象外となります。AI 入力結果の修正は通常の案件処理側で対応してください。
                   </p>
                 </div>

@@ -57,8 +57,8 @@ export function TrustLevelBadge({ current, variant = 'compact' }: TrustLevelBadg
         className={cn(
           'inline-flex items-center gap-1 rounded px-2 py-0.5 font-mono text-[11px] font-medium tabular',
           current === 'supervised' && 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
-          current === 'checkpoint' && 'bg-amber-50 text-amber-700',
-          current === 'autonomous' && 'bg-emerald-50 text-emerald-700',
+          current === 'checkpoint' && 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
+          current === 'autonomous' && 'bg-emerald-50 text-[var(--color-success-soft-fg)]',
           current === 'n/a' && 'bg-slate-100 text-slate-500'
         )}
       >

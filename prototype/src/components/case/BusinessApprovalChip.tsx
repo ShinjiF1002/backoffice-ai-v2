@@ -25,7 +25,7 @@ export function BusinessApprovalChip({ status }: Props) {
       : status === '差戻し'
         ? 'border-red-200 bg-[var(--color-error-soft)] text-[var(--color-error)]'
         : status === '承認待ち'
-          ? 'border-amber-200 bg-[var(--color-alert-soft)] text-amber-900'
+          ? 'border-amber-200 bg-[var(--color-alert-soft)] text-[var(--color-alert-soft-fg)]'
           : 'border-slate-200 bg-slate-50 text-slate-600'
 
   return (

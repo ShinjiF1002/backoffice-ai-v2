@@ -22,8 +22,8 @@ export function RelatedRuleAlert({ updates }: { updates: RelatedRuleUpdate[] }) 
       <div className="flex items-start gap-2">
         <AlertCircle className="h-4 w-4 shrink-0 text-[var(--color-alert)]" aria-hidden="true" />
         <div className="flex-1">
-          <h3 className="text-xs font-semibold text-amber-900">関連手順が更新されています</h3>
-          <p className="mt-0.5 text-[11px] leading-relaxed text-amber-800">
+          <h3 className="text-xs font-semibold text-[var(--color-alert-soft-fg)]">関連手順が更新されています</h3>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--color-alert-soft-fg)]">
             本案件作成後に新ルールが承認されました。AI 提案本文は当時のまま保持されています (監査証跡 参照)。
           </p>
           <ul className="mt-2 space-y-1">

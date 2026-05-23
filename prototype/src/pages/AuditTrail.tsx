@@ -79,12 +79,12 @@ const EVENT_TYPE_STYLE: Record<EventType, EventTypeStyle> = {
   human_review: {
     icon: User,
     iconClass: 'text-emerald-600',
-    badgeClass: 'bg-emerald-50 text-emerald-700',
+    badgeClass: 'bg-emerald-50 text-[var(--color-success-soft-fg)]',
   },
   human_sendback: {
     icon: AlertTriangle,
     iconClass: 'text-amber-600',
-    badgeClass: 'bg-amber-50 text-amber-700',
+    badgeClass: 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
   },
   ai_analysis: {
     icon: Sparkles,
@@ -94,22 +94,22 @@ const EVENT_TYPE_STYLE: Record<EventType, EventTypeStyle> = {
   proposal_approve: {
     icon: ShieldCheck,
     iconClass: 'text-emerald-600',
-    badgeClass: 'bg-emerald-50 text-emerald-700',
+    badgeClass: 'bg-emerald-50 text-[var(--color-success-soft-fg)]',
   },
   business_approve: {
     icon: ShieldCheck,
-    iconClass: 'text-emerald-700',
-    badgeClass: 'bg-emerald-100 text-emerald-800',
+    iconClass: 'text-[var(--color-success-soft-fg)]',
+    badgeClass: 'bg-emerald-100 text-[var(--color-success-soft-fg)]',
   },
   reflect: {
     icon: RefreshCw,
-    iconClass: 'text-emerald-700',
-    badgeClass: 'bg-emerald-100 text-emerald-800',
+    iconClass: 'text-[var(--color-success-soft-fg)]',
+    badgeClass: 'bg-emerald-100 text-[var(--color-success-soft-fg)]',
   },
   rule_update_alert: {
     icon: History,
     iconClass: 'text-amber-600',
-    badgeClass: 'bg-amber-50 text-amber-700',
+    badgeClass: 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
   },
   config_approve: {
     icon: Cog,
@@ -262,7 +262,7 @@ export function AuditTrail() {
                             {event.workflowId} {event.workflowVersion}
                           </span>
                           {isRuleUpdate && (
-                            <span className="inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-amber-800 tabular">
+                            <span className="inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--color-alert-soft-fg)] tabular">
                               過去案件への影響
                             </span>
                           )}

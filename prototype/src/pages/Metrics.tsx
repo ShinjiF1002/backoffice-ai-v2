@@ -47,17 +47,17 @@ const KRI_STATE: Record<
 > = {
   normal: {
     label: '正常',
-    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    classes: 'border-emerald-200 bg-emerald-50 text-[var(--color-success-soft-fg)]',
     dot: 'bg-emerald-500',
   },
   caution: {
     label: '注意',
-    classes: 'border-amber-200 bg-amber-50 text-amber-700',
+    classes: 'border-amber-200 bg-amber-50 text-[var(--color-alert-soft-fg)]',
     dot: 'bg-amber-500',
   },
   warning: {
     label: '警告',
-    classes: 'border-red-200 bg-red-50 text-red-700',
+    classes: 'border-red-200 bg-red-50 text-[var(--color-error-soft-fg)]',
     dot: 'bg-red-500',
   },
 }
@@ -174,7 +174,7 @@ export function Metrics() {
               <span
                 className={cn(
                   'inline-flex shrink-0 items-center gap-1 rounded px-2 py-1 font-mono text-[11px] font-medium tabular',
-                  gateAllMet ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                  gateAllMet ? 'bg-emerald-50 text-[var(--color-success-soft-fg)]' : 'bg-amber-50 text-[var(--color-alert-soft-fg)]'
                 )}
               >
                 {gateAllMet ? (
@@ -326,15 +326,15 @@ export function Metrics() {
                 </p>
               </div>
               <div className="flex items-center gap-2 font-mono text-[10px] tabular">
-                <span className="inline-flex items-center gap-1 text-emerald-700">
+                <span className="inline-flex items-center gap-1 text-[var(--color-success-soft-fg)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
                   正常 {kriByState.normal}
                 </span>
-                <span className="inline-flex items-center gap-1 text-amber-700">
+                <span className="inline-flex items-center gap-1 text-[var(--color-alert-soft-fg)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
                   注意 {kriByState.caution}
                 </span>
-                <span className="inline-flex items-center gap-1 text-red-700">
+                <span className="inline-flex items-center gap-1 text-[var(--color-error-soft-fg)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
                   警告 {kriByState.warning}
                 </span>

@@ -18,7 +18,7 @@ export function StatusBadge({ status, label }: Props) {
     pending: 'bg-slate-100 text-slate-600',
     ready: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
     'sent-back': 'bg-[var(--color-error-soft)] text-[var(--color-error)]',
-    'business-approval-waiting': 'bg-[var(--color-alert-soft)] text-amber-900',
+    'business-approval-waiting': 'bg-[var(--color-alert-soft)] text-[var(--color-alert-soft-fg)]',
     reflected: 'bg-[var(--color-success-soft)] text-[var(--color-success)]',
   }[status]
 

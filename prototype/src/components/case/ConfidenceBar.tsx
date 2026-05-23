@@ -43,7 +43,7 @@ export function ConfidenceBar({
         {value.toFixed(2)}
       </span>
       {showThresholdChip && belowThreshold && (
-        <span className="inline-flex items-center rounded bg-[var(--color-alert-soft)] px-1 py-0.5 font-mono text-[9px] font-medium text-amber-900 ring-1 ring-amber-200">
+        <span className="inline-flex items-center rounded bg-[var(--color-alert-soft)] px-1 py-0.5 font-mono text-[9px] font-medium text-[var(--color-alert-soft-fg)] ring-1 ring-amber-200">
           閾値未達
         </span>
       )}

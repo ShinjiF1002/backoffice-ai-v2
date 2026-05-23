@@ -47,6 +47,16 @@
 
 **装飾要素 scope-out**: gradient mesh / glow / glassmorphism / 3D icon / illustration / large rounded (>8px) / cream-beige 背景 / dark mode は使わない (`docs/03` §2.7 規範)。
 
+### Soft 背景上の foreground 規範 (Day 14 P1.5 C1)
+
+`bg-{success,alert,error}-soft` (= `bg-emerald-50` / `bg-amber-50` / `bg-red-50` 等の soft 背景) と組み合わせる **foreground は必ず `text-[var(--color-*-soft-fg)]` token 経由**:
+
+- `text-[var(--color-success-soft-fg)]` (= `#047857`、emerald-700 相当) — bg-success-soft の上
+- `text-[var(--color-alert-soft-fg)]` (= `#78350f`、amber-900 相当) — bg-alert-soft の上
+- `text-[var(--color-error-soft-fg)]` (= `#b91c1c`、red-700 相当) — bg-error-soft の上
+
+**Tailwind palette `text-{amber|emerald|red}-{700|800|900}` の直接使用は禁止** (Day 14 P1.5 で 11 file / 31 occurrence sweep 済、`index.css` `@theme inline` の `--color-*-soft-fg` token を経由する)。`bg-*` / `border-*` Tailwind palette は今回 allow (Day 16-18 polish で再判定、`docs/day14-medium-fi-inventory.md` §4 SSOT)。
+
 ## Persistent Prototype Mode Label (必須、全画面)
 
 AppShell header right に persistent pill を常時表示:

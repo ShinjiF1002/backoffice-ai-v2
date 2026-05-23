@@ -17,37 +17,25 @@ import type { RelatedRuleUpdate } from '@/data/types'
 export function RelatedRuleAlert({ updates }: { updates: RelatedRuleUpdate[] }) {
   if (updates.length === 0) return null
 
+  const firstWithProposal = updates.find((u) => u.proposalId)
+
   return (
-    <div className="rounded-md border border-amber-200 bg-[var(--color-alert-soft)] p-3">
-      <div className="flex items-start gap-2">
-        <AlertCircle className="h-4 w-4 shrink-0 text-[var(--color-alert)]" aria-hidden="true" />
-        <div className="flex-1">
-          <h3 className="text-xs font-semibold text-[var(--color-alert-soft-fg)]">関連手順が更新されています</h3>
-          <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--color-alert-soft-fg)]">
-            本案件作成後に新ルールが承認されました。AI 提案本文は当時のまま保持されています (監査証跡 参照)。
-          </p>
-          <ul className="mt-2 space-y-1">
-            {updates.map((u) => (
-              <li key={u.ruleId} className="rounded border border-amber-200 bg-white px-2 py-1.5 text-[11px]">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900">{u.ruleName}</span>
-                  <span className="font-mono text-[10px] text-slate-500">{u.approvedAt}</span>
-                </div>
-                <div className="mt-0.5 flex items-center justify-between gap-2">
-                  <span className="font-mono text-[10px] text-slate-400">{u.ruleId}</span>
-                  {u.proposalId && (
-                    <Link
-                      to={`/proposals/${u.proposalId}`}
-                      className="text-[11px] font-medium text-[var(--color-primary)] hover:underline"
-                    >
-                      更新内容を見る
-                    </Link>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <div className="border-l-2 border-amber-400 bg-[var(--color-alert-soft)] px-3 py-2">
+      <div className="flex items-center gap-2">
+        <AlertCircle className="h-3.5 w-3.5 shrink-0 text-[var(--color-alert)]" aria-hidden="true" />
+        <span className="text-[11px] text-[var(--color-alert-soft-fg)]">
+          <span className="font-medium">関連手順が更新されています</span>
+          {' — '}
+          {updates.length} 件の手順更新 — 最新: {updates[0].ruleName}
+        </span>
+        {firstWithProposal && (
+          <Link
+            to={`/proposals/${firstWithProposal.proposalId}`}
+            className="ml-auto shrink-0 text-[11px] font-medium text-[var(--color-primary)] hover:underline"
+          >
+            更新内容を見る
+          </Link>
+        )}
       </div>
     </div>
   )

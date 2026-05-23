@@ -17,15 +17,20 @@ export function PrototypeModeLabel() {
     <div
       role="status"
       aria-label="prototype mode indicator"
-      className="relative inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+      aria-describedby="prototype-tooltip"
+      tabIndex={0}
+      className="relative inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
     >
       <Info className="h-3.5 w-3.5" aria-hidden="true" />
       <span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
 
       {hovered && (
         <div
+          id="prototype-tooltip"
           role="tooltip"
           className="absolute right-0 top-full z-50 mt-2 w-80 rounded-md border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-md"
         >

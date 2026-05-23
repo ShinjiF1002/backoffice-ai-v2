@@ -42,7 +42,7 @@ export function BusinessApprovalChip({ status }: Props) {
       >
         <UserCheck className="h-3.5 w-3.5" />
         <span>業務承認: {status}</span>
-        <ExternalLink className="h-3 w-3 text-current opacity-60" />
+        <ExternalLink className="h-3.5 w-3.5 text-current opacity-60" />
       </button>
     </span>
   )

@@ -139,7 +139,7 @@ export function Metrics() {
           <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-700">
             <div className="flex items-start gap-2.5">
               <AlertTriangle
-                className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
+                className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
                 aria-hidden="true"
               />
               <div className="min-w-0 flex-1">
@@ -174,6 +174,13 @@ export function Metrics() {
                   </strong>
                   。Supervised → Checkpoint で 3 ヶ月以上連続達成{' '}
                   <span className="font-mono text-[10px]">[仮説 / 要検証]</span>
+                </p>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--color-success)]" aria-hidden="true" />{' '}仮判定 met
+                  {' '}
+                  <span className="inline-block h-2 w-2 rounded-full bg-[var(--color-alert)]" aria-hidden="true" />{' '}miss
+                  {' '}
+                  <span className="text-[9px]">[仮説 / 要検証]</span>
                 </p>
               </div>
               <span

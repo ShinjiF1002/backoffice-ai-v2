@@ -8,6 +8,7 @@ import { EvidenceTimeline } from '@/components/case/EvidenceTimeline'
 import { CitationPanel } from '@/components/case/CitationPanel'
 import { StagingHintPanel } from '@/components/case/StagingHintPanel'
 import { RelatedRuleAlert } from '@/components/case/RelatedRuleAlert'
+import { ConfidenceLegend } from '@/components/case/ConfidenceLegend'
 import { BusinessApprovalChip } from '@/components/shared/BusinessApprovalChip'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PageFooter } from '@/components/shared/PageFooter'
@@ -165,6 +166,7 @@ export function CaseReview() {
                   </div>
                 ))}
               </div>
+              <ConfidenceLegend className="mt-1 border-t border-slate-100" />
             </div>
           </section>
 

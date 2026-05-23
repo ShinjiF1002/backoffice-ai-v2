@@ -87,13 +87,13 @@ export function CaseReview() {
                   key={al.id}
                   className={cn(
                     'inline-flex max-w-xl items-start gap-1.5 rounded-md border bg-white px-2.5 py-1.5 text-[11px]',
-                    al.severity === 'amber' ? 'border-amber-200' : 'border-red-200'
+                    al.severity === 'caution' ? 'border-amber-200' : 'border-red-200'
                   )}
                 >
                   <AlertTriangle
                     className={cn(
                       'mt-0.5 h-3 w-3 shrink-0',
-                      al.severity === 'amber' ? 'text-[var(--color-alert)]' : 'text-[var(--color-error)]'
+                      al.severity === 'caution' ? 'text-[var(--color-alert)]' : 'text-[var(--color-error)]'
                     )}
                     aria-hidden="true"
                   />

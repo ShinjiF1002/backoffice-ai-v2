@@ -35,8 +35,20 @@ export interface CaseField {
 
 export interface CaseAlert {
   id: string
-  /** Alert severity */
-  severity: 'amber' | 'red'
+  /**
+   * Alert severity (semantic enum、Day 14 P1.5 C2 で `'amber' | 'red'` color name から rename)
+   * - `caution`: 注意水準 (旧 `'amber'`、現 mock-cases 6 entry 全て此処)
+   * - `severe`: 重大水準 (旧 `'red'`、現 mock-cases 未使用、将来値)
+   *
+   * **Prop 命名規範** (Day 14 P1.5 C2 で SSOT 化):
+   * - `tone`: 色 semantic (`'neutral'|'primary'|'success'|'alert'|'error'`)、StatusBadge / chip primitive で使う
+   * - `severity`: 深刻度 (`'caution'|'severe'`)、Alert 系で使う
+   * - `status`: workflow state (CaseStatus / ProposalStatus 等の domain enum)
+   * - `kind`: type / variant 区別 (例: `'banner'|'inline'`)
+   *
+   * Color name (amber/red) vs semantic (caution/severe) は混在禁止。color name は token 経由でのみ表現 (`text-[var(--color-alert-soft-fg)]` 等、C1 規範)。
+   */
+  severity: 'caution' | 'severe'
   /** 表示文言 (operational copy、日本語、internal flavor は避ける) */
   message: string
   /** Source step (timeline 連動) */

@@ -57,6 +57,17 @@
 
 **Tailwind palette `text-{amber|emerald|red}-{700|800|900}` の直接使用は禁止** (Day 14 P1.5 で 11 file / 31 occurrence sweep 済、`index.css` `@theme inline` の `--color-*-soft-fg` token を経由する)。`bg-*` / `border-*` Tailwind palette は今回 allow (Day 16-18 polish で再判定、`docs/day14-medium-fi-inventory.md` §4 SSOT)。
 
+### Prop 命名規範 (Day 14 P1.5 C2)
+
+意味軸の混在禁止。同じ component で複数 prop を使う場合、軸を分離:
+
+- `tone`: 色 semantic (`'neutral' | 'primary' | 'success' | 'alert' | 'error'`)。StatusBadge / chip primitive 等で使う。Color name (amber/red 等) は禁止、必ず semantic
+- `severity`: 深刻度 (`'caution' | 'severe'`)。Alert 系で使う。Day 14 P1.5 C2 で `CaseAlert.severity` を `'amber' | 'red'` から rename
+- `status`: workflow state (CaseStatus / ProposalStatus 等 domain enum)
+- `kind`: type / variant 区別 (例: `'banner' | 'inline'`)
+
+Color name (amber/red) vs semantic (caution/severe) の混在は禁止 (C1 token 規範 + C2 prop 規範の合わせ技で防止)。
+
 ## Persistent Prototype Mode Label (必須、全画面)
 
 AppShell header right に persistent pill を常時表示:

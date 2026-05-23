@@ -100,13 +100,13 @@ export const mockCases: CaseRecord[] = [
     alerts: [
       {
         id: 'al-1',
-        severity: 'amber',
+        severity: 'caution',
         message: 'OCR 信頼度が閾値 (0.85) を下回りました — 新住所の番地表記をご確認ください',
         sourceStep: 'OCR 抽出',
       },
       {
         id: 'al-2',
-        severity: 'amber',
+        severity: 'caution',
         message: '住所マスタ照合: 都道府県マスタに該当エントリがありません — 手動確認推奨',
         sourceStep: 'マスタ照合',
       },
@@ -186,7 +186,7 @@ export const mockCases: CaseRecord[] = [
     alerts: [
       {
         id: 'al-3',
-        severity: 'amber',
+        severity: 'caution',
         message: '印鑑照合 信頼度 0.78 — 手動確認推奨',
       },
     ],
@@ -253,7 +253,7 @@ export const mockCases: CaseRecord[] = [
     alerts: [
       {
         id: 'al-4',
-        severity: 'amber',
+        severity: 'caution',
         message: '法人格表記が登記簿と差異あり — 再確認後 AI 再処理中',
       },
     ],
@@ -299,7 +299,7 @@ export const mockCases: CaseRecord[] = [
     alerts: [
       {
         id: 'al-5',
-        severity: 'amber',
+        severity: 'caution',
         message: '本人確認書類 2 点目が未受領 — 補完依頼が必要',
       },
       // SLA 経過 signal は Inbox 経過列 (status 連動 tint) が担う、注意 chip との二重表現を回避 (Day 12.2 CR R28 M2)
@@ -366,7 +366,7 @@ export const mockCases: CaseRecord[] = [
     alerts: [
       {
         id: 'al-7',
-        severity: 'amber',
+        severity: 'caution',
         message: '本店所在地と支店住所マスタの紐付け未確認 — 関連支店一覧の追加確認推奨',
       },
     ],

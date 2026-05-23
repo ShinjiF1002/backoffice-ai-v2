@@ -10,6 +10,7 @@ import { StagingHintPanel } from '@/components/case/StagingHintPanel'
 import { RelatedRuleAlert } from '@/components/case/RelatedRuleAlert'
 import { BusinessApprovalChip } from '@/components/shared/BusinessApprovalChip'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { PageFooter } from '@/components/shared/PageFooter'
 import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 
@@ -185,13 +186,15 @@ export function CaseReview() {
         </div>
       </div>
 
-      {/* === Sticky bottom action bar === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-xs text-slate-500">
+      {/* === Sticky bottom action bar (Day 14 P1.5 C4: PageFooter primitive 経由) === */}
+      <PageFooter
+        left={
+          <span className="text-xs text-slate-500">
             <span className="font-medium text-slate-700">入力者確認:</span> 内容を確認し、承認または差戻しを選択してください
-          </div>
-          <div className="flex items-center gap-2">
+          </span>
+        }
+        right={
+          <>
             <BusinessApprovalChip status={c.businessApprovalStatus} />
             <button
               type="button"
@@ -207,9 +210,9 @@ export function CaseReview() {
               <Send className="h-3.5 w-3.5" />
               承認
             </button>
-          </div>
-        </div>
-      </footer>
+          </>
+        }
+      />
     </div>
   )
 }

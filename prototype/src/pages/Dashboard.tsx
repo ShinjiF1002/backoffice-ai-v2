@@ -14,6 +14,7 @@ import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { getWorkflowTrend } from '@/data/mock-metrics'
 import { Sparkline } from '@/components/shared/Sparkline'
+import { PageFooter } from '@/components/shared/PageFooter'
 import type { CaseRecord, CaseStatus } from '@/data/types'
 
 /**
@@ -418,17 +419,12 @@ export function Dashboard() {
         </section>
       </div>
 
-      {/* === Footer === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3 text-xs text-slate-500">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span>
-            業務カード・動線・注意行は画面内モック状態からの集計。検証用 KPI 表示の拡張を予定。
-          </span>
-          <span className="font-mono text-[10px] text-slate-400 tabular">
-            表示対象: UC-BO-01 + UC-BO-02 (登録済み 2 業務)
-          </span>
-        </div>
-      </footer>
+      {/* === Footer (Day 14 P1.5 C4: PageFooter primitive 経由) === */}
+      <PageFooter
+        className="text-xs text-slate-500"
+        left={<span>業務カード・動線・注意行は画面内モック状態からの集計。検証用 KPI 表示の拡張を予定。</span>}
+        caption={<>表示対象: UC-BO-01 + UC-BO-02 (登録済み 2 業務)</>}
+      />
     </div>
   )
 }

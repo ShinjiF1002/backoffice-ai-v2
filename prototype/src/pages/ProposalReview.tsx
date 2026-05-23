@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn'
 import { getProposalById } from '@/data/mock-proposals'
 import { ProposalLifecycleStepper } from '@/components/proposal/ProposalLifecycleStepper'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { PageFooter } from '@/components/shared/PageFooter'
 import { proposalStatusToTone } from '@/lib/status-tones'
 import type { ProposalSourceCase } from '@/data/types'
 
@@ -286,14 +287,16 @@ export function ProposalReview() {
         </div>
       </div>
 
-      {/* === Sticky bottom action bar (status-conditional、Day 12 wireframe では disabled) === */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-xs text-slate-500">
+      {/* === Sticky bottom action bar (Day 14 P1.5 C4: PageFooter primitive 経由、Day 12 wireframe では disabled) === */}
+      <PageFooter
+        left={
+          <span className="text-xs text-slate-500">
             <span className="font-medium text-slate-700">{p.raci.r}:</span>{' '}
             提案を整理し、業務責任者へ送付するか差戻しを判断してください
-          </div>
-          <div className="flex items-center gap-2">
+          </span>
+        }
+        right={
+          <>
             {/* CR R32 Major 1: disabled button は hover/focus が抑制されるため wrapper span に title を移動 */}
             <span
               className="inline-flex"
@@ -324,9 +327,9 @@ export function ProposalReview() {
               </button>
             </span>
             <span className="ml-1 text-[10px] text-slate-400">(承認動作は次の実装段階で対応)</span>
-          </div>
-        </div>
-      </footer>
+          </>
+        }
+      />
     </div>
   )
 }

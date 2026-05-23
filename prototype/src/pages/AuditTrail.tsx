@@ -69,56 +69,16 @@ interface EventTypeStyle {
 }
 
 const EVENT_TYPE_STYLE: Record<EventType, EventTypeStyle> = {
-  system_intake: {
-    icon: FileText,
-    iconClass: 'text-slate-500',
-    badgeClass: 'bg-slate-100 text-slate-700',
-  },
-  ai_input: {
-    icon: Bot,
-    iconClass: 'text-[var(--color-primary)]',
-    badgeClass: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
-  },
-  human_review: {
-    icon: User,
-    iconClass: 'text-emerald-600',
-    badgeClass: 'bg-emerald-50 text-[var(--color-success-soft-fg)]',
-  },
-  human_sendback: {
-    icon: AlertTriangle,
-    iconClass: 'text-amber-600',
-    badgeClass: 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
-  },
-  ai_analysis: {
-    icon: Sparkles,
-    iconClass: 'text-[var(--color-primary)]',
-    badgeClass: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
-  },
-  proposal_approve: {
-    icon: ShieldCheck,
-    iconClass: 'text-emerald-600',
-    badgeClass: 'bg-emerald-50 text-[var(--color-success-soft-fg)]',
-  },
-  business_approve: {
-    icon: ShieldCheck,
-    iconClass: 'text-[var(--color-success-soft-fg)]',
-    badgeClass: 'bg-emerald-100 text-[var(--color-success-soft-fg)]',
-  },
-  reflect: {
-    icon: RefreshCw,
-    iconClass: 'text-[var(--color-success-soft-fg)]',
-    badgeClass: 'bg-emerald-100 text-[var(--color-success-soft-fg)]',
-  },
-  rule_update_alert: {
-    icon: History,
-    iconClass: 'text-amber-600',
-    badgeClass: 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
-  },
-  config_approve: {
-    icon: Cog,
-    iconClass: 'text-[var(--color-primary)]',
-    badgeClass: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
-  },
+  system_intake:    { icon: FileText,      iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  ai_input:         { icon: Bot,           iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  human_review:     { icon: User,          iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  human_sendback:   { icon: AlertTriangle, iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  ai_analysis:      { icon: Sparkles,      iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  proposal_approve: { icon: ShieldCheck,   iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  business_approve: { icon: ShieldCheck,   iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  reflect:          { icon: RefreshCw,     iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  rule_update_alert:{ icon: History,       iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  config_approve:   { icon: Cog,           iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
 }
 
 export function AuditTrail() {

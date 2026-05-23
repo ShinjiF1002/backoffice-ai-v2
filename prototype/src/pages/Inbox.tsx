@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronRight, Filter, ArrowUpDown, AlertTriangle, CheckSquare, X } from 'lucide-react'
-import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
+import { MetaChip } from '@/components/shared/MetaChip'
 import { caseStatusToTone } from '@/lib/status-tones'
 import type { CaseStatus } from '@/data/types'
 
@@ -71,6 +71,9 @@ export function Inbox() {
   )
   const total = rows.length
   const workflowFilterLabel = workflowFilter ? workflowLabel[workflowFilter] ?? workflowFilter : 'すべて'
+  const pendingCount = useMemo(() => rows.filter((c) => c.status === 'pending' || c.status === 'ready').length, [rows])
+  const sentBackCount = useMemo(() => rows.filter((c) => c.status === 'sent-back').length, [rows])
+  const doneCount = useMemo(() => rows.filter((c) => c.status === 'reflected').length, [rows])
 
   const filterOptions = [
     { key: 'workflow', label: '業務', value: workflowFilterLabel },
@@ -179,15 +182,14 @@ export function Inbox() {
                     <td className="px-3 py-2">
                       <StatusBadge tone={caseStatusToTone(c.status)} label={c.statusLabel} />
                     </td>
-                    <td
-                      className={cn(
-                        'px-3 py-2 font-mono text-xs tabular',
-                        tone === 'critical' && 'text-[var(--color-error)]',
-                        tone === 'warn' && 'text-[var(--color-alert)]',
-                        tone === 'normal' && 'text-slate-600'
+                    <td className="px-3 py-2">
+                      {tone === 'critical' ? (
+                        <MetaChip label={c.elapsedLabel} tone="error" mono />
+                      ) : tone === 'warn' ? (
+                        <MetaChip label={c.elapsedLabel} tone="alert" mono />
+                      ) : (
+                        <span className="font-mono text-xs text-slate-600 tabular">{c.elapsedLabel}</span>
                       )}
-                    >
-                      {c.elapsedLabel}
                     </td>
                     <td className="px-3 py-2 text-xs text-slate-700">{c.assignee ?? '—'}</td>
                     <td className="px-3 py-2">
@@ -214,7 +216,11 @@ export function Inbox() {
       {/* === Sticky bottom action bar (Day 14 P2 D1: PageFooter primitive swap) === */}
       <PageFooter
         left={
-          <span className="font-mono text-xs text-slate-500 tabular">1 - {total} / {total} 件</span>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs text-slate-500 tabular">1 - {total} / {total} 件</span>
+            <span className="text-slate-300" aria-hidden="true">|</span>
+            <span className="text-[10px] text-slate-400">確認待ち {pendingCount} / 差戻し {sentBackCount} / 完了 {doneCount}</span>
+          </div>
         }
         right={
           <>

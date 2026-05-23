@@ -8,7 +8,6 @@ import {
   MessageSquare,
   Sparkles,
   Gauge,
-  ArrowRight,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
@@ -141,16 +140,16 @@ export function Dashboard() {
   const totalAlerts = stats.reduce((a, s) => a + s.totalAlerts, 0)
   const totalBusinessApprovalWaiting = stats.reduce((a, s) => a + s.businessApprovalWaiting, 0)
 
-  // Workflow lane 5 node の operational metadata。受信トレイは mockCases から live derive (CR R35 P2)、他は stable mock seed counts/structural label
+  // Workflow lane 5 node。受信トレイは mockCases から live derive (CR R35 P2)
   const workflowLaneSteps = useMemo(
     () => [
-      { to: '/inbox', label: '受信トレイ', icon: InboxIcon, hint: '案件一覧の起点', meta: `案件 ${totalCases} · 注意 ${totalAlerts}` },
-      { to: '/cases/CASE-2026-0142', label: '案件レビュー', icon: FileText, hint: 'AI 入力結果 + 証跡 + ナレッジ', meta: 'AI 提案 + 差戻し動線' },
-      { to: '/cases/CASE-2026-0142/comment', label: 'コメント付き差戻し', icon: MessageSquare, hint: '差戻し分類の起点', meta: '5 分類 + 自由記述' },
-      { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, hint: '手順承認の循環', meta: '元案件 3 · 判定基準 3' },
-      { to: '/metrics', label: 'メトリクス確認', icon: Gauge, hint: 'KPI / KRI 観測', meta: '4 KPI [仮説 / 要検証]' },
+      { to: '/inbox', label: '受信トレイ', icon: InboxIcon, count: `${totalCases}` },
+      { to: '/cases/CASE-2026-0142', label: '案件レビュー', icon: FileText, count: null },
+      { to: '/cases/CASE-2026-0142/comment', label: 'コメント付き差戻し', icon: MessageSquare, count: null },
+      { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, count: null },
+      { to: '/metrics', label: 'メトリクス確認', icon: Gauge, count: null },
     ],
-    [totalCases, totalAlerts]
+    [totalCases]
   )
 
   return (
@@ -372,49 +371,29 @@ export function Dashboard() {
           </div>
         </section>
 
-        {/* Workflow lane (業務操作 5 node × 5 route Link、enabled no-op 0) */}
+        {/* Workflow lane (業務操作 5 node × 5 route Link、compact shortcut bar) */}
         <section
           aria-labelledby="dashboard-workflow-lane"
           className="rounded-lg border border-slate-200 bg-white p-5"
         >
-          <div className="mb-3">
-            <h2 id="dashboard-workflow-lane" className="text-sm font-semibold text-slate-900">
-              業務オペレーション動線
-            </h2>
-            <p className="mt-0.5 text-[11px] text-slate-500">
-              業務の流れに沿った 5 画面構成。各ノードから該当画面に遷移します。
-            </p>
-          </div>
-          <ol className="flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1">
-            {workflowLaneSteps.map((step, idx) => {
+          <h2 id="dashboard-workflow-lane" className="mb-3 text-sm font-semibold text-slate-900">
+            業務オペレーション動線
+          </h2>
+          <ol className="flex flex-wrap gap-2">
+            {workflowLaneSteps.map((step) => {
               const Icon = step.icon
-              const isLast = idx === workflowLaneSteps.length - 1
               return (
-                <li key={step.to} className="flex flex-1 items-stretch gap-1">
+                <li key={step.to}>
                   <Link
                     to={step.to}
-                    className="flex flex-1 flex-col rounded-md border border-slate-200 bg-white px-3 py-2.5 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                    className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 transition-colors hover:border-slate-300 hover:bg-slate-50"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <Icon
-                        className="h-3.5 w-3.5 shrink-0 text-[var(--color-primary)]"
-                        aria-hidden="true"
-                      />
-                      <span className="text-xs font-medium text-slate-800">{step.label}</span>
-                    </div>
-                    <p className="mt-1 text-[10px] leading-relaxed text-slate-500">{step.hint}</p>
-                    <span className="mt-1 font-mono text-[10px] text-slate-400 tabular">{step.meta}</span>
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--color-primary)]" aria-hidden="true" />
+                    <span className="text-xs font-medium text-slate-800">{step.label}</span>
+                    {step.count != null && (
+                      <span className="ml-1 font-mono text-[10px] text-slate-500 tabular">{step.count}</span>
+                    )}
                   </Link>
-                  {!isLast && (
-                    <span className="hidden flex-col items-center justify-center text-slate-300 lg:flex">
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                      {idx === 2 && (
-                        <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-slate-400">
-                          AI 日次集約
-                        </span>
-                      )}
-                    </span>
-                  )}
                 </li>
               )
             })}

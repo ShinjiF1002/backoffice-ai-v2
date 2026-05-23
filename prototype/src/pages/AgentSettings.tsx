@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import { getAgentById } from '@/data/mock-agents'
 import { mockKpiHypotheses } from '@/data/mock-metrics'
 import { TrustLevelBadge } from '@/components/shared/TrustLevelBadge'
+import { DisabledAction } from '@/components/shared/DisabledAction'
 import { PageFooter } from '@/components/shared/PageFooter'
 import type { ApprovalType } from '@/data/types'
 
@@ -204,20 +205,14 @@ export function AgentSettings() {
                 Trust Level 引き上げは{' '}
                 <span className="font-medium text-slate-800">Type C 設定承認</span> (AI 管理者 + 業務責任者 co-A 必須) で判定されます。
               </p>
-              <span
-                className="inline-flex"
-                title="Trust Level 引き上げ申請 (動作は次の実装段階で対応)"
+              <DisabledAction
+                mode="wrapper"
+                reason="Trust Level 引き上げ申請 (動作は次の実装段階で対応)"
+                className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
               >
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
-                >
-                  <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                  Checkpoint へ引き上げ申請
-                </button>
-              </span>
+                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
+                Checkpoint へ引き上げ申請
+              </DisabledAction>
             </div>
           </section>
 
@@ -427,19 +422,18 @@ export function AgentSettings() {
           </Link>
         }
         right={
-          <span className="inline-flex" title="設定変更を Type A/B/C 区分で申請 (動作は次の実装段階で対応)">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
-            >
-              <Send className="h-3.5 w-3.5" aria-hidden="true" />
-              変更を申請
-            </button>
-          </span>
+          <DisabledAction
+            mode="caption"
+            reason="設定変更を Type A/B/C 区分で申請 (動作は次の実装段階で対応)"
+            captionId="agent-footer-caption"
+            className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
+          >
+            <Send className="h-3.5 w-3.5" aria-hidden="true" />
+            変更を申請
+          </DisabledAction>
         }
         caption="設定変更・申請は次の実装段階で対応"
+        captionId="agent-footer-caption"
       />
     </div>
   )

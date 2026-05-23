@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import { SENDBACK_CATEGORIES } from '@/lib/sendback-categories'
 import { getCaseById } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { DisabledAction } from '@/components/shared/DisabledAction'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
@@ -318,19 +319,18 @@ export function SendBackComment() {
           </button>
         }
         right={
-          <span className="inline-flex" title="差戻し理由を記録し AI の改善材料に反映">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
-            >
-              <Send className="h-3.5 w-3.5" aria-hidden="true" />
-              差戻しを記録
-            </button>
-          </span>
+          <DisabledAction
+            mode="caption"
+            reason="差戻し理由を記録し AI の改善材料に反映"
+            captionId="sbc-footer-caption"
+            className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70"
+          >
+            <Send className="h-3.5 w-3.5" aria-hidden="true" />
+            差戻しを記録
+          </DisabledAction>
         }
         caption="送信動作は次の実装段階で対応"
+        captionId="sbc-footer-caption"
       />
     </div>
   )

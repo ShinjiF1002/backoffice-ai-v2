@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn'
 import { getProposalById } from '@/data/mock-proposals'
 import { ProposalLifecycleStepper } from '@/components/proposal/ProposalLifecycleStepper'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { DisabledAction } from '@/components/shared/DisabledAction'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { proposalStatusToTone } from '@/lib/status-tones'
 import type { ProposalSourceCase } from '@/data/types'
@@ -300,35 +301,23 @@ export function ProposalReview() {
         }
         right={
           <>
-            {/* CR R32 Major 1: disabled button は hover/focus が抑制されるため wrapper span に title を移動 */}
-            <span
-              className="inline-flex"
-              title="差戻し理由をコメント付きで AI 日次分析にフィードバック (動作は次の実装段階で対応)"
+            {/* Day 18.5 Commit 2: CR R32+R38 wrapper span title pattern を <DisabledAction mode="wrapper"> に SSOT 化 */}
+            <DisabledAction
+              mode="wrapper"
+              reason="差戻し理由をコメント付きで AI 日次分析にフィードバック (動作は次の実装段階で対応)"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-400 opacity-70"
             >
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-400 opacity-70 cursor-not-allowed"
-              >
-                <X className="h-3.5 w-3.5" aria-hidden="true" />
-                差戻し
-              </button>
-            </span>
-            <span
-              className="inline-flex"
-              title={`業務責任者 (${p.approver}) の承認待ちへ転送 (動作は次の実装段階で対応)`}
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              差戻し
+            </DisabledAction>
+            <DisabledAction
+              mode="wrapper"
+              reason={`業務責任者 (${p.approver}) の承認待ちへ転送 (動作は次の実装段階で対応)`}
+              className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60"
             >
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60 cursor-not-allowed"
-              >
-                <Send className="h-3.5 w-3.5" />
-                業務責任者へ送付
-              </button>
-            </span>
+              <Send className="h-3.5 w-3.5" />
+              業務責任者へ送付
+            </DisabledAction>
             <span className="ml-1 text-[10px] text-slate-400">(承認動作は次の実装段階で対応)</span>
           </>
         }

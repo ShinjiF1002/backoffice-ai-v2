@@ -123,7 +123,10 @@ P1 DOM smoke verify (`/cases/CASE-2026-0142`、Day 14 P1 完了後、commit `f1a
 
 Allow (CSS var resolve 検証後の最終 allowlist):
 - `prototype/src/index.css` 内 `--color-*` variable 定義
-- (TBD) Sparkline / Recharts series color (CSS var resolve 失敗時のみ、Day 14 P1/P2 で確定して本 section に file:line で追記)
+- Sparkline / Recharts series color は `f1af8db` で `var(--color-fg-subtle)` / `var(--color-success)` / `var(--color-alert)` に解決済み。hex allowlist 例外なし。
+
+Preview MCP dev-server config:
+- `.claude/launch.json` は repo-local preview 再現性のため保持する。config name は `prototype-dev` のまま維持し、local dev server 起動対象は `prototype` app とする。
 
 Grep:
 ```bash

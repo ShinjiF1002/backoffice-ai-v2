@@ -20,6 +20,8 @@ import {
 import { mockKnowledge, type KnowledgeSnippet } from '@/data/mock-knowledge'
 import { getAgentById } from '@/data/mock-agents'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { FilterChip } from '@/components/shared/FilterChip'
+import { MetaChip } from '@/components/shared/MetaChip'
 import type { SendBackCategory, Weight } from '@/data/types'
 
 /**
@@ -100,9 +102,7 @@ export function KnowledgeBrowser() {
         <div className="mt-1.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">ナレッジ</h1>
-            <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-              全期間 (検証用)
-            </span>
+            <MetaChip label="全期間 (検証用)" />
             <span className="font-mono text-[10px] text-slate-500 tabular">
               {filteredSnippets.length} 件 ({KNOWLEDGE_WEIGHT_STYLE.high.shortLabel} {counts.high} · {KNOWLEDGE_WEIGHT_STYLE.medium.shortLabel} {counts.medium} · {KNOWLEDGE_WEIGHT_STYLE.low.shortLabel} {counts.low})
             </span>
@@ -113,20 +113,14 @@ export function KnowledgeBrowser() {
               const isActive = wid === workflowFilter
               const label = wid === 'all' ? '全業務' : WORKFLOW_LABEL[wid]
               return (
-                <button
+                <FilterChip
                   key={wid}
-                  type="button"
+                  label={label}
+                  active={isActive}
+                  mono={true}
                   onClick={() => setWorkflowFilter(wid)}
-                  className={cn(
-                    'rounded-md px-2.5 py-1 font-mono text-[11px] tabular transition-colors',
-                    isActive
-                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  )}
                   aria-pressed={isActive}
-                >
-                  {label}
-                </button>
+                />
               )
             })}
           </div>
@@ -162,88 +156,49 @@ export function KnowledgeBrowser() {
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[11px] font-medium text-slate-700">分類:</span>
-                <button
-                  type="button"
+                <FilterChip
+                  label="全分類"
+                  active={categoryFilter === 'all'}
                   onClick={() => setCategoryFilter('all')}
-                  className={cn(
-                    'rounded-md px-2.5 py-1 text-[11px] transition-colors',
-                    categoryFilter === 'all'
-                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  )}
                   aria-pressed={categoryFilter === 'all'}
-                >
-                  全分類
-                </button>
+                />
                 {(Object.keys(SENDBACK_CATEGORY_LABELS) as SendBackCategory[]).map((cat) => {
                   const isActive = cat === categoryFilter
                   const isDisabled = KNOWLEDGE_CATEGORY_DISABLED[cat]
-                  // CR R49 M3: data_error は staging から除外 SSOT (DOC-KNW-04 §4.5)、
-                  // 本一覧では disabled chip + title note で根拠提示、active 系 4 分類のみ filter 動作。
-                  const button = (
-                    <button
+                  // CR R49 M3: data_error は staging から除外 SSOT (DOC-KNW-04 §4.5)
+                  return (
+                    <FilterChip
                       key={cat}
-                      type="button"
-                      onClick={() => {
-                        if (isDisabled) return
-                        setCategoryFilter(cat)
-                      }}
+                      label={getSendbackCategoryLabel(cat)}
+                      active={isActive}
                       disabled={isDisabled}
-                      className={cn(
-                        'rounded-md px-2.5 py-1 text-[11px] transition-colors',
+                      title={
                         isDisabled
-                          ? 'cursor-not-allowed border border-slate-100 bg-slate-50 text-slate-400'
-                          : isActive
-                            ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      )}
+                          ? '入力誤りは個別差戻し時に処理するため、本一覧の対象外 (DOC-KNW-04 §4.5)'
+                          : undefined
+                      }
+                      onClick={() => setCategoryFilter(cat)}
                       aria-pressed={isActive}
-                      aria-disabled={isDisabled}
-                    >
-                      {getSendbackCategoryLabel(cat)}
-                    </button>
-                  )
-                  return isDisabled ? (
-                    <span
-                      key={cat}
-                      title="入力誤りは個別差戻し時に処理するため、本一覧の対象外 (DOC-KNW-04 §4.5)"
-                    >
-                      {button}
-                    </span>
-                  ) : (
-                    button
+                    />
                   )
                 })}
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[11px] font-medium text-slate-700">重要度:</span>
-                <button
-                  type="button"
+                <FilterChip
+                  label="全段階"
+                  active={weightFilter === 'all'}
                   onClick={() => setWeightFilter('all')}
-                  className={cn(
-                    'rounded-md px-2.5 py-1 text-[11px] transition-colors',
-                    weightFilter === 'all'
-                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  )}
                   aria-pressed={weightFilter === 'all'}
-                >
-                  全段階
-                </button>
+                />
                 {(['high', 'medium', 'low'] as Weight[]).map((w) => {
                   const isActive = w === weightFilter
                   const ws = KNOWLEDGE_WEIGHT_STYLE[w]
                   return (
-                    <button
+                    <FilterChip
                       key={w}
-                      type="button"
+                      active={isActive}
                       onClick={() => setWeightFilter(w)}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] transition-colors',
-                        isActive
-                          ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                          : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      )}
                       aria-pressed={isActive}
                     >
                       <span
@@ -251,7 +206,7 @@ export function KnowledgeBrowser() {
                         aria-hidden="true"
                       />
                       {ws.label}
-                    </button>
+                    </FilterChip>
                   )
                 })}
               </div>

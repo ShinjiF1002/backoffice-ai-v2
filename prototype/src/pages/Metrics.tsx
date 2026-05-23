@@ -11,6 +11,7 @@ import {
 } from '@/data/mock-metrics'
 import { Sparkline } from '@/components/shared/Sparkline'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { FilterChip } from '@/components/shared/FilterChip'
 
 /**
  * Metrics — 9 画面の 1 つ (`/metrics`)、Day 12 Page 6 wireframe
@@ -409,20 +410,14 @@ export function Metrics() {
                     const isActive = wid === workflowFilter
                     const label = wid === 'all' ? '全業務' : WORKFLOW_LABEL[wid]
                     return (
-                      <button
+                      <FilterChip
                         key={wid}
-                        type="button"
+                        label={label}
+                        active={isActive}
+                        mono={true}
                         onClick={() => setWorkflowFilter(wid)}
-                        className={cn(
-                          'rounded-md px-2.5 py-1 font-mono text-[11px] tabular transition-colors',
-                          isActive
-                            ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                        )}
                         aria-pressed={isActive}
-                      >
-                        {label}
-                      </button>
+                      />
                     )
                   })}
                   <span className="font-mono text-[10px] text-slate-500 tabular">

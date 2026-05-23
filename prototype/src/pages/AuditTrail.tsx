@@ -16,6 +16,8 @@ import { cn } from '@/lib/cn'
 import { getSendbackCategoryLabel } from '@/lib/sendback-categories'
 import { mockAuditEvents, type AuditEvent, type EventType } from '@/data/mock-audit'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { FilterChip } from '@/components/shared/FilterChip'
+import { MetaChip } from '@/components/shared/MetaChip'
 
 /**
  * AuditTrail — 9 画面の 1 つ (`/audit`)、Day 12 Page 7 wireframe
@@ -150,9 +152,7 @@ export function AuditTrail() {
         <div className="mt-1.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">監査証跡</h1>
-            <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-              直近 30 日 (検証用)
-            </span>
+            <MetaChip label="直近 30 日 (検証用)" />
             <span className="font-mono text-[10px] text-slate-500 tabular">
               15 項目構造 · 関連項目 含む実 18
             </span>
@@ -163,20 +163,14 @@ export function AuditTrail() {
               const isActive = wid === workflowFilter
               const label = wid === 'all' ? '全業務' : WORKFLOW_LABEL[wid]
               return (
-                <button
+                <FilterChip
                   key={wid}
-                  type="button"
+                  label={label}
+                  active={isActive}
+                  mono={true}
                   onClick={() => setWorkflowFilter(wid)}
-                  className={cn(
-                    'rounded-md px-2.5 py-1 font-mono text-[11px] tabular transition-colors',
-                    isActive
-                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  )}
                   aria-pressed={isActive}
-                >
-                  {label}
-                </button>
+                />
               )
             })}
           </div>

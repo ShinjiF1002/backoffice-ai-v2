@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import { mockCases } from '@/data/mock-cases'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { FilterChip } from '@/components/shared/FilterChip'
 import { caseStatusToTone } from '@/lib/status-tones'
 import type { CaseStatus } from '@/data/types'
 
@@ -112,16 +113,16 @@ export function Inbox() {
             const isActiveWorkflowFilter = f.key === 'workflow' && isActive
             if (isActiveWorkflowFilter) {
               return (
-                <button
+                <FilterChip
                   key={f.key}
-                  type="button"
+                  active={true}
                   onClick={() => navigate('/inbox')}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-primary)] bg-[var(--color-primary-soft)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary-soft)]"
+                  className="font-medium"
                 >
                   <span>{f.label}:</span>
                   <span>{f.value}</span>
-                  <X className="h-3 w-3 text-[var(--color-primary)]" aria-label="filter 解除" />
-                </button>
+                  <X className="h-3 w-3" aria-label="filter 解除" />
+                </FilterChip>
               )
             }
             return (

@@ -29,12 +29,12 @@ export function BusinessApprovalChip({ status }: Props) {
           : 'border-slate-200 bg-slate-50 text-slate-600'
 
   return (
-    <span title="業務承認画面 (Day 20 で実装予定の静的画面) は実装後に別タブで開きます">
+    <span title="業務承認画面 (次の実装段階で実装予定の静的画面) は実装後に別タブで開きます">
       <button
         type="button"
         disabled
         aria-disabled="true"
-        aria-label="業務承認画面を別タブで開く (Day 20 で実装予定)"
+        aria-label="業務承認画面を別タブで開く (次の実装段階で実装予定)"
         className={cn(
           'inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium opacity-60',
           semantic

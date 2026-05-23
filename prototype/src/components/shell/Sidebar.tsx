@@ -27,7 +27,6 @@ interface NavItem {
   to: string
   label: string
   icon: typeof LayoutDashboard
-  shortcut?: string
   /** 指定時、isActive を path prefix match で評価 (queue alias 動線用) */
   activePrefix?: string
 }
@@ -35,15 +34,16 @@ interface NavItem {
 // SendBackComment は CaseReview の子 route なので sidebar には出さない (9 navigable + 1 detail = 9 page components 維持)
 // 案件処理 = Inbox queue alias (Day 12.2 CR R28 B1): /cases/:id へは Inbox row click から、sidebar からは queue へ戻る動線
 // AI 提案レビュー / Agent 設定 = 現状 demo seed ID で固定 (Day 13 で localStorage based last-visited 化を検討)
+// Day 18.5 audit cleanup: keyboard shortcut field + group-hover:inline kbd reveal 削除 (command palette / kbd shortcut hint は scope-out)
 const navItems: NavItem[] = [
-  { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard, shortcut: '⌘1' },
-  { to: '/inbox', label: '受信トレイ', icon: InboxIcon, shortcut: '⌘2' },
-  { to: '/inbox', label: '案件処理', icon: FileText, shortcut: '⌘3', activePrefix: '/cases/' },
-  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, shortcut: '⌘4', activePrefix: '/proposals/' },
-  { to: '/agents/agent-corporate-address-change', label: 'Agent 設定', icon: Cog, shortcut: '⌘5', activePrefix: '/agents/' },
-  { to: '/audit', label: '監査証跡', icon: ShieldCheck, shortcut: '⌘6' },
-  { to: '/metrics', label: 'メトリクス', icon: Gauge, shortcut: '⌘7' },
-  { to: '/knowledge', label: 'ナレッジ', icon: BookOpen, shortcut: '⌘8' },
+  { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard },
+  { to: '/inbox', label: '受信トレイ', icon: InboxIcon },
+  { to: '/inbox', label: '案件処理', icon: FileText, activePrefix: '/cases/' },
+  { to: '/proposals/PROP-2026-031', label: 'AI 提案レビュー', icon: Sparkles, activePrefix: '/proposals/' },
+  { to: '/agents/agent-corporate-address-change', label: 'Agent 設定', icon: Cog, activePrefix: '/agents/' },
+  { to: '/audit', label: '監査証跡', icon: ShieldCheck },
+  { to: '/metrics', label: 'メトリクス', icon: Gauge },
+  { to: '/knowledge', label: 'ナレッジ', icon: BookOpen },
 ]
 
 export function Sidebar() {
@@ -88,11 +88,6 @@ export function Sidebar() {
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                   <span className="flex-1 truncate">{item.label}</span>
-                  {item.shortcut && (
-                    <kbd className="hidden font-mono text-[10px] text-slate-400 group-hover:inline">
-                      {item.shortcut}
-                    </kbd>
-                  )}
                 </NavLink>
               </li>
             )

@@ -23,11 +23,13 @@ interface Props {
   right?: ReactNode
   /** Right-aligned mono caption (font-mono text-[10px] text-slate-400 tabular auto-applied) */
   caption?: ReactNode
+  /** caption 用 id (Day 18.5 P1-4 反映: disabled control 群の aria-describedby 結合点として使う) */
+  captionId?: string
   /** Outer className 上書き (例: Dashboard の `text-xs text-slate-500`) */
   className?: string
 }
 
-export function PageFooter({ left, right, caption, className }: Props) {
+export function PageFooter({ left, right, caption, captionId, className }: Props) {
   return (
     <footer className={cn('border-t border-slate-200 bg-white px-6 py-3', className)}>
       <div className="flex items-center justify-between gap-3">
@@ -36,7 +38,7 @@ export function PageFooter({ left, right, caption, className }: Props) {
           <div className="flex items-center gap-3">
             {right && <div className="flex items-center gap-2">{right}</div>}
             {caption && (
-              <span className="font-mono text-[10px] text-slate-400 tabular">{caption}</span>
+              <span id={captionId} className="font-mono text-[10px] text-slate-400 tabular">{caption}</span>
             )}
           </div>
         )}

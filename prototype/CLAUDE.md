@@ -129,8 +129,8 @@ AppShell header right に persistent pill を常時表示:
 ```
 
 - 色: muted (slate-100 background + slate-600 text)、警告色は使わない
-- a11y: `role="status"` + `aria-label="prototype mode indicator"`
-- hover で expanded tooltip: 「本 prototype は in-memory mock state です。永続化なし / 外部システム未接続 / 実顧客データ未使用 / 実規制 cite なし」
+- a11y: `role="status"` + 日本語 `aria-label` + stable `aria-describedby` (tooltip node は常時 DOM に置く)
+- hover/focus で expanded tooltip: 「本プロトタイプはメモリ上のモック状態です。永続化なし / 外部システム未接続 / 実顧客データ未使用 / 実規制の引用なし」
 
 ## Citation / Staging Governance (Plan v1.4 P0-1、`docs/03` §2.7.2)
 

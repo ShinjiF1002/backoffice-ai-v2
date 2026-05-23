@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react'
 import { useState } from 'react'
+import { cn } from '@/lib/cn'
 
 /**
  * Prototype mode label (必須、全画面 persistent pill)
@@ -8,7 +9,7 @@ import { useState } from 'react'
  * 配置: `shared/` (1 file 1 component、9 画面横断 + BusinessApprovalView mock 共通)
  * 文言: "プロトタイプ表示 — 外部システム未接続 / 証跡はモック"
  * 色: muted (slate-100 background + slate-600 text)、警告色は使わない
- * a11y: role="status" + aria-label="prototype mode indicator"
+ * a11y: role="status" + aria-label JP + stable aria-describedby
  */
 export function PrototypeModeLabel() {
   const [hovered, setHovered] = useState(false)
@@ -16,7 +17,7 @@ export function PrototypeModeLabel() {
   return (
     <div
       role="status"
-      aria-label="prototype mode indicator"
+      aria-label="プロトタイプ表示の説明"
       aria-describedby="prototype-tooltip"
       tabIndex={0}
       className="relative inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
@@ -28,23 +29,24 @@ export function PrototypeModeLabel() {
       <Info className="h-3.5 w-3.5" aria-hidden="true" />
       <span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
 
-      {hovered && (
-        <div
-          id="prototype-tooltip"
-          role="tooltip"
-          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-md border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-md"
-        >
-          本 prototype は in-memory mock state です。
-          <br />
-          ・永続化なし
-          <br />
-          ・外部システム未接続
-          <br />
-          ・実顧客データ未使用
-          <br />
-          ・実規制 cite なし
-        </div>
-      )}
+      <div
+        id="prototype-tooltip"
+        role="tooltip"
+        className={cn(
+          'pointer-events-none absolute right-0 top-full z-50 mt-2 w-80 rounded-md border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-md transition-opacity',
+          hovered ? 'visible opacity-100' : 'invisible opacity-0'
+        )}
+      >
+        本プロトタイプはメモリ上のモック状態です。
+        <br />
+        ・永続化なし
+        <br />
+        ・外部システム未接続
+        <br />
+        ・実顧客データ未使用
+        <br />
+        ・実規制の引用なし
+      </div>
     </div>
   )
 }

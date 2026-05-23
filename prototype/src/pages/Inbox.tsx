@@ -71,7 +71,9 @@ export function Inbox() {
   )
   const total = rows.length
   const workflowFilterLabel = workflowFilter ? workflowLabel[workflowFilter] ?? workflowFilter : 'すべて'
-  const pendingCount = useMemo(() => rows.filter((c) => c.status === 'pending' || c.status === 'ready').length, [rows])
+  const aiProcessingCount = useMemo(() => rows.filter((c) => c.status === 'pending').length, [rows])
+  const readyCount = useMemo(() => rows.filter((c) => c.status === 'ready').length, [rows])
+  const approvalWaitingCount = useMemo(() => rows.filter((c) => c.status === 'business-approval-waiting').length, [rows])
   const sentBackCount = useMemo(() => rows.filter((c) => c.status === 'sent-back').length, [rows])
   const doneCount = useMemo(() => rows.filter((c) => c.status === 'reflected').length, [rows])
 
@@ -219,7 +221,9 @@ export function Inbox() {
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs text-slate-500 tabular">1 - {total} / {total} 件</span>
             <span className="text-slate-300" aria-hidden="true">|</span>
-            <span className="text-[10px] text-slate-400">確認待ち {pendingCount} / 差戻し {sentBackCount} / 完了 {doneCount}</span>
+            <span className="text-[10px] text-slate-400">
+              AI処理中 {aiProcessingCount} / 確認待ち {readyCount} / 承認待ち {approvalWaitingCount} / 差戻し {sentBackCount} / 完了 {doneCount}
+            </span>
           </div>
         }
         right={

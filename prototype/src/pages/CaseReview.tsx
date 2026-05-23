@@ -66,9 +66,6 @@ export function CaseReview() {
         <div className="mt-1.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-slate-900">{c.id} {c.workflowName}</h1>
-            <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-              {c.workflowName}
-            </span>
             <StatusBadge tone={caseStatusToTone(c.status)} label={c.statusLabel} />
           </div>
           <div className="flex items-center gap-3">

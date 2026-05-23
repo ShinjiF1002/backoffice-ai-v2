@@ -95,9 +95,10 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* User menu */}
+      {/* User menu — Day 18.5 拡張 Commit 0 (U-3): <button> enabled no-op 解消、<div> semantic 化。
+        * user role 切替は scope-out (Phase 1)、<DisabledAction> は form submit context との非整合のため div を採用、focusable なし。 */}
       <div className="border-t border-slate-200 p-2">
-        <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50">
+        <div className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-slate-700">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 font-mono text-xs font-medium text-slate-700">
             山田
           </div>
@@ -105,7 +106,7 @@ export function Sidebar() {
             <span className="text-xs font-medium text-slate-900">山田 太郎</span>
             <span className="text-[10px] text-slate-500">入力者</span>
           </div>
-        </button>
+        </div>
       </div>
     </aside>
   )

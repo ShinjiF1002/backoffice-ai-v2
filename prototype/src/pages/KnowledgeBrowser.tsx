@@ -118,10 +118,10 @@ export function KnowledgeBrowser() {
                   type="button"
                   onClick={() => setWorkflowFilter(wid)}
                   className={cn(
-                    'rounded-md px-2 py-0.5 font-mono text-[11px] tabular transition-colors',
+                    'rounded-md px-2.5 py-1 font-mono text-[11px] tabular transition-colors',
                     isActive
-                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   )}
                   aria-pressed={isActive}
                 >
@@ -166,10 +166,10 @@ export function KnowledgeBrowser() {
                   type="button"
                   onClick={() => setCategoryFilter('all')}
                   className={cn(
-                    'rounded-md px-2 py-0.5 text-[11px] transition-colors',
+                    'rounded-md px-2.5 py-1 text-[11px] transition-colors',
                     categoryFilter === 'all'
-                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   )}
                   aria-pressed={categoryFilter === 'all'}
                 >
@@ -190,12 +190,12 @@ export function KnowledgeBrowser() {
                       }}
                       disabled={isDisabled}
                       className={cn(
-                        'rounded-md px-2 py-0.5 text-[11px] transition-colors',
+                        'rounded-md px-2.5 py-1 text-[11px] transition-colors',
                         isDisabled
-                          ? 'cursor-not-allowed bg-slate-50 text-slate-400'
+                          ? 'cursor-not-allowed border border-slate-100 bg-slate-50 text-slate-400'
                           : isActive
-                            ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                       )}
                       aria-pressed={isActive}
                       aria-disabled={isDisabled}
@@ -221,10 +221,10 @@ export function KnowledgeBrowser() {
                   type="button"
                   onClick={() => setWeightFilter('all')}
                   className={cn(
-                    'rounded-md px-2 py-0.5 text-[11px] transition-colors',
+                    'rounded-md px-2.5 py-1 text-[11px] transition-colors',
                     weightFilter === 'all'
-                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   )}
                   aria-pressed={weightFilter === 'all'}
                 >
@@ -239,10 +239,10 @@ export function KnowledgeBrowser() {
                       type="button"
                       onClick={() => setWeightFilter(w)}
                       className={cn(
-                        'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] transition-colors',
+                        'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] transition-colors',
                         isActive
-                          ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                          : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                       )}
                       aria-pressed={isActive}
                     >

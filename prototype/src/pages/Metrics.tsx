@@ -276,13 +276,10 @@ export function Metrics() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockAuxiliaryKpis.map((k, idx) => (
+                  {mockAuxiliaryKpis.map((k) => (
                     <tr
                       key={k.id}
-                      className={cn(
-                        'border-b border-slate-100 last:border-0',
-                        idx % 2 === 0 ? '' : 'bg-slate-50/40'
-                      )}
+                      className="border-b border-slate-100 last:border-0"
                     >
                       <td className="px-3 py-2 font-mono text-slate-500 tabular">
                         {k.id}
@@ -417,10 +414,10 @@ export function Metrics() {
                         type="button"
                         onClick={() => setWorkflowFilter(wid)}
                         className={cn(
-                          'rounded-md px-2 py-0.5 font-mono text-[11px] tabular transition-colors',
+                          'rounded-md px-2.5 py-1 font-mono text-[11px] tabular transition-colors',
                           isActive
-                            ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                         )}
                         aria-pressed={isActive}
                       >

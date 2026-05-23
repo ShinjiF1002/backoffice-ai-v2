@@ -168,10 +168,10 @@ export function AuditTrail() {
                   type="button"
                   onClick={() => setWorkflowFilter(wid)}
                   className={cn(
-                    'rounded-md px-2 py-0.5 font-mono text-[11px] tabular transition-colors',
+                    'rounded-md px-2.5 py-1 font-mono text-[11px] tabular transition-colors',
                     isActive
-                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   )}
                   aria-pressed={isActive}
                 >

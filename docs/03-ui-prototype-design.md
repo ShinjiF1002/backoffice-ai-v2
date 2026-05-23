@@ -94,6 +94,8 @@ duration: `duration-150` (instant feedback) / `duration-250` (default) / `durati
 7. **accordion expand**: `h-0 → h-auto` (実際は `max-h-0 → max-h-screen`)、`duration-250 ease-out`
 8. **chip press feedback**: subtle outline + `bg-opacity-90` for `duration-150` on click (NO radial gradient / NO ripple decoration、Operational Premium Light 規範: 装飾 gradient effect は scope-out)
 
+**Day 18.5 audit hedge**: 上記 #4 (form submit feedback) + #5 (toast slide-in) は本 prototype 9 画面 ALL in-memory mock state で実 submit / 実 toast surface なし、Phase 2 backend 接続時に active。現状は `<DisabledAction>` + footer caption pattern で enabled no-op を回避 (§2.7.6 + §4.1 + §4.3 + §4.5 + §4.6 参照)。
+
 ## 2.7 Operational Premium Light (Day 11 visual direction lock、4 AI CR converged)
 
 Day 11 Step 1 で 3 reference mockup を ChatGPT 画像生成で並列生成、4 AI review (3 別 AI + 自己評価) すべて Direction B (Stripe + Controlled operational heterogeneity) を primary と判定、Image 3 の citation governance + Image 1 の diff block を hybrid composition で取り込み。**Direction name = "Operational Premium Light"**。装飾 Wow ではなく、**統制・証跡・AI 判断・承認状態が一目で分かる operational Wow** を狙う。
@@ -145,6 +147,16 @@ Day 11 Step 1 で 3 reference mockup を ChatGPT 画像生成で並列生成、4
 | `PrototypeModeLabel` | `プロトタイプ表示 — 外部システム未接続 / 証跡はモック` |
 
 **原則**: Component 名 (`BusinessApprovalChip` 等) は実装 internal にのみ存在、user-facing UI には出さない。`docs/03` 本文 + Screen Card 内の component 名は **implementation reference**、UI に出す表示文言は本 §2.7.4 table で SSOT 化。
+
+### 2.7.6 Disabled CTA `<DisabledAction>` shared component pattern (Day 18.5 audit、Plan v3.2 D3)
+
+4-source audit (Claude Code + GPT-5.5 + Claude Design + GPT-5.5 Pro) で確定した SSOT。`<button disabled>` は native HTML 仕様で title が多くの browser で発火せず、Tab focus も skip される。3 mode で reason 伝達を統一:
+
+- **wrapper** (CR R32+R38 既存 precedent、default): `<span title={reason}><button disabled>...</button></span>`。single CTA、native browser title が UI の唯一 affordance source。ProposalReview 差戻し / 業務責任者へ送付、AgentSettings 引き上げ申請 で採用
+- **caption**: `<button disabled aria-describedby={captionId}>...</button>` + visible PageFooter caption (`captionId` prop で `<span id>` に紐付け)。SR で読み上げ + visible 両方で affordance 明示。SendBackComment 差戻しを記録、AgentSettings 変更を申請 で採用
+- **inline**: button 直下に visible reason text + `aria-describedby` (Day 18.5 未使用、advanced)
+
+実装: `prototype/src/components/shared/DisabledAction.tsx`、`useId()` は関数先頭で無条件呼出 (Rules of Hooks 整合)。
 
 ### 2.7.5 9-screen routing 明確化 (CR R20 Major Fix 6)
 
@@ -220,6 +232,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 7. **遷移**: case row click → `/cases/:id`、filter / sort interaction
 8. **mock data 依存**: `mock-cases.ts` (case list)
 9. **Day 11+ 実装メモ**: Wireframe で table layout + filter chip + 状態 badge 配置確定。Demo Chapter 1 開始画面 (9 画面 ALL polish target equal、Hero 1-3 label は demo sequence indicator のみで polish target ではない、本画面は demo 起点として遷移順序上の意味のみ)。Screen Card 旧 "progress" 列は Day 12 で 担当者 列に置換 (mini-stepper による進捗可視化は Day 14-15 medium-fi で別途検討、現状の Inbox grammar は status badge + 経過列 SLA tint で進捗 signal を 2 軸で表現)
+10. **Day 18.5 audit P0 修正**: 未実装 filter 4 chip (業務 / 状態 / 担当者 / 経過時間) を `<FilterChip disabled aria-describedby="inbox-filter-caption">` で render (chip-style visual + 非 interactive `<span>` の affordance ミスマッチ解消)。PageFooter caption「フィルタ・並び順・一括操作は次の実装段階で対応」に統合 (一括操作 2 disabled button と同 caption 紐付け、CR R28 M3 footer caption pattern と統合)、Phase 2 で enabled 化。
 
 ### 4.2 CaseReview (`/cases/:id`) [Hero 1]
 
@@ -324,6 +337,7 @@ Screen Card template (ai-operator 11 §4 v2 再編):
 - **Header (top)**: PageBreadcrumb (left) + StatusBadge + **Prototype mode label** (UserMenu 左隣、§8 参照) + UserMenu (right)
 - **BottomNav (mobile fallback、scope-out 候補)**: 主要 5 画面 (Dashboard / Inbox / ProposalReview / Metrics / Knowledge)
 - **Route SSOT**: `prototype/src/App.tsx` で React Router v7 にて exactly 9 page route をマウント (§2.7.5 詳細、`/cases/:id/comment` は SendBackComment = 9 画面の 1 つ、10 番目ではない)
+- **Day 18.5 audit TopBar cleanup** (4-source convergence): Search input + Notification button は `aria-hidden="true"` static silhouette (focus 不可、SR 無視、`cursor-default`)、`⌘K` kbd badge + Sidebar `⌘1-⌘8` shortcut reveal は完全削除 (command palette / kbd shortcut hint は scope-out、未実装 shortcut hint は trust 違反)。検索 / 通知 / 一括操作 / フィルタの「次の実装段階で対応」 status は PrototypeModeLabel tooltip (§8) に統合。
 
 ## 6. AiProposalPanel 過去案件 関連ルール更新 Alert UI 仕様 (3 適用範囲)
 

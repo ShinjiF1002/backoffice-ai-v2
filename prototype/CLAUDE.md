@@ -120,6 +120,20 @@ Color name (amber/red) vs semantic (caution/severe) の混在は禁止 (C1 token
 
 Demo 中核 3 画面 (CaseReview / ProposalReview / Dashboard) + Inbox は最初から full-width で実装済 (touch 不要)。
 
+### Disabled CTA + TopBar audit affordance (Day 18.5、Plan v3.2)
+
+4-source audit (Claude Code + GPT-5.5 + Claude Design + GPT-5.5 Pro) で確定した SSOT。`docs/03` §2.7.6 + §4.1 + §5 と整合:
+
+- **`<DisabledAction>` shared component** (`src/components/shared/DisabledAction.tsx`): 3 mode (wrapper / caption / inline)。`<button disabled>` の native title 不発火 + Tab skip 問題を 3 mode で解消、`docs/03` §2.7.6 SSOT
+  - **wrapper** (default、CR R32+R38 既存 precedent): `<span title>` 経由
+  - **caption**: `aria-describedby` で PageFooter caption (`captionId` prop) に紐付け、visible + SR で affordance 明示
+  - **inline**: button 直下 visible reason text + `aria-describedby` (Day 18.5 未使用)
+- **PageFooter `captionId` prop** (Day 18.5 P1-4): caption ReactNode を `<span id>` に紐付け、disabled control 群の `aria-describedby` 結合点
+- **FilterChip `aria-describedby` prop** (Day 18.5 R3): disabled state + 外部 caption 紐付け対応
+- **TopBar aria-hidden affordance** (Day 18.5 D1+D2): Search input + Notification button は `<div aria-hidden="true">` static silhouette / `<span aria-hidden="true">` static icon (focus 不可、SR 無視、`cursor-default`)。`⌘K` / `⌘[0-9]` 一切禁止、Sidebar `⌘1-⌘8` shortcut reveal 削除済 (command palette / kbd shortcut hint は scope-out、未実装 shortcut hint は trust 違反)
+- **Inbox FilterChip disabled rule**: 未実装 filter 4 chip (業務 / 状態 / 担当者 / 経過時間) は `<FilterChip disabled aria-describedby="inbox-filter-caption">` + PageFooter caption「フィルタ・並び順・一括操作は次の実装段階で対応」に統合 (一括操作 2 disabled button と同 caption 紐付け、CR R28 M3 footer caption pattern と統合)、Phase 2 で enabled 化
+- **検索 / 通知 / 一括操作 / フィルタ の status**: PrototypeModeLabel tooltip (§Persistent Prototype Mode Label) に統合、`role="status"` semantic は dynamic update 通知向けで使用しない
+
 ## Persistent Prototype Mode Label (必須、全画面)
 
 AppShell header right に persistent pill を常時表示:

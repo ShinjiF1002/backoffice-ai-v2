@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Day 18.5 audit bundle (artifact、再生成可能、bundle README §git-track-not の方針)
+audit-bundle/
+
+# NOTE: prototype/audit/ は ignore しない (audit prompt SSOT を含む、user 判断で track or rm)

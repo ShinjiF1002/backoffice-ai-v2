@@ -247,7 +247,7 @@ Demo の execution step (どの画面の何を click するか) は `demo/demo-s
 
 ### 4.1 figure 内容
 
-- **PageHeader**: 「業務承認画面 (mock、slide 用)」+ Prototype mode label
+- **PageHeader**: 「承認者承認画面 (mock、slide 用)」+ Prototype mode label (v1.4 Commit 4 U-8、旧 `業務承認画面` から rename、HTML mock impl と整合)
 - **case 概要 card**: case_id / workflow (UC-BO-01) / 入力者確認 status (済 + 入力者名) / 申請日時
 - **AI 入力結果 summary**: 主要 field (住所 / 法人名 / 申請理由) の AI 結果 + diff (申請前後)
 - **証跡 thumbnail list**: PDF サムネ / screenshot stack (Day 11+ 実装の mock 画像を流用)

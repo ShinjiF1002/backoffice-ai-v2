@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1280, initial-scale=1.0" />
-  <title>Backoffice AI v2 — Session 4 (構想共有、60 min × 10 名)</title>
+  <title>Backoffice AI v2 — Session 4 (構想共有、60 分 × 参加者 10 名)</title>
 
   <!--
     ============================================================================
@@ -155,12 +155,12 @@
     <div class="slides">
 
       <!-- ====================================================================
-           Slide 0: Title (intro 2 min)
+           Slide 0: Title (intro 2 分)
            ==================================================================== -->
       <section data-state="title" class="!flex !flex-col !justify-center !items-start">
         <div class="w-full">
           <!-- mono chip -->
-          <p class="font-mono text-[14px] text-slate-500 tabular mb-6">2026-06-12 · 60 min · audience 10 名</p>
+          <p class="font-mono text-[14px] text-slate-500 tabular mb-6">2026-06-12 · 60 分 · 参加者 10 名</p>
           <h1 class="text-[72px] !mb-4 leading-none">Backoffice AI v2</h1>
           <p class="text-[28px] text-slate-700 font-medium !mb-8">構想共有 — 差戻しを、次の正解手順に変える仕組み</p>
           <div class="flex items-center gap-4 mt-8">
@@ -178,11 +178,11 @@
       </section>
 
       <!-- ====================================================================
-           Slide 1: 現状課題 (二択問題、5 min)
+           Slide 1: 現状課題 (二択問題、5 分)
            docs/06 §2.1
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 1 / 8 · 5 min</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 1 / 8 · 5 分</p>
         <h2>バックオフィス業務は「二択」に陥りやすい</h2>
 
         <div class="grid grid-cols-[1fr_auto_1fr] gap-6 items-stretch mt-8">
@@ -192,7 +192,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-alert">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
-              <span class="text-[14px] font-mono text-alert-soft-fg uppercase tracking-wide">Option A</span>
+              <span class="text-[14px] font-mono text-alert-soft-fg uppercase tracking-wide">選択肢 A</span>
             </div>
             <h3 class="text-slate-900 !mb-3">一括自動化</h3>
             <p class="text-slate-700 leading-relaxed">例外対応の難しさ + 規制対応の重さで実装が止まる。</p>
@@ -211,7 +211,7 @@
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
               </svg>
-              <span class="text-[14px] font-mono text-slate-600 uppercase tracking-wide">Option B</span>
+              <span class="text-[14px] font-mono text-slate-600 uppercase tracking-wide">選択肢 B</span>
             </div>
             <h3 class="text-slate-900 !mb-3">諦める</h3>
             <p class="text-slate-700 leading-relaxed">人手不足 + 退職リスクで現状維持不能。</p>
@@ -223,15 +223,15 @@
       </section>
 
       <!-- ====================================================================
-           Slide 2: Core message + 補助 3 コピー (5 min)
+           Slide 2: Core message + 補助 3 コピー (5 分)
            docs/06 §2.2
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 2 / 8 · 5 min · Core message</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 2 / 8 · 5 分 · 主張 (中核メッセージ)</p>
 
         <!-- Hero message -->
         <div class="bg-primary-soft rounded-lg p-8 mb-8 border-l-4 border-primary">
-          <p class="font-mono text-[12px] text-primary uppercase tracking-wider !mb-3">Top message</p>
+          <p class="font-mono text-[12px] text-primary uppercase tracking-wider !mb-3">主張</p>
           <h1 class="text-[48px] !mb-0 leading-tight text-primary-strong">差戻しを、<br/>次の正解手順に変える仕組み。</h1>
         </div>
 
@@ -252,23 +252,33 @@
         </div>
 
         <!-- Mini flywheel -->
-        <div class="mt-8 flex items-center justify-center gap-3 font-mono text-[14px]">
+        <div class="mt-6 flex items-center justify-center gap-3 font-mono text-[14px]">
           <span class="px-3 py-2 rounded-md border border-slate-300 bg-white text-slate-700">差戻し</span>
           <span class="text-slate-400">→</span>
-          <span class="px-3 py-2 rounded-md border border-slate-300 bg-slate-50 text-slate-700">未承認 (staging)</span>
+          <span class="px-3 py-2 rounded-md border border-slate-300 bg-slate-50 text-slate-700">未承認</span>
           <span class="text-slate-400">→</span>
-          <span class="px-3 py-2 rounded-md border border-success bg-success-soft text-success-soft-fg">承認済 (compiled)</span>
+          <span class="px-3 py-2 rounded-md border border-success bg-success-soft text-success-soft-fg">承認済</span>
           <span class="text-slate-400">→</span>
           <span class="px-3 py-2 rounded-md border border-primary bg-primary-soft text-primary-strong">反映</span>
+        </div>
+
+        <!-- Citation boundary (docs/06 §2.2 必須言及、CR P1 反映) -->
+        <div class="mt-4 rounded-md border-l-4 border-success bg-success-soft/40 p-3">
+          <p class="!my-0 text-[13px] leading-relaxed text-slate-800">
+            <strong class="text-success-soft-fg">引用根拠の境界線:</strong>
+            未承認ナレッジは AI runtime に存在 (補助 hint) だが、
+            <strong class="text-slate-900">引用根拠として使えるのは承認済ナレッジのみ</strong>。
+            これが Sub message 02「承認された手順だけを覚えさせる」の具体的境界。
+          </p>
         </div>
       </section>
 
       <!-- ====================================================================
-           Slide 3: 案件承認 4-eyes + BusinessApprovalView mock figure (5 min)
+           Slide 3: 案件承認 4-eyes + BusinessApprovalView mock figure (5 分)
            docs/06 §2.3 + §4
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 3 / 8 · 5 min · 案件承認 4-eyes</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 3 / 8 · 5 分 · 案件承認 (4-eyes)</p>
         <h2>案件承認 = 入力者確認 + 承認者承認 の 2 段で「4-eyes」</h2>
 
         <div class="grid grid-cols-[1fr_1.4fr] gap-6 mt-6">
@@ -276,10 +286,10 @@
           <div class="space-y-4">
             <div class="rounded-lg border border-hairline bg-panel p-4">
               <div class="flex items-center gap-2 mb-2">
-                <span class="font-mono text-[12px] text-slate-500 uppercase tracking-wide">Step 1</span>
+                <span class="font-mono text-[12px] text-slate-500 uppercase tracking-wide">第1段階</span>
               </div>
               <h3 class="!mb-1 !text-[18px]">入力者確認</h3>
-              <p class="text-[15px] text-slate-600 !mb-0">AI 結果の accept / sendback (差戻し)</p>
+              <p class="text-[15px] text-slate-600 !mb-0">AI 結果を 受理 または 差戻し</p>
             </div>
 
             <div class="flex justify-center">
@@ -288,7 +298,7 @@
 
             <div class="rounded-lg border-2 border-primary/30 bg-primary-soft/30 p-4">
               <div class="flex items-center gap-2 mb-2">
-                <span class="font-mono text-[12px] text-primary uppercase tracking-wide">Step 2</span>
+                <span class="font-mono text-[12px] text-primary uppercase tracking-wide">第2段階</span>
               </div>
               <h3 class="!mb-1 !text-[18px] text-primary-strong">承認者承認</h3>
               <p class="text-[15px] text-slate-700 !mb-0">入力者確認後の最終確認 = 4-eyes 成立</p>
@@ -312,24 +322,24 @@
         </div>
 
         <p class="mt-4 text-[14px] text-slate-500 leading-relaxed">
-          prototype では承認者画面は React route 化せず (9 routes exactly 規範)、CaseReview 内 <code class="font-mono text-[13px] bg-slate-100 px-1.5 py-0.5 rounded">BusinessApprovalChip</code> click で別タブで開く static mock として実装
+          prototype では承認者画面は React route 化せず (9 routes exactly 規範)、CaseReview 内 <code class="font-mono text-[13px] bg-slate-100 px-1.5 py-0.5 rounded">BusinessApprovalChip</code> クリックで別タブで開く静的モック として実装
         </p>
       </section>
 
       <!-- ====================================================================
-           Slide 4: 3 層承認 + Type A/B/C (5 min)
+           Slide 4: 3 層承認 + Type A/B/C (5 分)
            docs/06 §2.4
            Demo Chapter 1 切替 cue 付き
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 4 / 8 · 5 min · 3 層承認</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 4 / 8 · 5 分 · 3 層承認</p>
         <h2>承認は 3 層。設定承認は Type A/B/C に分岐</h2>
 
         <div class="space-y-3 mt-6">
           <!-- Layer 1: 案件承認 -->
           <div class="grid grid-cols-[180px_1fr_auto] gap-4 items-center rounded-lg border border-hairline bg-panel p-4">
             <div>
-              <span class="font-mono text-[12px] text-slate-500 uppercase tracking-wide">Layer 1</span>
+              <span class="font-mono text-[12px] text-slate-500 uppercase tracking-wide">第1層</span>
               <h3 class="!mb-0 !text-[20px]">案件承認</h3>
             </div>
             <p class="!mb-0 text-slate-700">個別案件の 4-eyes (Slide 3 と同じ)、入力者 + 承認者の 2 段</p>
@@ -339,19 +349,19 @@
           <!-- Layer 2: 手順承認 -->
           <div class="grid grid-cols-[180px_1fr_auto] gap-4 items-center rounded-lg border border-hairline bg-panel p-4">
             <div>
-              <span class="font-mono text-[12px] text-slate-500 uppercase tracking-wide">Layer 2</span>
+              <span class="font-mono text-[12px] text-slate-500 uppercase tracking-wide">第2層</span>
               <h3 class="!mb-0 !text-[20px]">手順承認</h3>
             </div>
             <p class="!mb-0 text-slate-700">
-              AI が日次分析で <strong class="text-slate-900">Procedure Update Proposal を自動生成</strong> · R = Manual 管理者 (キュー責任) / A = 業務責任者
+              AI が日次分析で <strong class="text-slate-900">手順更新提案を自動生成</strong> · R = 手順管理者 (キュー責任) / A = 業務責任者
             </p>
-            <span class="inline-flex items-center rounded-md bg-primary-soft px-2.5 py-1 font-mono text-[12px] text-primary-strong">Proposal source: AI</span>
+            <span class="inline-flex items-center rounded-md bg-primary-soft px-2.5 py-1 font-mono text-[12px] text-primary-strong">提案ソース: AI</span>
           </div>
 
           <!-- Layer 3: 設定承認 -->
           <div class="grid grid-cols-[180px_1fr_auto] gap-4 items-center rounded-lg border-2 border-primary/30 bg-primary-soft/20 p-4">
             <div>
-              <span class="font-mono text-[12px] text-primary uppercase tracking-wide">Layer 3</span>
+              <span class="font-mono text-[12px] text-primary uppercase tracking-wide">第3層</span>
               <h3 class="!mb-0 !text-[20px] text-primary-strong">設定承認</h3>
             </div>
             <p class="!mb-0 text-slate-800">
@@ -359,39 +369,39 @@
             </p>
             <div class="flex gap-1.5">
               <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-700">Type A 通常</span>
-              <span class="inline-flex items-center rounded-md bg-amber-100 px-2 py-1 font-mono text-[11px] text-alert-soft-fg">Type B Security</span>
-              <span class="inline-flex items-center rounded-md bg-indigo-100 px-2 py-1 font-mono text-[11px] text-primary-strong">Type C Automation</span>
+              <span class="inline-flex items-center rounded-md bg-amber-100 px-2 py-1 font-mono text-[11px] text-alert-soft-fg">Type B 情報管理</span>
+              <span class="inline-flex items-center rounded-md bg-indigo-100 px-2 py-1 font-mono text-[11px] text-primary-strong">Type C 自動化段階</span>
             </div>
           </div>
         </div>
 
         <!-- Demo 1 cue -->
         <div class="mt-8 rounded-lg border border-primary/30 bg-primary-soft p-4 flex items-center gap-3">
-          <span class="font-mono text-[12px] uppercase tracking-wider text-primary">▶ Next</span>
-          <span class="text-slate-800 font-medium">Demo Chapter 1 (22-38 min): UC-BO-01 法人住所変更 — Inbox → CaseReview → SendBackComment → staging hint visible</span>
+          <span class="font-mono text-[12px] uppercase tracking-wider text-primary">▶ デモへ</span>
+          <span class="text-slate-800 font-medium">デモ Chapter 1 (22-38 分): UC-BO-01 法人住所変更 — 受信トレイ → 案件レビュー → 差戻しコメント → 未承認ヒント反映</span>
           <span class="ml-auto font-mono text-[12px] text-slate-500 tabular">http://localhost:5173/?demo=1</span>
         </div>
       </section>
 
       <!-- ====================================================================
-           Slide 5: Flywheel 全景 + Knowledge loop (~2.5 min)
+           Slide 5: Flywheel 全景 + Knowledge loop (~2.5 分)
            docs/06 §2.5
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 5 / 8 · 2.5 min · Flywheel</p>
-        <h2>差戻し → 反映の 5 段 loop</h2>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 5 / 8 · 2.5 分 · 反復サイクル (Flywheel)</p>
+        <h2>差戻し → 反映の 5 段サイクル</h2>
 
         <!-- Flywheel circular -->
         <div class="grid grid-cols-5 gap-3 mt-6">
           <div class="rounded-lg border border-hairline bg-panel p-4 text-center">
             <div class="font-mono text-[11px] text-slate-400 mb-2">01</div>
             <div class="text-[20px] font-semibold text-slate-900 mb-1">差戻し</div>
-            <div class="text-[12px] text-slate-500">5-category routing</div>
+            <div class="text-[12px] text-slate-500">5 分類 (5-category)</div>
           </div>
           <div class="rounded-lg border border-hairline bg-slate-50 p-4 text-center">
             <div class="font-mono text-[11px] text-slate-400 mb-2">02</div>
             <div class="text-[20px] font-semibold text-slate-900 mb-1">staging</div>
-            <div class="text-[12px] text-slate-500">未承認、AI hint のみ</div>
+            <div class="text-[12px] text-slate-500">未承認、AI ヒントのみ</div>
           </div>
           <div class="rounded-lg border-2 border-success bg-success-soft p-4 text-center">
             <div class="font-mono text-[11px] text-success-soft-fg mb-2">03</div>
@@ -412,13 +422,13 @@
 
         <!-- Loop arrow -->
         <div class="mt-4 flex items-center justify-center gap-2 text-slate-400 text-[14px]">
-          <span class="font-mono">↺ 日次 loop で蒸留</span>
+          <span class="font-mono">↺ 日次サイクルで蒸留</span>
         </div>
 
         <!-- weight indicator legend + 5-category -->
         <div class="grid grid-cols-2 gap-4 mt-6">
           <div class="rounded-md border border-hairline bg-panel p-4">
-            <h3 class="!mb-2 !text-[16px]">weight インジケータ</h3>
+            <h3 class="!mb-2 !text-[16px]">重み (weight) インジケータ</h3>
             <div class="flex gap-3 text-[13px] flex-wrap">
               <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span> 未承認 (低)</span>
               <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-alert"></span> 確認済</span>
@@ -426,7 +436,7 @@
             </div>
           </div>
           <div class="rounded-md border border-hairline bg-panel p-4">
-            <h3 class="!mb-2 !text-[16px]">5-category routing</h3>
+            <h3 class="!mb-2 !text-[16px]">5 分類 (5-category)</h3>
             <div class="flex gap-1.5 text-[12px] flex-wrap font-mono">
               <span class="px-2 py-0.5 rounded bg-slate-100">誤読</span>
               <span class="px-2 py-0.5 rounded bg-slate-100">UI 差異</span>
@@ -440,11 +450,11 @@
       </section>
 
       <!-- ====================================================================
-           Slide 6: 過去 case 不変 + Alert + audit trail (~2.5 min)
+           Slide 6: 過去 case 不変 + Alert + audit trail (~2.5 分)
            docs/06 §2.6
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 6 / 8 · 2.5 min · 過去 case 不変</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 6 / 8 · 2.5 分 · 過去 case 不変</p>
         <h2>過去 case の AI 提案本文は遡って書き換えない (audit trail 保護)</h2>
 
         <!-- Timeline -->
@@ -472,7 +482,7 @@
                 <span class="font-mono text-[12px] text-alert-soft-fg">関連ルール更新</span>
               </div>
               <div class="rounded-md border-2 border-alert bg-alert-soft/40 p-3">
-                <p class="!mb-1 text-[14px] font-medium text-alert-soft-fg">⚠ Alert banner</p>
+                <p class="!mb-1 text-[14px] font-medium text-alert-soft-fg">⚠ 関連手順更新 バナー</p>
                 <p class="!mb-0 text-[12px] text-slate-700 leading-relaxed">「このcase作成後に承認されたルールがあります / AI提案本文は当時のまま保持されています」</p>
               </div>
             </div>
@@ -485,7 +495,7 @@
               </div>
               <div class="rounded-md border border-hairline bg-panel p-3">
                 <p class="!mb-1 text-[14px] font-medium text-slate-800">新ルール適用</p>
-                <p class="!mb-0 text-[12px] text-slate-500">通常 citation として参照</p>
+                <p class="!mb-0 text-[12px] text-slate-500">通常の引用根拠として参照</p>
               </div>
             </div>
           </div>
@@ -495,20 +505,20 @@
         <div class="mt-6 rounded-md border border-hairline bg-slate-50/60 p-4">
           <h3 class="!mb-2 !text-[16px]">Alert UI 3 適用範囲 (DOC-UI-03 §6)</h3>
           <ol class="!my-0 list-decimal pl-5 text-[14px] space-y-1">
-            <li><strong>未承認・承認待ち case</strong>: CaseReview AiProposalPanel に banner Alert</li>
-            <li><strong>承認済み過去 case</strong>: AuditTrail に timeline 表示</li>
-            <li><strong>新規 case</strong>: 新ルールを通常 citation として参照</li>
+            <li><strong>未承認・承認待ち case</strong>: CaseReview AI 提案 panel に バナー Alert</li>
+            <li><strong>承認済み過去 case</strong>: 監査 (AuditTrail) に時系列表示</li>
+            <li><strong>新規 case</strong>: 新ルールを通常の引用根拠として参照</li>
           </ol>
         </div>
       </section>
 
       <!-- ====================================================================
-           Slide 7: Matrix B + slogan + Autonomous footnote (~2.5 min)
+           Slide 7: Matrix B + slogan + Autonomous footnote (~2.5 分)
            docs/06 §2.7
            Demo Chapter 2 切替 cue 付き
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 7 / 8 · 2.5 min · Matrix B</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 7 / 8 · 2.5 分 · マトリクス B (Matrix B)</p>
 
         <!-- Hero message -->
         <div class="bg-slate-900 text-white rounded-lg p-6 !mb-6">
@@ -522,27 +532,27 @@
           <table class="w-full text-[14px]">
             <thead class="bg-slate-50 border-b border-hairline">
               <tr>
-                <th class="text-left px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-slate-500">Automation 段階</th>
-                <th class="text-center px-3 py-2.5 font-medium text-slate-700">案件承認 (Layer 1)</th>
-                <th class="text-center px-3 py-2.5 font-medium text-slate-700">手順承認 (Layer 2)</th>
-                <th class="text-center px-3 py-2.5 font-medium text-slate-700">設定承認 (Layer 3)</th>
+                <th class="text-left px-4 py-2.5 font-mono text-[12px] uppercase tracking-wide text-slate-500">自動化段階</th>
+                <th class="text-center px-3 py-2.5 font-medium text-slate-700">案件承認 (第1層)</th>
+                <th class="text-center px-3 py-2.5 font-medium text-slate-700">手順承認 (第2層)</th>
+                <th class="text-center px-3 py-2.5 font-medium text-slate-700">設定承認 (第3層)</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr>
-                <td class="px-4 py-3 font-medium text-slate-800">Supervised</td>
+                <td class="px-4 py-3 font-medium text-slate-800">監督下 (Supervised)</td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">全件</span></td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">同強度</span></td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">同強度</span></td>
               </tr>
               <tr>
-                <td class="px-4 py-3 font-medium text-slate-800">Checkpoint</td>
+                <td class="px-4 py-3 font-medium text-slate-800">確認ポイント (Checkpoint)</td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-amber-100 px-2 py-0.5 font-mono text-[12px] text-alert-soft-fg">閾値以上</span></td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">同強度</span></td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">同強度</span></td>
               </tr>
               <tr>
-                <td class="px-4 py-3 font-medium text-slate-800">Autonomous*</td>
+                <td class="px-4 py-3 font-medium text-slate-800">自律 (Autonomous)*</td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 font-mono text-[12px] text-slate-600">サンプリング</span></td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">同強度</span></td>
                 <td class="px-3 py-3 text-center"><span class="inline-flex items-center rounded bg-primary-soft px-2 py-0.5 font-mono text-[12px] text-primary-strong">同強度</span></td>
@@ -554,26 +564,26 @@
         <!-- footnote + 高額取引 -->
         <div class="grid grid-cols-2 gap-3 mt-4">
           <p class="!my-0 text-[11px] text-slate-500 leading-relaxed">
-            <strong class="text-slate-700">*Autonomous footnote:</strong> 人間統制なし、ではない。案件確認がサンプリング化するだけで、手順承認 / 設定承認は同じ強度で残る。
+            <strong class="text-slate-700">*自律 補足:</strong> 人間統制なし、ではない。案件確認がサンプリング化するだけで、手順承認 / 設定承認は同じ強度で残る。
           </p>
           <p class="!my-0 text-[11px] text-slate-500 leading-relaxed border-l-2 border-amber-300 pl-3">
-            <strong class="text-alert-soft-fg">高額・高リスク取引</strong> (国際送金等) は本 v2 では条件付き制限業務 (boundary pack のみ docs)、自動化対象外。具体閾値は Phase 1 で業務・法務・リスク観点から検証。
+            <strong class="text-alert-soft-fg">高額・高リスク取引</strong> (国際送金等) は本 v2 では条件付き制限業務 (境界 pack 内部のみ)、自動化対象外。具体閾値は Phase 1 で業務・法務・リスク観点から検証。
           </p>
         </div>
 
         <!-- Demo 2 cue -->
         <div class="mt-4 rounded-lg border border-primary/30 bg-primary-soft p-3 flex items-center gap-3">
-          <span class="font-mono text-[11px] uppercase tracking-wider text-primary">▶ Next</span>
-          <span class="text-[14px] text-slate-800 font-medium">Demo Chapter 2 (46-54 min): AI 日次分析 → ProposalReview (RACI drawer auto-open) → 手順承認 → Metrics</span>
+          <span class="font-mono text-[11px] uppercase tracking-wider text-primary">▶ デモへ</span>
+          <span class="text-[14px] text-slate-800 font-medium">デモ Chapter 2 (46-54 分): AI 日次分析 → 提案レビュー (RACI 詳細 自動展開) → 手順承認 → メトリクス</span>
         </div>
       </section>
 
       <!-- ====================================================================
-           Slide 8: Metrics 4 KPI multi-criteria 仮説 gate + 9 KRI (4 min)
+           Slide 8: Metrics 4 KPI multi-criteria 仮説 gate + 9 KRI (4 分)
            docs/06 §2.8
            ==================================================================== -->
       <section>
-        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 8 / 8 · 4 min · Metrics</p>
+        <p class="font-mono text-[12px] text-slate-400 tabular !mb-2">Slide 8 / 8 · 4 分 · メトリクス</p>
         <h2>4 KPI multi-criteria <span class="text-alert">仮説</span> gate</h2>
 
         <!-- Hedge banner -->
@@ -584,7 +594,7 @@
             <path d="M12 17h.01"/>
           </svg>
           <p class="!my-0 text-[14px] text-slate-800 leading-relaxed">
-            <strong>本番導入可否を判定する gate ではない。</strong> Phase 1 で測定・再設定する <strong>target hypothesis</strong>、本 v2 phase の数値は target、本番ではない。
+            <strong>本番導入可否を判定する gate ではない。</strong> Phase 1 で測定・再設定する <strong>目標仮説 (target hypothesis)</strong>、本 v2 phase の数値は target、本番ではない。
           </p>
         </div>
 
@@ -624,29 +634,29 @@
       </section>
 
       <!-- ====================================================================
-           Slide 9: Q&A / Closing (2 min)
+           Slide 9: Q&A / Closing (2 分)
            ==================================================================== -->
       <section data-state="closing" class="!flex !flex-col !justify-center !items-start">
         <div class="w-full">
-          <p class="font-mono text-[14px] text-slate-500 tabular !mb-6">Closing · 2 min · Q&A</p>
-          <h1 class="text-[72px] !mb-6">質疑応答 / Next step</h1>
+          <p class="font-mono text-[14px] text-slate-500 tabular !mb-6">締めくくり · 2 分 · 質疑応答</p>
+          <h1 class="text-[72px] !mb-6">質疑応答 / 次のステップ</h1>
 
           <p class="text-[20px] text-slate-700 !mb-6 leading-relaxed">
-            audience outcome: <strong class="text-slate-900">「来週、サンプル業務を選んで設計検討を始められる感触」</strong>
+            本日のゴール: <strong class="text-slate-900">「来週、サンプル業務を選んで設計検討を始められる感触」</strong>
           </p>
 
           <div class="grid grid-cols-3 gap-4 mt-8">
             <div class="rounded-lg border border-hairline bg-panel p-4">
-              <p class="font-mono text-[11px] text-slate-500 !mb-2">Step 1</p>
+              <p class="font-mono text-[11px] text-slate-500 !mb-2">手順 1</p>
               <p class="!my-0 text-[14px] text-slate-800">業務選定 (Tier 1 候補)</p>
             </div>
             <div class="rounded-lg border border-hairline bg-panel p-4">
-              <p class="font-mono text-[11px] text-slate-500 !mb-2">Step 2</p>
-              <p class="!my-0 text-[14px] text-slate-800">workflow.md / agent-instructions.md draft</p>
+              <p class="font-mono text-[11px] text-slate-500 !mb-2">手順 2</p>
+              <p class="!my-0 text-[14px] text-slate-800">業務手順書 / AI Agent 指示書 の下書き</p>
             </div>
             <div class="rounded-lg border border-hairline bg-panel p-4">
-              <p class="font-mono text-[11px] text-slate-500 !mb-2">Step 3</p>
-              <p class="!my-0 text-[14px] text-slate-800">Day 1 staging 体験 (mock)</p>
+              <p class="font-mono text-[11px] text-slate-500 !mb-2">手順 3</p>
+              <p class="!my-0 text-[14px] text-slate-800">第1日: 未承認ナレッジ体験 (モック)</p>
             </div>
           </div>
 

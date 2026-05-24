@@ -263,8 +263,19 @@ Demo の execution step (どの画面の何を click するか) は `demo/demo-s
 
 ### 4.3 PNG export
 
-- Day 20 で `demo/static-mocks/business-approval-view.html` を browser open + screenshot で `demo/screenshots/business-approval-view.png` に export
+- **Day 20 実体化済 (2026-05-23)**: `demo/static-mocks/business-approval-view.html` を Playwright headless chromium で screenshot、`demo/screenshots/business-approval-view.png` に export 済 (viewport 1280×1600、full-page、286KB)
+- **再生成手順** (project root から実行):
+  ```bash
+  # Terminal A: 静的 HTML serve (port 5182、任意の空き port に変更可)
+  python3 -m http.server 5182 --directory demo/static-mocks
+  # Terminal B: Playwright で full-page screenshot
+  cd prototype && npx playwright screenshot \
+    --viewport-size 1280,1600 --full-page --wait-for-timeout 1500 \
+    http://localhost:5182/business-approval-view.html \
+    ../demo/screenshots/business-approval-view.png
+  ```
 - Slide 3 visual として slide deck に挿入
+- **CR 案 B 同時実装**: `BusinessApprovalChip.tsx` を Day 20 で再 enabled、`window.open(import.meta.env.BASE_URL + 'demo/business-approval-view.html', '_blank')` で CaseReview footer から別タブ起動可。Vite が `prototype/public/demo/business-approval-view.html` (symlink → canonical SSOT) を serve、`BASE_URL` 起点で dev / production root deploy / GitHub Pages sub-path deploy 全て resolves (`vite.config.ts` の `base: process.env.VITE_BASE_PATH ?? '/'` と整合)
 
 ## 5. 規制語 hedge (Tier 3 不在原則)
 

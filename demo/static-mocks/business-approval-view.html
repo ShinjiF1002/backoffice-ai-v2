@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0" />
+  <title>承認者承認画面 (mock、Session 4 slide 用) — Backoffice AI v2</title>
+
+  <!--
+    ============================================================================
+    SSOT:
+      - docs/06-session4-narrative.md §4 BusinessApprovalView mock figure spec
+      - docs/03-ui-prototype-design.md §2.7 Operational Premium Light design tokens
+      - prototype/CLAUDE.md (9 routes exactly: 本 view は React route 化しない、
+                              Slide 3 内 mock figure として静的 HTML のみ)
+      - prototype/audit/day-19-ux-clarity-integrated-plan.md v1.4 Commit 4 U-8
+        (Tier 1 vocab 「業務承認」→「承認者承認」)
+
+    Day 20 (Plan v1.3 final patch Day 20 で実体化):
+      - Tailwind CDN 1 file HTML (build pipeline 不要、direct browser open 可)
+      - Operational Premium Light token を inline 化 (slate / indigo / emerald /
+        amber、@theme inline は CDN 経由では使えないので Tailwind utility 直書き)
+      - PrototypeModeLabel pill を必ず表示 (Plan v1.4 P0-3 / v1.4.1 Fix 5)
+      - prototype/src の CASE-2026-0142 data を verbatim 参照 (mock-cases.ts と
+        手動同期、本 file は build artifact ではなく snapshot)
+
+    State disclosure (Slide 3 figure mock のため):
+      - 元 mock case (CASE-2026-0142) は status='ready' / 入力者確認待ち /
+        businessApprovalStatus='未送付'
+      - 本 figure は「入力者確認後、承認者承認待ち」状態に切り出し表示
+      - status の overlay は figure caption + Mock 状態 disclosure note で明示
+    ============================================================================
+  -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <script>
+    // Tailwind config: Operational Premium Light token (docs/03 §2.7.3 SSOT) を CDN 経由で extend
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans JP', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            // Operational Premium Light semantic tokens (index.css @theme inline mirror)
+            canvas: '#F8FAFC',         // slate-50
+            panel: '#FFFFFF',
+            hairline: '#E5E7EB',
+            primary: '#635BFF',
+            'primary-soft': '#EEF2FF',
+            'primary-hover': '#4F46E5',
+            success: '#10B981',
+            'success-soft': '#ECFDF5',
+            'success-soft-fg': '#047857',
+            alert: '#F59E0B',
+            'alert-soft': '#FEF3C7',
+            'alert-soft-fg': '#78350F',
+            error: '#DC2626',
+            'error-soft': '#FEE2E2',
+            'error-soft-fg': '#B91C1C',
+          },
+          borderRadius: {
+            chip: '4px',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+      font-feature-settings: 'tnum' 1, 'cv11' 1;
+    }
+    /* tabular-nums for mono ID / timestamps */
+    .tabular {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-canvas text-slate-900">
+
+  <!-- =============================================================
+       Mock state disclosure (Slide 用 caption、figure 上部に明示)
+       JP-only paraphrase: 内部 enum 名 (status / businessApprovalStatus) と
+       「mock data」表記は user-facing から削除、規範文言のみで disclosure。
+       内部 SSOT (元 case の実際の進行段階) は本 file の HTML comment block に保持。
+       ============================================================= -->
+  <div class="border-b border-amber-200 bg-amber-50/40 px-6 py-2">
+    <p class="text-[11px] leading-relaxed text-slate-700">
+      <span class="font-semibold text-[#78350F]">Slide 3 用 静的画面:</span>
+      本画面は Session 4 説明用の静的画面です。サンプル案件
+      <span class="font-mono tabular">CASE-2026-0142</span>
+      を <strong>「入力者確認後、承認者承認待ち」</strong>の状態に切り出して表示しています
+      (案件の実際の進行段階は「入力者確認待ち」、本画面は承認者向け UI 構造の例示)。
+    </p>
+  </div>
+
+  <!-- =============================================================
+       Top header (AppShell TopBar mirror、Prototype mode label 含む)
+       ============================================================= -->
+  <header class="flex h-14 items-center justify-between border-b border-hairline bg-panel px-6">
+    <div class="flex items-center gap-3">
+      <!-- Brand / page label -->
+      <span class="text-sm font-semibold text-slate-900">
+        Backoffice AI v2 — 承認者承認画面 (mock、slide 用)
+      </span>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- PrototypeModeLabel pill (持続表示、必須) -->
+      <div
+        role="status"
+        aria-label="プロトタイプ表示の説明"
+        class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- =============================================================
+       Page header (breadcrumb + h1 + status + 経過)
+       ============================================================= -->
+  <header
+    data-page-header
+    class="border-b border-hairline bg-panel px-6 py-3"
+    style="min-height: 88px"
+  >
+    <nav aria-label="breadcrumb" class="flex items-center gap-1.5 text-xs text-slate-500">
+      <span class="hover:text-slate-700">承認者キュー</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+      <span class="text-slate-600">案件承認</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+      <span class="font-mono text-slate-700 tabular">CASE-2026-0142</span>
+    </nav>
+
+    <div class="mt-1.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-semibold text-slate-900">CASE-2026-0142 法人住所変更</h1>
+        <!-- StatusBadge: 承認者承認待ち (amber soft) -->
+        <span class="inline-flex items-center rounded-chip border border-amber-200 bg-alert-soft px-2 py-0.5 text-xs font-medium text-alert-soft-fg">
+          承認者承認待ち
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-[11px] text-slate-500 tabular">承認者キュー 経過 00:08:21</span>
+      </div>
+    </div>
+
+    <!-- LifecycleStepper (受付 → AI 処理 → 入力者確認 → 承認者承認 [current] → 反映) -->
+    <ol class="mt-2.5 flex items-center gap-2">
+      <li class="flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-success" aria-hidden="true"></span>
+        <span class="text-[11px] text-slate-500">受付</span>
+      </li>
+      <span class="text-slate-300" aria-hidden="true">→</span>
+      <li class="flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-success" aria-hidden="true"></span>
+        <span class="text-[11px] text-slate-500">AI 処理</span>
+      </li>
+      <span class="text-slate-300" aria-hidden="true">→</span>
+      <li class="flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-success" aria-hidden="true"></span>
+        <span class="text-[11px] text-slate-500">入力者確認</span>
+      </li>
+      <span class="text-slate-300" aria-hidden="true">→</span>
+      <li class="flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-primary ring-4 ring-primary-soft" aria-hidden="true"></span>
+        <span class="text-[11px] font-semibold text-primary">承認者承認</span>
+      </li>
+      <span class="text-slate-300" aria-hidden="true">→</span>
+      <li class="flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-slate-300" aria-hidden="true"></span>
+        <span class="text-[11px] text-slate-400">反映</span>
+      </li>
+    </ol>
+  </header>
+
+  <!-- =============================================================
+       Main body: 2-column (case detail 8/12 + 承認者 action box 4/12)
+       ============================================================= -->
+  <main class="p-4">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+
+      <!-- =========================================================
+           Left 8/12: case 概要 + AI 入力結果 + 証跡 + AiProposal
+           ========================================================= -->
+      <section class="space-y-3 lg:col-span-8">
+
+        <!-- 1. case 概要 card -->
+        <div class="rounded-lg border border-hairline bg-panel p-4">
+          <h2 class="mb-3 text-sm font-semibold text-slate-900">案件概要</h2>
+          <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-xs sm:grid-cols-4">
+            <div>
+              <dt class="text-[11px] text-slate-500">案件 ID</dt>
+              <dd class="mt-0.5 font-mono font-medium text-slate-800 tabular">CASE-2026-0142</dd>
+            </div>
+            <div>
+              <dt class="text-[11px] text-slate-500">業務</dt>
+              <dd class="mt-0.5 font-medium text-slate-800">UC-BO-01 法人住所変更</dd>
+            </div>
+            <div>
+              <dt class="text-[11px] text-slate-500">入力者確認</dt>
+              <dd class="mt-0.5 flex items-center gap-1.5">
+                <span class="inline-flex items-center rounded-chip bg-success-soft px-1.5 py-0.5 text-[10px] font-medium text-success-soft-fg">済</span>
+                <span class="text-slate-700">田中 美咲</span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-[11px] text-slate-500">申請日時</dt>
+              <dd class="mt-0.5 font-mono text-slate-700 tabular">2026-05-31 09:13:47</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- 2. RelatedRuleAlert (amber banner、最上部、Alert UI 適用範囲 1) -->
+        <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50/40 p-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 h-4 w-4 shrink-0 text-alert">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-semibold text-alert-soft-fg">関連手順が更新されています</p>
+            <p class="mt-0.5 text-[11px] leading-relaxed text-slate-700">
+              <span class="font-mono tabular">RULE-CORP-OCR-2026-05-28</span> ·
+              OCR 信頼度閾値の段階引き上げ (0.80 → 0.85) ·
+              承認日 2026-05-28 · 提案 <span class="font-mono tabular">PROP-2026-031</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- 3. AI 入力結果 summary + diff (主要 field) -->
+        <div class="rounded-lg border border-hairline bg-panel p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-900">AI 入力結果 summary</h2>
+            <span class="font-mono text-[10px] text-slate-500 tabular">5 項目</span>
+          </div>
+
+          <dl class="space-y-3">
+            <!-- 法人名 -->
+            <div class="grid grid-cols-12 items-baseline gap-3">
+              <dt class="col-span-3 text-[11px] text-slate-500">法人名</dt>
+              <dd class="col-span-7 text-sm text-slate-800">株式会社サンプルホールディングス</dd>
+              <dd class="col-span-2 text-right font-mono text-[10px] text-success tabular">信頼度 0.96</dd>
+            </div>
+
+            <!-- 新住所 (with diff inline) -->
+            <div class="grid grid-cols-12 items-baseline gap-3">
+              <dt class="col-span-3 text-[11px] text-slate-500">新住所</dt>
+              <dd class="col-span-7 text-sm text-slate-800">
+                東京都千代田区丸の内
+                <span class="text-error line-through decoration-error decoration-2">1 丁目 1 番 1 号</span>
+                <span class="text-success font-medium">2 丁目 3 番 5 号</span>
+                サンプルビル 8F
+              </dd>
+              <dd class="col-span-2 text-right font-mono text-[10px] text-alert tabular">信頼度 0.84</dd>
+            </div>
+
+            <!-- 旧住所 -->
+            <div class="grid grid-cols-12 items-baseline gap-3">
+              <dt class="col-span-3 text-[11px] text-slate-500">旧住所</dt>
+              <dd class="col-span-7 text-sm text-slate-600">東京都千代田区丸の内 1 丁目 1 番 1 号 サンプルビル 8F</dd>
+              <dd class="col-span-2 text-right font-mono text-[10px] text-success tabular">信頼度 0.92</dd>
+            </div>
+
+            <!-- 支店コード -->
+            <div class="grid grid-cols-12 items-baseline gap-3">
+              <dt class="col-span-3 text-[11px] text-slate-500">支店コード</dt>
+              <dd class="col-span-7 font-mono text-sm text-slate-800 tabular">042</dd>
+              <dd class="col-span-2 text-right font-mono text-[10px] text-success tabular">信頼度 1.00</dd>
+            </div>
+
+            <!-- 効力発生日 -->
+            <div class="grid grid-cols-12 items-baseline gap-3">
+              <dt class="col-span-3 text-[11px] text-slate-500">効力発生日</dt>
+              <dd class="col-span-7 font-mono text-sm text-slate-800 tabular">2026-06-15</dd>
+              <dd class="col-span-2 text-right font-mono text-[10px] text-success tabular">信頼度 1.00</dd>
+            </div>
+          </dl>
+
+          <!-- 差分 meta (mono、JP-only) -->
+          <p class="mt-3 border-t border-slate-100 pt-2 font-mono text-[10px] text-slate-500">
+            差分 1 項目 · 1 セグメント (新住所の番地表記)
+          </p>
+        </div>
+
+        <!-- 4. 証跡 thumbnail list (4 step) -->
+        <div class="rounded-lg border border-hairline bg-panel p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-900">証跡</h2>
+            <span class="font-mono text-[10px] text-slate-500">4 step</span>
+          </div>
+
+          <!-- PDF preview thumbnail -->
+          <div class="mb-3 flex gap-3 rounded-md border border-hairline bg-canvas p-3">
+            <div class="flex h-16 w-12 shrink-0 items-center justify-center rounded border border-hairline bg-panel">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-slate-400">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-medium text-slate-900">corp-address-change-CASE-2026-0142.pdf</span>
+              <span class="mt-0.5 font-mono text-[10px] text-slate-500">3 ページ</span>
+              <span class="mt-1 text-[11px] font-medium text-slate-400 opacity-70">プレビュー →</span>
+            </div>
+          </div>
+
+          <!-- 4 step horizontal thumbnail strip -->
+          <div class="grid grid-cols-4 gap-2">
+            <div class="rounded-md border border-hairline bg-panel p-2.5">
+              <div class="mb-1 flex items-center gap-1.5">
+                <span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+                <span class="text-[11px] font-medium text-slate-700">受付</span>
+              </div>
+              <p class="font-mono text-[9px] text-slate-500 tabular">09:00:14</p>
+              <p class="mt-0.5 text-[10px] text-slate-500">システム · v1</p>
+            </div>
+            <div class="rounded-md border border-hairline bg-panel p-2.5">
+              <div class="mb-1 flex items-center gap-1.5">
+                <span class="h-1.5 w-1.5 rounded-full bg-alert" aria-hidden="true"></span>
+                <span class="text-[11px] font-medium text-slate-700">OCR 抽出</span>
+              </div>
+              <p class="font-mono text-[9px] text-slate-500 tabular">09:01:02</p>
+              <p class="mt-0.5 text-[10px] text-slate-500">AI · v2.3 · <span class="text-alert">信頼度 0.78</span></p>
+            </div>
+            <div class="rounded-md border border-hairline bg-panel p-2.5">
+              <div class="mb-1 flex items-center gap-1.5">
+                <span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+                <span class="text-[11px] font-medium text-slate-700">マスタ照合</span>
+              </div>
+              <p class="font-mono text-[9px] text-slate-500 tabular">09:01:48</p>
+              <p class="mt-0.5 text-[10px] text-slate-500">AI · <span class="text-success">信頼度 0.91</span></p>
+            </div>
+            <div class="rounded-md border border-hairline bg-panel p-2.5">
+              <div class="mb-1 flex items-center gap-1.5">
+                <span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+                <span class="text-[11px] font-medium text-slate-700">AI 入力結果生成</span>
+              </div>
+              <p class="font-mono text-[9px] text-slate-500 tabular">09:02:11</p>
+              <p class="mt-0.5 text-[10px] text-slate-500">AI · v2.3 · <span class="text-success">信頼度 0.92</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. AiProposalPanel summary (引用根拠 citation list、compiled approved のみ) -->
+        <div class="rounded-lg border border-hairline bg-panel p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-900">引用根拠 — 承認済みナレッジ</h2>
+            <span class="font-mono text-[10px] text-slate-500">3 件</span>
+          </div>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2">
+              <span class="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden="true"></span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium text-slate-800">OCR 信頼度閾値 0.85 — 手動 review 要求</p>
+                <p class="mt-0.5 font-mono text-[10px] text-slate-500 tabular">KN-CORP-001 · 関連度 0.94</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden="true"></span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium text-slate-800">多店舗法人の住所変更 — 全店舗一括処理</p>
+                <p class="mt-0.5 font-mono text-[10px] text-slate-500 tabular">KN-CORP-002 · 関連度 0.78</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden="true"></span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium text-slate-800">法人格変更を伴う住所変更 — 別 workflow 移行</p>
+                <p class="mt-0.5 font-mono text-[10px] text-slate-500 tabular">KN-CORP-003 · 関連度 0.62</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 入力者からのコメント (差戻し履歴がある場合の placeholder、本 case では空) -->
+        <div class="rounded-lg border border-hairline bg-panel p-4">
+          <h2 class="mb-2 text-sm font-semibold text-slate-900">入力者コメント</h2>
+          <p class="text-xs text-slate-600">
+            AI 入力結果を確認しました。新住所の番地表記 (2 丁目 3 番 5 号) は申請書類と一致。OCR 信頼度
+            0.84 で閾値未達ですが、住所マスタ照合 + 申請 PDF の目視確認で齟齬なし。承認者承認を依頼します。
+          </p>
+          <p class="mt-2 font-mono text-[10px] text-slate-500 tabular">
+            田中 美咲 · 2026-05-31 09:13:47
+          </p>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Right 4/12: 承認者 action box + footer note
+           ========================================================= -->
+      <aside class="space-y-3 lg:col-span-4">
+
+        <!-- 承認者 action box (mock、click 不可) -->
+        <div class="rounded-lg border-2 border-primary/30 bg-panel p-4">
+          <h2 class="mb-3 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-primary">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <polyline points="17 11 19 13 23 9" />
+            </svg>
+            承認者アクション
+          </h2>
+
+          <!-- 承認者情報 -->
+          <dl class="mb-3 space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">承認者</dt>
+              <dd class="font-medium text-slate-800">山田 健太</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">役職</dt>
+              <dd class="text-slate-700">業務責任者</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">職務分離 (SoD)</dt>
+              <dd class="text-success-soft-fg">入力者 ≠ 承認者 ✓</dd>
+            </div>
+          </dl>
+
+          <!-- コメント field (mock、disabled-ish 表示) -->
+          <label class="mb-3 block">
+            <span class="block text-[11px] font-medium text-slate-700">承認コメント (任意)</span>
+            <textarea
+              rows="3"
+              placeholder="承認時のコメントを記録"
+              class="mt-1 block w-full cursor-not-allowed rounded-md border border-hairline bg-slate-50 px-2.5 py-1.5 text-xs text-slate-500 placeholder-slate-400 opacity-70"
+              disabled
+            ></textarea>
+          </label>
+
+          <!-- approve / sendback buttons (mock、click 不可) -->
+          <div class="flex flex-col gap-2">
+            <button
+              type="button"
+              disabled
+              class="inline-flex cursor-not-allowed items-center justify-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-xs font-medium text-white opacity-60"
+              title="承認動作は次の実装段階で対応 (本 view は Slide 用 mock)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              承認する
+            </button>
+            <button
+              type="button"
+              disabled
+              class="inline-flex cursor-not-allowed items-center justify-center gap-1.5 rounded-md border border-hairline bg-canvas px-3.5 py-2 text-xs font-medium text-slate-500 opacity-70"
+              title="差戻し動作は次の実装段階で対応 (本 view は Slide 用 mock)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+              入力者に差戻す
+            </button>
+          </div>
+
+          <p class="mt-3 border-t border-slate-100 pt-2 text-[10px] leading-relaxed text-slate-500">
+            ※ 本画面は Session 4 Slide 用 mock のため button click は無効。実動作は Phase 1 で実装。
+          </p>
+        </div>
+
+        <!-- 承認後の遷移先 説明 -->
+        <div class="rounded-lg border border-hairline bg-canvas p-4">
+          <h2 class="mb-2 text-sm font-semibold text-slate-900">承認後の動作</h2>
+          <ol class="space-y-1.5 text-[11px] leading-relaxed text-slate-600">
+            <li>1. <span class="font-medium text-slate-800">案件 status</span> が
+              <span class="font-mono">承認者承認待ち</span> →
+              <span class="font-mono">反映</span> に遷移
+            </li>
+            <li>2. <span class="font-medium text-slate-800">業務システム</span> (基幹系) に新住所が
+              書き込み (Phase 1 で実装、本 prototype では外部接続なし)
+            </li>
+            <li>3. <span class="font-medium text-slate-800">監査ログ</span> に承認 event 記録 (15 項目)、
+              <span class="font-mono tabular">/audit</span> 画面で確認可能
+            </li>
+            <li>4. <span class="font-medium text-slate-800">入力者通知</span> (本 mock では遷移なし、
+              実装段階で通知 channel 経由)
+            </li>
+          </ol>
+        </div>
+
+        <!-- RACI mini -->
+        <div class="rounded-lg border border-hairline bg-canvas p-4">
+          <h2 class="mb-2 text-sm font-semibold text-slate-900">RACI (案件承認 / Type A)</h2>
+          <dl class="space-y-1.5 text-[11px]">
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">R · 整理担当</dt>
+              <dd class="font-medium text-slate-800">田中 美咲 (入力者)</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">A · 承認</dt>
+              <dd class="font-medium text-slate-800">山田 健太 (承認者)</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">C · 相談</dt>
+              <dd class="text-slate-700">業務 SME</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-slate-500">I · 情報共有</dt>
+              <dd class="text-slate-700">Manual 管理者</dd>
+            </div>
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- =============================================================
+       Footer note (PrototypeModeLabel 補足、Slide 用 caption)
+       ============================================================= -->
+  <footer class="border-t border-hairline bg-panel px-6 py-3">
+    <p class="text-[10px] leading-relaxed text-slate-500">
+      Backoffice AI v2 — <span class="font-medium text-slate-700">DOC-S4-06 §4 BusinessApprovalView mock figure</span> ·
+      実 React route 化なし (9 routes exactly 規範) · Slide 3 内 figure 用 ·
+      Day 20 実体化 (Plan v1.3 final patch)
+    </p>
+  </footer>
+
+</body>
+</html>

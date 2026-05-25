@@ -1475,16 +1475,18 @@ Phase 1 は single tenant が default だが、Phase 2 multi-tenant 拡張に向
 
 ### 15.1 DR 目標
 
-| 項目                          | 目標 (Phase 1 measurement 後 calibration)             |
+**注 (v2.6 wording calibration)**: 本表は **設計目標値** (design target)、AWS spec 上の **typical** 値ベース。Phase 1 sandbox 実測 + DR drill で calibrate するまでは保証値ではない。AWS Aurora Global Database spec: replication latency は `typically under a second` と AWS docs に記載、SLA ではなく typical performance (参照: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html)。
+
+| 項目                          | 目標 (Phase 1 measurement 後 calibration、AWS spec typical ベース、SLA ではない) |
 | ----------------------------- | ----------------------------------------------------- |
-| RPO (Aurora primary failure)  | < 1 sec (Aurora Global DB)                            |
-| RTO (Aurora primary failure)  | < 60 sec (managed failover)                           |
-| RPO (Region failure → us-west-2) | < 5 sec (cross-region writer storage replication、~3,900km distance により Tokyo↔Osaka より latency 高、Phase 1 で実測 calibrate) |
-| RTO (Region failure → us-west-2) | < 30 min (manual failover trigger + Route 53 + warm pool、long distance により Aurora Global DB promote latency 微増を許容) |
-| RPO (S3 audit immutable)      | < 15 min (CRR latency)                                |
+| RPO (Aurora primary failure)  | < 1 sec target (Aurora Global DB typical replication latency 〜0.5-1 sec per AWS docs、Phase 1 実測 calibrate) [仮説 / 要検証] |
+| RTO (Aurora primary failure)  | < 60 sec target (managed failover、Phase 1 実測 calibrate) [仮説 / 要検証] |
+| RPO (Region failure → us-west-2) | < 5 sec target (cross-region writer storage replication、~3,900km distance により Tokyo↔Osaka より latency 高、Phase 1 で実測 calibrate) [仮説 / 要検証] |
+| RTO (Region failure → us-west-2) | < 30 min target (manual failover trigger + Route 53 + warm pool、long distance により Aurora Global DB promote latency 微増を許容) [仮説 / 要検証] |
+| RPO (S3 audit immutable)      | < 15 min target (CRR latency)                         |
 | RTO (S3 audit immutable)      | Read available all time、write は別 region で復旧後   |
-| RPO (Bedrock invocation log)  | < 5 min (streaming export)                            |
-| RPO (国際送金 boundary audit_event) — F21 追加 | < 1 sec (Aurora Global DB synchronous mode 検討、Phase 1 計測後 calibrate) |
+| RPO (Bedrock invocation log)  | < 5 min target (streaming export)                     |
+| RPO (国際送金 boundary audit_event) — F21 追加 | < 1 sec target (Aurora Global DB synchronous mode 検討、Phase 1 計測後 calibrate) [仮説 / 要検証] |
 | RTO (国際送金 boundary 業務) — F21 追加        | DR 中は **boundary operation 全停止** (Type B 設定承認による緊急停止 SOP)、SWIFT 締切跨ぎ時は backoffice 通常チャネルで manual operate (open question §17 #15) |
 
 ### 15.2 Aurora Global DB vs Phase 2 alternatives

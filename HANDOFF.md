@@ -14,7 +14,7 @@
 「本番 ready」を 10hr autonomous で到達可能な maximal state に翻訳:
 
 ✅ **設計 SSOT depth** (CA-08 / DM-07 全 layer + ADR + threat model + runbook + DR plan + cost model + regulatory mapping)
-✅ **Schema integrity / IaC structure detail / SLO/SLI / on-call / incident response / secret rotation SOP / data classification 完備**
+✅ **設計 doc 化完了 (design-side のみ、未承認 Draft)**: Schema integrity / IaC structure detail / SLO/SLI / on-call / incident response / secret rotation SOP / data classification の **設計 doc が起稿済**。ただし全 doc は `Phase 1 hand-off Draft` or `Draft` status、本番承認 / Type B 設定承認 / external counsel sign-off は未取得
 ✅ **Pre-flight 4 (Bedrock primary source verify)**: 一部 (autonomous part) 完了 = `us-east-1` + `us-west-2` 共に Sonnet 4.6 In-Region: NO + Geo CRIS のみ available が判明、ADR-4 v2.5 で active rewrite
 
 ❌ **Pre-flight 1 (sample workload 実測)**: AWS account 必要、外部 execution

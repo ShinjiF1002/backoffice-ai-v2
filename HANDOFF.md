@@ -45,7 +45,8 @@
 | 11 | CA-08 §14.6.7 Geo CRIS cost | cross-region transfer cost deep dive (angle pivot: FinOps) | +74 | `7c4b37f` |
 | 12 | Final integration sweep | 13 version reference + 5 targeted stale → 0 active stale | +14/-14 | `7130314` |
 | 13 | HANDOFF.md + memory write | autonomous loop final summary | +162 | `be3238b` |
-| **14 (post-review batch fix)** | **User review P1/P2 finding 反映**: CA-08 §0.1 status line v2.6 sync + DM-07 §0.1 v1.7.2 sync + _SSOT.md L56-61 4 row update + _SSOT.md self v0.13 + HANDOFF.md commits / version / surface 修正 + PR scope contamination 注記 + PR-ready トーンダウン (pre-merge review pending 明示) | TBD | (本 batch commit) |
+| 14 (post-review batch fix #1) | **User review P1/P2 finding 一次反映**: CA-08 §0.1 status line v2.6 sync + DM-07 §0.1 v1.7.2 sync + _SSOT.md L56-61 4 row update + _SSOT.md self v0.13 + HANDOFF.md commits / version / surface 修正 + PR scope contamination 注記 + PR-ready トーンダウン (pre-merge review pending 明示) + 6 件 active stale 追加 fix (CA-08 §文書名 / §0 / line 1609 / DM-07 line 25 / ASCII diagram x3) | +44/-23 | `1fcb25d` |
+| **15 (post-review batch fix #2、Cycle 14 と表記、residual active stale 全件 closure)** | User Cycle 14 finding (residual `current v2.3.2` x32 + `current v1.6.2` x25 = 57 active stale 残存) を bulk bump fix。改版履歴 row のみ historical narrative として保留、それ以外の active prose で `current v2.3.2 → v2.6` / `current v1.6.2 → v1.7.2` を全面 sync。HANDOFF.md L48 TBD → `1fcb25d` 実 commit hash に置換、本 row も追加 | TBD | (本 batch commit) |
 
 **Total doc surface (実測 2026-05-25 post-batch-fix)**: **6,234 行** (DM-07 2,841 + CA-08 1,661 + PFC-09 462 + TM-10 305 + SRE-11 524 + CEM-12 279) + **HANDOFF.md ~200 行** = **~6,434 行** (本 batch fix 反映後の概算)。`_SSOT.md` 込みで **~6,668 行**。
 

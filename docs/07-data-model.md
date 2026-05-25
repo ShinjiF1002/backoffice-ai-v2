@@ -14,7 +14,7 @@
 | 機密区分        | Internal                                                                                                                                                                                                                                    |
 | 関連文書        | DOC-OV-00 §2.2 (接続層), DOC-FW-01 (Flywheel), DOC-APP-02 (3 層承認), DOC-UI-03 §4 (9 画面), DOC-KNW-04 §3 / §6-§8 (snippet schema / staging usage / audit event model), DOC-MON-05 (KPI/KRI), DOC-ROOT-\_SSOT, workflows/_index.md          |
 | SSOT 区分       | 物理データモデル / DB 技術選定 / immutable audit 設計 / RLS + RBAC policy / pgvector + embedding store / KMS + secret rotation / RPO/RTO + DR / retention policy の SSOT                                                                    |
-| Evidence Status | 設計のみ。Phase 1 で (a) sample workload で IO 計測、(b) AWS us-east-1 + us-west-2 multi-AZ で DR drill、(c) **US 規制 mapping table 作成** (Federal: FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + State: NYDFS Part 500 / NY SHIELD / CCPA-CPRA 等)、(d) cost 実測 → 設計 calibration (introduced in v1.4 US pivot、current v1.6.2)                                |
+| Evidence Status | 設計のみ。Phase 1 で (a) sample workload で IO 計測、(b) AWS us-east-1 + us-west-2 multi-AZ で DR drill、(c) **US 規制 mapping table 作成** (Federal: FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + State: NYDFS Part 500 / NY SHIELD / CCPA-CPRA 等)、(d) cost 実測 → 設計 calibration (introduced in v1.4 US pivot、current v1.7.2)                                |
 | 改版履歴        | v1.0 (2026-05-24): 初版作成 (Phase 1 hand-off の foundation)。v1 から v4 までの内部 critique trace を §2 に記録、最終形を §3 以降に lock。`docs/00-06` の SSOT に整合、`docs/_SSOT.md` 拡張は本 doc lock 後に別 PR で行う (Out-of-scope 条項)。v1.1 (2026-05-24): 外部 critical review (AWS + JP メガバンク + FISC 監査経験 視点) から 13 finding を取得し全件反映 (§2.8 patch trace 参照)。主要修正: (a) `case` → `case_record` rename (Postgres 予約語衝突)、(b) CHECK subquery 不可問題を trigger へ移行 (Finding 1/4)、(c) audit immutability を 4-ring + streaming export 化 (Finding 2/3)、(d) idempotency_registry 分離 (Finding 7)、(e) retention class に kyc_document 7 年新設 (Finding 8)、(f) Blue/Green 3 段 expand-contract 詳細 (Finding 9)、(g) K3 precision/FP denominator 分離 (Finding 10)、(h) §2.4 stack 比較に Azure Confidential Ledger 列追加 (Finding 11)、(i) workflow_version publish 時 outbox 即時 Alert (Finding 12)、(j) boundary_definition_version typed threshold (Finding 13)、(k) FISC 9 版 章番号 mapping 表 (Finding 6)。v1.2 (2026-05-24): user Decision Brief round 1 (6 finding、3 P0 + 3 P1) 反映 (§2.10)。**main title から "Production-Ready" claim を撤回し "Phase 1 hand-off Draft" に降格**。主要修正: (a) §0.1 doc status + plan 接続順序の明文化、(b) §3 entity 数 42 → 47 訂正 + `customer_reference` 新規定義、(c) §6.1 FISC 章番号 placeholder 化 (版数特定を Phase 1 に委譲)、(d) §8 冒頭 DDL excerpt status disclaimer、(e) §10.4.1 pg_partman + Blue/Green 衝突 SOP、(f) §5.1 4-eyes trigger を 5 軸整合 (actor + tenant + case_id + decision_kind + 時系列) に強化、(g) §13 open question #19-#21 追加。**ただし v1.2 自己採点「全 6 finding 反映済」は不正確** (R2 で apply failure 5 件発見)。v1.3 (2026-05-24): user Decision Brief round 2 で v1.2 の apply failure 5 件を指摘 + 全件修正 (§2.11)。主要修正: (a) §2.10 / §16 で P0 #1 を未解消と honest 明記、(b) §2.9 / §13 / §2.10 から FISC "9 版" active claim 削除 (現行版 = v13 想定として表現)、(c) §0 / §1.1 で "本番 ready" / "本番投入可能" を Phase 1 文脈に paraphrase、(d) 全 11 trigger ON 句に schema-qualify 追加、outbox aggregate_type comment を entity rename と整合、(e) §16 TODO numbering を 1-11 で sequential 化。**ただし v1.3 の grep verify も apply failure 3 件残存** (R3 で指摘)。v1.3.1 (2026-05-24): user Decision Brief round 3 micro-patch — FISC 9 版 active claim 残存 2 箇所 (§7.3 row 2、§13 #3) + bare-table trigger 1 件 (§5.2 `trg_wfv_immutable ... ON workflow_version` → `ON app.workflow_version`) を修正。v1.3 検証で使った positive-enum grep pattern (table 名を私が enumerate) が `workflow_version` を見落としたため、§2.11 verification methodology note に **負パターン (`grep -vE 'ON (app\.\|audit\.)'`) を default にする教訓** を追記 (Decision Brief R3-P2)。v1.4 (2026-05-24、US pivot): user 新情報「US リージョン deploy + JP 銀行 America division」で DOC-CA-08 v2.0 と同期 pivot、§6.1 PII mapping を FISC + 個情法 + 銀行法 + 犯収法 → **US framework** (Federal: FRB SR 11-7 / OCC / FFIEC / BSA-AML (FinCEN) / USA PATRIOT 326 CIP / OFAC / GLBA + Reg P / Safeguards Rule / SOX、State: NYDFS 23 NYCRR Part 500 / NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA) に swap、§9.4 retention class を BSA + SOX baseline に swap (kyc_document 7 年 → 5 年、audit_immutable 10 年 → 7 年)、JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、Phase 2 検討、本 doc scope 外) と明示。v1.0-v1.3.2 は historical archive として trace に保存。Plan v1.7 で US pivot 承認済。v1.3.2 (2026-05-24): user Decision Brief round 5 governance micro-patch — Plan v1.5 + `_SSOT.md` v0.9 反映後に DM-07 本体の §0.1 / §16 が「未完 TODO」表現で stale だった問題を修正。§0.1 git 管理 + SSOT 接続 を「Plan v1.5 / _SSOT.md v0.9 反映済、残るは `git add` のみ (user 領域)」に update、§16 #1 + #2 を ✅ 完了マーク化。`v1.3.1 lock` は内容 lock (§3-§15) であり governance metadata sync (§0.1 / §16) は lock 違反外と判断。本 patch で active な状態不整合 0 を達成。v1.4 (2026-05-24、US pivot): §6.1 PII mapping + §9.4 retention class を FISC + 個情法 + 銀行法 + 犯収法 → US framework (NYDFS Part 500 / FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + Reg P + Safeguards Rule + SOX + State law) に swap、kyc_document 7yr → 5yr (BSA Section 1010.430)、audit_immutable 10yr → 7yr (SOX baseline)、JP parent reporting は別 doc DOC-CA-09 candidate scope。v1.5 (2026-05-24): §13 #3 + #20 + §16 #3 の active FISC claim を US framework に swap、§7.3 R3 推奨 rationale も US pivot 反映 (active FISC claim 0 達成)。v1.6 (2026-05-24): §7.3 R2 / §2.9 pre-flight / §0.1 governance / §7.1 / §7.2 / §10.1 / §10.7 / §14 R9/R10 の active stale US pivot reflect、AlloyDB row 比較軸を FISC → US 規制 (NYDFS / FRB / FFIEC) に swap。v1.6.1 (2026-05-24): §0.1 + §7.1 AlloyDB row + §7.3 R1/R2 + §16 TODO の metadata `introduced in vX.Y / current vX.Y.Z` provenance label 化、_SSOT.md v0.11 row + DOC-CA-08 v2.3.2 と sync 完了。v1.6.2 (2026-05-24): P1 metadata sync — §6.1 / §9.4 section headings の `(v1.4 US pivot)` → `(introduced in v1.4 US pivot、current v1.6.2)` 形式統一、§7.2 ASCII diagram の [v1.4 US pivot] label を [introduced v1.4、current v1.7.2] 化、§7.1 Aurora row の `(v1.4 US pivot)` を `(introduced in v1.4 US pivot、current v1.6.2)` 化、AWS Japan FISC reference を Historical reference only label 化 (§19.1)、改版履歴 v1.5/v1.6/v1.6.1 entry を本 entry まで継続。P2 batch: 全 active `v1.4 US pivot` literal を `introduced in vX.Y / current v1.6.2` provenance label に統一 (active stale literal 0、provenance trace 完全保存)。v1.7.1 (2026-05-25、autonomous prod-ready loop Cycle 6): operational depth の 4 章追加。(a) §10.10 PITR drill SOP (半年 cadence、5 phase pre-drill / execution / 成功基準 / failure scenario / output、target restore < 60 min + smoke test 10 sample + audit hash 100% pass)。(b) §10.11 RDS Proxy fail-mode runbook (FM-1 connection pool exhaustion / FM-2 pinning / FM-3 IAM auth burst / FM-4 Aurora failover / FM-5 proxy unavailable / FM-6 SSL handshake、各 mode に symptom + verify CLI + action chain)。(c) §10.12 Liquibase changelog naming + lock convention (db/changelog/v{semver}/ + 3-digit prefix + author email + runOnChange=false forward-only + magic comment + DATABASECHANGELOGLOCK lock SOP + idempotency principle + CI gate)。(d) §10.13 prototype → physical migration validation harness (7 test set: schema conformance / mock-physical bridge / RLS / SoD trigger / audit chain / immutability / PII encryption + per PR + daily + weekly + pre-prod cadence + 16 entity × 6 concern coverage matrix + Day 11-22 prototype 切替 SOP)。Cycle 6 で operational runbook + migration safety net 完備、Phase 1 着手 prerequisite を mechanical execution 化。v1.7 (2026-05-25、autonomous prod-ready loop Cycle 5): defense in depth + ⚠ Gap resolution の 3 章追加。(a) §5.10 Row-level encryption (PII tier 3 = `id_document_hash` 用 KMS DataKey-per-tenant envelope encryption、pgcrypto AES-256-GCM、RLS + at-rest との triple defense、NYDFS 500.15(a)(2)(B) alternative compensating controls + GLBA Safeguards 16 CFR 314.4(c)(3) over-meet 想定、key rotation half-yearly + yearly re-encrypt + performance trade-off catalog)。(b) §9.5 Audit chain repair playbook (DOC-SRE-11 RB-03 連動、7 phase: Detection → Immediate freeze → Forensic isolation → Scope identification → NYDFS 500.17 72hr notification → PITR + S3 export canonical reconciliation → Postmortem → Defense in depth strengthening)。(c) §9.6 Right-to-erasure × Audit immutability conflict resolution (DOC-CEM-12 §10.2 ⚠ Gap fix、pseudo-anonymization 推奨案 = HMAC-SHA-256 stable pseudonym + customer_reference erasure_status + column-level KMS DataKey destroy crypto-erasure + audit_event chain append-only 維持 + counsel review focus 4 件、Alternative 4 案 rejection rationale 完備、CCPA 1798.105 + 1798.145(e) banking exemption + GLBA Reg P 1016.3(q)(1) deidentified concept alignment)。改版履歴 P1 metadata sync 完了 (本 entry まで sequential)。 |
 
 ---
@@ -30,7 +30,7 @@
 - **対象**: Phase 0 (v2 設計) で固定した Flywheel + 3 層承認 + Knowledge governance を、Phase 1 (生 ops 投入) で運用可能にする persistence layer を **Phase 1 hand-off に必要な設計深度** まで落とす (§2.9 pre-flight checklist 3 項 + Decision Brief 残課題が prerequisite、本 doc 単独では production-ready ではない)。
 - **scope**: 論理データモデル (§3) + 状態機械 (§4) + 不変条件 (§5) + DB 技術選定 (§7) + 物理スキーマ (§8) + immutable audit (§9) + 運用 playbook (§10)。
 - **out of scope (本 doc では決定しない)**: (1) 業務システム側 API の具体スキーマ (= 外部 system、本 doc は contract のみ握る)、(2) UI 状態の reactive store (Phase 1 frontend 詳細設計)、(3) ML model 学習 pipeline (LLMOps の training 側、本 doc は serving + audit のみ)。
-- **推奨 stack の結論先出し (introduced in v1.4 US pivot、current v1.6.2)**: **AWS (us-east-1 primary + us-west-2 secondary、US 規制 framework: NYDFS Part 500 + FRB SR 11-7 + OCC + BSA-AML + OFAC + GLBA + State law mapping)**、Aurora PostgreSQL 16 Serverless v2 + S3 Object Lock (Compliance mode) + OpenSearch Serverless + pgvector + KMS multi-Region key + EventBridge + Step Functions。理由詳細は §7 (v1.0-v1.3.2 の Tokyo + Osaka + FISC 前提は v1.4 US pivot で superseded)。
+- **推奨 stack の結論先出し (introduced in v1.4 US pivot、current v1.7.2)**: **AWS (us-east-1 primary + us-west-2 secondary、US 規制 framework: NYDFS Part 500 + FRB SR 11-7 + OCC + BSA-AML + OFAC + GLBA + State law mapping)**、Aurora PostgreSQL 16 Serverless v2 + S3 Object Lock (Compliance mode) + OpenSearch Serverless + pgvector + KMS multi-Region key + EventBridge + Step Functions。理由詳細は §7 (v1.0-v1.3.2 の Tokyo + Osaka + FISC 前提は v1.4 US pivot で superseded)。
 - **critique trace**: §2 に v1→v4 の内部 review loop (10 軸 Round 1 / 7 軸 Round 2 / 10 軸 Round 3) を記録、本文 §3 以降は v4 lock 後の最終形のみ。
 
 ---
@@ -132,7 +132,7 @@ boundary_definition
 **判定**: **AWS 推奨** (理由 §7.3)。決定要因:
 - **R1**: Aurora PostgreSQL 16 の RLS + declarative range partition + pgvector の本番運用 maturity が 3 stack で最高
 - **R2**: S3 Object Lock の Compliance mode は **root account でも削除不能** (= 規制 retention の最強 enforcement)、GCS Bucket Lock も同等だが S3 の方が運用 doc 厚い
-- **R3 (introduced in v1.4 US pivot、current v1.6.2)**: AWS us-east-1 + us-west-2 の latency profile + global infrastructure maturity、JP 銀行 America division は典型的 NY ops で us-east-1 ~10ms。FISC mapping は v1.0-v1.3.2 の Tokyo deploy 想定で記述、v1.4 で US framework に swap (FRB SR 11-7 + OCC + NYDFS 500 + FFIEC を AWS Japan / US Public Sector / Financial Services team が compliance 支援)
+- **R3 (introduced in v1.4 US pivot、current v1.7.2)**: AWS us-east-1 + us-west-2 の latency profile + global infrastructure maturity、JP 銀行 America division は典型的 NY ops で us-east-1 ~10ms。FISC mapping は v1.0-v1.3.2 の Tokyo deploy 想定で記述、v1.4 で US framework に swap (FRB SR 11-7 + OCC + NYDFS 500 + FFIEC を AWS Japan / US Public Sector / Financial Services team が compliance 支援)
 - **R4**: Aurora Global Database + RPO sub-second + cross-region failover < 1 分は本案件の RPO/RTO 要件と整合
 - **R5**: 既存 stack に AI 連携 (Bedrock / Step Functions / EventBridge) を載せる時の choreography が最も短く書ける
 
@@ -220,7 +220,7 @@ v1.1 lock 後、user 自身の critical review (Decision Brief) で 6 finding (3
 本 doc v1.1 lock 後、Phase 1 着手前に以下 3 件を完了する。完了するまで本 doc は **"Phase 1 hand-off draft"** 状態を維持、production-ready 主張は保留:
 
 1. **DDL syntactic validation** (Finding 1 / 4 / 5 / 7 / 13 修正の verify): 本 doc § 3 以降の全 DDL excerpt を Liquibase changeset に起こし、Aurora PG 16 sandbox で `pg_verifyschema` 相当の dry-run pass を確認。CI に `psql --dry-run` ステップを追加
-2. **US 規制 framework mapping 表の外部 Security 関係者 + Compliance officer + external legal counsel review** (introduced in v1.4 US pivot、current v1.6.2): §6.1 PII mapping + §9.4 retention class が **NYDFS 23 NYCRR Part 500 + FRB SR 11-7 + OCC SR 11-7 + 2023-17 + FFIEC IT Examination Handbook + BSA-AML (FinCEN) + USA PATRIOT 326 CIP + OFAC + GLBA + Reg P + Safeguards Rule + SOX + State law (NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA / WA)** の各条 control に充足することを Compliance officer + external legal counsel + 外部監査 が逐条確認。Type B 設定承認 (本 doc 自身の承認) の prerequisite (open question §13 #3 + #20 と同期、historical: v1.0-v1.3.2 では FISC 章番号 mapping review が prerequisite だったが v1.4 で superseded、JP parent layer は別 doc DOC-CA-09 candidate scope)
+2. **US 規制 framework mapping 表の外部 Security 関係者 + Compliance officer + external legal counsel review** (introduced in v1.4 US pivot、current v1.7.2): §6.1 PII mapping + §9.4 retention class が **NYDFS 23 NYCRR Part 500 + FRB SR 11-7 + OCC SR 11-7 + 2023-17 + FFIEC IT Examination Handbook + BSA-AML (FinCEN) + USA PATRIOT 326 CIP + OFAC + GLBA + Reg P + Safeguards Rule + SOX + State law (NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA / WA)** の各条 control に充足することを Compliance officer + external legal counsel + 外部監査 が逐条確認。Type B 設定承認 (本 doc 自身の承認) の prerequisite (open question §13 #3 + #20 と同期、historical: v1.0-v1.3.2 では FISC 章番号 mapping review が prerequisite だったが v1.4 で superseded、JP parent layer は別 doc DOC-CA-09 candidate scope)
 3. **Audit immutability の streaming vs daily snapshot 決定 + RPO 計測** (Finding 2 修正): §9.2 の Kinesis Firehose 5 min buffer 構成を sandbox で構築、tamper detection RPO を実測。5 min 達成できない場合は (a) Firehose buffer 短縮、(b) Kinesis Data Streams 直 consume、の選択を Phase 1 設計 gate で決定
 
 加えて、本 doc を Type B 設定承認に通す前に DOC-OV-00 §2.2 + DOC-APP-02 §9.8 + 本 doc を 1 つの hand-off package として bundle、Security 関係者 + 業務責任者 + 経営層に同時提示する (§16 #7)。
@@ -250,8 +250,8 @@ v1.1 lock 後、user 自身の critical review (Decision Brief) で 6 finding (3
 tenant_id UUID PK
 tenant_name TEXT NOT NULL
 fisc_classification TEXT  -- 'jp_domestic_bank' / 'jp_us_branch' / 'sandbox' 等
-default_region TEXT NOT NULL  -- 'us-east-1' (introduced in v1.4 US pivot、current v1.6.2)
-dr_region TEXT NOT NULL       -- 'us-west-2' (Oregon、introduced in v1.4 US pivot、current v1.6.2)
+default_region TEXT NOT NULL  -- 'us-east-1' (introduced in v1.4 US pivot、current v1.7.2)
+dr_region TEXT NOT NULL       -- 'us-west-2' (Oregon、introduced in v1.4 US pivot、current v1.7.2)
 created_at TIMESTAMPTZ
 ```
 - Phase 1 は single tenant (v2 sample bank)、schema は multi-tenant ready
@@ -1518,9 +1518,9 @@ ALTER TABLE app.evidence_step
 
 ## 6. PII / 機密 / Tier 分類
 
-### 6.1 PII 分類 4 段 (3 PII + 非 PII) + US 規制 mapping (introduced in v1.4 US pivot、current v1.6.2、JP 銀行 America division)
+### 6.1 PII 分類 4 段 (3 PII + 非 PII) + US 規制 mapping (introduced in v1.4 US pivot、current v1.7.2、JP 銀行 America division)
 
-**Pivot trace**: v1.3.1 までは FISC + 個情法 + 銀行法 + 犯収法 mapping だったが、introduced in v1.4 (DOC-CA-08 v2.0 US pivot と同期) で **US 規制 framework** に swap (current v1.6.2)。JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、本 doc scope 外)。
+**Pivot trace**: v1.3.1 までは FISC + 個情法 + 銀行法 + 犯収法 mapping だったが、introduced in v1.4 (DOC-CA-08 v2.0 US pivot と同期) で **US 規制 framework** に swap (current v1.7.2)。JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、本 doc scope 外)。
 
 | 分類                    | 例                              | Federal (FRB / OCC / FFIEC / FinCEN / GLBA)                                | NYDFS 23 NYCRR Part 500        | State law (適用 operating state 依存)             | 暗号化                                      | retention                                |
 | ----------------------- | ------------------------------- | --------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------- | ------------------------------------------- | ---------------------------------------- |
@@ -1533,7 +1533,7 @@ ALTER TABLE app.evidence_step
 - **Sanctions screening**: 国際送金 boundary (UC-BO-IT-BOUNDARY) は **OFAC SDN/SSI list screening** 必須 (50 CFR Part 501 reporting)、`alert` table に `ofac_alert` enum 追加 (Phase 1 で確定)
 - **State law operating state 依存**: 実際の operating state (NY / CA / TX / 等) は Phase 1 で external legal counsel が finalize、DOC-CA-08 open question §17 #27 と同期
 - **JP parent (本店) layer**: cross-border data flow / 連結 reporting / supervisory submission は本 v1.4 doc scope 外、別 doc (DOC-CA-09 candidate、Phase 2 検討、open question DOC-CA-08 §17 #28)
-- **Historical (v1.0-v1.3.1)**: FISC 安全対策基準 + 個情法 + 銀行法 + 犯収法 mapping は Tokyo deploy 前提で記述、introduced in v1.4 US pivot、current v1.6.2 で superseded。historical context として §改版履歴 + DM-07 過去版で trace
+- **Historical (v1.0-v1.3.1)**: FISC 安全対策基準 + 個情法 + 銀行法 + 犯収法 mapping は Tokyo deploy 前提で記述、introduced in v1.4 US pivot、current v1.7.2 で superseded。historical context として §改版履歴 + DM-07 過去版で trace
 
 ### 6.2 PII の物理配置
 
@@ -1556,8 +1556,8 @@ ALTER TABLE app.evidence_step
 
 | Stack                                  | 評価                                                                                                                     | 採否        |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| Aurora PostgreSQL 16 (AWS)             | RLS + partition + pgvector + JSONB + trigger 全機能成熟、us-east-1 + us-west-2 multi-AZ + Global DB (introduced in v1.4 US pivot、current v1.6.2) | **採用**    |
-| AlloyDB (GCP)                          | pgvector 強化版あり、AI Studio 連携 ◯、ただし RLS / partition 運用知見が AWS より浅い、**US 規制 mapping** (NYDFS / FRB SR 11-7 / FFIEC) の banking 採用実績 + AWS US Public Sector 経験 が AWS より薄い (US pivot introduced in v1.4、比較軸 swap completed in v1.6、current v1.6.2、historical v1.0-v1.3.2 は FISC 比較軸) | 不採用      |
+| Aurora PostgreSQL 16 (AWS)             | RLS + partition + pgvector + JSONB + trigger 全機能成熟、us-east-1 + us-west-2 multi-AZ + Global DB (introduced in v1.4 US pivot、current v1.7.2) | **採用**    |
+| AlloyDB (GCP)                          | pgvector 強化版あり、AI Studio 連携 ◯、ただし RLS / partition 運用知見が AWS より浅い、**US 規制 mapping** (NYDFS / FRB SR 11-7 / FFIEC) の banking 採用実績 + AWS US Public Sector 経験 が AWS より薄い (US pivot introduced in v1.4、比較軸 swap completed in v1.6、current v1.7.2、historical v1.0-v1.3.2 は FISC 比較軸) | 不採用      |
 | Azure DB for PG Flexible               | PG 16 GA、pgvector GA、ただし banking 案件 ref で Azure 優位なのは .NET ecosystem、本案件は ts/python stack なので利得低 | 不採用      |
 | Spanner / Cosmos DB (NewSQL)           | 強整合だが PG 機能 (RLS / trigger / pgvector) 不在 or 制限大、本案件の trigger-heavy 設計に不適                          | 不採用      |
 | DynamoDB (NoSQL)                       | scale 強、ただし trigger / RLS / hash chain / partition with materialized view が application-side 実装重く、本案件不適 | 不採用 (補助 cache のみ可) |
@@ -1614,8 +1614,8 @@ ALTER TABLE app.evidence_step
 
 | 軸                       | AWS 推奨理由                                                                                                                            |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. US-region + DR        | us-east-1 (3 AZ) + us-west-2 (3 AZ) の 2 region 構成、Aurora Global DB で RPO < 1 sec / cross-region failover < 1 min (introduced in v1.4 US pivot、current v1.6.2、~3,900km distance impact は Phase 1 で実測 calibrate) |
-| 2. US 規制 mapping (introduced in v1.6 / current v1.6.2) | AWS US Public Sector + Financial Services team による **NYDFS 23 NYCRR Part 500 / FRB SR 11-7 / OCC SR 11-7 + 2023-17 / FFIEC IT Examination Handbook / BSA-AML (FinCEN) / OFAC / GLBA + Reg P / Safeguards Rule** の compliance 支援 + bank 監査受け入れ実績多数。FISC mapping は historical (Tokyo deploy 想定の v1.0-v1.3.2 で参照、introduced in v1.4 US pivot、current v1.6.2 で superseded、JP parent layer 別 doc DOC-CA-09 candidate scope) |
+| 1. US-region + DR        | us-east-1 (3 AZ) + us-west-2 (3 AZ) の 2 region 構成、Aurora Global DB で RPO < 1 sec / cross-region failover < 1 min (introduced in v1.4 US pivot、current v1.7.2、~3,900km distance impact は Phase 1 で実測 calibrate) |
+| 2. US 規制 mapping (introduced in v1.6 / current v1.7.2) | AWS US Public Sector + Financial Services team による **NYDFS 23 NYCRR Part 500 / FRB SR 11-7 / OCC SR 11-7 + 2023-17 / FFIEC IT Examination Handbook / BSA-AML (FinCEN) / OFAC / GLBA + Reg P / Safeguards Rule** の compliance 支援 + bank 監査受け入れ実績多数。FISC mapping は historical (Tokyo deploy 想定の v1.0-v1.3.2 で参照、introduced in v1.4 US pivot、current v1.7.2 で superseded、JP parent layer 別 doc DOC-CA-09 candidate scope) |
 | 3. PG ecosystem 成熟度   | RLS, partition, trigger, pgvector が GA、Aurora I/O-Optimized で write-heavy ワークロード対応 (Phase 2 で評価)                          |
 | 4. WORM enforcement      | S3 Object Lock **Compliance mode** は root account でも削除不能、Governance mode と区別、規制 retention の唯一の DBs 抜け道防止 path  |
 | 5. Hash chain DBs        | QLDB EOL 後の AWS 構成 (自前 hash chain + S3 Object Lock streaming export) と Azure Confidential Ledger (managed, SGX backed) は **ほぼ同等の保証強度**。AWS 採用は R5 単独優位ではなく **R1-R4 + R6-R7 の合算理由**。Phase 2 で Azure Confidential Ledger を audit_immutable backup の cross-cloud 二重化候補として再評価 (open question §13 #16) |
@@ -1855,7 +1855,7 @@ Aurora audit_event (partition writes)
 - 書込時に CloudTrail Lake (cross-account append-only S3) に manifest entry の二重記録
 - Aurora 側 entry と sha 比較を §9.3 step 3 で実施
 
-### 9.4 retention class 6 段 (introduced in v1.4 US pivot、current v1.6.2、US framework swap)
+### 9.4 retention class 6 段 (introduced in v1.4 US pivot、current v1.7.2、US framework swap)
 
 **v1.4 pivot**: v1.0-v1.3.2 は FISC + 犯収法 7 年 baseline、v1.4 で US deploy に伴い BSA + FinCEN + SOX + GLBA + state law baseline に swap。各 class の保持期間は **長い方が勝つ** principle (US federal + state law の max)。
 
@@ -1872,7 +1872,7 @@ Aurora audit_event (partition writes)
 - IL BIPA 適用案件 (biometric data) は別 retention 検討、Phase 1 で external legal counsel
 - CCPA-CPRA **deletion right** (1798.105) は user 削除要求 12 month 以内 response。BSA / FRB の保管義務 (5yr / 7yr) と conflict 場合は **banking exemption** (CCPA 1798.145(e) / GLBA carve-out) で federal 規制が優先、ただし trace 必須 (DOC-CA-08 open question §17 #27)
 
-**Historical context (v1.0-v1.3.2、Tokyo deploy 前提)**: 犯収法 6 条 7 年保存が個情法 23 条を支配する設計だったが、introduced in v1.4 US pivot、current v1.6.2 で **BSA 5yr baseline** に swap。`kyc_document` class 7 年 → 5 年、`audit_immutable` class 10 年 → 7 年 (SOX baseline)。各 class 保持期間の最終確定は Phase 1 で external legal counsel が actual operating state + business 要件と照合。
+**Historical context (v1.0-v1.3.2、Tokyo deploy 前提)**: 犯収法 6 条 7 年保存が個情法 23 条を支配する設計だったが、introduced in v1.4 US pivot、current v1.7.2 で **BSA 5yr baseline** に swap。`kyc_document` class 7 年 → 5 年、`audit_immutable` class 10 年 → 7 年 (SOX baseline)。各 class 保持期間の最終確定は Phase 1 で external legal counsel が actual operating state + business 要件と照合。
 
 #### retention assignment trigger (Finding 8)
 
@@ -2098,7 +2098,7 @@ consumer notification (state-specific format)
 | ----------------------------- | ----------------------------------------------------- |
 | RPO (Aurora primary failure)  | < 1 sec (Aurora Global DB)                            |
 | RTO (Aurora primary failure)  | < 60 sec (managed failover)                           |
-| RPO (Region failure → us-west-2) | < 5 sec (cross-region writer storage replication、~3,900km distance により Tokyo↔Osaka より latency 高、Phase 1 で実測 calibrate、introduced in v1.4 US pivot、current v1.6.2) |
+| RPO (Region failure → us-west-2) | < 5 sec (cross-region writer storage replication、~3,900km distance により Tokyo↔Osaka より latency 高、Phase 1 で実測 calibrate、introduced in v1.4 US pivot、current v1.7.2) |
 | RTO (Region failure → us-west-2) | < 30 min (manual failover trigger + Route 53 + warm pool、long distance impact 許容) |
 | RPO (S3 audit immutable)      | < 15 min (CRR latency)                                |
 | RTO (S3 audit immutable)      | Read available all time、write は別 region で復旧後   |
@@ -2178,7 +2178,7 @@ Open question §13 #19 として「Phase 1 ops gate で pg_partman BGW vs Step F
 
 | Drill                                              | 頻度       | 検証項目                                                                            |
 | -------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------- |
-| Aurora us-east-1a 障害 → us-east-1b 自動 failover  | 月次       | application reconnect time、open transaction loss、observability alarms (introduced in v1.4 US pivot、current v1.6.2) |
+| Aurora us-east-1a 障害 → us-east-1b 自動 failover  | 月次       | application reconnect time、open transaction loss、observability alarms (introduced in v1.4 US pivot、current v1.7.2) |
 | Aurora us-east-1 Region 障害 → us-west-2 manual failover | 四半期     | RPO 計測 (~3,900km long distance impact)、application Route 53 cutover、credential / RLS context recovery |
 | Audit hash chain verification                      | 四半期     | full chain walk + S3 snapshot re-hash + mismatch 検知                              |
 | Backup restore (PITR + manual snapshot)            | 半年       | 任意の case_id 復元、application bind test                                          |
@@ -2757,7 +2757,7 @@ API layer は本 doc 範囲外。OpenAPI / GraphQL schema は Phase 1 別 doc。
 | -- | ------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------- |
 | 1  | retention 各 class の正確な保持年数                            | 業務責任者 + Security 関係者 + Compliance 関係者     | Phase 1 設計 gate                 |
 | 2  | KMS CMK の per-tenant vs per-environment 配分                  | Security 関係者 + AI 管理者                          | Phase 1 設計 gate                 |
-| 3  | **US 規制 framework AWS service mapping doc** (introduced in v1.4 US pivot、current v1.6.2): NYDFS 23 NYCRR Part 500 + FRB SR 11-7 + OCC SR 11-7 + 2023-17 + FFIEC IT Examination Handbook + BSA-AML + OFAC + GLBA + Reg P + Safeguards Rule + State law (NY SHIELD / CCPA-CPRA / VA / CO / CT / UT / IL BIPA) の各条 control への AWS service mapping | Security 関係者 + Compliance officer + external legal counsel + 外部監査 | Phase 1 サンプル業務 投入 1 month 前 |
+| 3  | **US 規制 framework AWS service mapping doc** (introduced in v1.4 US pivot、current v1.7.2): NYDFS 23 NYCRR Part 500 + FRB SR 11-7 + OCC SR 11-7 + 2023-17 + FFIEC IT Examination Handbook + BSA-AML + OFAC + GLBA + Reg P + Safeguards Rule + State law (NY SHIELD / CCPA-CPRA / VA / CO / CT / UT / IL BIPA) の各条 control への AWS service mapping | Security 関係者 + Compliance officer + external legal counsel + 外部監査 | Phase 1 サンプル業務 投入 1 month 前 |
 | 4  | Tier 3 規制語 linter の application or DB layer 配置          | AI 管理者                                             | Phase 1 設計 gate                 |
 | 5  | input_artifact (PDF) の OCR 後 raw text 保持要否               | 業務責任者 (audit reproducibility) + Security        | Phase 1 設計 gate                 |
 | 6  | Customer master との同期方法 (CDC / API / nightly batch)       | 業務責任者 + 基幹 system 所管                         | Phase 1 接続 gate                 |
@@ -2791,8 +2791,8 @@ API layer は本 doc 範囲外。OpenAPI / GraphQL schema は Phase 1 別 doc。
 | R6 | Workflow version snapshot の sha256 content と Storage の不整合                                    | nightly job で sha256 再計算 + storage 比較                                                                                                       |
 | R7 | Phase 1 単一 tenant 想定で multi-tenant 経路の bug 隠れ                                            | Phase 1 末で synthetic 2nd tenant を staging で常駐、cross-tenant leak の RLS test を CI に                                                       |
 | R8 | EventBridge → consumer 失敗時の outbox 未配送                                                      | outbox dispatched_at NULL の alarm、Phase 1 で manual replay SOP                                                                                  |
-| R9 | Bedrock model availability の region 制約 (新 Claude version GA から us-east-1 / us-west-2 対応まで 0-1 month、introduced in v1.4 US pivot、current v1.6.2 で Tokyo lag risk 大幅低下) | model_artifact で `artifact_kind='base_model_pointer'` + region 列を持ち、不在時は staging region 経由 (cross-region inference、PII 注意) |
-| R10 | Aurora Global DB の write-forwarding 制約 (introduced in v1.4 US pivot、current v1.6.2)                                          | DR 時のみ us-west-2 に writer promote、平常時は read-only replica として monitor                                                                   |
+| R9 | Bedrock model availability の region 制約 (新 Claude version GA から us-east-1 / us-west-2 対応まで 0-1 month、introduced in v1.4 US pivot、current v1.7.2 で Tokyo lag risk 大幅低下) | model_artifact で `artifact_kind='base_model_pointer'` + region 列を持ち、不在時は staging region 経由 (cross-region inference、PII 注意) |
+| R10 | Aurora Global DB の write-forwarding 制約 (introduced in v1.4 US pivot、current v1.7.2)                                          | DR 時のみ us-west-2 に writer promote、平常時は read-only replica として monitor                                                                   |
 | R11 | `connection_attempt` の partition friendly UNIQUE が真の重複防御にならない (Finding 7)             | `idempotency_registry` PK uniqueness を SSOT、application は connection_attempt insert 前に必ず idempotency_registry に INSERT ... ON CONFLICT DO NOTHING、final_status='success' 後の retry は alarm |
 | R12 | exporter Lambda 自体の tampering risk (Finding 2 R4 防御の前提)                                    | image digest を別 account `audit-config` bucket に Object Lock で固定、CodePipeline 経由のみ更新、変更時は Security 関係者 Type B 設定承認         |
 | R13 | Blue/Green switchover 不可逆 destructive DDL (Finding 9)                                          | 3 段 expand-contract 強制、rollback rule 違反は CI で検出 (DDL changeset の diff 解析、column drop を含む単独 release を block)                    |
@@ -2819,7 +2819,7 @@ API layer は本 doc 範囲外。OpenAPI / GraphQL schema は Phase 1 別 doc。
 - AWS Aurora PostgreSQL 16 documentation (RLS, partition, pgvector, Global DB)
 - AWS S3 Object Lock (Compliance vs Governance mode) — https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html
 - AWS QLDB end-of-life announcement (2025-06) + AWS recommended migration pattern (Aurora + S3 Object Lock + hash chain)
-- AWS Japan FISC 安全対策基準 mapping doc (Japan public sector & financial services compliance page) — **Historical reference only** (Tokyo deploy 想定の v1.0-v1.3.2 で参照、introduced in v1.4 US pivot、current v1.6.2 で superseded、current は AWS US Public Sector + Financial Services team による NYDFS / FRB / OCC / FFIEC mapping、DOC-CA-08 §19.1 参照)
+- AWS Japan FISC 安全対策基準 mapping doc (Japan public sector & financial services compliance page) — **Historical reference only** (Tokyo deploy 想定の v1.0-v1.3.2 で参照、introduced in v1.4 US pivot、current v1.7.2 で superseded、current は AWS US Public Sector + Financial Services team による NYDFS / FRB / OCC / FFIEC mapping、DOC-CA-08 §19.1 参照)
 - pgvector HNSW vs IVFFLAT trade-off study
 - Transactional Outbox pattern (Chris Richardson, microservices.io)
 - AWS Well-Architected Financial Services Industry Lens
@@ -2828,9 +2828,9 @@ API layer は本 doc 範囲外。OpenAPI / GraphQL schema は Phase 1 別 doc。
 
 ## 16. 後続 PR / TODO
 
-1. ✅ **完了 (v1.3.2 → current v1.6.2 で sync 済)** — `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.5 section 追加済 + Plan v1.7 US pivot 承認 (L1001-1135)
-2. ✅ **完了 (v1.3.2 → current v1.6.2 / _SSOT.md v0.11 で sync 済)** — `docs/_SSOT.md` v0.11 Topic mapping table L56 に DM-07 row 追加済
-3. **§2.9 Phase 1 pre-flight checklist 3 項 完了** (introduced in v1.4 US pivot、current v1.6.2: DDL syntactic validation / **US 規制 framework mapping verify** (NYDFS 500 + FRB SR 11-7 + OCC + BSA-AML + OFAC + GLBA + State、§13 #3 と同期、FISC 章番号 review は v1.4 で superseded) / streaming export RPO 計測)
+1. ✅ **完了 (v1.3.2 → current v1.7.2 で sync 済)** — `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.5 section 追加済 + Plan v1.7 US pivot 承認 (L1001-1135)
+2. ✅ **完了 (v1.3.2 → current v1.7.2 / _SSOT.md v0.11 で sync 済)** — `docs/_SSOT.md` v0.11 Topic mapping table L56 に DM-07 row 追加済
+3. **§2.9 Phase 1 pre-flight checklist 3 項 完了** (introduced in v1.4 US pivot、current v1.7.2: DDL syntactic validation / **US 規制 framework mapping verify** (NYDFS 500 + FRB SR 11-7 + OCC + BSA-AML + OFAC + GLBA + State、§13 #3 と同期、FISC 章番号 review は v1.4 で superseded) / streaming export RPO 計測)
 4. `db/changelog/v1.0.0/` に Liquibase changeset 起稿 (Phase 1 着手時、§2.9 #1 と同時)
 5. CDK / Terraform IaC repo の bootstrap (Aurora cluster + S3 OL bucket + KMS keys + Secrets rotation + Kinesis Firehose audit pipeline)
 6. RBAC / RLS policy test suite (CI で cross-tenant leak / SoD violation を automated、Finding 5 の `case_record` rename 含む schema 全体を test fixture 化)

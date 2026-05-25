@@ -6,7 +6,7 @@
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 文書 ID         | DOC-DM-07                                                                                                                                                                                                                                   |
 | 文書名          | Data Model & Persistence Architecture (logical model + physical schema + DB 技術選定 + immutable audit + ops playbook)                                                                                                                      |
-| 版数            | v1.7 (autonomous prod-ready loop Cycle 5: §5.10 row-level encryption + §9.5 audit chain repair playbook + §9.6 right-to-erasure × audit immutability conflict resolution、DOC-CEM-12 §10.2 ⚠ Gap → resolution、DOC-TM-10 T-ID-04 + T-IN-01 defense in depth) |
+| 版数            | v1.7.1 (autonomous prod-ready loop Cycle 5-6: §5.10 row-level encryption + §9.5 audit chain repair playbook + §9.6 right-to-erasure × audit immutability conflict resolution + §10.10 PITR drill SOP + §10.11 RDS Proxy fail-mode runbook (FM-1 ~ FM-6) + §10.12 Liquibase changelog naming + lock convention + §10.13 prototype → physical migration validation harness) |
 | ステータス      | Phase 1 hand-off Draft (前提条件未充足、§2.9 + §0.1 参照、production-ready claim 撤回済)                                                                                                                                                    |
 | オーナー        | backoffice-ai-v2 maintainer (AI 管理者 + 業務責任者 + Security 関係者 合議想定)                                                                                                                                                             |
 | 承認者          | 設定承認 Type B (Security-impacting、外部接続 + PII scope + 鍵管理を含むため) + Type C (Trust Level 進化 path を機械的に enforce する schema を含むため、業務責任者 co-A)                                                                    |
@@ -15,7 +15,7 @@
 | 関連文書        | DOC-OV-00 §2.2 (接続層), DOC-FW-01 (Flywheel), DOC-APP-02 (3 層承認), DOC-UI-03 §4 (9 画面), DOC-KNW-04 §3 / §6-§8 (snippet schema / staging usage / audit event model), DOC-MON-05 (KPI/KRI), DOC-ROOT-\_SSOT, workflows/_index.md          |
 | SSOT 区分       | 物理データモデル / DB 技術選定 / immutable audit 設計 / RLS + RBAC policy / pgvector + embedding store / KMS + secret rotation / RPO/RTO + DR / retention policy の SSOT                                                                    |
 | Evidence Status | 設計のみ。Phase 1 で (a) sample workload で IO 計測、(b) AWS us-east-1 + us-west-2 multi-AZ で DR drill、(c) **US 規制 mapping table 作成** (Federal: FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + State: NYDFS Part 500 / NY SHIELD / CCPA-CPRA 等)、(d) cost 実測 → 設計 calibration (introduced in v1.4 US pivot、current v1.6.2)                                |
-| 改版履歴        | v1.0 (2026-05-24): 初版作成 (Phase 1 hand-off の foundation)。v1 から v4 までの内部 critique trace を §2 に記録、最終形を §3 以降に lock。`docs/00-06` の SSOT に整合、`docs/_SSOT.md` 拡張は本 doc lock 後に別 PR で行う (Out-of-scope 条項)。v1.1 (2026-05-24): 外部 critical review (AWS + JP メガバンク + FISC 監査経験 視点) から 13 finding を取得し全件反映 (§2.8 patch trace 参照)。主要修正: (a) `case` → `case_record` rename (Postgres 予約語衝突)、(b) CHECK subquery 不可問題を trigger へ移行 (Finding 1/4)、(c) audit immutability を 4-ring + streaming export 化 (Finding 2/3)、(d) idempotency_registry 分離 (Finding 7)、(e) retention class に kyc_document 7 年新設 (Finding 8)、(f) Blue/Green 3 段 expand-contract 詳細 (Finding 9)、(g) K3 precision/FP denominator 分離 (Finding 10)、(h) §2.4 stack 比較に Azure Confidential Ledger 列追加 (Finding 11)、(i) workflow_version publish 時 outbox 即時 Alert (Finding 12)、(j) boundary_definition_version typed threshold (Finding 13)、(k) FISC 9 版 章番号 mapping 表 (Finding 6)。v1.2 (2026-05-24): user Decision Brief round 1 (6 finding、3 P0 + 3 P1) 反映 (§2.10)。**main title から "Production-Ready" claim を撤回し "Phase 1 hand-off Draft" に降格**。主要修正: (a) §0.1 doc status + plan 接続順序の明文化、(b) §3 entity 数 42 → 47 訂正 + `customer_reference` 新規定義、(c) §6.1 FISC 章番号 placeholder 化 (版数特定を Phase 1 に委譲)、(d) §8 冒頭 DDL excerpt status disclaimer、(e) §10.4.1 pg_partman + Blue/Green 衝突 SOP、(f) §5.1 4-eyes trigger を 5 軸整合 (actor + tenant + case_id + decision_kind + 時系列) に強化、(g) §13 open question #19-#21 追加。**ただし v1.2 自己採点「全 6 finding 反映済」は不正確** (R2 で apply failure 5 件発見)。v1.3 (2026-05-24): user Decision Brief round 2 で v1.2 の apply failure 5 件を指摘 + 全件修正 (§2.11)。主要修正: (a) §2.10 / §16 で P0 #1 を未解消と honest 明記、(b) §2.9 / §13 / §2.10 から FISC "9 版" active claim 削除 (現行版 = v13 想定として表現)、(c) §0 / §1.1 で "本番 ready" / "本番投入可能" を Phase 1 文脈に paraphrase、(d) 全 11 trigger ON 句に schema-qualify 追加、outbox aggregate_type comment を entity rename と整合、(e) §16 TODO numbering を 1-11 で sequential 化。**ただし v1.3 の grep verify も apply failure 3 件残存** (R3 で指摘)。v1.3.1 (2026-05-24): user Decision Brief round 3 micro-patch — FISC 9 版 active claim 残存 2 箇所 (§7.3 row 2、§13 #3) + bare-table trigger 1 件 (§5.2 `trg_wfv_immutable ... ON workflow_version` → `ON app.workflow_version`) を修正。v1.3 検証で使った positive-enum grep pattern (table 名を私が enumerate) が `workflow_version` を見落としたため、§2.11 verification methodology note に **負パターン (`grep -vE 'ON (app\.\|audit\.)'`) を default にする教訓** を追記 (Decision Brief R3-P2)。v1.4 (2026-05-24、US pivot): user 新情報「US リージョン deploy + JP 銀行 America division」で DOC-CA-08 v2.0 と同期 pivot、§6.1 PII mapping を FISC + 個情法 + 銀行法 + 犯収法 → **US framework** (Federal: FRB SR 11-7 / OCC / FFIEC / BSA-AML (FinCEN) / USA PATRIOT 326 CIP / OFAC / GLBA + Reg P / Safeguards Rule / SOX、State: NYDFS 23 NYCRR Part 500 / NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA) に swap、§9.4 retention class を BSA + SOX baseline に swap (kyc_document 7 年 → 5 年、audit_immutable 10 年 → 7 年)、JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、Phase 2 検討、本 doc scope 外) と明示。v1.0-v1.3.2 は historical archive として trace に保存。Plan v1.7 で US pivot 承認済。v1.3.2 (2026-05-24): user Decision Brief round 5 governance micro-patch — Plan v1.5 + `_SSOT.md` v0.9 反映後に DM-07 本体の §0.1 / §16 が「未完 TODO」表現で stale だった問題を修正。§0.1 git 管理 + SSOT 接続 を「Plan v1.5 / _SSOT.md v0.9 反映済、残るは `git add` のみ (user 領域)」に update、§16 #1 + #2 を ✅ 完了マーク化。`v1.3.1 lock` は内容 lock (§3-§15) であり governance metadata sync (§0.1 / §16) は lock 違反外と判断。本 patch で active な状態不整合 0 を達成。v1.4 (2026-05-24、US pivot): §6.1 PII mapping + §9.4 retention class を FISC + 個情法 + 銀行法 + 犯収法 → US framework (NYDFS Part 500 / FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + Reg P + Safeguards Rule + SOX + State law) に swap、kyc_document 7yr → 5yr (BSA Section 1010.430)、audit_immutable 10yr → 7yr (SOX baseline)、JP parent reporting は別 doc DOC-CA-09 candidate scope。v1.5 (2026-05-24): §13 #3 + #20 + §16 #3 の active FISC claim を US framework に swap、§7.3 R3 推奨 rationale も US pivot 反映 (active FISC claim 0 達成)。v1.6 (2026-05-24): §7.3 R2 / §2.9 pre-flight / §0.1 governance / §7.1 / §7.2 / §10.1 / §10.7 / §14 R9/R10 の active stale US pivot reflect、AlloyDB row 比較軸を FISC → US 規制 (NYDFS / FRB / FFIEC) に swap。v1.6.1 (2026-05-24): §0.1 + §7.1 AlloyDB row + §7.3 R1/R2 + §16 TODO の metadata `introduced in vX.Y / current vX.Y.Z` provenance label 化、_SSOT.md v0.11 row + DOC-CA-08 v2.3.2 と sync 完了。v1.6.2 (2026-05-24): P1 metadata sync — §6.1 / §9.4 section headings の `(v1.4 US pivot)` → `(introduced in v1.4 US pivot、current v1.6.2)` 形式統一、§7.2 ASCII diagram の [v1.4 US pivot] label を [introduced v1.4、current v1.6.2] 化、§7.1 Aurora row の `(v1.4 US pivot)` を `(introduced in v1.4 US pivot、current v1.6.2)` 化、AWS Japan FISC reference を Historical reference only label 化 (§19.1)、改版履歴 v1.5/v1.6/v1.6.1 entry を本 entry まで継続。P2 batch: 全 active `v1.4 US pivot` literal を `introduced in vX.Y / current v1.6.2` provenance label に統一 (active stale literal 0、provenance trace 完全保存)。v1.7 (2026-05-25、autonomous prod-ready loop Cycle 5): defense in depth + ⚠ Gap resolution の 3 章追加。(a) §5.10 Row-level encryption (PII tier 3 = `id_document_hash` 用 KMS DataKey-per-tenant envelope encryption、pgcrypto AES-256-GCM、RLS + at-rest との triple defense、NYDFS 500.15(a)(2)(B) alternative compensating controls + GLBA Safeguards 16 CFR 314.4(c)(3) over-meet 想定、key rotation half-yearly + yearly re-encrypt + performance trade-off catalog)。(b) §9.5 Audit chain repair playbook (DOC-SRE-11 RB-03 連動、7 phase: Detection → Immediate freeze → Forensic isolation → Scope identification → NYDFS 500.17 72hr notification → PITR + S3 export canonical reconciliation → Postmortem → Defense in depth strengthening)。(c) §9.6 Right-to-erasure × Audit immutability conflict resolution (DOC-CEM-12 §10.2 ⚠ Gap fix、pseudo-anonymization 推奨案 = HMAC-SHA-256 stable pseudonym + customer_reference erasure_status + column-level KMS DataKey destroy crypto-erasure + audit_event chain append-only 維持 + counsel review focus 4 件、Alternative 4 案 rejection rationale 完備、CCPA 1798.105 + 1798.145(e) banking exemption + GLBA Reg P 1016.3(q)(1) deidentified concept alignment)。改版履歴 P1 metadata sync 完了 (本 entry まで sequential)。 |
+| 改版履歴        | v1.0 (2026-05-24): 初版作成 (Phase 1 hand-off の foundation)。v1 から v4 までの内部 critique trace を §2 に記録、最終形を §3 以降に lock。`docs/00-06` の SSOT に整合、`docs/_SSOT.md` 拡張は本 doc lock 後に別 PR で行う (Out-of-scope 条項)。v1.1 (2026-05-24): 外部 critical review (AWS + JP メガバンク + FISC 監査経験 視点) から 13 finding を取得し全件反映 (§2.8 patch trace 参照)。主要修正: (a) `case` → `case_record` rename (Postgres 予約語衝突)、(b) CHECK subquery 不可問題を trigger へ移行 (Finding 1/4)、(c) audit immutability を 4-ring + streaming export 化 (Finding 2/3)、(d) idempotency_registry 分離 (Finding 7)、(e) retention class に kyc_document 7 年新設 (Finding 8)、(f) Blue/Green 3 段 expand-contract 詳細 (Finding 9)、(g) K3 precision/FP denominator 分離 (Finding 10)、(h) §2.4 stack 比較に Azure Confidential Ledger 列追加 (Finding 11)、(i) workflow_version publish 時 outbox 即時 Alert (Finding 12)、(j) boundary_definition_version typed threshold (Finding 13)、(k) FISC 9 版 章番号 mapping 表 (Finding 6)。v1.2 (2026-05-24): user Decision Brief round 1 (6 finding、3 P0 + 3 P1) 反映 (§2.10)。**main title から "Production-Ready" claim を撤回し "Phase 1 hand-off Draft" に降格**。主要修正: (a) §0.1 doc status + plan 接続順序の明文化、(b) §3 entity 数 42 → 47 訂正 + `customer_reference` 新規定義、(c) §6.1 FISC 章番号 placeholder 化 (版数特定を Phase 1 に委譲)、(d) §8 冒頭 DDL excerpt status disclaimer、(e) §10.4.1 pg_partman + Blue/Green 衝突 SOP、(f) §5.1 4-eyes trigger を 5 軸整合 (actor + tenant + case_id + decision_kind + 時系列) に強化、(g) §13 open question #19-#21 追加。**ただし v1.2 自己採点「全 6 finding 反映済」は不正確** (R2 で apply failure 5 件発見)。v1.3 (2026-05-24): user Decision Brief round 2 で v1.2 の apply failure 5 件を指摘 + 全件修正 (§2.11)。主要修正: (a) §2.10 / §16 で P0 #1 を未解消と honest 明記、(b) §2.9 / §13 / §2.10 から FISC "9 版" active claim 削除 (現行版 = v13 想定として表現)、(c) §0 / §1.1 で "本番 ready" / "本番投入可能" を Phase 1 文脈に paraphrase、(d) 全 11 trigger ON 句に schema-qualify 追加、outbox aggregate_type comment を entity rename と整合、(e) §16 TODO numbering を 1-11 で sequential 化。**ただし v1.3 の grep verify も apply failure 3 件残存** (R3 で指摘)。v1.3.1 (2026-05-24): user Decision Brief round 3 micro-patch — FISC 9 版 active claim 残存 2 箇所 (§7.3 row 2、§13 #3) + bare-table trigger 1 件 (§5.2 `trg_wfv_immutable ... ON workflow_version` → `ON app.workflow_version`) を修正。v1.3 検証で使った positive-enum grep pattern (table 名を私が enumerate) が `workflow_version` を見落としたため、§2.11 verification methodology note に **負パターン (`grep -vE 'ON (app\.\|audit\.)'`) を default にする教訓** を追記 (Decision Brief R3-P2)。v1.4 (2026-05-24、US pivot): user 新情報「US リージョン deploy + JP 銀行 America division」で DOC-CA-08 v2.0 と同期 pivot、§6.1 PII mapping を FISC + 個情法 + 銀行法 + 犯収法 → **US framework** (Federal: FRB SR 11-7 / OCC / FFIEC / BSA-AML (FinCEN) / USA PATRIOT 326 CIP / OFAC / GLBA + Reg P / Safeguards Rule / SOX、State: NYDFS 23 NYCRR Part 500 / NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA) に swap、§9.4 retention class を BSA + SOX baseline に swap (kyc_document 7 年 → 5 年、audit_immutable 10 年 → 7 年)、JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、Phase 2 検討、本 doc scope 外) と明示。v1.0-v1.3.2 は historical archive として trace に保存。Plan v1.7 で US pivot 承認済。v1.3.2 (2026-05-24): user Decision Brief round 5 governance micro-patch — Plan v1.5 + `_SSOT.md` v0.9 反映後に DM-07 本体の §0.1 / §16 が「未完 TODO」表現で stale だった問題を修正。§0.1 git 管理 + SSOT 接続 を「Plan v1.5 / _SSOT.md v0.9 反映済、残るは `git add` のみ (user 領域)」に update、§16 #1 + #2 を ✅ 完了マーク化。`v1.3.1 lock` は内容 lock (§3-§15) であり governance metadata sync (§0.1 / §16) は lock 違反外と判断。本 patch で active な状態不整合 0 を達成。v1.4 (2026-05-24、US pivot): §6.1 PII mapping + §9.4 retention class を FISC + 個情法 + 銀行法 + 犯収法 → US framework (NYDFS Part 500 / FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + Reg P + Safeguards Rule + SOX + State law) に swap、kyc_document 7yr → 5yr (BSA Section 1010.430)、audit_immutable 10yr → 7yr (SOX baseline)、JP parent reporting は別 doc DOC-CA-09 candidate scope。v1.5 (2026-05-24): §13 #3 + #20 + §16 #3 の active FISC claim を US framework に swap、§7.3 R3 推奨 rationale も US pivot 反映 (active FISC claim 0 達成)。v1.6 (2026-05-24): §7.3 R2 / §2.9 pre-flight / §0.1 governance / §7.1 / §7.2 / §10.1 / §10.7 / §14 R9/R10 の active stale US pivot reflect、AlloyDB row 比較軸を FISC → US 規制 (NYDFS / FRB / FFIEC) に swap。v1.6.1 (2026-05-24): §0.1 + §7.1 AlloyDB row + §7.3 R1/R2 + §16 TODO の metadata `introduced in vX.Y / current vX.Y.Z` provenance label 化、_SSOT.md v0.11 row + DOC-CA-08 v2.3.2 と sync 完了。v1.6.2 (2026-05-24): P1 metadata sync — §6.1 / §9.4 section headings の `(v1.4 US pivot)` → `(introduced in v1.4 US pivot、current v1.6.2)` 形式統一、§7.2 ASCII diagram の [v1.4 US pivot] label を [introduced v1.4、current v1.6.2] 化、§7.1 Aurora row の `(v1.4 US pivot)` を `(introduced in v1.4 US pivot、current v1.6.2)` 化、AWS Japan FISC reference を Historical reference only label 化 (§19.1)、改版履歴 v1.5/v1.6/v1.6.1 entry を本 entry まで継続。P2 batch: 全 active `v1.4 US pivot` literal を `introduced in vX.Y / current v1.6.2` provenance label に統一 (active stale literal 0、provenance trace 完全保存)。v1.7.1 (2026-05-25、autonomous prod-ready loop Cycle 6): operational depth の 4 章追加。(a) §10.10 PITR drill SOP (半年 cadence、5 phase pre-drill / execution / 成功基準 / failure scenario / output、target restore < 60 min + smoke test 10 sample + audit hash 100% pass)。(b) §10.11 RDS Proxy fail-mode runbook (FM-1 connection pool exhaustion / FM-2 pinning / FM-3 IAM auth burst / FM-4 Aurora failover / FM-5 proxy unavailable / FM-6 SSL handshake、各 mode に symptom + verify CLI + action chain)。(c) §10.12 Liquibase changelog naming + lock convention (db/changelog/v{semver}/ + 3-digit prefix + author email + runOnChange=false forward-only + magic comment + DATABASECHANGELOGLOCK lock SOP + idempotency principle + CI gate)。(d) §10.13 prototype → physical migration validation harness (7 test set: schema conformance / mock-physical bridge / RLS / SoD trigger / audit chain / immutability / PII encryption + per PR + daily + weekly + pre-prod cadence + 16 entity × 6 concern coverage matrix + Day 11-22 prototype 切替 SOP)。Cycle 6 で operational runbook + migration safety net 完備、Phase 1 着手 prerequisite を mechanical execution 化。v1.7 (2026-05-25、autonomous prod-ready loop Cycle 5): defense in depth + ⚠ Gap resolution の 3 章追加。(a) §5.10 Row-level encryption (PII tier 3 = `id_document_hash` 用 KMS DataKey-per-tenant envelope encryption、pgcrypto AES-256-GCM、RLS + at-rest との triple defense、NYDFS 500.15(a)(2)(B) alternative compensating controls + GLBA Safeguards 16 CFR 314.4(c)(3) over-meet 想定、key rotation half-yearly + yearly re-encrypt + performance trade-off catalog)。(b) §9.5 Audit chain repair playbook (DOC-SRE-11 RB-03 連動、7 phase: Detection → Immediate freeze → Forensic isolation → Scope identification → NYDFS 500.17 72hr notification → PITR + S3 export canonical reconciliation → Postmortem → Defense in depth strengthening)。(c) §9.6 Right-to-erasure × Audit immutability conflict resolution (DOC-CEM-12 §10.2 ⚠ Gap fix、pseudo-anonymization 推奨案 = HMAC-SHA-256 stable pseudonym + customer_reference erasure_status + column-level KMS DataKey destroy crypto-erasure + audit_event chain append-only 維持 + counsel review focus 4 件、Alternative 4 案 rejection rationale 完備、CCPA 1798.105 + 1798.145(e) banking exemption + GLBA Reg P 1016.3(q)(1) deidentified concept alignment)。改版履歴 P1 metadata sync 完了 (本 entry まで sequential)。 |
 
 ---
 
@@ -2200,6 +2200,282 @@ Open question §13 #19 として「Phase 1 ops gate で pg_partman BGW vs Step F
 | Threat detection   | GuardDuty + Security Hub + Macie (PII scanning on S3)                                        |
 | Patch              | Aurora minor version auto-upgrade (maintenance window)、major は手動 + Blue/Green             |
 | Pen test           | 年次 + 大規模変更時、結果は `audit_event (event_type='matrix_c_review')` に記録               |
+
+### 10.10 PITR (Point-In-Time Recovery) drill SOP (introduced in v1.7、autonomous prod-ready loop Cycle 6)
+
+§10.7 で半年に 1 回 PITR drill を schedule してあるが、本 §10.10 で execution SOP を pin。DOC-SRE-11 §9 quarterly DR drill に bundle、ただし PITR は半年 cadence。
+
+#### 10.10.1 Pre-drill prep (drill -7 day)
+
+1. **Target time selection**: Random PITR target を drill -2 day から選定 (実際 incident scenario 模倣)、Aurora `BacktrackWindow` または `restore-db-cluster-to-point-in-time` API で対応 timestamp 確認
+2. **Restore destination**: 別 cluster name (`backofficeai-pitr-drill-YYYYMMDD`)、production と分離 (drill 中 production accidental impact 防御)
+3. **Target case_id list**: PITR target time に存在した case_id を 10 件抽出、復元後の per-case integrity verify 用 baseline 取得
+4. **Stakeholder notify**: SRE Lead + AI 管理者 + 業務責任者 に drill schedule notify、production traffic 影響 0 を再確認
+
+#### 10.10.2 Drill execution (drill day、30 min ~ 2 hr)
+
+1. **T+0**: Drill war room channel create、target time + cluster name lock
+2. **T+5 min**: `aws rds restore-db-cluster-to-point-in-time --restore-to-time <target> --db-cluster-identifier backofficeai-pitr-drill-... --source-db-cluster-identifier backofficeai-prod` 実行
+3. **T+30 min ~ 60 min**: Restore complete を待つ (Aurora 規模次第 + storage size 依存)、`describe-db-cluster` で `Status=available` 確認
+4. **T+60 min**: Restored cluster に application を temp connect、smoke test
+   - case_record SELECT (10 sample)
+   - audit_event hash chain verify (per-tenant)
+   - workflow_version_id snapshot integrity
+   - knowledge_snippet weight=high count baseline 比較
+5. **T+90 min**: Restored cluster を `delete-db-cluster` で teardown (production と分離維持)、KMS-encrypted snapshot は 7 日 retain (forensic 用)
+
+#### 10.10.3 成功基準
+
+| Metric                                           | Target                          |
+| ------------------------------------------------ | ------------------------------- |
+| Restore completion time                          | < 60 min (Phase 1 規模)         |
+| Restored cluster smoke test pass                 | 10/10 sample case OK             |
+| Audit hash chain verify on restored cluster      | 100% (no breach)                 |
+| workflow_version + agent_version snapshot integrity | full match per-version row      |
+| Stakeholder notify SLA                            | drill -7 / +0 / +24 hr all met   |
+
+#### 10.10.4 Failure scenario + response
+
+| Scenario                                         | Response                                                                                                 |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Restore latency > 60 min                         | AWS Support escalation、PITR window adjust、drill 再 schedule。Phase 1 着手前に baseline restore time 確定 |
+| Hash chain verify fail on restored cluster      | DOC-SRE-11 RB-03 phase 3-5 同等 forensic flow、PITR target time が breach 後の状態 = 別 target で再 drill   |
+| Smoke test fail (case 整合不全)                  | Postmortem (DOC-SRE-11 §7 template)、root cause = Liquibase changelog idempotency / outbox semantic / 等  |
+
+#### 10.10.5 Output
+
+Drill 完了後 5 business day 以内に PITR drill report を起稿:
+- Restore completion time 実測
+- Smoke test result table
+- Audit chain verify result
+- Failure scenario 発生時の forensic flow record
+- DOC-SRE-11 §9 quarterly DR drill report と bundle (同 quarter で combined 提示)
+
+### 10.11 RDS Proxy connection pool fail-mode runbook (introduced in v1.7、autonomous prod-ready loop Cycle 6)
+
+DOC-SRE-11 RB-02 (Aurora writer 接続喪失 S1) + DOC-TM-10 T-DS-04 (RDS Proxy connection pool exhaustion) 連動。RDS Proxy 特有の fail-mode を 6 種類 enumerate + per-mode runbook。
+
+#### 10.11.1 Fail-mode catalog
+
+| Fail-mode                                       | Symptom                                                                                            | Cause                                                          | Primary runbook                                   |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------- |
+| **FM-1**: Connection pool exhaustion            | `ConnectionAttempt` metric spike + Lambda `Timeout` cascade                                       | Lambda Reserved concurrency × per-Lambda max connections > Aurora connection limit | RB-FM-1                                            |
+| **FM-2**: Pinning (session vars long-lived)     | `ConnectionPinningOccurrences` metric > 5/min                                                      | Lambda が session-level setting (`SET app.tenant_id`) を transaction 外で発行 | RB-FM-2                                            |
+| **FM-3**: Authentication failure burst          | `ConnectionAttemptFailures` metric + IAM auth token expire                                          | IAM auth token TTL (15 min) を超える long-running Lambda      | RB-FM-3                                            |
+| **FM-4**: Aurora writer DNS failover            | `RDSProxyError` + Aurora `FailoverInitiated` event                                                | Aurora primary failure                                         | DOC-SRE-11 RB-02                                  |
+| **FM-5**: Proxy endpoint unavailable            | API Gateway 5xx burst + RDS Proxy `Disconnected` metric                                             | Proxy maintenance / version upgrade / AZ outage                | RB-FM-5                                            |
+| **FM-6**: SSL/TLS handshake failure             | `TLSHandshakeFailures` metric                                                                       | Aurora cert rotation / Proxy cert mismatch                     | RB-FM-6                                            |
+
+#### 10.11.2 RB-FM-1: Connection pool exhaustion
+
+**Symptom**: `RDSProxyConnectionAttempt` > 100/sec sustained + Lambda `Timeout` spike
+
+**Verify**:
+```bash
+aws cloudwatch get-metric-statistics --namespace AWS/RDS \
+  --metric-name DatabaseConnections \
+  --dimensions Name=DBProxyName,Value=backofficeai-proxy \
+  --start-time -PT15M --end-time 0 --period 60 --statistics Maximum
+```
+
+**Action**:
+1. Lambda Reserved concurrency × per-Lambda max DB connections (default 5) > Aurora connection limit (Aurora Serverless v2 default 16,000) を計算
+2. RDS Proxy `MaxConnectionsPercent` (default 100%) を 90% に下げて connection burst absorb
+3. Lambda 側 connection pooling library (e.g., AWS Data API、`pg-promise` pool reuse) を活用、function 内 connection reuse
+4. Long-term: Reserved concurrency × per-Lambda max connections を Aurora limit 70% 以内に sizing
+5. Audit Lambda code で connection leak (transaction abort 後 `conn.release()` 漏れ) を検出
+
+#### 10.11.3 RB-FM-2: Pinning (session vars long-lived)
+
+**Symptom**: `ConnectionPinningOccurrences` > 5/min、connection pool 効率劣化
+
+**Verify**:
+```bash
+aws cloudwatch get-metric-statistics --namespace AWS/RDS \
+  --metric-name ConnectionPinningOccurrences \
+  --dimensions Name=DBProxyName,Value=backofficeai-proxy \
+  --start-time -PT60M --end-time 0 --period 300 --statistics Sum
+```
+
+**Action**:
+1. Lambda code で `SET app.tenant_id` / `SET app.user_id` を **transaction 内で** 発行する pattern に修正 (DM-07 §5.7 RLS で必須)
+2. RDS Proxy `SessionPinningFilters` に `EXCLUDE_VARIABLE_SETS=tenant_id,user_id` 設定 (Aurora PG 16 supported parameter group setting)
+3. Transactional `BEGIN ... SET LOCAL app.tenant_id ... COMMIT` pattern を application code template 化、PR review で enforce
+
+#### 10.11.4 RB-FM-3: Authentication failure burst
+
+**Symptom**: `ConnectionAttemptFailures` spike with IAM auth tokens
+
+**Action**:
+1. Lambda 内 IAM auth token cache TTL を 10 min (token lifetime 15 min の 2/3) に設定、token expire 直前再 generate
+2. Long-running Lambda (Step Functions task) は token re-generate hook を実装、connection lifetime > 10 min は dropped
+3. RDS Proxy IAM auth が affected の場合 Secrets Manager rotation Lambda 監視
+
+#### 10.11.5 RB-FM-5: Proxy endpoint unavailable
+
+**Symptom**: API Gateway 5xx + RDS Proxy `Disconnected` metric
+
+**Action**:
+1. RDS Proxy event subscription で `MaintenanceWindow` 確認
+2. AZ outage の場合 Multi-AZ proxy automatically failover、application側 retry logic で reconnect (Lambda 自動 retry + exponential backoff)
+3. Maintenance window が unscheduled の場合 AWS Support escalation
+
+#### 10.11.6 RB-FM-6: SSL/TLS handshake failure
+
+**Symptom**: `TLSHandshakeFailures` metric (Aurora cert rotation event 後 typically)
+
+**Action**:
+1. Lambda runtime (Node.js / Python) の root CA bundle が AWS RDS CA 2019 + AWS RDS CA 2024 両方含むか確認、必要なら Lambda layer で `rds-combined-ca-bundle.pem` 更新
+2. Aurora cluster の `ca_certificate_identifier` を最新 (rds-ca-rsa2048-g1 / rds-ca-rsa4096-g1 等) に rotate
+3. Cutover SOP: `modify-db-cluster --ca-certificate-identifier rds-ca-rsa2048-g1`、Lambda redeploy で root CA bundle 更新確認
+
+### 10.12 Liquibase changelog naming + lock convention (introduced in v1.7、autonomous prod-ready loop Cycle 6)
+
+§10.5 で Liquibase changelog 配置を `db/changelog/v{semver}/` 配下にすると pin したが、本 §10.12 で naming convention + lock + idempotency + rollback handling を SSOT 化。
+
+#### 10.12.1 Changelog file naming
+
+```
+db/changelog/
+├── master.xml                        # Liquibase root
+├── v0.1.0/                            # Phase 1 initial schema
+│   ├── 001-extensions.xml             # CREATE EXTENSION
+│   ├── 002-schemas.xml                # CREATE SCHEMA app / audit / cdc_outbox / analytics
+│   ├── 003-enums.xml                  # CREATE TYPE (案件状態 / SoD action / 等)
+│   ├── 010-tenant-identity.xml       # tenant / app_user / role / role_assignment
+│   ├── 020-workflow-version.xml      # workflow / workflow_version / 等
+│   ├── 030-agent-version.xml         # agent + 4 sub-config _version
+│   ├── 040-case-record.xml           # case_record + ai_proposal + ai_proposal_field + evidence_step
+│   ├── 050-approval.xml              # human_decision + procedure_proposal + config_change_approval
+│   ├── 060-knowledge.xml             # knowledge_snippet + snippet_version + citation_linkage
+│   ├── 070-audit.xml                 # audit_event partition + chain_head + snapshot_manifest
+│   ├── 080-integration.xml           # connection_attempt + idempotency_registry + boundary_definition_version
+│   ├── 090-rls-policies.xml          # ENABLE ROW LEVEL SECURITY + CREATE POLICY
+│   ├── 091-triggers-sod.xml          # SoD trigger (4-eyes / Type B / etc.)
+│   ├── 092-triggers-immutability.xml # Immutability trigger (workflow_version / agent_version / 等)
+│   ├── 093-triggers-validation.xml   # Citation / boundary threshold / retention 等
+│   ├── 094-row-level-encryption.xml  # §5.10 column-level encryption (v1.7 追加、pgcrypto + KMS)
+│   └── 099-seed-enum-and-roles.xml   # production seed (enum + role + screen_access_grant)
+├── v0.2.0/                            # Phase 1 ops 開始後 first revision
+└── ...
+```
+
+#### 10.12.2 Changeset ID convention
+
+```xml
+<changeSet id="010-001-create-tenant" author="ai-mgr@example.com" runOnChange="false">
+  <!-- {file-prefix}-{seq}-{purpose} 形式、forward-only -->
+  <comment>Create tenant table for Phase 1 single-tenant ops</comment>
+  <createTable tableName="tenant" schemaName="app">
+    ...
+  </createTable>
+  <rollback>
+    <dropTable tableName="tenant" schemaName="app"/>
+  </rollback>
+</changeSet>
+```
+
+- `id` 命名: `{file-prefix 3-digit}-{seq 3-digit}-{purpose}`、e.g., `010-001-create-tenant`
+- `author` は 個人 email、blame 用
+- `runOnChange="false"` で forward-only 強制 (= 既存 changeset の content 変更で再 apply されない、新 changeset 追加のみ許容)
+- `<rollback>` は必ず書く、ただし production rollback は限定運用 (DOC-CA-08 §9.3 Squawk linter)
+- Destructive DDL (DROP / ALTER COLUMN type 変更) は `[liquibase-destructive-approved]` magic comment で contract phase のみ許容
+
+#### 10.12.3 Lock mechanism
+
+```sql
+-- Liquibase 標準 lock table
+DATABASECHANGELOGLOCK (ID, LOCKED, LOCKGRANTED, LOCKEDBY)
+
+-- 並行 deploy 防御: us-east-1 + us-west-2 両方で同時 Liquibase apply 不可 (両 region applier が同 lock を競合 → 1 region failure)
+```
+
+**Lock handling SOP**:
+1. CodePipeline で us-east-1 → us-west-2 sequential apply、`waitFor` で完了確認
+2. Lock timeout default 5 min を 15 min に extend (Phase 1 schema 規模考慮)
+3. Lock stuck 検出 (deploy fail + 30 min 経過) 時 `UPDATE DATABASECHANGELOGLOCK SET LOCKED=FALSE` を SRE Lead 承認経由のみ実行 (DOC-SRE-11 §6 incident response)
+
+#### 10.12.4 Idempotency + deterministic apply
+
+- 全 changeset は **idempotent** であること (e.g., `CREATE TABLE IF NOT EXISTS`、`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`)
+- 同 changeset の二度 apply 試行で deterministic 失敗 (Liquibase 側 hash check で同 hash の場合 skip、改竄検知時 fail)
+- Seed data は `loadUpdateData` ではなく `loadData` + primary key で idempotent insert
+
+#### 10.12.5 CI gate
+
+- PR review で Squawk linter (DOC-CA-08 §9.3) + `liquibase validate --search-path=db/changelog`
+- Magic comment `[liquibase-destructive-approved]` の使用は 2 名 reviewer (人間 + Security 関係者) 承認必須
+- Forward-only enforcement: 既存 changeset の hash 変更検出は PR auto-block
+
+### 10.13 Prototype → physical migration validation harness (introduced in v1.7、autonomous prod-ready loop Cycle 6)
+
+§11 で prototype mock → physical mapping を pin、本 §10.13 で validation harness を SSOT 化。Phase 1 Day 11-22 期間中 prototype と physical を切替できる safety net。
+
+#### 10.13.1 Harness components
+
+```
+db/validation-harness/
+├── 01-schema-conformance/             # Schema conformance check
+│   ├── expected-schema.sql            # 47 entity の expected DDL signature
+│   └── compare.sh                     # Aurora 実 schema との diff
+├── 02-mock-physical-bridge/           # Prototype mock → DB seed bridge
+│   ├── mock-to-seed.ts                # mock-*.ts を physical seed SQL に変換
+│   ├── seed-staging.sh                # staging cluster seed
+│   └── prod-seed-skeleton.sql         # production seed (enum + role + screen_access_grant のみ)
+├── 03-rls-enforcement-test/           # RLS bypass test
+│   ├── rls-test-cases.sql             # 10 RLS scenario (cross-tenant SELECT、INSERT、UPDATE 等)
+│   └── run-rls-tests.sh                # 期待値 = 全 cross-tenant query 0 rows
+├── 04-sod-trigger-test/                # SoD trigger test
+│   ├── 4eyes-violation-scenarios.sql  # 5 軸 (actor / tenant / case / decision_kind / 時系列) violation 各 scenario
+│   ├── config-approval-sod.sql        # Type B/C SoD violation scenario
+│   └── run-sod-tests.sh                # 期待値 = 全 violation で exception raise
+├── 05-audit-chain-integrity/           # Audit chain verify test
+│   ├── chain-walk-baseline.sql        # 各 tenant chain hash verify
+│   └── run-audit-tests.sh
+├── 06-immutability-test/               # Immutability test (workflow_version / agent_version / ai_proposal frozen)
+│   ├── update-attempt-scenarios.sql
+│   └── run-immutability-tests.sh
+└── 07-pii-redaction-test/              # PII redaction + column-level encryption test
+    ├── encryption-round-trip.sql      # encrypt → store → decrypt round trip
+    └── run-pii-tests.sh                # KMS Decrypt audit
+```
+
+#### 10.13.2 Harness execution cadence
+
+| Cadence                  | Test set                                                                                                                |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Per PR (CI gate)         | 01-schema-conformance + 03-rls-enforcement-test + 04-sod-trigger-test + 06-immutability-test (subset、touched table のみ) |
+| Daily (staging cluster)  | 01 + 03 + 04 + 05 + 06 (full、staging seed で)                                                                          |
+| Weekly (staging cluster) | 全 07 test set (encryption round trip 含む)                                                                              |
+| Pre-production deploy    | 全 07 test set + 02 production seed dry-run                                                                              |
+
+#### 10.13.3 Coverage matrix
+
+| Entity / Concern              | 01 schema | 03 RLS | 04 SoD | 05 audit | 06 immut | 07 PII |
+| ----------------------------- | --------- | ------ | ------ | -------- | -------- | ------ |
+| tenant                        | ✅        |        |        |          |          |        |
+| app_user / role               | ✅        | ✅     |        |          |          |        |
+| workflow_version              | ✅        | ✅     |        |          | ✅       |        |
+| agent_version + sub-config    | ✅        | ✅     |        |          | ✅       |        |
+| case_record                   | ✅        | ✅     | ✅ (4-eyes) | ✅    |          |        |
+| human_decision                | ✅        | ✅     |        | ✅       |          |        |
+| procedure_proposal            | ✅        | ✅     | ✅     | ✅       |          |        |
+| config_change_approval        | ✅        | ✅     | ✅ (Type B/C) | ✅ |          |        |
+| knowledge_snippet + version   | ✅        | ✅     |        | ✅       | ✅ (high) |        |
+| citation_linkage              | ✅        | ✅     | ✅ (weight=high) |    |          |        |
+| ai_proposal + freeze          | ✅        | ✅     |        | ✅       | ✅ (frozen) |       |
+| audit_event + chain_head      | ✅        | ✅     |        | ✅       | ✅       |        |
+| input_artifact (tier 3 PII)   | ✅        | ✅     |        |          |          | ✅     |
+| evidence_step (encrypted)     | ✅        | ✅     |        |          |          | ✅     |
+| screenshot_stack              | ✅        | ✅     |        |          |          | ✅     |
+| boundary_definition_version   | ✅        | ✅     | ✅     |          |          |        |
+
+#### 10.13.4 Phase 1 Day 11-22 prototype 切替 SOP
+
+1. Day 11: Harness 01 + 03 + 04 を CI gate に組み込み、PR ごと自動 run
+2. Day 14: medium-fi 切替時点で Daily 全 set を staging cluster で run、green status 確認
+3. Day 18: high-fi 完了時点で Weekly 全 set + PII test run、KMS Decrypt audit OK 確認
+4. Day 22: Pre-production deploy harness (07 test set + 02 production seed dry-run) を Type B 設定承認 input に bundle
 
 ---
 

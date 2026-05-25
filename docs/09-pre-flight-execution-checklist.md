@@ -7,7 +7,7 @@
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 文書 ID         | DOC-PFC-09                                                                                                                                                                                          |
 | 文書名          | Phase 1 Pre-Flight Execution Checklist (外部 7 項 × RACI × acceptance × 証跡 template × sign-off authority、Type B 設定承認 prerequisite)                                                            |
-| 版数            | v0.1                                                                                                                                                                                                |
+| 版数            | v0.2 (autonomous prod-ready loop Cycle 8.5 P0-V correction: PFC-03 全面 rewrite to Bedrock Geo CRIS active state + acceptance condition #6 追加 + counsel sign-off prerequisite 強化)                |
 | ステータス      | Draft (autonomous prod-ready loop Cycle 1 起稿)                                                                                                                                                     |
 | オーナー        | backoffice-ai-v2 maintainer (AI 管理者 + Security 関係者 + SRE + 業務責任者 + Compliance officer + 外部 legal counsel の 6 stakeholder coordination)                                                |
 | 承認者          | 設定承認 Type B (Phase 1 本番投入 prerequisite gate、全 7 項 sign-off 後に Type B approval gate に進む)                                                                                              |
@@ -16,7 +16,7 @@
 | 関連文書        | **DOC-CA-08 v2.3.2 §16** (hoist source), **DOC-DM-07 v1.6.2** (persistence foundation), DOC-CEM-12 (Compliance Evidence Matrix、Cycle 4 起稿予定), DOC-TM-10 (Threat Model、Cycle 2 起稿予定), DOC-SRE-11 (SRE Runbook、Cycle 3 起稿予定) |
 | SSOT 区分       | Phase 1 本番投入 pre-flight execution の SSOT (外部 execution owner / acceptance criteria / 証跡 template / sign-off chain)                                                                          |
 | Evidence Status | N/A (本 doc は execution orchestration、定量値は 各 owner が実測後に append)                                                                                                                       |
-| 改版履歴        | v0.1 (2026-05-25、autonomous prod-ready loop Cycle 1): 初版作成、CA-08 §16 inline 7 項を本 doc に hoist + RACI / acceptance / 証跡 template / 工数 / sign-off authority に拡張、PFC-01 ~ PFC-07 として ID 化、§3 統合 sign-off chain + §4 dependency graph + §5 evidence package binder structure を新設 |
+| 改版履歴        | v0.1 (2026-05-25、autonomous prod-ready loop Cycle 1): 初版作成、CA-08 §16 inline 7 項を本 doc に hoist + RACI / acceptance / 証跡 template / 工数 / sign-off authority に拡張、PFC-01 ~ PFC-07 として ID 化、§3 統合 sign-off chain + §4 dependency graph + §5 evidence package binder structure を新設。v0.2 (2026-05-25、autonomous prod-ready loop Cycle 8.5 + Cycle 9): PFC-03 全面 rewrite (CA-08 v2.5 ADR-4 active state Geo CRIS default に sync、acceptance condition 5 → 6 項、Bedrock Geo CRIS quota verify + SCP enforce sandbox 実証 + data residency counsel sign-off prerequisite 追加)。本 PFC-03 update は CA-08 §16 PFC #3 + §17 open question #30-#32 + §18 R1/R11 と整合 |
 
 ---
 
@@ -121,20 +121,24 @@
 
 ---
 
-### PFC-03: Bedrock In-Region 再 verify + quota 確認
+### PFC-03: Bedrock Geo CRIS 再 verify + quota 確認 (v0.2 P0-V correction、autonomous loop Cycle 8.5)
 
-- **(a) 主題**: AWS Bedrock model card で Claude Sonnet 4.6 + Haiku 4.5 が us-east-1 + us-west-2 で **In-Region: Yes** が継続していることを Phase 1 着手時点で再 verify + Phase 1 想定 token 量を sandbox で sustain 実測 + service quota increase 申請
+- **(a) 主題 (v0.2 corrected)**: AWS Bedrock model card primary source 再 verify で Phase 1 着手時点の active state confirm:
+  - Sonnet 4.6: us-east-1 + us-west-2 共に In-Region: NO、Geo CRIS `us.anthropic.claude-sonnet-4-6` のみ available (CA-08 v2.5 ADR-4 で active state)
+  - Haiku 4.5: us-east-1 In-Region: YES、us-west-2 NO、Geo CRIS `us.anthropic.claude-haiku-4-5-20251001-v1:0` available
+  - Phase 1 想定 token 量を **Geo CRIS profile invocation** で sandbox sustain 実測 + service quota increase 申請 (Geo CRIS は In-Region と独立 quota possibility あり、AWS Support 確認)
 - **(b) RACI**:
   - **R**: AI 管理者
   - **A**: AI 管理者
-  - **C**: SRE / Security 関係者
+  - **C**: SRE / Security 関係者 / Compliance officer (data residency 解釈 sync 必要)
   - **I**: 経営層 / 業務責任者
-- **(c) 受入条件 (binary、全 5 項 ✅ 必須)**:
-  1. ☐ AWS Bedrock model card (Sonnet 4.6 + Haiku 4.5) Phase 1 着手時点 page を archive (Wayback Machine + 内部 evidence) + In-Region status が **Yes for us-east-1 + us-west-2** であることを screenshot 証跡化
-  2. ☐ Phase 1 想定 token 量 (low / mid / high scenario、DOC-CA-08 §14) を sandbox で sustain 実測、TPM (tokens per minute) / RPM (requests per minute) が requirement 充足
-  3. ☐ Service quota increase 申請が approved (AWS Support case ID + approved quota value 記録)
-  4. ☐ Cross-region inference (us-east-1 / us-west-2 以外) が SCP で deny されていることを sandbox 実証 (DOC-CA-08 §7.5)
-  5. ☐ Model version pin (DOC-DM-07 §3.2 `agent_model_config_version`) が Phase 1 開始 model version で lock
+- **(c) 受入条件 (binary、全 6 項 ✅ 必須、v0.2 で 5 → 6 項に拡張)**:
+  1. ☐ AWS Bedrock model card (Sonnet 4.6 + Haiku 4.5) Phase 1 着手時点 page を archive (Wayback Machine + 内部 evidence)、In-Region / Geo / Global 3 status が **autonomous loop Cycle 8.5 verify 結果と一致** (Sonnet 4.6 両 region In-Region: NO + Geo CRIS YES、Haiku 4.5 us-east-1 In-Region: YES + us-west-2 NO + Geo CRIS YES) であることを screenshot 証跡化、乖離あれば即 escalation
+  2. ☐ Phase 1 想定 token 量 (low / mid / high scenario、DOC-CA-08 §14) を **Geo CRIS profile** で sandbox sustain 実測、TPM (tokens per minute) / RPM (requests per minute) + cross-region data transfer cost が requirement 充足
+  3. ☐ Service quota increase 申請が approved (AWS Support case ID + approved quota value 記録)、Geo CRIS profile 専用 quota の有無 + In-Region quota との関係を AWS Support 確認
+  4. ☐ SCP §7.5 v2.5 rewrite (Allow `us.anthropic.*` + Haiku 4.5 us-east-1 direct + Deny `eu/jp/au/global.anthropic.*` + Deny outside us-east-1/us-west-2) が sandbox で正しく enforce されることを実証
+  5. ☐ Model version pin (DOC-DM-07 §3.2 `agent_model_config_version.model_label`) が Geo CRIS profile (`us.anthropic.claude-sonnet-4-6`) + Haiku 4.5 direct (`anthropic.claude-haiku-4-5-20251001-v1:0`) で lock
+  6. ☐ (新 v0.2 P0-V) **Geo CRIS data residency 解釈 counsel sign-off** (open question §17 #30、PFC-02 acceptance condition #2 強化と sync): "US geography Geo CRIS = NYDFS 500.15 / GLBA / state law 充足" であることが external counsel から sign-off
 - **(d) 検証方法**:
   - Step 1: Bedrock model card primary source を WebSearch + 直接 browse、archive
   - Step 2: AWS sandbox account で Phase 1 想定 token rate で 1 hour sustain test (low / mid / high 3 scenario)、throttle 発生 0 を確認

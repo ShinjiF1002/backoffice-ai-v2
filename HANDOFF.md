@@ -2,7 +2,7 @@
 
 > **branch**: `feature/prod-ready-design-loop`
 > **prod-ready baseline commit**: `09e1e76` (autonomous loop scope の起点、Day 22 slide deck commits は本 hand-off 対象外)
-> **prod-ready scope commits**: 19 (baseline `09e1e76` + Cycle 1-15 = 19 commits in `09e1e76^..HEAD`、`main..HEAD` は 21 commits で Day 22 slide deck 2 commits を contaminate)
+> **prod-ready scope commits**: 21 (baseline `09e1e76` + Cycle 1-15 + 各 row hash 確定 commit を含めた cumulative count、`09e1e76^..HEAD` = 21 / `main..HEAD` = 23 で Day 22 slide deck 2 commits contaminate / 厳密 commit count は `git log --oneline 09e1e76^..HEAD | wc -l` で都度参照、本値は post-Cycle-15 snapshot)
 > **scope**: Phase 1 hand-off package の 6 doc + HANDOFF.md を design-complete state に到達させる autonomous loop
 > **status**: ⚠ **pre-merge review pending (PR scope option 選択のみ残存、active stale literal 0)**。Design SSOT は本番投入意思決定会議 (Type B 設定承認) に持ち込める state に到達、ただし **pre-flight 外部 7 項 (DOC-PFC-09)** + **counsel sign-off (DOC-CEM-12)** + **経営層 Type B approval** が Phase 1 着手 prerequisite。**PR 切り出し方**: (a) `feature/prod-ready-design-loop` を `09e1e76 baseline` から rebase / squash-merge で main 直接 merge、または (b) Day 22 commits を除外する PR-only branch を切り直し
 

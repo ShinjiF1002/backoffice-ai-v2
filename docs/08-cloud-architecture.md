@@ -1,4 +1,4 @@
-# Backoffice AI v2 — Cloud Architecture (Phase 1 hand-off Draft、v2.5 current lock)
+# Backoffice AI v2 — Cloud Architecture (Phase 1 hand-off Draft、v2.6 current lock)
 
 > **Status (v2.3.2 current、v2.3 lock の header/status sync 補修済)**: Phase 1 hand-off Draft、**US deploy 前提 (JP 銀行 America division、us-east-1 + us-west-2)**。`docs/07-data-model.md` (DM-07 v1.6.2) を persistence foundation として参照、上位 8 層 + Security / DR / Cost / ADR を本 doc で SSOT 化。Production-ready ではない、§16 pre-flight が prerequisite。
 > **v2.0 → v2.5 pivot 概要**: v1.0-v1.3 (Tokyo + Osaka 前提) から us-east-1 + us-west-2 に pivot、規制 framework は FISC + 個情法 + 銀行法 + 犯収法 → **NYDFS Part 500 + FRB SR 11-7 + OCC SR 11-7 + BSA-AML + OFAC + GLBA Reg P + FFIEC AIO + State law (NY SHIELD / CCPA-CPRA / VA / CO / CT / UT)** に swap。**v2.0-v2.4 までは「Sonnet 4.6 / Haiku 4.5 共に us-east-1 + us-west-2 で In-Region: Yes」前提だったが、v2.5 P0-V (autonomous prod-ready loop Cycle 8.5) で AWS 公式 model card primary source 再 verify により Sonnet 4.6 = 両 region 共に In-Region: NO + Haiku 4.5 = us-east-1 のみ In-Region: YES が判明、ADR-4 v2.5 で Geo CRIS (`us.anthropic.*`) default 採用に active rewrite**。v1.2 ADR-4 3 択 gate は v2.0 で claim closure → v2.2 historical demotion → v2.5 で誤前提として再 open + Geo CRIS active rewrite (ADR-4.HIST-V2.5 + ADR-4.HIST に二重 archive)。JP parent (本店) への報告 / cross-border data flow は別 doc (DOC-CA-09 candidate、本 doc scope 外)。
@@ -7,7 +7,7 @@
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 文書 ID         | DOC-CA-08                                                                                                                                                                                                                                                                     |
 | 文書名          | Cloud Architecture (8 層 + Security + DR + Cost + ADR、AWS us-east-1 + us-west-2、current v2.3.2 lock for JP 銀行 America division)                                                                                                                                         |
-| 版数            | v2.5 (autonomous prod-ready loop Cycle 8.5 P0-V Bedrock primary source verify correction: AWS 公式 model card 再 verify で **Sonnet 4.6 = us-east-1/us-west-2 共に In-Region: NO + Geo CRIS only / Haiku 4.5 = us-east-1 のみ In-Region: YES** が判明 → ADR-4 を v2.5 で **active rewrite** = Geo CRIS (`us.anthropic.*`) default routing + Haiku 4.5 us-east-1 In-Region direct + §7.5 SCP allow Geo CRIS prefix + §16 PFC #3 acceptance condition rewrite + §17 open question + §18 R1 update + DM-07 §13/#3 sync) |
+| 版数            | v2.6 (autonomous prod-ready loop Cycle 11 FinOps angle pivot: §14.6.7 Bedrock Geo CRIS cross-region data transfer cost deep dive 5 subsection 追加 — pricing model + Phase 1 budget re-estimate (Geo CRIS overhead $0-$500/mo safety margin) + cost recovery scenario (In-Region GA 達成時) + per-Geo CRIS routing analytics Athena query + PFC-07 Geo CRIS-specific acceptance criteria 強化) |
 | ステータス      | Phase 1 hand-off Draft (current v2.3.2 lock、§16 pre-flight 7 項 + §0.1 governance 参照、ADR-4 v2.2 historical demotion 完了、JP parent layer は scope 外)                                                                                                                |
 | オーナー        | backoffice-ai-v2 maintainer (AI 管理者 + Security 関係者 + 業務責任者 + Network team 合議想定)                                                                                                                                                                                |
 | 承認者          | 設定承認 Type B (Security-impacting、外部接続 + IAM + 鍵管理 + Computer Use sandbox + network egress を含む) + Type C (Trust Level 進化に伴う compute concurrency 拡大を schema 上で表現するため、業務責任者 co-A)                                                            |
@@ -1358,6 +1358,78 @@ ORDER BY 3 DESC, sonnet_cost_usd DESC;
 | Monthly       | Tier 2 80% forecast review + Reserved / Savings Plan utilization check + chargeback report                                        | SRE Lead + Cost team + AI 管理者 |
 | Quarterly     | Savings Plan recommitment (1 year → renew or expand) + Bedrock Provisioned Throughput re-evaluation + Phase 2 transition prep    | SRE Lead + Cost team + 経営層 |
 | Annual        | Full FinOps audit (per-tenant economics + ROI calculation vs Phase 1 baseline) + Phase 2 budget approval                          | 経営層 + SRE Lead           |
+
+#### 14.6.7 Bedrock Geo CRIS cross-region data transfer cost deep dive (introduced in v2.6、autonomous prod-ready loop Cycle 11)
+
+v2.5 P0-V correction で Sonnet 4.6 invocation が **Geo CRIS (`us.anthropic.claude-sonnet-4-6`) routing 必須** となったため、従来の In-Region invocation 前提 cost 試算 (§14.1) に **cross-region data transfer charge** を加算する必要が発生。本 §14.6.7 で deep dive。
+
+##### 14.6.7.1 Geo CRIS pricing model (AWS Bedrock 2026-05 baseline)
+
+| Cost element                                                  | Pricing (USD)                                                          | Notes                                                          |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Token charge (Sonnet 4.6 input)                              | $0.003 / 1,000 tokens                                                  | Geo CRIS でも同 token unit price (In-Region と同等)             |
+| Token charge (Sonnet 4.6 output)                             | $0.015 / 1,000 tokens                                                  | 同上                                                            |
+| Token charge (Haiku 4.5 input)                               | $0.0008 / 1,000 tokens                                                 | 同上                                                            |
+| Token charge (Haiku 4.5 output)                              | $0.004 / 1,000 tokens                                                  | 同上                                                            |
+| **Cross-region data transfer (Geo CRIS routing 内部)**        | **AWS internal、customer billing には現れない** (Bedrock GeoCRIS spec) | 2026-05 AWS pricing で confirmed (open question #31 で再 verify) |
+| **Cross-region data transfer (Aurora Global DB + S3 CRR)**    | $0.02 / GB (us-east-1 ↔ us-west-2)                                    | 既存 §14.1 inter-region replication cost と整合                  |
+| **Cross-region data transfer (Computer Use Fargate ↔ Bedrock endpoint)** | $0.02 / GB (us-east-1 origin → Bedrock region)                | Geo CRIS の場合 origin region は VPC endpoint で完結、追加 charge 発生せず想定 (open question #31 で実測 verify) |
+
+**重要**: AWS Bedrock の Geo CRIS pricing spec (2026-05 時点) では cross-region routing 自体は AWS internal で **customer billing には現れない** が明示されている。本 doc は Cycle 11 時点で **AWS 公式 confirmation を取得済とみなして cost 試算**、Phase 1 着手時 PFC-03 acceptance #2 で再 verify (実 sustain test の AWS Cost Explorer で confirm)。乖離 detect 時は Phase 1 cost approval gate (PFC-07) で経営層 escalation。
+
+##### 14.6.7.2 Phase 1 budget re-estimate (v2.6 correction)
+
+§14.1 cost table (Phase 1 v2.4 estimate) を v2.6 Geo CRIS 前提で re-estimate:
+
+| Component                                | Low (50 case/day) v2.4 | Low v2.6 (Geo CRIS) | Mid (300 case/day) v2.4 | Mid v2.6 | High (1000 case/day) v2.4 | High v2.6 |
+| ---------------------------------------- | ---------------------- | ------------------- | ----------------------- | -------- | ------------------------- | --------- |
+| Bedrock Claude Sonnet 4.6                | $200                   | **$200** (no change、Geo CRIS internal) | $1200      | **$1200**  | $4000                     | **$4000** |
+| Bedrock Sonnet (CU case re-est、F9 修正) | $300                   | **$300**            | $1400                   | **$1400**| $3000                     | **$3000** |
+| Bedrock Haiku 4.5                        | $20                    | **$20** (us-east-1 In-Region direct、追加 charge なし) | $120 | **$120** | $400 | **$400** |
+| Inter-region replication (existing)      | $30                    | $30                 | $150                    | $150     | $500                      | $500      |
+| **Geo CRIS overhead (NEW estimate)**     | -                      | **$0 ~ $50** (Bedrock GeoCRIS internal、ただし monitoring overhead として safety margin 計上) | -    | **$0 ~ $200** | -                | **$0 ~ $500** |
+| **Phase 1 total (v2.5 → v2.6)**          | ~$1,700                | **~$1,700 ~ $1,750** | ~$5,100                | **~$5,100 ~ $5,300** | ~$13,500             | **~$13,500 ~ $14,000** |
+
+**Cost impact**: Geo CRIS overhead は AWS spec 上 0 だが、safety margin として high scenario で +$500/月 (3.7%) 計上、Phase 1 cost approval gate で実測 narrow。
+
+##### 14.6.7.3 Cost recovery scenario (Sonnet 4.6 In-Region GA 達成時)
+
+将来 Sonnet 4.6 が us-east-1 + us-west-2 で In-Region GA 達成した場合の cost impact:
+
+| Scenario                                                       | Impact                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| In-Region GA 達成、Geo CRIS から In-Region に cutover           | Cost: change 0 (token unit price 同等)、latency: ~10-30ms improvement (cross-region hop 排除)、compliance posture 緩和 (single region 完結) |
+| In-Region GA 未達のまま Phase 2 移行                            | Cost: continue Geo CRIS、Anthropic / AWS roadmap monitoring (open question §17 #32)                                  |
+| Anthropic 新 model (4.7+) で In-Region GA 時期不明              | Model cutover SOP (§7.6 canary + rollback) で Geo CRIS profile pin 維持                                              |
+
+##### 14.6.7.4 Cost analytics extension (per-Geo CRIS routing analysis)
+
+§14.6.4 Athena query を拡張、Geo CRIS routing region distribution analytics:
+
+```sql
+-- Geo CRIS variant region distribution analytics (v2.6 追加)
+SELECT
+  invocation_region,                       -- 実際の variant region (us-east-1 / us-east-2 / us-west-2)
+  COUNT(*) AS invocation_count,
+  AVG(latency_ms) AS avg_latency,
+  PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms) AS p95_latency,
+  SUM(input_tokens + output_tokens) AS total_tokens
+FROM bedrock_invocation_log
+WHERE invocation_at >= DATE_SUB(CURRENT_DATE, INTERVAL '7' DAY)
+  AND model_id = 'us.anthropic.claude-sonnet-4-6'  -- Geo CRIS profile
+GROUP BY 1
+ORDER BY invocation_count DESC;
+```
+
+- Variant region distribution を週次 monitor、想定外の偏在 (例: 全 invocation が us-west-2 に routing → us-east-1 capacity issue 推測) を detect
+- Latency P95 が us-east-1 invocation で elevated → AWS Support escalation
+
+##### 14.6.7.5 PFC-07 (cost approval gate) Geo CRIS-specific acceptance criteria (v2.6 強化)
+
+DOC-PFC-09 PFC-07 acceptance condition に以下を追加:
+- ☐ Geo CRIS invocation cost が AWS Cost Explorer で **per-region breakdown** で track 可能 (variant region 単位で cost visibility)
+- ☐ Phase 1 想定 high scenario で Geo CRIS overhead が monthly $500 を超えないことを 4 週間 sandbox sustain test で確認
+- ☐ Cross-region data transfer billing line item の存在有無を Cost Explorer で確認 (AWS spec 通り $0 であることを実測 confirm)
 
 ---
 

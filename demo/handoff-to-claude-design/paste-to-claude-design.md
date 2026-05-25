@@ -1,235 +1,173 @@
 # PASTE THIS ENTIRE FILE TO CLAUDE DESIGN (web chat)
 
-> **本 file の使い方**: 本 file 全文 を Claude Design (claude.ai 等) の最初の message として paste すれば、cold-start で executive deck (HTML) build 可能。file path 参照ではなく content 内蔵、external 依存なし。
-> **想定 build 時間**: 1-2 hr。
+> **本 file の使い方**: 本 file 全文 を Claude Design (claude.ai 等) の最初の message として paste すれば、cold-start で concept-share HTML deck を build 可能。file path 参照ではなく content 内蔵、external 依存なし。
+> **想定 build 時間**: 30 min - 1 hr (6 slide 短編)。
 > **Output**: HTML deck 1 file + screenshot pack + self-review report。
+
+> **本 file 改版履歴**:
+> - v0.1 / v0.2 (旧、Cycle 16-17): **Phase 1 投入 decision deck** (Type B 設定承認 prerequisite sign-off、18 slide、CXO+Risk Committee 単独 audience) — **superseded**
+> - **v0.3 (本版、Cycle 18)**: **Concept share + automation feasibility 説明 deck** に story pivot。6 slide、Mixed audience (経営層 + 業務責任者 + Security + Compliance)、Linear sequence + Cover slogan opening (III+A、research-compounder narrative card 由来) に再構築
 
 ---
 
 ## §A. INSTRUCTIONS (Claude Design への直接 prompt)
 
-あなたは戦略コンサル経験を持つ deck design specialist です。以下の仕様に従って executive deck の HTML を build してください。
+あなたは戦略コンサル経験を持つ deck design specialist です。以下の仕様に従って **concept-share + automation feasibility 説明 deck** の HTML を build してください。
 
 ### A.1 Task
-Backoffice AI v2 Phase 1 投入計画の executive deck を Reveal.js + Tailwind CDN single-file HTML で build する。
+Backoffice AI v2 (銀行 backoffice の AI 自動化 project) の **概要説明** + **オペレーション自動化が可能な根拠** を伝える 6-slide HTML deck を Reveal.js + Tailwind CDN single-file で build する。
 
-### A.2 Decision ask
-本 deck で経営層に求める判断は **「Type B 設定承認の prerequisite として、本日 6 設計 doc + 7 PFC plan の sign-off」**。Recommendation tone、Act 1 (S3) で PFC + counsel 未取得を honne として up-front 開示。
+### A.2 Primary purpose
+1. **プロジェクトの概要** を 1 sitting で伝える
+2. **「なぜ自動化が可能か」の根拠** を D 軸 (組織 feasibility: 段階成長 + 人間役割 shift + headcount evolution) を core に説明する
 
 ### A.3 Audience
-日本銀行 America division の CXO + Risk Committee、30 min keynote (説明 15 + Q&A 15)。
+**Mixed cross-functional** (経営層 + 業務責任者 + Security 関係者 + Compliance officer)、30 min concept share workshop format。
 
-### A.4 Output
+### A.4 Tone
+- **Concept share + belief alignment** (Recommendation tone ではない)
+- **Discussion-inviting** (本日 decision は ask しない、議論起動が purpose)
+- **Politics-aware** (S6 headcount reduction は sensitive、hedge inline mandatory)
+
+### A.5 Decision ask
+**本日は decision ask しない**。概要理解 + automation feasibility 認識 + 各機能の関与点 identify が outcome。
+
+### A.6 Output
 1. **HTML deck** (single-file、Reveal.js 5.1+ + Tailwind CDN)
-2. **Self-review report** (build 後、§F production checklist の 7 check を全件 self-verify)
-3. 不明点があれば最初に質問、ただし本 file 単独で build 可能な setup になっている。
+2. **Self-review report** (build 後、§E.2 7 check 全件)
+3. 不明点があれば最初に質問、ただし本 file 単独で build 可能な setup。
 
-### A.5 Strict constraint
-以下は絶対遵守:
-- **「完成 / production-ready」wording 禁止**: 全 doc は Draft、本投入は Type B 承認後
-- **NYDFS Part 500 は State 規制** (Federal ではない)、混同しない
-- **RPO は "target / [仮説 / 要検証] / Phase 1 実測 calibrate"** wording、SLA ではない
-- **「規制 mapping 完備」overstatement 禁止**、「control × evidence pointer mapping 作成済、counsel sign-off pending」に hedge
+### A.7 Strict constraints (絶対遵守)
+
+- **「完成 / production-ready」wording 禁止**: project は Draft、本投入は Phase 1 着手後
+- **NYDFS Part 500 は State 規制**: Federal と混同しない
+- **役割 shift / headcount は politics-sensitive**: hedge 4 件 mandatory inline
+  - 「数値は [仮説 / 要検証]、Phase 1 実測 calibrate」
+  - 「即時 layoff ではない、自然退職 + re-skilling + gradual 移行」
+  - 「役割が深くなる、operations の dignity 保持」
+  - 「1 role count ではなく operations 工数 index」
 - **3-color strict**: `#1a3a52` navy / `#c93838` red / `#8a8a8a` grey、4 色目禁止
 - **40% empty rule**: 各 slide で white space 40% 以上維持
 - **1 slide 1 message**: bullet wall 禁止、各 slide 1 hero visual
+- **Tier 3 規制語の事実主張禁止**: hedge 表現 (`[ai-operator paper §X.Y 参照]`)
 
 ---
 
-## §B. SLIDE-BY-SLIDE SPEC (本編 12 + Appendix 6 = 計 18)
+## §B. SLIDE-BY-SLIDE SPEC (6 slide、Linear + Cover slogan / 改善案 III+A)
 
-### B.0 Pyramid trace test (titles-only readout で governing thought 再生確認)
+### B.0 Narrative arc
 
-S2 → S12 の action title だけで読み下すと:
+```
+S1 Cover (slogan punchline)
+   ↓
+S2 Project = 何を作るか (what)
+   ↓
+S3 業務現状 + Flywheel = どう動くか (how it flows)
+   ↓
+S4 3 層承認 + 4-eyes = どう統制するか (how it's controlled)
+   ↓
+S5 接続層 4 tier = どう繋ぐか (how it integrates)
+   ↓
+S6 役割 shift + Headcount evolution = どう育つか + Cover slogan 回収 (how it grows + closing)
+```
 
-> 業務確認を減らし AI 設定承認は強化する仕組みを Phase 1 で投入したい → なぜなら業務量増 + AI 規制強化が同時進行 → そのため 12 layer cloud + 47 entity data model を作った → 5 段 flywheel で AI 学習を承認管理 + 9 規制 framework を control matrix で mapping + 4 段防御で primary risk closure → コストは breakeven 可能だが 7 件の外部 execution + 90 day counsel critical path が必要 → よって本日 prerequisite sign-off をいただきたい → 決まれば CDK skeleton + 12 month で本投入 + 30 日後 review timing 確定
+### B.0.1 Pyramid trace test (titles-only readout)
 
-→ governing thought 完全再生。**build 後の self-review でこの readout を必ず再確認**。
+S2 → S6 の action title だけで読み下すと:
 
-### B.1 Act 1 — Intro (S1-S3、SCQA + honne up-front)
+> 差戻しを次の正解手順に変える仕組みを AWS Bedrock + Aurora で構築 → 案件処理は「手順実行 + 案件確認」の繰返し、差戻し flywheel で AI 学習を承認管理 → 案件/手順/設定 の 3 層承認 + 4-eyes で control は人間保持 → 既存 system への接続は 4 tier (API/MQ/RPA-CU/DB) で実装 → 人間役割は operations → 検証/高 risk/高難易度/例外 へ shift、phase ごと operations 減 + AI gov 増 + net 削減
+
+= Cover slogan「**小さく POC で大きく成長させる**」の **実装が S2-S6 で unfold**、S6 で回収される rhetorical bookend。
+
+### B.1 共通 footer convention (各 slide 下部に固定)
+
+```
+出典: <DOC-XX §X.Y>  ·  page X/6  ·  Concept share / Internal
+```
 
 ---
 
-#### **S1 Cover**
+### **S1 Cover**
 
 | Field | Spec |
 |---|---|
-| Header (slogan) | **「案件確認は減らす、ルール承認は残す。」** (48pt bold navy) |
-| Subtitle | Backoffice AI v2 Phase 1 投入計画 — Type B 設定承認 Prerequisite Sign-off |
-| Meta | 経営層 review session / Confidential / Internal |
-| Layout | 中央配置、minimal、navy + grey、no chart |
+| **Headline (slogan)** | 「**小さく POC で大きく成長させる**」(48-56pt bold navy、中央配置) |
+| Subtitle (24pt grey) | Backoffice AI v2 — オペレーション自動化の概念共有 |
+| Meta line (16pt grey) | 経営層 + 業務責任者 + Security + Compliance / Concept share workshop |
+| Date | YYYY-MM-DD |
+| Layout | 中央配置、minimal、navy + grey only、no chart |
+| Footer | Concept share / Internal |
 
 ---
 
-#### **S2 Governing thought**
+### **S2 Project 1-page**
 
 | Field | Spec |
 |---|---|
-| Action title (28pt bold) | 業務確認を減らし AI 設定承認は強化する仕組みを Phase 1 で投入、本日その prerequisite を求める |
-| Hero (center) | 1 文 thesis box (中央 48pt navy)、下に 3 pillar horizontal box |
-| 3 pillar | (1) 差戻し → staging → 手順承認 → 設定承認 の 5 段 flywheel / (2) 案件確認 + AI 設定変更 の 3 層承認 (Type A/B/C) / (3) 9 規制 framework を control matrix で逐条 mapping |
-| Footer footnote | 出典: 設計 SSOT (6 doc) + HANDOFF.md |
+| **Action title (28pt bold navy)** | 差戻しを次の正解手順に変える仕組みを、AWS Bedrock + Aurora で構築する |
+| **Hero (3-column 1-page summary、中央配置)** | |
+| Col 1: **何を** (navy box) | AI 案件処理 + 差戻し flywheel + 3 層承認管理 |
+| Col 2: **どう** (navy box) | AWS Bedrock Sonnet 4.6 (Geo CRIS) + Aurora PG 16 + Computer Use Fargate sandbox + 3 層承認 governance |
+| Col 3: **どこから** (navy box) | UC-BO-01 法人住所変更 を Phase 1 baseline、検証後に scale |
+| Bottom slogan | 「**承認された手順だけを AI に覚えさせる**」 |
+| Footer | 出典: CA-08 §3 + DM-07 §3 + CLAUDE.md 中核 message |
 
 ---
 
-#### **S3 SCQA + Honne disclosure**
+### **S3 業務現状 + Flywheel mechanism** (元 S5+S6 統合)
 
 | Field | Spec |
 |---|---|
-| Action title (28pt bold) | 業務量増 + AI 規制強化の同時進行に、PFC 7 項 + counsel sign-off を経て Phase 1 投入が必要 |
-| Hero | **2-column layout**: 左 SCQA box (4 stacked card)、右 honne disclosure box (alert red border `#c93838`) |
-| Left SCQA cards | **Situation**: 米州本邦銀行 backoffice の案件量増 + cost 構造、人手 review の限界 / **Complication**: AI 規制 (FRB SR 11-7 model risk / NYDFS Part 500 cybersecurity) 強化 + 競合 AI 投入加速 / **Question**: AI 自動化を「人間 control 下」で本投入するか / **Answer**: Yes、ただし prerequisite sign-off が前提 |
-| Right honne box (alert red) | ⚠ **本投入決定の前に必要なもの** / (a) PFC 7 項 完了 (60-90 day) / (b) external counsel sign-off (PFC-02 が critical path) / (c) 経営層 Type B 設定承認 / **本日はその (c) prerequisite を求める** |
-| Footer footnote | 出典: PFC-09 §1-§3 (7 PFC item + critical path) |
+| **Action title** | 案件処理は「手順実行 + 案件確認」の繰返し、差戻し → staging → 手順承認 の flywheel で AI 学習を承認管理する |
+| **Hero (2-zone vertical layout)** | |
+| **Top zone (40%): 現状業務 step horizontal flow** | (1) 案件受付 → (2) AI 入力 → (3) 入力者確認 → (4) 承認者承認 → (5) 反映 // 各 step に「確認」マーク (現状: 各 step で人間 review 発生) |
+| **Bottom zone (60%): 5-phase flywheel circular** | (1) 差戻し記録 → (2) staging ナレッジ蓄積 (未承認ヒント) → (3) AI 日次分析 + 改善提案 → (4) 手順承認 → (5) compiled 反映 → 1 へ |
+| **Center slogan (24pt italic navy)** | 「**減らせるのは確認、残すのは判断**」 |
+| Footer | 出典: 01-flywheel-and-knowledge §1-§7 |
 
 ---
 
-### B.2 Act 2 — Mechanism (S4-S7、何を作ったか / どう統制するか)
-
----
-
-#### **S4 System architecture**
+### **S4 3 層承認 + 4-eyes SoD**
 
 | Field | Spec |
 |---|---|
-| Action title (28pt bold) | AWS 12 layer cloud + 47 entity data model + Bedrock Geo CRIS で AI を人間 control 下に維持する |
-| Hero | **12 layer stack diagram**、top → bottom |
-| Layer stack | (1) User / Engineer → (2) H4 Frontend (S3 + CloudFront + WAF、9 画面 SPA) → (3) L5 API Gateway (HTTP + WebSocket) → (4) L3 Compute (Lambda + Fargate Computer Use sandbox + Step Functions) → (5) **L4 AI Runtime: Bedrock Claude Sonnet 4.6 Geo CRIS + Haiku 4.5 us-east-1 In-Region** [alert red box で highlight] → (6) L6 Persistence (Aurora PG 16 + S3 Object Lock + KMS + OpenSearch + pgvector) |
-| Right sidebar (vertical) | L1 Identity (Cognito + IAM Identity Center) / L7 Observability (CloudWatch + X-Ray) / L8 CI/CD (CDK + GitHub Actions + Liquibase) / H1 Security baseline (SCP + GuardDuty + Macie) / H2 DR (us-east-1 + us-west-2 Aurora Global DB) / H3 Cost (Cost Explorer + Budgets) |
-| Key callout (右下) | **Bedrock Geo CRIS** = US geography 内 routing (us-east-1 / us-east-2 / us-west-2)、Sonnet 4.6 In-Region 不在のため必須、data residency は US geography 単位で counsel sign-off pending |
-| Footer footnote | 出典: CA-08 §3 (12 layer) + §7.1 (Bedrock) + §13 ADR-4 |
+| **Action title** | 案件 / 手順 / 設定 の 3 層承認と 4-eyes SoD で、AI に任せる量を増やしても control は人間が保持する |
+| **Hero (2-block horizontal layout)** | |
+| **Left (60%): 3 層承認 RACI table** | 4-col table:<br>**承認種別** / **Proposal source** / **Owner (R)** / **Approver (A)** + Type<br>--- (3 row) ---<br>**案件承認** / 入力者 + 承認者 / 入力者 / 承認者 (4-eyes 必須)<br>**手順承認** / AI 自動生成 / Manual 管理者 / 業務責任者 + SME 合議<br>**設定承認** / AI 管理者 / AI 管理者 / Type A/B/C co-A (Security / 業務責任者) |
+| **Right (40%): 4-eyes diagram** | 入力者 (icon) → 案件 (icon) → 承認者 (icon)、間に「≠」symbol で SoD 強調 |
+| **Center slogan (24pt italic navy)** | 「**AI に任せる量は段階的に増やすが、人によるコントロールは渡さない**」 |
+| Footer | 出典: 02-approval-model §1-§9 + DM-07 §5.1 4-eyes trigger |
 
 ---
 
-#### **S5 Flywheel + 3 層承認**
+### **S5 接続層 4 tier**
 
 | Field | Spec |
 |---|---|
-| Action title (28pt bold) | 差戻し → staging → 手順承認 → 設定承認 の 5 段 flywheel で AI 学習を承認管理する |
-| Hero | **2 横並び**: 左 5 phase circular flow / 右 3 層承認 RACI table |
-| Left flywheel | 5 node circular arrow: (1) 差戻し記録 → (2) staging ナレッジ蓄積 (未承認ヒント) → (3) AI 日次分析 + 改善提案 → (4) 手順承認 → (5) compiled 反映 → (1 へ戻る) |
-| Right RACI table | 3 row × 4 col: 列 = 承認種別 / Proposal source / Owner (R) / Approver (A) / Type / 反映 // 案件承認 (入力者 + 承認者 4-eyes) / 手順承認 (AI 自動生成 → 業務責任者承認) / 設定承認 (AI 管理者 + Type A/B/C co-A) |
-| Slogan callout (24pt italic navy) | 「**AI に任せる量は段階的に増やすが、人によるコントロールは渡さない**」 |
-| Footer footnote | 出典: 01-flywheel-and-knowledge §1-§7 + 02-approval-model §1-§9 + DM-07 §5.1 4-eyes trigger |
+| **Action title** | 既存業務システムへの接続は API / MQ / RPA-Computer Use / DB 直接続 の 4 tier で実装する |
+| **Hero (4-row matrix table、tier × 接続方式 × 用途 × 例)** | |
+| Row 1 **標準** (navy soft 背景) | API / 通常想定の接続方式 / 業務 system core API |
+| Row 2 **準標準** (navy soft 背景) | MQ / event / file bridge / レガシー連携 + 非同期 / 基幹勘定系 batch |
+| Row 3 **代替** (alert soft 背景、Computer Use 強調) | RPA / **Computer Use** / MCP / API 不在のレガシー / 一部 portal の screen 操作 |
+| Row 4 **例外** (red soft 背景) | DB 直接続 / **原則 read-only、write は明示承認 + 限定条件** / 旧 master data 参照 |
+| **Bottom slogan (20pt italic navy)** | 「**API が default、Computer Use は API 不在の bridge、DB 直接続は最終手段**」 |
+| Footer | 出典: 00-overview §2.2 + _SSOT §1.5 接続層 4 tier |
 
 ---
 
-#### **S6 規制 framework × control coverage**
+### **S6 人間役割 shift + Headcount evolution** (元 S9+S10+S11 統合、Cover slogan 回収)
 
 | Field | Spec |
 |---|---|
-| Action title (28pt bold) | NYDFS Part 500 + FRB SR 11-7 + BSA-AML を含む 9 規制 framework を control matrix で逐条 mapping した |
-| Hero | **table-as-chart heatmap** (9 規制 framework × 6 主要 control) |
-| Rows (9 framework、Federal 8 + State 1 group) | (Federal) FRB SR 11-7 model risk / OCC SR 11-7 + 2023-17 third-party / FFIEC IT + AIO / BSA-AML + USA PATRIOT 326 / OFAC / GLBA + Reg P + Safeguards / SOX 404 // (State) NYDFS Part 500 / State law family (NY SHIELD + CCPA-CPRA + VA + CO + CT + UT + IL BIPA + WA) |
-| Cols (6 control) | Encryption / Access control / Audit trail / Incident notification / Model governance / Data residency |
-| Cell status icon | ✅ Counsel signed-off (現状 0) / 🔍 Counsel review pending (大半) / ⏸ Draft mapping (一部) / ⚠ Gap identified (0) |
-| Honne note (下) | 現状の大半は **🔍 Draft mapping / counsel review pending**、最終 verify は PFC-02 で取得 (90 day critical path)。**control × evidence pointer mapping は作成済、counsel sign-off は未取得** |
-| Footer footnote | 出典: CEM-12 §2-§10 (counsel review input doc、status 列で各 cell 状態を pin) |
-
----
-
-#### **S7 Risk control matrix**
-
-| Field | Spec |
-|---|---|
-| Action title (28pt bold) | Computer Use prompt injection + cross-tenant leak + audit tampering は 4 段防御で primary risk closure |
-| Hero | **3×3 heatmap** (Y軸 Impact × X軸 Likelihood)、9 risk plot、9 cell が認知上限 |
-| 9 risk plotted | (a) Computer Use prompt injection [High Impact / Medium Likelihood、mitigation: 4 段防御 = action allowlist + pre-action confirmation + tenant cross-contamination check + screenshot redaction] / (b) Cross-tenant data leak (RLS bypass) [H / L、§5.10 column-level KMS DataKey-per-tenant] / (c) Audit chain tampering [H / L、§9 4 ring 防御 + cross-account S3 Object Lock] / (d) Bedrock model drift [M / M、canary 5% → promote → rollback] / (e) Insider 共謀 [H / L、external audit quarterly] / (f) Aurora primary failure [M / M、Global DB + 30 min RTO target] / (g) Supply chain (npm/container) [M / M、SBOM + cosign] / (h) KMS key compromise [H / VL、5 CMK 分離 + multi-Region] / (i) DDoS at scale [M / L、WAF + Shield Std] |
-| Color rule | Impact High + Likelihood H/M = alert red `#c93838`、其他 = navy gradient |
-| Bottom row | Residual risk register R1-R12 への bridge note (Appendix A2 で詳述) |
-| Footer footnote | 出典: TM-10 §2 STRIDE + §3 AI/ML threat + §7 abuse case + §9 residual risk |
-
----
-
-### B.3 Act 3 — Decision (S8-S10、何を決めるか)
-
----
-
-#### **S8 Cost / ROI**
-
-| Field | Spec |
-|---|---|
-| Action title (28pt bold) | Mid scenario 月 ~$5,100、人件費 0.6-0.8 FTE 相当で breakeven、Phase 1 投資回収可能 |
-| Hero | **stacked bar chart** (3 scenario × 主要 component) |
-| Bar 1 (Low、50 case/day) | ~$1,700/mo: Aurora $100 + Bedrock Sonnet $200 + Bedrock CU re-est $300 + Fargate $100 + その他 $1,000 |
-| Bar 2 (Mid、300 case/day) | ~$5,100/mo: Aurora $300 + Bedrock Sonnet $1,200 + Bedrock CU re-est $1,400 + Fargate $300 + その他 $1,900 |
-| Bar 3 (High、1000 case/day) | ~$13,500/mo: Aurora $800 + Bedrock Sonnet $4,000 + Bedrock CU re-est $3,000 + Fargate $800 + その他 $4,900 |
-| Breakeven overlay | 横線で「FTE 1 名 $60-80k/yr ≒ $5-7k/mo」を overlay、Mid scenario が breakeven 領域 |
-| Side panel (右) | Reserved / Savings Plan 1 year strategy で **-28-32% 削減可能**、Phase 1 cost approval gate (PFC-07) で実測 calibrate |
-| Geo CRIS note (下) | Sonnet 4.6 Geo CRIS overhead = $0-$500/mo safety margin (AWS internal billing、token unit price 同等) |
-| Footer footnote | 出典: CA-08 §14.1 cost table + §14.6 FinOps governance + §14.6.7 Geo CRIS cost deep dive |
-
----
-
-#### **S9 Pre-flight 7 項 + critical path**
-
-| Field | Spec |
-|---|---|
-| Action title (28pt bold) | Phase 1 着手まで 7 件の外部 execution が必要、counsel review は 90 day lead time の critical path |
-| Hero | **horizontal Gantt + dependency graph** (7 PFC item)、critical path を alert red 太線で強調 |
-| Timeline columns | M1 (-90 day) → M2 (-60 day) → M3 (-30 day) → M4 (-7 day) → M5 (Phase 1 着手) |
-| Bars (7 PFC item) | (1) PFC-02 counsel review [**M1 → M4 = 60-90 day、alert red 太線**] / (2) PFC-03 Bedrock Geo CRIS verify [M1 → M2、14 day、navy] / (3) PFC-04 Computer Use isolation [M2 → M3、14 day] / (4) PFC-05 TLS inspection [M2 → M3、14 day] / (5) PFC-06 warm pool 実測 [M2 → M3、14 day] / (6) PFC-07 token cost re-estimate [M2 → M4、30 day] / (7) PFC-01 hand-off package bundle [M4 のみ、1-2 day] |
-| Critical path callout | PFC-02 が 60-90 day で他 PFC 全件の completion 条件、**M1 (-90 day) kick-off の意思決定が本日 sign-off の核**。Counsel firm 選定 + engagement letter 開始から逆算 |
-| Footer footnote | 出典: PFC-09 §3 統合 sign-off chain + §4 dependency graph |
-
----
-
-#### **S10 Decision ask (本日 sign-off)**
-
-| Field | Spec |
-|---|---|
-| Action title (28pt bold) | Type B 設定承認の prerequisite として、本日 6 設計 doc + 7 PFC plan の sign-off をいただきたい |
-| Hero | **2 horizontal block** |
-| Top block (navy): **Decision items 3 個** | ☐ (1) 6 設計 doc (DM-07 / CA-08 / PFC-09 / TM-10 / SRE-11 / CEM-12) を Phase 1 hand-off Draft として承認 / ☐ (2) 7 PFC execution plan + critical path (PFC-02 = 90 day) 承認 / ☐ (3) Next 30 day commitment (counsel firm 選定 + AWS sandbox provision) kick-off 承認 |
-| Bottom block (alert red border): **Sign-off table** | 4 row × 3 col: Role / Name / Date 列、行 = AI 管理者 / Security 関係者 / 業務責任者 / **経営層 (final approver)**、各行に signature line |
-| Visual emphasis | Decision items は navy box、Sign-off table は alert red border で重要性 visual cue |
-| Footer footnote | 出典: PFC-09 §6 Type B 設定承認 agenda template |
-
----
-
-### B.4 Act 4 — Close (S11-S12、決めた後 30 日)
-
----
-
-#### **S11 Roadmap (Three Horizons)**
-
-| Field | Spec |
-|---|---|
-| Action title (28pt bold) | Phase 1 sprint 0 で CDK skeleton 起稿、12 month 内に UC-BO-01 本番投入を達成する |
-| Hero | **Three Horizons diagram**、X軸 timeline / Y軸 maturity、3 ascending curves |
-| Horizon 1 (0-6 month、navy 濃) | Phase 1 sprint 0 → CDK skeleton + counsel review (PFC-02) + PFC sandbox 検証 (PFC-03~07) + Type B 設定承認 + UC-BO-01 (法人住所変更) 本投入 |
-| Horizon 2 (6-12 month、navy 中) | UC-BO-02 (口座開設書類完備) 追加 + multi-tenant 拡張 + Bedrock Knowledge Bases 評価 + Aurora DSQL active-active 検討 |
-| Horizon 3 (12-24 month、navy 薄) | Autonomous tier 拡張 + JP parent layer (DOC-CA-09) cross-border data flow + 他業務 expand |
-| Milestone marker (vertical line) | M1 (-90 day) / M4 (-7 day) / M5 (Phase 1 着手) / +6 month review / +12 month Phase 2 gate |
-| Footer footnote | 出典: CA-08 §13 ADR + §17 open question + HANDOFF.md §5 Remaining work |
-
----
-
-#### **S12 Next 30 days commitment + review timing**
-
-| Field | Spec |
-|---|---|
-| Action title (28pt bold) | 次 30 日で counsel firm 選定 + AWS sandbox provision、次回 review は Phase 1 -60 day |
-| Hero | **30 day Gantt + owner**、5-7 milestone を 4 week timeline に plot |
-| Week 1 | counsel firm bid request (3 firm 想定) [Compliance officer] / AWS account provision kick-off [Security 関係者] |
-| Week 2 | counsel firm 選定 + engagement letter [Compliance officer] / AWS sandbox provision 完了 [SRE] |
-| Week 3 | PFC-02 kickoff session (counsel + Compliance) / PFC-03 Bedrock model card archive [AI 管理者] |
-| Week 4 | PFC-04 + PFC-05 sandbox 構築開始 [Security + Network team] |
-| Closing callout (alert red box) | **次回 board review: Phase 1 -60 day** (PFC-02 mid-review + cost approval gate session) |
-| Footer footnote | 出典: PFC-09 §3 M1-M5 milestone + §4 dependency graph |
-
----
-
-### B.5 Appendix (A1-A6、deep-dive 質疑用)
-
-| # | 内容 spec |
-|---|---|
-| **A1 Architecture detail** | 12 layer + 13 ADR + Bedrock Geo CRIS data flow 詳細図。Bedrock data flow: Lambda (us-east-1) → Bedrock Runtime us-east-1 endpoint → `us.anthropic.claude-sonnet-4-6` Geo CRIS profile → us-east-1 / us-east-2 / us-west-2 内 routing |
-| **A2 Residual risk register R1-R12** | 12 risk × (description / acceptable status / Phase 2 mitigation roadmap) table。Phase 1 受容 (⚠) と Phase 2 mitigation 計画を visual に分離 |
-| **A3 SLO/SLI + DR target (caveat 付き)** | 5 SLO (Availability 99.9% / Inbox latency P95 / Approval latency P95 / AI proposal quality / Audit chain integrity 100%) + DR target table (RPO < 1 sec target、各行 [仮説 / 要検証] label)。 **Caveat (alert red box)**: 全 RPO/RTO は設計目標値、AWS Aurora Global DB は typical performance per AWS docs、SLA ではない |
-| **A4 Cost model detail** | 16 component × 3 scenario stacked breakdown table。Per-component breakdown + Reserved / Savings Plan ROI table |
-| **A5 NYDFS Part 500 全 23 section status** | §500.02 ~ §500.23 table、各 row に Status icon (大半 Draft mapping / 🔍 Counsel review pending)。**特に focus**: §500.02 program / §500.06 audit trail (5yr) / §500.12 MFA / §500.15 encryption / §500.17 incident notification 72hr / §500.22 annual certification |
-| **A6 Anticipated Q&A 6 件** | (Q1) Bedrock Sonnet 4.6 が In-Region 不在で Geo CRIS routing、NYDFS 500.15 / GLBA data residency は本当に充足するか? → (A1) US geography 単位で counsel sign-off pending、PFC-02 acceptance condition #2 強化、Geo CRIS は AWS internal で US geography 外に出ない / (Q2) Computer Use prompt injection が "primary risk"、4 段防御の bypass scenario は想定済か? → (A2) PFC-04 で 5 attack scenario sandbox 実証 (URL-based / OCR-based / instruction override / tenant switching / exfiltration)、Bedrock Guardrails で補強 / (Q3) Mid scenario $5,100/mo は楽観的か? Bedrock token cost spike scenario は? → (A3) Cost Anomaly Detection + Tier 1-4 budget alert + per-tenant tag、Tier 4 hard cap = budget × 1.2 で manual approval mode / (Q4) Counsel review 60-90 day、expedite は? → (A4) Phase 1 -90 day から並行で 3 firm bid + 既存 AWS counsel pre-engagement 推奨 / (Q5) Type B 承認は 1 回で済むか? → (A5) 6 doc + 7 PFC bundle で 1 回、ただし PFC-04 (prompt injection) + PFC-07 (cost) は実測後の追加 ratification 想定 / (Q6) Phase 2 multi-tenant 拡張で再 design 必要か? → (A6) DM-07 §5.10 row-level encryption + CA-08 §14A tenant onboarding/offboarding SOP で multi-tenant 対応設計済、Phase 2 で activation のみ |
+| **Action title** | 人間の役割は operations → 検証 + 高 risk + 高難易度 + 例外 へ shift、phase ごと operations 人員は減少 / AI gov role は増加、net で削減する |
+| **Hero (2-block vertical layout)** | |
+| **Top block (50%): Role shift 2-column** | |
+| Left half: **Current human role** | `[████████████████████] 100% — 案件確認 + 手順実行 + escalation 判断` (横長 bar、navy soft 塗) |
+| Right half: **Future human role (4 category vertical bar)** | `[██] 検証` — AI 出力の妥当性確認 + edge case 判断 / `[██] 高 risk` — 国際送金 boundary、高額案件 / `[██] 高難易度` — 新規 pattern、規制 ambiguity 解釈 / `[██] 例外ケース` — AI confidence 低出力、初見 case<br>合計 Future bar 長 < Current bar 長 (= 工数 net 減を visual 暗示) |
+| **Bottom block (50%): Headcount evolution stacked area chart** | X 軸: Now → Phase 1 (6mo) → Phase 2 (12mo) → Phase 3 (24mo)<br>Layer 1 (navy、declining): Operations role 100 → 80 → 55 → 30<br>Layer 2 (red、rising): AI governance role 0 → 5 → 12 → 22<br>Total (黒線): 100 → 85 → 67 → 52 (-15% → -33% → -48%)<br>**全数値に [仮説 / 要検証] label**<br>**Net annotation**: Phase 3 で total -48%、ただし AI gov role +22 = re-skilling target |
+| **Hedge box (alert red border、bottom)** | ⚠ **本図の前提 (politics-aware framing)**<br>(1) 数値は [仮説 / 要検証]、Phase 1 実測で calibrate<br>(2) 即時 layoff ではない、自然退職 + re-skilling + gradual 移行<br>(3) 役割が深くなる、operations の dignity 保持<br>(4) **1 role count ではなく operations 工数 index**、新 AI governance role は既存社員の re-skilling path を内包 |
+| **Closing slogan (24pt italic、Cover slogan の call-back)** | 「**Cover で提示した『小さく POC で大きく成長』は、本図 Phase 1 → 2 → 3 移行が その実装**」 |
+| Footer | 出典: CA-08 §14A Tenant lifecycle + canon C4-20 Three Horizons + research-compounder D 軸 (target-operating-model + strangler-fig + org-redesign + RACI) |
 
 ---
 
@@ -238,13 +176,12 @@ S2 → S12 の action title だけで読み下すと:
 ### C.1 Color palette (3-color strict)
 
 ```css
-/* Tailwind config extension */
 colors: {
   navy: '#1a3a52',         /* primary、header / title / chart main */
-  'navy-light': '#2d5a7d', /* hover / lighter shade */
-  'navy-soft': '#e8eef3',  /* surface tint */
-  red: '#c93838',          /* alert / decision ask / critical path */
-  'red-soft': '#fbe8e8',   /* alert background */
+  'navy-light': '#2d5a7d',
+  'navy-soft': '#e8eef3',  /* surface tint、navy soft 背景 */
+  red: '#c93838',          /* alert / hedge box border / DB 直接続 row */
+  'red-soft': '#fbe8e8',
   grey: '#8a8a8a',         /* body / supporting / footnote */
   'grey-light': '#bababa',
   canvas: '#fafaf8',       /* slide background (off-white) */
@@ -252,140 +189,127 @@ colors: {
 }
 ```
 
-**禁則**: 4 色目 (緑 / 紫 / 黄 etc.) の使用。heatmap で gradation 必要時は navy の opacity 段階 (`#1a3a52` 100% → 60% → 30%) で表現。
+**禁則**: 4 色目 (緑 / 紫 / 黄 etc.) 0 件。
 
 ### C.2 Typography (canon C3-11)
 
-| Element | Font-family | Size | Weight | Use |
-|---|---|---|---|---|
-| Action title | Inter, Noto Sans JP | 28pt (1.75rem) | Bold (700) | header zone |
-| Subtitle / section | Inter, Noto Sans JP | 16pt | SemiBold (600) | section label |
-| Body | Inter, Noto Sans JP | 18pt | Regular (400) | content |
-| Data emphasis | Inter | 36-48pt | Bold (700) | KPI numbers |
-| Footer / footnote | Inter, Noto Sans JP | 10-12pt | Regular (400) | citation |
-| Citation mono | JetBrains Mono | 10pt | Regular | code / case_id |
-
-```css
-.reveal {
-  font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
-  font-size: 18px;
-  background-color: #fafaf8;
-  color: #1a3a52;
-}
-.reveal h1 { font-size: 48px; font-weight: 700; }  /* Cover slogan */
-.reveal h2 { font-size: 28px; font-weight: 700; }  /* Action title */
-.reveal h3 { font-size: 16px; font-weight: 600; }  /* Section label */
-.reveal p  { font-size: 18px; line-height: 1.6; color: #1a3a52; }
-.reveal .footer { font-size: 11px; color: #8a8a8a; }
-```
+| Element | Font-family | Size | Weight |
+|---|---|---|---|
+| Cover slogan | Inter, Noto Sans JP | 48-56pt | Bold |
+| Action title | Inter, Noto Sans JP | 28pt | Bold |
+| Subtitle / section | Inter, Noto Sans JP | 16pt | SemiBold |
+| Body | Inter, Noto Sans JP | 18pt | Regular |
+| Data emphasis | Inter | 36-48pt | Bold |
+| Slogan (italic) | Inter | 20-24pt | Regular italic |
+| Footer / footnote | Inter | 10-12pt | Regular |
 
 ### C.3 Layout (canon C3-13 + C3-15)
 
 ```
 ┌────────────────────────────────────────────────┐ ← 16:9 (1920×1080)
-│  HEADER ZONE (15% top、padding 80px)            │
-│  Action title 28pt bold (12-15 words)           │
-│  ────  (2px navy underline、60px width)         │
+│  HEADER (15% top、padding 80px)                  │
+│  Action title 28pt bold + 2px navy underline    │
 ├────────────────────────────────────────────────┤
-│  HERO ZONE (60% middle)                          │
-│                                                  │
+│  HERO (60% middle、white space 40% 維持)         │
 │        SINGLE HERO VISUAL                        │
-│        (centered、white space 40% 維持)          │
-│                                                  │
 ├────────────────────────────────────────────────┤
-│  FOOTER ZONE (15% bottom)                        │
-│  Supporting data points (3-5 bullets max)        │
-│  ──── page X/12 · Source: [...] · Confidential   │
+│  FOOTER (15% bottom)                             │
+│  Slogan (optional、center)                       │
+│  ──── 出典 · page X/6 · Concept share / Internal │
 └────────────────────────────────────────────────┘
-   ← 10% L margin           15% R margin →
+   ← 10% L                          15% R →
 ```
 
-- **40% empty rule** (canon C3-13): 各 slide で ink coverage < 60% を維持
-- **Asymmetric margin**: 10% L / 15% R で右側 visual balance
-- **No animation within slide**: distraction 排除
-- **Transition**: `fade` のみ
+### C.4 Animation
+
+- Slide transition: `fade` (Reveal.js `transition="fade"`)
+- Within-slide: no animation
 
 ---
 
-## §D. ANTI-PATTERN GUARDRAILS (18 件、build 後 self-review で全件 check)
+## §D. ANTI-PATTERN GUARDRAILS (build 後 self-review で全件 check)
 
 ### D.1 Canon C8a 12 anti-pattern
 
-1. ☐ **Bullet wall slide 禁止**: 各 slide 1 hero visual + supporting 3-5 bullet max、bullet 10+ は violation
+1. ☐ **Bullet wall slide 禁止**: 各 slide 1 hero visual + supporting 3-5 bullet max
 2. ☐ **'TBD' / 'Coming soon' on hero 禁止**: 全 hero に確定 status / 数値、不確定は alert red qualifier 付き ([仮説 / 要検証])
-3. ☐ **Multi-color palette overuse 禁止**: 3-color strict (navy / red / grey)、4 色目 (緑 / 紫 / 黄) 0 件
-4. ☐ **Briefing → Recommendation tone 混在 禁止**: S10 で明示 decision ask、それ以前は mechanism、tone 切替を slide 間で linear
-5. ☐ **Action title が takeaway なし 禁止**: 全 action title を S-V-O claim form、12-15 words、takeaway-first
-6. ☐ **So-what 不在 禁止**: 各 hero visual 後の footer bullet で 'So what' を pin
-7. ☐ **Footnote overload (10+ per slide) 禁止**: 各 slide 主要 footnote 1-2 件 + appendix reference
-8. ☐ **Decision ask 不在 禁止**: S10 で明示、close (S12) で再確認
-9. ☐ **Risk hidden in appendix 禁止**: S7 で 9 risk heatmap、S3 で honne up-front、appendix A2 で詳細
-10. ☐ **Honne / tatemae 不整合 禁止**: S3 で PFC + counsel 未取得を up-front、tatemae 隠さない
-11. ☐ **Pyramid trace fail 禁止**: title-only readout で governing thought 再生可能か confirm
+3. ☐ **Multi-color palette overuse 禁止**: 3-color strict (navy / red / grey)、4 色目 0 件
+4. ☐ **Briefing → Recommendation tone 混在 禁止**: 本 deck は **concept share tone 一貫**、recommendation tone を混在させない
+5. ☐ **Action title が takeaway なし 禁止**: 全 S2-S6 action title を S-V-O claim form、12-15 words、takeaway-first
+6. ☐ **So-what 不在 禁止**: 各 hero visual の slogan で 'So what' を pin
+7. ☐ **Footnote overload (10+ per slide) 禁止**: 各 slide 主要 footnote 1-2 件
+8. ☐ **Decision ask 不在 OK** (本 deck は concept share、decision ask しない): 代わりに **belief alignment** が outcome
+9. ☐ **Risk hidden 禁止**: S6 で headcount honne を up-front、hedge inline で politics-aware
+10. ☐ **Honne / tatemae 不整合 禁止**: S6 で operations 削減を honest に出す、tatemae 隠さない
+11. ☐ **Pyramid trace fail 禁止**: title-only readout で governing thought 再生確認 (§B.0.1)
 12. ☐ **White space 不足 (>60% ink coverage) 禁止**: 40% empty rule 維持
 
-### D.2 Project-specific 6 guardrail
+### D.2 Project-specific 6 guardrail (本 deck では 6 件中 4 件適用、Type B 承認 deck から限定)
 
-13. ☐ **'design-complete / 完成' wording 禁止**: 全 doc は `Phase 1 hand-off Draft` / Draft status
+13. ☐ **'design-complete / 完成' wording 禁止**: project は Draft、本投入は Phase 1 着手後
 14. ☐ **'primary regulator' 断定 禁止**: entity / license fact 依存、counsel 確認待ち、'NY 拠点で適用' 程度に hedge
-15. ☐ **NYDFS を Federal 行に置く 禁止**: NYDFS は State 規制、必ず State 配置
-16. ☐ **RPO < 1 sec を SLA wording 禁止**: AWS spec typical (per AWS docs)、'< 1 sec target / Phase 1 実測 calibrate / [仮説 / 要検証]' に
-17. ☐ **'規制 mapping 完備' overstatement 禁止**: 'control × evidence pointer mapping 作成済、counsel sign-off pending' に hedge
-18. ☐ **Tier 3 規制語の事実主張 禁止**: `[ai-operator paper §X.Y 参照]` の hedge 表現、Session 4 表層には完全に出さない
+15. ☐ **NYDFS を Federal 行に置く 禁止**: NYDFS は State 規制、必ず State 配置 (本 deck では出ないが念のため keep)
+16. ☐ **Tier 3 規制語の事実主張 禁止**: hedge 表現 `[ai-operator paper §X.Y 参照]`
+
+### D.3 Politics-sensitive guardrail (S6 特有、新規 6 件)
+
+17. ☐ **Headcount 削減を冷酷 wording で出す 禁止**: 「人員減」より「役割が深くなる」「総量は減るが質は高まる」
+18. ☐ **数値を確定数で出す 禁止**: 全 headcount 数値に [仮説 / 要検証] label 必須
+19. ☐ **Layoff を直接 imply する wording 禁止**: 「自然退職 + re-skilling + gradual 移行」を hedge box で必ず明示
+20. ☐ **具体 業務名 (= 削減 target 推測される) を roadmap chart に書く 禁止**: 業務名抽象化、operations 工数 index で表現
+21. ☐ **Future 人間役割 4 category を「楽な仕事」風 wording で出す 禁止**: 「検証 / 高 risk / 高難易度 / 例外」= 価値高い judgment work であることを 明示
+22. ☐ **Cover slogan「小さく POC で大きく」を S6 で回収しない 禁止**: rhetorical bookend を必ず close、bottom slogan で explicit call-back
 
 ---
 
-## §E. PRODUCTION CHECKLIST (build 後 必須実行)
+## §E. PRODUCTION CHECKLIST
 
 ### E.1 Build steps (5)
 
-1. ☐ Reveal.js 5.x + Tailwind CDN single-file HTML を build (output filename: `exec-phase1-handoff.html` 推奨)
-2. ☐ 12 本編 slide + 6 appendix slide = 計 18 slide を §B spec 通り build
+1. ☐ Reveal.js 5.x + Tailwind CDN single-file HTML を build (filename 推奨: `concept-share.html`)
+2. ☐ 6 slide を §B spec 通り build (no appendix)
 3. ☐ Color palette / typography / layout を §C に strict 準拠
-4. ☐ 各 slide footer に `page X/12 · Source: [...] · Confidential` を pin
-5. ☐ Hero visual は **SVG inline** (chart) or **HTML table / CSS grid** (heatmap / Gantt) で実装、external image asset は使わない (single-file 維持)
+4. ☐ 各 slide footer に `出典 · page X/6 · Concept share / Internal` を pin
+5. ☐ Hero visual は **SVG inline** or **HTML table / CSS grid** で実装、external image asset 不要
 
 ### E.2 Self-review check (7、build 後必須)
 
-1. ☐ **Pyramid trace test** (canon C2-10): action title 12 個だけで §B.0 readout 再生可能か confirm
-2. ☐ **C8a 12 anti-pattern grep** (§D.1 全件): violation 0 件
-3. ☐ **Project-specific 6 guardrail grep** (§D.2 全件): violation 0 件
-4. ☐ **3-color check**: navy / red / grey 以外の color literal が CSS に 0 件 (canvas `#fafaf8` + surface `#f0f0ec` は許容)
-5. ☐ **Action title length**: 全 12 title が 12-15 words ± 2 words 範囲
-6. ☐ **40% empty rule**: 各 slide screenshot で ink coverage < 60% (目視 or screenshot pixel analysis)
-7. ☐ **Source citation**: 全数値 claim に footnote source pointer
+1. ☐ **Pyramid trace test** (canon C2-10): §B.0.1 readout 再生可能か confirm
+2. ☐ **C8a 12 anti-pattern grep** (§D.1): violation 0 件
+3. ☐ **Project-specific 4 guardrail** (§D.2): violation 0 件
+4. ☐ **Politics-sensitive 6 guardrail** (§D.3): S6 で全 6 件 ✅
+5. ☐ **3-color check**: navy / red / grey 以外 0 件 (canvas + surface は許容)
+6. ☐ **Action title length**: S2-S6 全 5 title が 12-15 words ± 2 words
+7. ☐ **40% empty rule**: 各 slide で ink coverage < 60%
 
 ### E.3 Self-review report format
 
-build 完了後、以下 format で self-review report を出力:
+build 完了後、以下 format で report:
 
 ```markdown
-# Exec Deck Self-Review Report
+# Concept Share Deck Self-Review Report
 
 ## E.2 7 check 結果
 1. Pyramid trace test: ✅ / ⚠ / ❌ + 詳細
-2. C8a 12 anti-pattern: ✅ all clear / ⚠ N 件 violation (list)
-3. Project-specific 6: ✅ / ⚠ / ❌
-4. 3-color check: ✅ / ⚠ N color literal 検出
-5. Action title length: ✅ / ⚠ N title が 12-15 words 範囲外
-6. 40% empty rule: ✅ / ⚠ N slide で ink coverage > 60%
-7. Source citation: ✅ / ⚠ N claim で footnote 欠
+2. C8a 12 anti-pattern: ✅ all clear / ⚠ N 件 (list)
+3. Project-specific 4: ✅ / ⚠ / ❌
+4. Politics-sensitive 6 (S6): ✅ / ⚠ N 件 (詳細)
+5. 3-color check: ✅ / ⚠ N color literal 検出
+6. Action title length: ✅ / ⚠ N title が範囲外
+7. 40% empty rule: ✅ / ⚠ N slide で 60% 超
 
 ## 残課題 / Open question (user review 用)
 - ...
 
 ## Build summary
-- Total slides: 18 (本編 12 + appendix 6)
+- Total slides: 6 (no appendix)
 - File size: ~XXX KB
-- Reveal.js version: 5.x.x
-- Tailwind version: CDN (latest)
+- Reveal.js / Tailwind version
 ```
 
 ---
 
 ## §F. REFERENCE HTML PATTERN (Reveal.js + Tailwind CDN skeleton)
-
-以下を base として **必要に応じて** style / structure を expand。本 skeleton は **technical pattern reference**、§C の visual design system が prevailing spec。
 
 ```html
 <!DOCTYPE html>
@@ -393,7 +317,7 @@ build 完了後、以下 format で self-review report を出力:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1920, initial-scale=1.0" />
-  <title>Backoffice AI v2 — Phase 1 投入計画 (Exec Deck)</title>
+  <title>Backoffice AI v2 — オペレーション自動化の概念共有</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -437,13 +361,13 @@ build 完了後、以下 format で self-review report を出力:
     }
     .reveal .slides { text-align: left; }
     .reveal .slides section {
-      padding: 80px 100px 80px 80px;  /* T R B L = 10% L / 15% R margin */
+      padding: 80px 100px 80px 80px;
       box-sizing: border-box;
       height: 100%;
       background-color: #fafaf8;
     }
     .reveal h1 {
-      font-size: 48px; font-weight: 700; line-height: 1.15;
+      font-size: 56px; font-weight: 700; line-height: 1.15;
       color: #1a3a52; margin: 0 0 20px 0; letter-spacing: -0.02em;
     }
     .reveal h2 {  /* Action title */
@@ -455,6 +379,7 @@ build 完了後、以下 format で self-review report を出力:
     }
     .reveal h3 { font-size: 16px; font-weight: 600; color: #1a3a52; margin: 0 0 12px 0; }
     .reveal p { font-size: 18px; line-height: 1.6; color: #1a3a52; margin: 0 0 12px 0; }
+    .reveal .slogan { font-size: 24px; font-style: italic; color: #1a3a52; }
     .reveal .footer {
       position: absolute;
       bottom: 24px;
@@ -476,8 +401,6 @@ build 完了後、以下 format で self-review report を出力:
       border-radius: 4px;
     }
     .tabular { font-variant-numeric: tabular-nums; }
-
-    /* 3-pillar / 2-column / etc. utility classes via Tailwind */
   </style>
 </head>
 
@@ -486,67 +409,64 @@ build 完了後、以下 format で self-review report を出力:
     <div class="slides">
 
       <!-- ============================================================
-           S1 Cover (no h2、center slogan)
+           S1 Cover (slogan punchline)
            ============================================================ -->
       <section data-transition="fade">
         <div class="h-full flex flex-col items-center justify-center text-center">
           <h1 class="text-navy text-7xl mb-8 leading-tight">
-            案件確認は減らす、<br/>ルール承認は残す。
+            小さく POC で<br/>大きく成長させる。
           </h1>
-          <p class="text-grey text-xl mb-4">Backoffice AI v2 Phase 1 投入計画</p>
-          <p class="text-navy text-lg font-semibold">Type B 設定承認 Prerequisite Sign-off</p>
+          <p class="text-grey text-2xl mb-4">Backoffice AI v2 — オペレーション自動化の概念共有</p>
+          <p class="text-navy text-lg">経営層 + 業務責任者 + Security + Compliance / Concept share workshop</p>
         </div>
         <div class="footer">
-          <span>経営層 review session</span>
-          <span>Confidential / Internal</span>
+          <span>Concept share workshop</span>
+          <span>Internal</span>
         </div>
       </section>
 
       <!-- ============================================================
-           S2 Governing thought (3 pillar)
+           S2 Project 1-page (3-column)
            ============================================================ -->
       <section data-transition="fade">
-        <h2>業務確認を減らし AI 設定承認は強化する仕組みを Phase 1 で投入、本日その prerequisite を求める</h2>
+        <h2>差戻しを次の正解手順に変える仕組みを、AWS Bedrock + Aurora で構築する</h2>
 
-        <div class="mt-8 text-center">
-          <div class="inline-block bg-navy-soft px-8 py-6 rounded-lg max-w-3xl">
-            <p class="text-navy text-3xl font-bold leading-relaxed">
-              「人に任せる量は段階的に増やすが、<br/>人によるコントロールは渡さない」
-            </p>
+        <div class="mt-8 grid grid-cols-3 gap-6">
+          <div class="bg-navy-soft rounded-lg p-6 border-l-4 border-navy">
+            <h3 class="text-navy mb-4">何を</h3>
+            <p class="text-base">AI 案件処理 + 差戻し flywheel + 3 層承認管理</p>
+          </div>
+          <div class="bg-navy-soft rounded-lg p-6 border-l-4 border-navy">
+            <h3 class="text-navy mb-4">どう</h3>
+            <p class="text-base">AWS Bedrock Sonnet 4.6 (Geo CRIS) + Aurora PG 16 + Computer Use Fargate sandbox + 3 層承認 governance</p>
+          </div>
+          <div class="bg-navy-soft rounded-lg p-6 border-l-4 border-navy">
+            <h3 class="text-navy mb-4">どこから</h3>
+            <p class="text-base">UC-BO-01 法人住所変更 を Phase 1 baseline、検証後に scale</p>
           </div>
         </div>
 
-        <div class="mt-12 grid grid-cols-3 gap-6">
-          <div class="bg-white border-2 border-navy-soft rounded-lg p-5">
-            <h3 class="text-navy">差戻し flywheel</h3>
-            <p class="text-sm text-grey">差戻し → staging → 手順承認 → 設定承認 の 5 段</p>
-          </div>
-          <div class="bg-white border-2 border-navy-soft rounded-lg p-5">
-            <h3 class="text-navy">3 層承認</h3>
-            <p class="text-sm text-grey">案件 / 手順 / 設定承認、Type A/B/C SoD</p>
-          </div>
-          <div class="bg-white border-2 border-navy-soft rounded-lg p-5">
-            <h3 class="text-navy">9 規制 framework</h3>
-            <p class="text-sm text-grey">control matrix で逐条 mapping、counsel sign-off pending</p>
-          </div>
+        <div class="mt-10 text-center">
+          <p class="slogan">「承認された手順だけを AI に覚えさせる」</p>
         </div>
 
         <div class="footer">
-          <span>出典: 設計 SSOT (6 doc) + HANDOFF.md</span>
-          <span class="slide-number">2 / 12</span>
+          <span>出典: CA-08 §3 + DM-07 §3 + CLAUDE.md 中核 message</span>
+          <span class="slide-number">2 / 6</span>
         </div>
       </section>
 
       <!-- ============================================================
-           S3-S12 + A1-A6 同 pattern で expand
+           S3-S6 同 pattern で expand
            各 slide で:
              - <section data-transition="fade">
              - <h2> action title (28pt bold navy + 2px navy underline)
-             - hero visual (table / heatmap / Gantt / Three Horizons etc.)
-             - <div class="footer"> page X/12 + source + confidential
+             - hero visual (table / flow diagram / matrix / chart etc.)
+             - center slogan (italic、必要に応じ)
+             - <div class="footer"> 出典 · page X/6 · Concept share / Internal
            ============================================================ -->
 
-      <!-- ... (S3 through S12, then A1-A6) ... -->
+      <!-- ... (S3 through S6) ... -->
 
     </div>
   </div>
@@ -568,42 +488,53 @@ build 完了後、以下 format で self-review report を出力:
 </html>
 ```
 
-**Hero visual implementation hints** (Tailwind + HTML / SVG):
-- **3×3 heatmap (S7)**: `<div class="grid grid-cols-3 gap-2">` + 各 cell に背景 navy/red opacity と label
-- **Gantt (S9 / S12)**: `<div class="grid grid-cols-5">` (M1-M5 column) + `<div class="col-span-N bg-navy / bg-red h-8">` で bar
-- **Three Horizons (S11)**: SVG inline path で 3 ascending curves、CSS で X axis label
-- **Stacked bar (S8)**: `<div class="flex flex-col">` + 各 segment を `<div class="bg-navy h-X w-full">` で stack
-- **Table-as-chart (S6)**: `<table class="w-full">` + 各 cell に icon (✅ 🔍 ⏸ ⚠) と背景 tint
+### Hero visual implementation hints
+
+- **S3 業務 step + Flywheel**: `<div class="grid grid-cols-5">` で horizontal flow (現状 step)、下に `<svg>` で 5-phase circular flow (Flywheel)
+- **S4 RACI table + 4-eyes**: `<table class="w-full">` で RACI、右に SVG icon (入力者 → 案件 → 承認者 + "≠" symbol)
+- **S5 4 tier matrix**: `<table>` で 4 row × 4 col、Row 3 (Computer Use) を `bg-red-soft` で highlight
+- **S6 Role shift + Headcount chart**: 上部 2-column (Current 100% bar / Future 4 bar)、下部 stacked area chart (SVG inline、Phase 1/2/3 timeline)、bottom に hedge box (red border)
+- 全 chart は **SVG inline** (single-file 維持、external 不要)
 
 ---
 
-## §G. CANON PRINCIPLE GLOSSARY (B-D 章で使用された参照、cold-start 用)
+## §G. CANON PRINCIPLE GLOSSARY (本 deck で使用、cold-start 用)
 
 | Ref | 1-line explanation |
 |---|---|
-| C1-2 SCQA | Situation → Complication → Question → Answer の 4 段 pre-amble。Act 1 narrative arc の core pattern |
-| C1-5 4-act | Workshop / executive deck の narrative arc: Intro → Mechanism → Decision → Close |
-| C2-6 Action title | 12-15 words、claim form S-V-O、takeaway-first。bullet 形式ではない |
+| C2-6 Action title | 12-15 words、claim form S-V-O、takeaway-first |
 | C2-7 1 slide 1 message | Singleton test、1 slide に 1 message 以外載せない |
-| C2-10 Pyramid trace test | Ship gate: action title だけ読み下しで governing thought 再生可能か confirm |
-| C3-11 Typography | Action title 24-28pt bold、body 16-18pt、footer 10-12pt |
+| C2-10 Pyramid trace test | Ship gate: action title だけ読み下しで governing thought 再生可能か |
+| C3-11 Typography | Action title 28pt bold、body 18pt、slogan 24pt italic |
 | C3-12 3-color rule | Primary + Accent + Neutral の 3 色のみ、4 色目禁止 |
 | C3-13 White space | 10-15% safe margin + 40% empty rule (ink coverage < 60%) |
-| C3-14 Footer | page number + source + footnote symbol chain |
-| C3-15 Header | Action title above hero、section tracker 任意 |
-| C4-20 Three Horizons | Baghai 1999 roadmap canonical、3 ascending curves on timeline |
-| C4-21 Process flow | 4-5 step max + swimlane for actor 表現 |
-| C4-22 Heatmap | 3×3 or 5×5 canonical、9 cell が認知上限 |
-| C4-23 Table-as-chart | Cell-level shading + 1 highlight row |
-| C5-26 Recommendation tone | Briefing tone (情報共有) と区別、明示 decision ask 必須 |
-| C6-31 Honne / Tatemae | Internal alignment deck で本音 (honne) を up-front、tatemae 隠さない |
-| C7-36 Anticipated Q&A | Appendix に 5-7 件 catalog、discussion-trigger 想定 |
-| C7-38 Decision point marker | "Next 30 days" close convention で具体 action commit |
+| C3-14 Footer | 出典 + page number + audience indicator |
+| C3-15 Header | Action title above hero + 2px underline |
+| C4-20 Three Horizons | Baghai 1999、3 ascending curves on timeline。S6 headcount chart の inspiration |
+| C4-21 Process flow | 4-5 step max + swimlane。S3 現状 step / S4 RACI / S5 4 tier matrix で適用 |
+| C4-23 Table-as-chart | Cell-level shading + 1 highlight row。S5 で Computer Use row を highlight |
 | C8a 12 anti-pattern | §D.1 12 件 (bullet wall / TBD / multi-color / etc.) |
 
 ---
 
-## §H. 完了条件
+## §H. RESEARCH-COMPOUNDER CARDS USED (本 deck 構成 anchor)
+
+本 deck の narrative arc は以下 research-compounder card を anchor として構築:
+
+| Card | 使用 section |
+|---|---|
+| `slides-executive/workshop-opening-deck-pattern.md` | Tone setting / Outcome promise は drop、Mechanism walk-through を core に採用 |
+| `slides-executive/storytelling-spine-and-narrative-arc.md` | Linear sequence (Cover → Project → Flywheel → 統制 → 接続 → 育成) を SCR の compressed 版として運用 |
+| `slides-executive/vision-setting-deck-pattern.md` | Cover slogan「小さく POC で大きく」の future-pull opening + S6 closing 回収 (call-back) |
+| `modernize-transformation/target-operating-model-1page.md` | S6 の TOM 4 role + 役割 shift framing |
+| `modernize-transformation/phased-modernization-strangler-fig.md` | S6 の "段階成長" mechanism、slogan「小さく POC で大きく」の technical underpinning |
+| `modernize-transformation/org-redesign-for-ai-native.md` | S6 の "新 AI governance role" 創出 + re-skilling path |
+| `ai-agents-automation/raci-on-agent-action.md` | S4 の 3 層承認 RACI structure |
+| `banking-finance/three-lines-of-defense-and-ai.md` | S4 の 統制 governance backing (本 deck では explicit に出さないが背景 evidence) |
+
+---
+
+## §I. 完了条件
 
 build 完了 + §E.2 self-review 7 check 全 ✅ + self-review report 出力 → user review に hand-off。
 

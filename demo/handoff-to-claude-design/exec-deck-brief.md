@@ -1,5 +1,8 @@
 # Executive Deck Design Brief — Backoffice AI v2 Phase 1 投入計画
 
+> ⚠ **SUPERSEDED (Cycle 18、2026-05-25)**: 本 brief は **Phase 1 投入 Type B 設定承認 prerequisite sign-off** を decision ask とした 18-slide decision deck の spec。Cycle 18 で user の story pivot により **「プロジェクト概要 + オペレーション自動化 feasibility 説明」** に goal 変更、現行版は [`paste-to-claude-design.md`](./paste-to-claude-design.md) v0.3 (6 slide concept-share)。本 file は historical reference として keep、Claude Design への paste は不要。
+
+
 > **For Claude Design (cold-start handoff)**: 本 brief は backoffice-ai-v2 prod-ready design loop (Cycle 1-16) の autonomous loop で確定した executive deck の構成 spec。Claude Design 側で本 brief を input として HTML deck (Reveal.js + Tailwind single-file) を build する。本 brief 単独で実行可能、prior 文脈不要。
 
 | 項目 | 値 |

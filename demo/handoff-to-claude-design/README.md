@@ -18,15 +18,15 @@
 | `README.md` (本 file) | Directory index | 使い方の説明のみ |
 | `autonomous-rebuild/` | (空、別 phase 用 reserved) | 未使用 |
 
-## 現行 paste-to-claude-design.md の核 (v0.3、Cycle 18)
+## 現行 paste-to-claude-design.md の核 (v0.4、Cycle 19)
 
-- **Primary purpose**: プロジェクト概要 + オペレーション自動化が可能な根拠 の説明
-- **Audience**: Mixed (経営層 + 業務責任者 + Security + Compliance)、30 min concept share workshop
-- **Tone**: Concept share + belief alignment + discussion-inviting (Recommendation tone ではない)
-- **Decision ask**: 本日 ask しない、概要理解 + automation feasibility 認識 + 各機能の関与点 identify が outcome
-- **Slide count**: **6** (本編、no appendix)
-- **Story arc**: III+A Linear + Slogan-on-Cover (research-compounder narrative card 由来)
-- **Core feasibility argument**: D 軸 組織 feasibility (段階成長 + 人間役割 shift + headcount evolution)
+- **Primary purpose**: プロジェクト概要 + オペレーション自動化が可能な根拠 の説明 + **素人理解可能性 最優先**
+- **Audience**: Mixed cross-functional non-technical (経営層 + 業務責任者 + Security + Compliance)、30 min concept share workshop
+- **Tone**: Concept share + belief alignment + discussion-inviting
+- **Decision ask**: 本日 ask しない、概要理解 + automation feasibility 認識 が outcome
+- **Slide count**: **5** (S3+S4 merged、no appendix)
+- **Pattern**: **Before/After Parallel Column** — 全 S2-S5 を 2-column (現状 vs 未来) で対比、jargon を visual contrast に置換
+- **Core feasibility argument**: D 軸 組織 feasibility、ただし全 slide を 5 軸対比 (案件処理 / 業務全体 / system 接続 / 人員構成) で render
 
 ## paste-to-claude-design.md の 9 章 (~700 行)
 
@@ -52,4 +52,5 @@
 
 - v0.1 (Cycle 16): `exec-deck-brief.md` + `README.md` 起稿、Claude Code agent 内部参照前提 (path 引き渡し)
 - v0.2 (Cycle 17): User feedback「Claude Design は web チャット、コピペ渡し」反映、`paste-to-claude-design.md` を inline 化、handoff workflow を 1-step 化 (旧 18-slide decision deck)
-- **v0.3 (本版、Cycle 18)**: **Story pivot** — Phase 1 投入 decision deck → **Concept share + automation feasibility 説明 deck** に rewrite。Audience を mixed cross-functional に拡張、6 slide tight format、Linear + Cover slogan III+A arc、D 軸 (組織 feasibility) core
+- v0.3 (Cycle 18): Story pivot — Concept share + automation feasibility 説明 deck、6 slide Linear + Cover slogan III+A arc、D 軸 (組織 feasibility) core
+- **v0.4 (本版、Cycle 19)**: **素人理解可能性 pivot** — 全 slide を **Before/After Parallel Column pattern** に統一、S3+S4 merger で **5 slide**。`side-by-side-comparison-slide` + `before-after-and-flywheel-patterns` card を primary anchor。Jargon を visual contrast (現状 vs 未来) に置換、cross-functional non-technical audience の理解可能性最優先

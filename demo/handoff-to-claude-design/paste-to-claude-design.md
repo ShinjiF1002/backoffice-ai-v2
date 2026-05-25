@@ -1,88 +1,94 @@
 # PASTE THIS ENTIRE FILE TO CLAUDE DESIGN (web chat)
 
-> **本 file の使い方**: 本 file 全文 を Claude Design (claude.ai 等) の最初の message として paste すれば、cold-start で concept-share HTML deck を build 可能。file path 参照ではなく content 内蔵、external 依存なし。
-> **想定 build 時間**: 30 min - 1 hr (6 slide 短編)。
-> **Output**: HTML deck 1 file + screenshot pack + self-review report。
+> **本 file の使い方**: 本 file 全文 を Claude Design (claude.ai 等) の最初の message として paste すれば、cold-start で **Before/After 5-slide concept-share HTML deck** を build 可能。file path 参照ではなく content 内蔵、external 依存なし。
+> **想定 build 時間**: 30-60 min (5 slide 短編)
+> **Output**: HTML deck 1 file + screenshot pack + self-review report
 
 > **本 file 改版履歴**:
-> - v0.1 / v0.2 (旧、Cycle 16-17): **Phase 1 投入 decision deck** (Type B 設定承認 prerequisite sign-off、18 slide、CXO+Risk Committee 単独 audience) — **superseded**
-> - **v0.3 (本版、Cycle 18)**: **Concept share + automation feasibility 説明 deck** に story pivot。6 slide、Mixed audience (経営層 + 業務責任者 + Security + Compliance)、Linear sequence + Cover slogan opening (III+A、research-compounder narrative card 由来) に再構築
+> - v0.1/v0.2 (Cycle 16-17): **Phase 1 投入 decision deck** (Type B 設定承認 prerequisite sign-off、18 slide) — superseded
+> - v0.3 (Cycle 18): **Concept share v0.3** (Linear + Cover slogan opening、6 slide) — superseded
+> - **v0.4 (本版、Cycle 19)**: **Before/After Parallel Column pattern** (`side-by-side-comparison-slide` + `before-after-and-flywheel-patterns` card 由来)、**5 slide** (S3+S4 merger 反映)、素人理解可能性 最優先
 
 ---
 
 ## §A. INSTRUCTIONS (Claude Design への直接 prompt)
 
-あなたは戦略コンサル経験を持つ deck design specialist です。以下の仕様に従って **concept-share + automation feasibility 説明 deck** の HTML を build してください。
+あなたは戦略コンサル経験を持つ deck design specialist です。以下の仕様に従って **Before/After 対比 5-slide concept-share deck** の HTML を build してください。
 
 ### A.1 Task
-Backoffice AI v2 (銀行 backoffice の AI 自動化 project) の **概要説明** + **オペレーション自動化が可能な根拠** を伝える 6-slide HTML deck を Reveal.js + Tailwind CDN single-file で build する。
+Backoffice AI v2 (銀行 backoffice の AI 自動化 project) の **概要説明** + **オペレーション自動化が可能な根拠** を、**全 slide を Before/After 2-column 対比 format** で 5-slide HTML deck (Reveal.js + Tailwind CDN single-file) で build する。
 
 ### A.2 Primary purpose
-1. **プロジェクトの概要** を 1 sitting で伝える
-2. **「なぜ自動化が可能か」の根拠** を D 軸 (組織 feasibility: 段階成長 + 人間役割 shift + headcount evolution) を core に説明する
+1. **プロジェクトの概要** を 5 軸 (案件処理 / 業務全体 / system 接続 / 人員構成) で **現状 vs 未来 対比** で 1 sitting で伝える
+2. **「なぜ自動化が可能か」の根拠** を **対比 visualization で jargon を contrast に置換**
 
 ### A.3 Audience
-**Mixed cross-functional** (経営層 + 業務責任者 + Security 関係者 + Compliance officer)、30 min concept share workshop format。
+**Mixed cross-functional non-technical** (経営層 + 業務責任者 + Security 関係者 + Compliance officer)、30 min concept share workshop format。**素人理解可能性が最優先**、技術用語は対比で見せる。
 
 ### A.4 Tone
 - **Concept share + belief alignment** (Recommendation tone ではない)
-- **Discussion-inviting** (本日 decision は ask しない、議論起動が purpose)
-- **Politics-aware** (S6 headcount reduction は sensitive、hedge inline mandatory)
+- **Discussion-inviting** (本日 decision は ask しない)
+- **Politics-aware** (S5 headcount は sensitive、hedge box mandatory)
 
-### A.5 Decision ask
-**本日は decision ask しない**。概要理解 + automation feasibility 認識 + 各機能の関与点 identify が outcome。
+### A.5 Output
+1. **HTML deck** (single-file、Reveal.js 5.1+ + Tailwind CDN、5 slide)
+2. **Self-review report** (build 後、§E.2 7 check)
+3. 不明点は最初に質問、本 file 単独で build 可能。
 
-### A.6 Output
-1. **HTML deck** (single-file、Reveal.js 5.1+ + Tailwind CDN)
-2. **Self-review report** (build 後、§E.2 7 check 全件)
-3. 不明点があれば最初に質問、ただし本 file 単独で build 可能な setup。
+### A.6 Strict constraints (絶対遵守)
 
-### A.7 Strict constraints (絶対遵守)
-
-- **「完成 / production-ready」wording 禁止**: project は Draft、本投入は Phase 1 着手後
-- **NYDFS Part 500 は State 規制**: Federal と混同しない
-- **役割 shift / headcount は politics-sensitive**: hedge 4 件 mandatory inline
-  - 「数値は [仮説 / 要検証]、Phase 1 実測 calibrate」
-  - 「即時 layoff ではない、自然退職 + re-skilling + gradual 移行」
-  - 「役割が深くなる、operations の dignity 保持」
-  - 「1 role count ではなく operations 工数 index」
-- **3-color strict**: `#1a3a52` navy / `#c93838` red / `#8a8a8a` grey、4 色目禁止
+- **全 5 slide を Before/After 2-column 対比 format に統一** (S1 Cover を除く)
+- **共通 row dimension 4-6 件** per slide、After 列の改善点を **navy bold + ✓ icon** で highlight
+- **中央 transformation lever** 列 (10% width) — 「→」+ 1 行 lever 名
+- **3-color strict**: `#1a3a52` navy / `#c93838` red / `#8a8a8a` grey、4 色目禁止 (After highlight は navy bold で、red は alert/hedge 専用)
+- **「完成 / production-ready」wording 禁止**: project は Draft
+- **NYDFS Part 500 は State 規制** (本 deck 出ないが念のため)
+- **S5 politics-sensitive hedge box mandatory**: 数値 [仮説 / 要検証] / 自然退職 / re-skilling / gradual / role count ではなく工数 index
+- **Tier 3 規制語の事実主張禁止**: hedge 表現
 - **40% empty rule**: 各 slide で white space 40% 以上維持
-- **1 slide 1 message**: bullet wall 禁止、各 slide 1 hero visual
-- **Tier 3 規制語の事実主張禁止**: hedge 表現 (`[ai-operator paper §X.Y 参照]`)
+- **1 slide 1 message**: bullet wall 禁止
 
 ---
 
-## §B. SLIDE-BY-SLIDE SPEC (6 slide、Linear + Cover slogan / 改善案 III+A)
+## §B. SLIDE-BY-SLIDE SPEC (5 slide、Before/After Parallel Column)
 
-### B.0 Narrative arc
+### B.0 共通 layout pattern (`before-after-and-flywheel-patterns.md` + `side-by-side-comparison-slide.md` canonical)
 
 ```
-S1 Cover (slogan punchline)
-   ↓
-S2 Project = 何を作るか (what)
-   ↓
-S3 業務現状 + Flywheel = どう動くか (how it flows)
-   ↓
-S4 3 層承認 + 4-eyes = どう統制するか (how it's controlled)
-   ↓
-S5 接続層 4 tier = どう繋ぐか (how it integrates)
-   ↓
-S6 役割 shift + Headcount evolution = どう育つか + Cover slogan 回収 (how it grows + closing)
+┌──────────────────────────────────────────────────────────┐
+│  Action title 28pt bold + 2px navy underline               │
+├─────────────────────┬───────────────┬────────────────────┤
+│ Before (現状)        │   Lever       │ After (未来)        │
+│ 45% width            │   10% width   │ 45% width           │
+│                      │               │                     │
+│  dim 1   value 1     │   → lever 1   │  dim 1   ✓value 1' │
+│  dim 2   value 2     │   → lever 2   │  dim 2   ✓value 2' │
+│  dim 3   value 3     │   → lever 3   │  dim 3   ✓value 3' │
+│  dim 4   value 4     │   → lever 4   │  dim 4   ✓value 4' │
+│  dim 5   value 5     │   → lever 5   │  dim 5   ✓value 5' │
+│                      │               │                     │
+└─────────────────────┴───────────────┴────────────────────┘
+       Bottom slogan (24pt italic navy、So-what pin)
+   出典 · page X/5 · Concept share / Internal
 ```
+
+- **Common row dimension** = 全 slide で 5 row、各 slide で dimension は独自 (5 軸 = 処理 / 業務 / system / 統制 / 人員)
+- **After highlight** = navy bold + `✓` prefix (3-color 維持、red は alert/hedge 専用)
+- **Lever column** = 10% width、矢印 `→` + 1 行 lever 名
+- **Background**: After column = `navy-soft` (#e8eef3) tint で visual contrast
 
 ### B.0.1 Pyramid trace test (titles-only readout)
 
-S2 → S6 の action title だけで読み下すと:
+S2 → S5 の action title:
 
-> 差戻しを次の正解手順に変える仕組みを AWS Bedrock + Aurora で構築 → 案件処理は「手順実行 + 案件確認」の繰返し、差戻し flywheel で AI 学習を承認管理 → 案件/手順/設定 の 3 層承認 + 4-eyes で control は人間保持 → 既存 system への接続は 4 tier (API/MQ/RPA-CU/DB) で実装 → 人間役割は operations → 検証/高 risk/高難易度/例外 へ shift、phase ごと operations 減 + AI gov 増 + net 削減
+> 案件 1 件の処理時間は 12 → 4 min、step は同じだが確認が判断に shift → 業務全体が「人手 100% + ad-hoc 統制」から「AI + 3 層承認 + flywheel」に再構成 → 既存 system 接続は「個別 silo」から「4 tier 構造」に整理 → Operations 人員は減、AI governance role が新規立ち上がり、net で削減・役割は深化
 
-= Cover slogan「**小さく POC で大きく成長させる**」の **実装が S2-S6 で unfold**、S6 で回収される rhetorical bookend。
+= **「Before の人手 silo から After の AI-hybrid + 統制された operating model へ、段階的に transformation」** が再生。
 
-### B.1 共通 footer convention (各 slide 下部に固定)
+### B.1 共通 footer
 
 ```
-出典: <DOC-XX §X.Y>  ·  page X/6  ·  Concept share / Internal
+出典: <DOC-XX §X.Y>  ·  page X/5  ·  Concept share / Internal
 ```
 
 ---
@@ -92,82 +98,100 @@ S2 → S6 の action title だけで読み下すと:
 | Field | Spec |
 |---|---|
 | **Headline (slogan)** | 「**小さく POC で大きく成長させる**」(48-56pt bold navy、中央配置) |
-| Subtitle (24pt grey) | Backoffice AI v2 — オペレーション自動化の概念共有 |
-| Meta line (16pt grey) | 経営層 + 業務責任者 + Security + Compliance / Concept share workshop |
-| Date | YYYY-MM-DD |
+| Subtitle (24pt grey) | Backoffice AI v2 — 業務処理を 5 軸で対比する |
+| Meta (16pt grey) | 経営層 + 業務責任者 + Security + Compliance / Concept share workshop |
 | Layout | 中央配置、minimal、navy + grey only、no chart |
-| Footer | Concept share / Internal |
 
 ---
 
-### **S2 Project 1-page**
+### **S2 — 案件 1 件の処理: 現状 vs 未来**
 
-| Field | Spec |
-|---|---|
-| **Action title (28pt bold navy)** | 差戻しを次の正解手順に変える仕組みを、AWS Bedrock + Aurora で構築する |
-| **Hero (3-column 1-page summary、中央配置)** | |
-| Col 1: **何を** (navy box) | AI 案件処理 + 差戻し flywheel + 3 層承認管理 |
-| Col 2: **どう** (navy box) | AWS Bedrock Sonnet 4.6 (Geo CRIS) + Aurora PG 16 + Computer Use Fargate sandbox + 3 層承認 governance |
-| Col 3: **どこから** (navy box) | UC-BO-01 法人住所変更 を Phase 1 baseline、検証後に scale |
-| Bottom slogan | 「**承認された手順だけを AI に覚えさせる**」 |
-| Footer | 出典: CA-08 §3 + DM-07 §3 + CLAUDE.md 中核 message |
+**Action title (28pt bold)**: 案件 1 件の処理時間は 12 → 4 min、step 数は同じだが「確認」が「判断」に shift する
 
----
+**Hero (2-column Before/After table)**:
 
-### **S3 業務現状 + Flywheel mechanism** (元 S5+S6 統合)
+| dim | **Before (現状)** | Lever | **After (Phase 1 投入後)** |
+|---|---|:---:|---|
+| 処理時間 / 件 | 12 min | → AI 入力支援 | **✓ 4 min** |
+| Step 数 | 5 (受付→入力→確認→承認→反映) | (同じ) | 5 (同) |
+| 担当者 work | 確認 100% (情報突合・形式 check) | → 役割 shift | **✓ AI 提案確認 + 判断 (例外/高 risk のみ)** |
+| 差戻し時の処理 | ad-hoc memo、属人化 | → staging → 学習 | **✓ staging 記録 → AI 日次分析 → 手順承認** |
+| 担当者 mental load | backlog 不安 + 単純作業 | → focus shift | **✓ 判断 work に集中、単純作業は AI 側** |
 
-| Field | Spec |
-|---|---|
-| **Action title** | 案件処理は「手順実行 + 案件確認」の繰返し、差戻し → staging → 手順承認 の flywheel で AI 学習を承認管理する |
-| **Hero (2-zone vertical layout)** | |
-| **Top zone (40%): 現状業務 step horizontal flow** | (1) 案件受付 → (2) AI 入力 → (3) 入力者確認 → (4) 承認者承認 → (5) 反映 // 各 step に「確認」マーク (現状: 各 step で人間 review 発生) |
-| **Bottom zone (60%): 5-phase flywheel circular** | (1) 差戻し記録 → (2) staging ナレッジ蓄積 (未承認ヒント) → (3) AI 日次分析 + 改善提案 → (4) 手順承認 → (5) compiled 反映 → 1 へ |
-| **Center slogan (24pt italic navy)** | 「**減らせるのは確認、残すのは判断**」 |
-| Footer | 出典: 01-flywheel-and-knowledge §1-§7 |
+**Bottom slogan (24pt italic navy)**: 「**減らせるのは確認、残すのは判断**」
+
+**Footer 出典**: 03-ui-prototype-design §4 + DM-07 §3.3 case_record
 
 ---
 
-### **S4 3 層承認 + 4-eyes SoD**
+### **S3 — 業務全体構造: 現状 vs 未来** (元 S3+S4 merged)
 
-| Field | Spec |
-|---|---|
-| **Action title** | 案件 / 手順 / 設定 の 3 層承認と 4-eyes SoD で、AI に任せる量を増やしても control は人間が保持する |
-| **Hero (2-block horizontal layout)** | |
-| **Left (60%): 3 層承認 RACI table** | 4-col table:<br>**承認種別** / **Proposal source** / **Owner (R)** / **Approver (A)** + Type<br>--- (3 row) ---<br>**案件承認** / 入力者 + 承認者 / 入力者 / 承認者 (4-eyes 必須)<br>**手順承認** / AI 自動生成 / Manual 管理者 / 業務責任者 + SME 合議<br>**設定承認** / AI 管理者 / AI 管理者 / Type A/B/C co-A (Security / 業務責任者) |
-| **Right (40%): 4-eyes diagram** | 入力者 (icon) → 案件 (icon) → 承認者 (icon)、間に「≠」symbol で SoD 強調 |
-| **Center slogan (24pt italic navy)** | 「**AI に任せる量は段階的に増やすが、人によるコントロールは渡さない**」 |
-| Footer | 出典: 02-approval-model §1-§9 + DM-07 §5.1 4-eyes trigger |
+**Action title**: 業務全体が「人手 100% + ad-hoc 統制」から「AI + 3 層承認 + flywheel」に再構成される
 
----
+**Hero (2-column Before/After table)**:
 
-### **S5 接続層 4 tier**
+| dim | **Before (現状)** | Lever | **After (Phase 1 投入後)** |
+|---|---|:---:|---|
+| 案件処理 flow | 受付→入力→確認→承認→反映 (全人手) | → AI 化 + 4-eyes | **✓ 同 flow + AI 入力 + 入力者確認 + 承認者承認 (4-eyes)** |
+| 学習 mechanism | 個人 know-how 暗黙知 | → 5 段 flywheel | **✓ 差戻し → staging → AI 日次分析 → 手順承認 → compiled 反映** |
+| 統制 layer | 案件ごと個別 review、暗黙 SoD | → 3 層分離 | **✓ 案件 / 手順 / 設定 の 3 層承認 + 4-eyes (入力者 ≠ 承認者)** |
+| 承認の type 区分 | undocumented | → Type A/B/C | **✓ Type A (通常) / B (Security-impacting) / C (Trust Level 変更)** |
+| KPI 可視性 | 差戻し率 etc. ad-hoc | → continuous monitor | **✓ 4 KPI gate (AI 入力承認率/人手上書き率/Alert 発生率/差戻し率) [仮説 / 要検証]** |
 
-| Field | Spec |
-|---|---|
-| **Action title** | 既存業務システムへの接続は API / MQ / RPA-Computer Use / DB 直接続 の 4 tier で実装する |
-| **Hero (4-row matrix table、tier × 接続方式 × 用途 × 例)** | |
-| Row 1 **標準** (navy soft 背景) | API / 通常想定の接続方式 / 業務 system core API |
-| Row 2 **準標準** (navy soft 背景) | MQ / event / file bridge / レガシー連携 + 非同期 / 基幹勘定系 batch |
-| Row 3 **代替** (alert soft 背景、Computer Use 強調) | RPA / **Computer Use** / MCP / API 不在のレガシー / 一部 portal の screen 操作 |
-| Row 4 **例外** (red soft 背景) | DB 直接続 / **原則 read-only、write は明示承認 + 限定条件** / 旧 master data 参照 |
-| **Bottom slogan (20pt italic navy)** | 「**API が default、Computer Use は API 不在の bridge、DB 直接続は最終手段**」 |
-| Footer | 出典: 00-overview §2.2 + _SSOT §1.5 接続層 4 tier |
+**Bottom slogan**: 「**AI に任せる量は段階的に増やすが、人によるコントロールは渡さない**」
+
+**Footer 出典**: 01-flywheel-and-knowledge §1-§7 + 02-approval-model §1-§9 + DM-07 §5.1 4-eyes
 
 ---
 
-### **S6 人間役割 shift + Headcount evolution** (元 S9+S10+S11 統合、Cover slogan 回収)
+### **S4 — 既存 system への接続: 現状 vs 未来**
 
-| Field | Spec |
-|---|---|
-| **Action title** | 人間の役割は operations → 検証 + 高 risk + 高難易度 + 例外 へ shift、phase ごと operations 人員は減少 / AI gov role は増加、net で削減する |
-| **Hero (2-block vertical layout)** | |
-| **Top block (50%): Role shift 2-column** | |
-| Left half: **Current human role** | `[████████████████████] 100% — 案件確認 + 手順実行 + escalation 判断` (横長 bar、navy soft 塗) |
-| Right half: **Future human role (4 category vertical bar)** | `[██] 検証` — AI 出力の妥当性確認 + edge case 判断 / `[██] 高 risk` — 国際送金 boundary、高額案件 / `[██] 高難易度` — 新規 pattern、規制 ambiguity 解釈 / `[██] 例外ケース` — AI confidence 低出力、初見 case<br>合計 Future bar 長 < Current bar 長 (= 工数 net 減を visual 暗示) |
-| **Bottom block (50%): Headcount evolution stacked area chart** | X 軸: Now → Phase 1 (6mo) → Phase 2 (12mo) → Phase 3 (24mo)<br>Layer 1 (navy、declining): Operations role 100 → 80 → 55 → 30<br>Layer 2 (red、rising): AI governance role 0 → 5 → 12 → 22<br>Total (黒線): 100 → 85 → 67 → 52 (-15% → -33% → -48%)<br>**全数値に [仮説 / 要検証] label**<br>**Net annotation**: Phase 3 で total -48%、ただし AI gov role +22 = re-skilling target |
-| **Hedge box (alert red border、bottom)** | ⚠ **本図の前提 (politics-aware framing)**<br>(1) 数値は [仮説 / 要検証]、Phase 1 実測で calibrate<br>(2) 即時 layoff ではない、自然退職 + re-skilling + gradual 移行<br>(3) 役割が深くなる、operations の dignity 保持<br>(4) **1 role count ではなく operations 工数 index**、新 AI governance role は既存社員の re-skilling path を内包 |
-| **Closing slogan (24pt italic、Cover slogan の call-back)** | 「**Cover で提示した『小さく POC で大きく成長』は、本図 Phase 1 → 2 → 3 移行が その実装**」 |
-| Footer | 出典: CA-08 §14A Tenant lifecycle + canon C4-20 Three Horizons + research-compounder D 軸 (target-operating-model + strangler-fig + org-redesign + RACI) |
+**Action title**: 既存 system 接続は「個別 silo」から「API / MQ / RPA-CU / DB の 4 tier 構造」に整理される
+
+**Hero (2-column Before/After table)**:
+
+| dim | **Before (現状)** | Lever | **After (Phase 1 投入後)** |
+|---|---|:---:|---|
+| 接続方式 | 個別接続 / 手作業 / undocumented | → 4 tier 化 | **✓ API / MQ / RPA-CU / DB 直接続 の 4 tier 構造化** |
+| 標準 system | API 不在 or undocumented | → API default | **✓ API が default の接続方式** |
+| レガシー連携 | 個別対応、人手 polling | → MQ / event | **✓ MQ / event / file bridge で非同期化** |
+| API 不在 system | 手作業 or 部分 RPA | → Computer Use sandbox | **✓ Computer Use sandbox (1 case = 1 ephemeral task)** |
+| DB 直接続 | read/write 区別不明 | → SoP enforce | **✓ 原則 read-only、write は明示承認 + 限定条件** |
+
+**Bottom slogan**: 「**API が default、Computer Use は API 不在の bridge、DB 直接続は最終手段**」
+
+**Footer 出典**: 00-overview §2.2 + _SSOT §1.5 接続層 4 tier
+
+---
+
+### **S5 — 人員構成 + 役割: 現状 vs 未来 (Phase 3 完了時)**
+
+**Action title**: Operations 人員は減少、AI governance role が新規立ち上がり、net で削減・役割は深化する
+
+**Hero (2-column Before/After table)**:
+
+| dim | **Before (現状)** | Lever | **After (Phase 3 完了時、[仮説 / 要検証])** |
+|---|---|:---:|---|
+| 総人員 index | 100 | → -48% (gradual) | **52** |
+| Operations role | 100 (全 confirm + 手順実行) | → 自動化 + 自然退職 | **30 (-70%)** |
+| AI governance role | 0 (該当 role 未在) | → 新規創出 | **✓ +22 (AI 管理者 / Security AI / Compliance AI / Model Risk / Audit AI)** |
+| 人間 work | 100% 確認・手順実行 | → 役割 shift | **✓ 検証 / 高 risk / 高難易度 / 例外ケース** |
+| 移行 path | n/a | → re-skilling + 自然退職 | **gradual 移行 + re-skilling (即時 layoff ではない)** |
+
+**Hedge box (alert red border、bottom、mandatory)**:
+
+> ⚠ **本図の前提 (politics-aware framing)**
+> - 数値 全件 **[仮説 / 要検証]**、Phase 1 実測で calibrate
+> - **即時 layoff ではない**、自然退職 + re-skilling + gradual 移行
+> - 「**役割が深くなる**」 — Future 4 category は judgment work、operations の dignity 保持
+> - **1 role count ではなく operations 工数 index**、新 AI gov role は既存社員の re-skilling path 内包
+> - **段階的 transition**: Phase 1 (-15%) → Phase 2 (-33%) → Phase 3 (-48%)
+
+**Bottom slogan (24pt italic、Cover slogan 回収 mandatory)**:
+
+> 「**人数は減る、役割は深くなる、移行は段階的** — Cover で提示した『**小さく POC で大きく成長**』の実装が本図」
+
+**Footer 出典**: CA-08 §14A Tenant lifecycle + modernize-transformation/target-operating-model + canon C4-20 Three Horizons
 
 ---
 
@@ -177,52 +201,59 @@ S2 → S6 の action title だけで読み下すと:
 
 ```css
 colors: {
-  navy: '#1a3a52',         /* primary、header / title / chart main */
+  navy: '#1a3a52',           /* primary、header / title / chart main / After highlight */
   'navy-light': '#2d5a7d',
-  'navy-soft': '#e8eef3',  /* surface tint、navy soft 背景 */
-  red: '#c93838',          /* alert / hedge box border / DB 直接続 row */
+  'navy-soft': '#e8eef3',    /* After column 背景 tint */
+  red: '#c93838',            /* alert / S5 hedge box border のみ */
   'red-soft': '#fbe8e8',
-  grey: '#8a8a8a',         /* body / supporting / footnote */
+  grey: '#8a8a8a',           /* Before column / supporting / footnote */
   'grey-light': '#bababa',
-  canvas: '#fafaf8',       /* slide background (off-white) */
-  surface: '#f0f0ec',      /* panel / table row alt */
+  canvas: '#fafaf8',         /* slide background */
+  surface: '#f0f0ec',        /* table row alt */
 }
 ```
 
-**禁則**: 4 色目 (緑 / 紫 / 黄 etc.) 0 件。
+**After highlight rule**: navy bold + `✓` prefix。red 系は **S5 hedge box border のみ**、それ以外で red 使用禁止。
 
-### C.2 Typography (canon C3-11)
+### C.2 Typography
 
-| Element | Font-family | Size | Weight |
+| Element | Font | Size | Weight |
 |---|---|---|---|
-| Cover slogan | Inter, Noto Sans JP | 48-56pt | Bold |
-| Action title | Inter, Noto Sans JP | 28pt | Bold |
-| Subtitle / section | Inter, Noto Sans JP | 16pt | SemiBold |
-| Body | Inter, Noto Sans JP | 18pt | Regular |
-| Data emphasis | Inter | 36-48pt | Bold |
-| Slogan (italic) | Inter | 20-24pt | Regular italic |
-| Footer / footnote | Inter | 10-12pt | Regular |
+| Cover slogan | Inter + Noto Sans JP | 48-56pt | Bold |
+| Action title | Inter + Noto Sans JP | 28pt | Bold |
+| Table row dim | Inter + Noto Sans JP | 14pt | SemiBold (grey) |
+| Table cell value | Inter + Noto Sans JP | 16pt | Regular (Before grey) / **Bold (After navy)** |
+| Lever 矢印 | Inter | 20pt | Regular |
+| Bottom slogan | Inter | 24pt | Regular italic (navy) |
+| Hedge box | Inter + Noto Sans JP | 13pt | Regular |
+| Footer | Inter | 10-12pt | Regular grey |
 
-### C.3 Layout (canon C3-13 + C3-15)
+### C.3 Layout
 
 ```
-┌────────────────────────────────────────────────┐ ← 16:9 (1920×1080)
-│  HEADER (15% top、padding 80px)                  │
-│  Action title 28pt bold + 2px navy underline    │
-├────────────────────────────────────────────────┤
-│  HERO (60% middle、white space 40% 維持)         │
-│        SINGLE HERO VISUAL                        │
-├────────────────────────────────────────────────┤
-│  FOOTER (15% bottom)                             │
-│  Slogan (optional、center)                       │
-│  ──── 出典 · page X/6 · Concept share / Internal │
-└────────────────────────────────────────────────┘
-   ← 10% L                          15% R →
+┌────────────────────────────────────────────────────────┐ ← 16:9 (1920×1080)
+│  HEADER (12% top、padding 80px)                          │
+│  Action title 28pt bold + 2px navy underline             │
+├─────────────────────┬───────────────┬───────────────────┤
+│ HERO (65% middle)   │               │                   │
+│ Before (45% width)  │ Lever (10%)   │ After (45% width) │
+│  grey bg            │ centered →    │ navy-soft bg      │
+│  5 row dim          │ 5 lever       │ 5 row dim         │
+├─────────────────────┴───────────────┴───────────────────┤
+│ FOOTER (23% bottom)                                       │
+│ Bottom slogan (24pt italic navy、center)                  │
+│ (S5 only: hedge box with red border above slogan)         │
+│ ──── 出典 · page X/5 · Concept share / Internal           │
+└────────────────────────────────────────────────────────┘
+   ← 8% L                                  8% R →
 ```
+
+- **40% empty rule** 維持: row 5 件 + lever + slogan で 60% ink coverage 上限
+- **Asymmetric vs symmetric margin**: Before/After symmetric (visual balance)、Cover/Footer は asymmetric (8% L/R margin)
 
 ### C.4 Animation
 
-- Slide transition: `fade` (Reveal.js `transition="fade"`)
+- Slide transition: `fade`
 - Within-slide: no animation
 
 ---
@@ -231,34 +262,41 @@ colors: {
 
 ### D.1 Canon C8a 12 anti-pattern
 
-1. ☐ **Bullet wall slide 禁止**: 各 slide 1 hero visual + supporting 3-5 bullet max
-2. ☐ **'TBD' / 'Coming soon' on hero 禁止**: 全 hero に確定 status / 数値、不確定は alert red qualifier 付き ([仮説 / 要検証])
-3. ☐ **Multi-color palette overuse 禁止**: 3-color strict (navy / red / grey)、4 色目 0 件
-4. ☐ **Briefing → Recommendation tone 混在 禁止**: 本 deck は **concept share tone 一貫**、recommendation tone を混在させない
-5. ☐ **Action title が takeaway なし 禁止**: 全 S2-S6 action title を S-V-O claim form、12-15 words、takeaway-first
-6. ☐ **So-what 不在 禁止**: 各 hero visual の slogan で 'So what' を pin
-7. ☐ **Footnote overload (10+ per slide) 禁止**: 各 slide 主要 footnote 1-2 件
-8. ☐ **Decision ask 不在 OK** (本 deck は concept share、decision ask しない): 代わりに **belief alignment** が outcome
-9. ☐ **Risk hidden 禁止**: S6 で headcount honne を up-front、hedge inline で politics-aware
-10. ☐ **Honne / tatemae 不整合 禁止**: S6 で operations 削減を honest に出す、tatemae 隠さない
-11. ☐ **Pyramid trace fail 禁止**: title-only readout で governing thought 再生確認 (§B.0.1)
-12. ☐ **White space 不足 (>60% ink coverage) 禁止**: 40% empty rule 維持
+1. ☐ Bullet wall slide 禁止 (本 deck は Before/After table format で自然回避)
+2. ☐ 'TBD' / 'Coming soon' on hero 禁止
+3. ☐ Multi-color palette overuse 禁止 (3-color strict、After highlight = navy bold + ✓ で red 不使用)
+4. ☐ Briefing → Recommendation tone 混在 禁止 (本 deck は concept share 一貫)
+5. ☐ Action title が takeaway なし 禁止
+6. ☐ So-what 不在 禁止 (bottom slogan で each slide pin)
+7. ☐ Footnote overload 禁止
+8. ☐ Decision ask 不在 OK (本 deck は concept share)
+9. ☐ Risk hidden 禁止 (S5 で headcount honne を Before/After で up-front)
+10. ☐ Honne / tatemae 不整合 禁止
+11. ☐ Pyramid trace fail 禁止 (§B.0.1 readout 確認)
+12. ☐ White space 不足 (>60% ink) 禁止
 
-### D.2 Project-specific 6 guardrail (本 deck では 6 件中 4 件適用、Type B 承認 deck から限定)
+### D.2 Project-specific 4 guardrail
 
-13. ☐ **'design-complete / 完成' wording 禁止**: project は Draft、本投入は Phase 1 着手後
-14. ☐ **'primary regulator' 断定 禁止**: entity / license fact 依存、counsel 確認待ち、'NY 拠点で適用' 程度に hedge
-15. ☐ **NYDFS を Federal 行に置く 禁止**: NYDFS は State 規制、必ず State 配置 (本 deck では出ないが念のため keep)
-16. ☐ **Tier 3 規制語の事実主張 禁止**: hedge 表現 `[ai-operator paper §X.Y 参照]`
+13. ☐ 'design-complete / 完成' wording 禁止
+14. ☐ 'primary regulator' 断定 禁止
+15. ☐ NYDFS を Federal 行に置く 禁止 (本 deck 出ない、念のため keep)
+16. ☐ Tier 3 規制語の事実主張 禁止
 
-### D.3 Politics-sensitive guardrail (S6 特有、新規 6 件)
+### D.3 Politics-sensitive 6 guardrail (S5 専用)
 
-17. ☐ **Headcount 削減を冷酷 wording で出す 禁止**: 「人員減」より「役割が深くなる」「総量は減るが質は高まる」
-18. ☐ **数値を確定数で出す 禁止**: 全 headcount 数値に [仮説 / 要検証] label 必須
-19. ☐ **Layoff を直接 imply する wording 禁止**: 「自然退職 + re-skilling + gradual 移行」を hedge box で必ず明示
-20. ☐ **具体 業務名 (= 削減 target 推測される) を roadmap chart に書く 禁止**: 業務名抽象化、operations 工数 index で表現
-21. ☐ **Future 人間役割 4 category を「楽な仕事」風 wording で出す 禁止**: 「検証 / 高 risk / 高難易度 / 例外」= 価値高い judgment work であることを 明示
-22. ☐ **Cover slogan「小さく POC で大きく」を S6 で回収しない 禁止**: rhetorical bookend を必ず close、bottom slogan で explicit call-back
+17. ☐ Headcount 削減を冷酷 wording 禁止 → 「役割が深くなる」「総量は減るが質は高まる」
+18. ☐ 数値を確定数で出す 禁止 → 全 [仮説 / 要検証] label
+19. ☐ Layoff direct imply 禁止 → 「自然退職 + re-skilling + gradual」
+20. ☐ 具体 業務名 (削減 target 推測) を chart に書く 禁止
+21. ☐ Future 4 category を「楽な仕事」風 wording 禁止 → judgment work 明示
+22. ☐ Cover slogan を S5 で回収しない 禁止 → bottom slogan で explicit call-back
+
+### D.4 Before/After-specific 4 guardrail (v0.4 新規)
+
+23. ☐ **Before / After 列幅不均等 禁止**: 必ず 45% / 10% / 45% 等幅 (canon `side-by-side-comparison-slide`)
+24. ☐ **Row dimension 全 slide で 統一数 (5 件) 推奨**: dimension は各 slide 独自で OK、ただし数は 5 件で揃える (cognitive consistency)
+25. ☐ **After 列で改善点を highlight しない 禁止**: 必ず navy bold + ✓ prefix で visual distinction
+26. ☐ **Lever 列が空 or 1 lever のみで全 row 説明 禁止**: 各 row に独立した lever 1 行 (transformation の因果関係を pin)
 
 ---
 
@@ -266,45 +304,39 @@ colors: {
 
 ### E.1 Build steps (5)
 
-1. ☐ Reveal.js 5.x + Tailwind CDN single-file HTML を build (filename 推奨: `concept-share.html`)
-2. ☐ 6 slide を §B spec 通り build (no appendix)
-3. ☐ Color palette / typography / layout を §C に strict 準拠
-4. ☐ 各 slide footer に `出典 · page X/6 · Concept share / Internal` を pin
-5. ☐ Hero visual は **SVG inline** or **HTML table / CSS grid** で実装、external image asset 不要
+1. ☐ Reveal.js 5.x + Tailwind CDN single-file HTML を build (filename: `concept-share-ba.html` 推奨、ba = Before/After)
+2. ☐ 5 slide を §B spec 通り build (S1 Cover + S2-S5 Before/After 4 slide、no appendix)
+3. ☐ Color palette / typography / layout を §C strict 準拠
+4. ☐ 各 slide footer に `出典 · page X/5 · Concept share / Internal`
+5. ☐ Before/After table は HTML table or CSS grid で実装、SVG / external image 不要
 
-### E.2 Self-review check (7、build 後必須)
+### E.2 Self-review check (7)
 
-1. ☐ **Pyramid trace test** (canon C2-10): §B.0.1 readout 再生可能か confirm
-2. ☐ **C8a 12 anti-pattern grep** (§D.1): violation 0 件
-3. ☐ **Project-specific 4 guardrail** (§D.2): violation 0 件
-4. ☐ **Politics-sensitive 6 guardrail** (§D.3): S6 で全 6 件 ✅
-5. ☐ **3-color check**: navy / red / grey 以外 0 件 (canvas + surface は許容)
-6. ☐ **Action title length**: S2-S6 全 5 title が 12-15 words ± 2 words
-7. ☐ **40% empty rule**: 各 slide で ink coverage < 60%
+1. ☐ Pyramid trace test (canon C2-10): §B.0.1 readout 再生可能
+2. ☐ C8a 12 anti-pattern (§D.1): violation 0
+3. ☐ Project-specific 4 (§D.2): violation 0
+4. ☐ Politics-sensitive 6 (§D.3、S5): ✅ all
+5. ☐ **Before/After-specific 4 (§D.4、新規)**: ✅ all
+6. ☐ 3-color check (navy/red/grey 以外 0 件、canvas + surface 許容)
+7. ☐ 40% empty rule (各 slide ink coverage < 60%)
 
 ### E.3 Self-review report format
 
-build 完了後、以下 format で report:
-
 ```markdown
-# Concept Share Deck Self-Review Report
+# Concept Share Deck (Before/After) Self-Review Report
 
 ## E.2 7 check 結果
-1. Pyramid trace test: ✅ / ⚠ / ❌ + 詳細
-2. C8a 12 anti-pattern: ✅ all clear / ⚠ N 件 (list)
-3. Project-specific 4: ✅ / ⚠ / ❌
-4. Politics-sensitive 6 (S6): ✅ / ⚠ N 件 (詳細)
-5. 3-color check: ✅ / ⚠ N color literal 検出
-6. Action title length: ✅ / ⚠ N title が範囲外
-7. 40% empty rule: ✅ / ⚠ N slide で 60% 超
-
-## 残課題 / Open question (user review 用)
-- ...
+1. Pyramid trace: ✅ / ⚠ / ❌
+2. C8a 12: ✅ / ⚠ N 件
+3. Project 4: ✅ / ⚠
+4. Politics 6: ✅ / ⚠
+5. Before/After 4: ✅ / ⚠
+6. 3-color: ✅ / ⚠
+7. 40% empty: ✅ / ⚠
 
 ## Build summary
-- Total slides: 6 (no appendix)
+- Total slides: 5
 - File size: ~XXX KB
-- Reveal.js / Tailwind version
 ```
 
 ---
@@ -317,7 +349,7 @@ build 完了後、以下 format で report:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1920, initial-scale=1.0" />
-  <title>Backoffice AI v2 — オペレーション自動化の概念共有</title>
+  <title>Backoffice AI v2 — 業務処理を 5 軸で対比する</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -355,20 +387,20 @@ build 完了後、以下 format で report:
   <style>
     .reveal {
       font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
-      font-size: 18px;
+      font-size: 16px;
       background-color: #fafaf8;
       color: #1a3a52;
     }
     .reveal .slides { text-align: left; }
     .reveal .slides section {
-      padding: 80px 100px 80px 80px;
+      padding: 60px 80px 60px 80px;
       box-sizing: border-box;
       height: 100%;
       background-color: #fafaf8;
     }
     .reveal h1 {
       font-size: 56px; font-weight: 700; line-height: 1.15;
-      color: #1a3a52; margin: 0 0 20px 0; letter-spacing: -0.02em;
+      color: #1a3a52; letter-spacing: -0.02em;
     }
     .reveal h2 {  /* Action title */
       font-size: 28px; font-weight: 700; line-height: 1.3;
@@ -378,29 +410,70 @@ build 完了後、以下 format で report:
       display: inline-block;
     }
     .reveal h3 { font-size: 16px; font-weight: 600; color: #1a3a52; margin: 0 0 12px 0; }
-    .reveal p { font-size: 18px; line-height: 1.6; color: #1a3a52; margin: 0 0 12px 0; }
+    .reveal p { font-size: 16px; line-height: 1.6; color: #1a3a52; }
     .reveal .slogan { font-size: 24px; font-style: italic; color: #1a3a52; }
     .reveal .footer {
       position: absolute;
-      bottom: 24px;
+      bottom: 20px;
       left: 80px;
-      right: 100px;
+      right: 80px;
       font-size: 11px;
       color: #8a8a8a;
       display: flex;
       justify-content: space-between;
-      align-items: center;
     }
     .reveal .progress { color: #1a3a52; }
     .reveal .slide-number {
       background-color: rgba(26, 58, 82, 0.08);
       color: #1a3a52;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
+      font-size: 12px;
       padding: 4px 8px;
       border-radius: 4px;
     }
-    .tabular { font-variant-numeric: tabular-nums; }
+    /* Before/After table styles */
+    .ba-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 20px 0;
+    }
+    .ba-table thead th {
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 18px;
+      text-align: left;
+    }
+    .ba-table thead th.before { color: #8a8a8a; }
+    .ba-table thead th.lever { text-align: center; color: #1a3a52; }
+    .ba-table thead th.after { color: #1a3a52; background: #e8eef3; }
+    .ba-table tbody td {
+      padding: 14px 16px;
+      vertical-align: top;
+      font-size: 15px;
+      line-height: 1.5;
+      border-top: 1px solid rgba(26, 58, 82, 0.08);
+    }
+    .ba-table tbody td.dim { font-weight: 600; color: #8a8a8a; font-size: 14px; }
+    .ba-table tbody td.before { color: #8a8a8a; }
+    .ba-table tbody td.lever { text-align: center; color: #1a3a52; font-size: 13px; }
+    .ba-table tbody td.after {
+      background: #e8eef3;
+      color: #1a3a52;
+      font-weight: 700;
+    }
+    .ba-table tbody td.after::before { content: "✓ "; }
+    .hedge-box {
+      border: 2px solid #c93838;
+      background: #fbe8e8;
+      padding: 16px 20px;
+      margin-top: 24px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #1a3a52;
+    }
+    .hedge-box strong { color: #c93838; }
   </style>
 </head>
 
@@ -408,15 +481,13 @@ build 完了後、以下 format で report:
   <div class="reveal">
     <div class="slides">
 
-      <!-- ============================================================
-           S1 Cover (slogan punchline)
-           ============================================================ -->
+      <!-- S1 Cover -->
       <section data-transition="fade">
         <div class="h-full flex flex-col items-center justify-center text-center">
           <h1 class="text-navy text-7xl mb-8 leading-tight">
             小さく POC で<br/>大きく成長させる。
           </h1>
-          <p class="text-grey text-2xl mb-4">Backoffice AI v2 — オペレーション自動化の概念共有</p>
+          <p class="text-grey text-2xl mb-4">Backoffice AI v2 — 業務処理を 5 軸で対比する</p>
           <p class="text-navy text-lg">経営層 + 業務責任者 + Security + Compliance / Concept share workshop</p>
         </div>
         <div class="footer">
@@ -425,48 +496,85 @@ build 完了後、以下 format で report:
         </div>
       </section>
 
-      <!-- ============================================================
-           S2 Project 1-page (3-column)
-           ============================================================ -->
+      <!-- S2 案件 1 件の処理 (Before/After table example) -->
       <section data-transition="fade">
-        <h2>差戻しを次の正解手順に変える仕組みを、AWS Bedrock + Aurora で構築する</h2>
+        <h2>案件 1 件の処理時間は 12 → 4 min、step 数は同じだが「確認」が「判断」に shift する</h2>
 
-        <div class="mt-8 grid grid-cols-3 gap-6">
-          <div class="bg-navy-soft rounded-lg p-6 border-l-4 border-navy">
-            <h3 class="text-navy mb-4">何を</h3>
-            <p class="text-base">AI 案件処理 + 差戻し flywheel + 3 層承認管理</p>
-          </div>
-          <div class="bg-navy-soft rounded-lg p-6 border-l-4 border-navy">
-            <h3 class="text-navy mb-4">どう</h3>
-            <p class="text-base">AWS Bedrock Sonnet 4.6 (Geo CRIS) + Aurora PG 16 + Computer Use Fargate sandbox + 3 層承認 governance</p>
-          </div>
-          <div class="bg-navy-soft rounded-lg p-6 border-l-4 border-navy">
-            <h3 class="text-navy mb-4">どこから</h3>
-            <p class="text-base">UC-BO-01 法人住所変更 を Phase 1 baseline、検証後に scale</p>
-          </div>
-        </div>
+        <table class="ba-table">
+          <colgroup>
+            <col style="width: 15%" />
+            <col style="width: 35%" />
+            <col style="width: 15%" />
+            <col style="width: 35%" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th class="before">Before (現状)</th>
+              <th class="lever">Lever</th>
+              <th class="after">After (Phase 1 投入後)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="dim">処理時間 / 件</td>
+              <td class="before">12 min</td>
+              <td class="lever">→ AI 入力支援</td>
+              <td class="after">4 min</td>
+            </tr>
+            <tr>
+              <td class="dim">Step 数</td>
+              <td class="before">5 (受付→入力→確認→承認→反映)</td>
+              <td class="lever">(同じ)</td>
+              <td class="after" style="background: transparent; color: #8a8a8a; font-weight: 400;">5 (同)</td>
+            </tr>
+            <tr>
+              <td class="dim">担当者 work</td>
+              <td class="before">確認 100% (情報突合・形式 check)</td>
+              <td class="lever">→ 役割 shift</td>
+              <td class="after">AI 提案確認 + 判断 (例外/高 risk のみ)</td>
+            </tr>
+            <tr>
+              <td class="dim">差戻し時の処理</td>
+              <td class="before">ad-hoc memo、属人化</td>
+              <td class="lever">→ staging → 学習</td>
+              <td class="after">staging 記録 → AI 日次分析 → 手順承認</td>
+            </tr>
+            <tr>
+              <td class="dim">担当者 mental load</td>
+              <td class="before">backlog 不安 + 単純作業</td>
+              <td class="lever">→ focus shift</td>
+              <td class="after">判断 work に集中、単純作業は AI 側</td>
+            </tr>
+          </tbody>
+        </table>
 
-        <div class="mt-10 text-center">
-          <p class="slogan">「承認された手順だけを AI に覚えさせる」</p>
+        <div class="mt-6 text-center">
+          <p class="slogan">「減らせるのは確認、残すのは判断」</p>
         </div>
 
         <div class="footer">
-          <span>出典: CA-08 §3 + DM-07 §3 + CLAUDE.md 中核 message</span>
-          <span class="slide-number">2 / 6</span>
+          <span>出典: 03-ui-prototype-design §4 + DM-07 §3.3</span>
+          <span class="slide-number">2 / 5</span>
         </div>
       </section>
 
-      <!-- ============================================================
-           S3-S6 同 pattern で expand
-           各 slide で:
-             - <section data-transition="fade">
-             - <h2> action title (28pt bold navy + 2px navy underline)
-             - hero visual (table / flow diagram / matrix / chart etc.)
-             - center slogan (italic、必要に応じ)
-             - <div class="footer"> 出典 · page X/6 · Concept share / Internal
-           ============================================================ -->
+      <!-- S3-S5 同 pattern で expand
+           S5 のみ <div class="hedge-box"> を slogan の前に追加 (politics-sensitive content) -->
 
-      <!-- ... (S3 through S6) ... -->
+      <!-- S5 hedge-box example: -->
+      <!--
+      <div class="hedge-box">
+        <strong>⚠ 本図の前提 (politics-aware framing)</strong>
+        <ul class="mt-2 space-y-1">
+          <li>・ 数値 全件 <strong>[仮説 / 要検証]</strong>、Phase 1 実測で calibrate</li>
+          <li>・ <strong>即時 layoff ではない</strong>、自然退職 + re-skilling + gradual 移行</li>
+          <li>・ 「役割が深くなる」 — Future 4 category は judgment work、operations の dignity 保持</li>
+          <li>・ 1 role count ではなく <strong>operations 工数 index</strong>、新 AI gov role は既存社員の re-skilling path 内包</li>
+          <li>・ 段階的 transition: Phase 1 (-15%) → Phase 2 (-33%) → Phase 3 (-48%)</li>
+        </ul>
+      </div>
+      -->
 
     </div>
   </div>
@@ -490,52 +598,48 @@ build 完了後、以下 format で report:
 
 ### Hero visual implementation hints
 
-- **S3 業務 step + Flywheel**: `<div class="grid grid-cols-5">` で horizontal flow (現状 step)、下に `<svg>` で 5-phase circular flow (Flywheel)
-- **S4 RACI table + 4-eyes**: `<table class="w-full">` で RACI、右に SVG icon (入力者 → 案件 → 承認者 + "≠" symbol)
-- **S5 4 tier matrix**: `<table>` で 4 row × 4 col、Row 3 (Computer Use) を `bg-red-soft` で highlight
-- **S6 Role shift + Headcount chart**: 上部 2-column (Current 100% bar / Future 4 bar)、下部 stacked area chart (SVG inline、Phase 1/2/3 timeline)、bottom に hedge box (red border)
-- 全 chart は **SVG inline** (single-file 維持、external 不要)
+- **全 S2-S5**: 同 `.ba-table` class で 4-column (dim / before / lever / after) 5 row、After 列に `navy-soft` 背景 + `✓` prefix
+- **S5 のみ**: `.ba-table` の後に `.hedge-box` (red border、4 bullet hedge)、その後 bottom slogan
+- 全 chart は HTML table or CSS grid、SVG inline、external image asset 不要
 
 ---
 
-## §G. CANON PRINCIPLE GLOSSARY (本 deck で使用、cold-start 用)
+## §G. CANON PRINCIPLE GLOSSARY (本 deck で使用)
 
 | Ref | 1-line explanation |
 |---|---|
 | C2-6 Action title | 12-15 words、claim form S-V-O、takeaway-first |
-| C2-7 1 slide 1 message | Singleton test、1 slide に 1 message 以外載せない |
-| C2-10 Pyramid trace test | Ship gate: action title だけ読み下しで governing thought 再生可能か |
-| C3-11 Typography | Action title 28pt bold、body 18pt、slogan 24pt italic |
-| C3-12 3-color rule | Primary + Accent + Neutral の 3 色のみ、4 色目禁止 |
-| C3-13 White space | 10-15% safe margin + 40% empty rule (ink coverage < 60%) |
+| C2-7 1 slide 1 message | Singleton test、1 slide に 1 message |
+| C2-10 Pyramid trace test | Title-only readout で governing thought 再生確認 |
+| C3-11 Typography | Action title 28pt bold、body 16pt、slogan 24pt italic |
+| C3-12 3-color rule | navy / red / grey 3 色のみ |
+| C3-13 White space | 40% empty rule |
 | C3-14 Footer | 出典 + page number + audience indicator |
-| C3-15 Header | Action title above hero + 2px underline |
-| C4-20 Three Horizons | Baghai 1999、3 ascending curves on timeline。S6 headcount chart の inspiration |
-| C4-21 Process flow | 4-5 step max + swimlane。S3 現状 step / S4 RACI / S5 4 tier matrix で適用 |
-| C4-23 Table-as-chart | Cell-level shading + 1 highlight row。S5 で Computer Use row を highlight |
-| C8a 12 anti-pattern | §D.1 12 件 (bullet wall / TBD / multi-color / etc.) |
+| C3-15 Header | Action title + 2px underline |
+| **C4-23 Table-as-chart** | **本 deck core: cell-level shading + 1 highlight 列**。Before/After で必須 |
+| **side-by-side-comparison-slide** | **2-3 列等幅、共通 row、cell に 1-2 行 fact、最終 row が verdict** |
+| **before-after-and-flywheel-patterns** | **2 column 同 dimension 4-6 row、After 強調 color、center transformation lever** |
+| C8a 12 anti-pattern | §D.1 12 件 |
 
 ---
 
-## §H. RESEARCH-COMPOUNDER CARDS USED (本 deck 構成 anchor)
+## §H. RESEARCH-COMPOUNDER CARDS USED
 
-本 deck の narrative arc は以下 research-compounder card を anchor として構築:
+本 deck v0.4 の構成 anchor:
 
-| Card | 使用 section |
+| Card | Use |
 |---|---|
-| `slides-executive/workshop-opening-deck-pattern.md` | Tone setting / Outcome promise は drop、Mechanism walk-through を core に採用 |
-| `slides-executive/storytelling-spine-and-narrative-arc.md` | Linear sequence (Cover → Project → Flywheel → 統制 → 接続 → 育成) を SCR の compressed 版として運用 |
-| `slides-executive/vision-setting-deck-pattern.md` | Cover slogan「小さく POC で大きく」の future-pull opening + S6 closing 回収 (call-back) |
-| `modernize-transformation/target-operating-model-1page.md` | S6 の TOM 4 role + 役割 shift framing |
-| `modernize-transformation/phased-modernization-strangler-fig.md` | S6 の "段階成長" mechanism、slogan「小さく POC で大きく」の technical underpinning |
-| `modernize-transformation/org-redesign-for-ai-native.md` | S6 の "新 AI governance role" 創出 + re-skilling path |
-| `ai-agents-automation/raci-on-agent-action.md` | S4 の 3 層承認 RACI structure |
-| `banking-finance/three-lines-of-defense-and-ai.md` | S4 の 統制 governance backing (本 deck では explicit に出さないが背景 evidence) |
+| **`slide-design/before-after-and-flywheel-patterns.md`** | **Primary anchor**: 2-column Before/After layout、After 改善点 highlight、center transformation lever |
+| **`slide-design/side-by-side-comparison-slide.md`** | **Primary anchor**: 共通 row dimension、column 等幅、各 cell 1-2 行 fact、最終 row verdict 形式 |
+| `ux-design/jtbd-customer-journey-mapping.md` | S2 dimension 設計 (1 件処理時間 / mental load / 担当者 work) の JTBD framing 由来 |
+| `slides-executive/storytelling-spine-and-narrative-arc.md` | Pyramid trace test の readout 確認 (§B.0.1) |
+| `modernize-transformation/target-operating-model-1page.md` | S5 役割 shift framing |
+| `modernize-transformation/phased-modernization-strangler-fig.md` | S5 段階成長 underpinning、Cover slogan の根拠 |
+| `modernize-transformation/org-redesign-for-ai-native.md` | S5 新 AI governance role + re-skilling |
+| `ai-agents-automation/raci-on-agent-action.md` | S3 3 層承認 RACI structure |
 
 ---
 
 ## §I. 完了条件
 
-build 完了 + §E.2 self-review 7 check 全 ✅ + self-review report 出力 → user review に hand-off。
-
-不明点があれば最初に質問。本 file 単独で実行可能。
+build 完了 + §E.2 self-review 7 check 全 ✅ + self-review report 出力 → user review に hand-off。不明点は最初に質問。本 file 単独で実行可能。

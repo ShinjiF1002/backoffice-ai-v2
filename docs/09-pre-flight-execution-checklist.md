@@ -1,6 +1,6 @@
 # Backoffice AI v2 — Phase 1 Pre-Flight Execution Checklist (v0.1 Draft)
 
-> **目的**: DOC-CA-08 v2.3.2 + DOC-DM-07 v1.6.2 が **「設計 SSOT として design-complete」** に到達した上で、**Phase 1 本番投入の Type B 設定承認** を取るために、外部依存 7 項 (real workload 実測 / DR drill / external counsel review / Bedrock primary source verify / Computer Use isolation 実証 / TLS inspection 実証 / warm pool 実測) を **autonomously 不能な外部 execution work** として明示分離し、各項目に owner / acceptance criteria / 証跡 template / 推定工数 / sign-off authority を pin する SSOT。
+> **目的**: DOC-CA-08 v2.6 + DOC-DM-07 v1.7.2 が **「設計 SSOT として design-complete」** に到達した上で、**Phase 1 本番投入の Type B 設定承認** を取るために、外部依存 7 項 (real workload 実測 / DR drill / external counsel review / Bedrock primary source verify / Computer Use isolation 実証 / TLS inspection 実証 / warm pool 実測) を **autonomously 不能な外部 execution work** として明示分離し、各項目に owner / acceptance criteria / 証跡 template / 推定工数 / sign-off authority を pin する SSOT。
 > **位置付け**: DOC-CA-08 §16 (inline 7 項 list) を本 doc に hoist + 拡張、Phase 1 着手 sprint 0 の execution backlog として運用。本 doc 自体は「設計 doc」ではなく「外部 execution の orchestration doc」。Claude が autonomously 完了できる項目は 0、全項目が外部 human + AWS account + 外部 counsel に依存する。
 
 | 項目            | 値                                                                                                                                                                                                  |
@@ -13,7 +13,7 @@
 | 承認者          | 設定承認 Type B (Phase 1 本番投入 prerequisite gate、全 7 項 sign-off 後に Type B approval gate に進む)                                                                                              |
 | 閲覧対象        | Phase 1 implementation team / Security 関係者 / Compliance 関係者 / Network team / SRE team / 業務責任者 / 経営層 (Type B 承認者) / 外部 legal counsel                                              |
 | 機密区分        | Internal                                                                                                                                                                                            |
-| 関連文書        | **DOC-CA-08 v2.3.2 §16** (hoist source), **DOC-DM-07 v1.6.2** (persistence foundation), DOC-CEM-12 (Compliance Evidence Matrix、Cycle 4 起稿予定), DOC-TM-10 (Threat Model、Cycle 2 起稿予定), DOC-SRE-11 (SRE Runbook、Cycle 3 起稿予定) |
+| 関連文書        | **DOC-CA-08 v2.6 §16** (hoist source), **DOC-DM-07 v1.7.2** (persistence foundation), DOC-CEM-12 v0.2 (Compliance Evidence Matrix), DOC-TM-10 v0.1 (Threat Model), DOC-SRE-11 v0.1 (SRE Runbook) |
 | SSOT 区分       | Phase 1 本番投入 pre-flight execution の SSOT (外部 execution owner / acceptance criteria / 証跡 template / sign-off chain)                                                                          |
 | Evidence Status | N/A (本 doc は execution orchestration、定量値は 各 owner が実測後に append)                                                                                                                       |
 | 改版履歴        | v0.1 (2026-05-25、autonomous prod-ready loop Cycle 1): 初版作成、CA-08 §16 inline 7 項を本 doc に hoist + RACI / acceptance / 証跡 template / 工数 / sign-off authority に拡張、PFC-01 ~ PFC-07 として ID 化、§3 統合 sign-off chain + §4 dependency graph + §5 evidence package binder structure を新設。v0.2 (2026-05-25、autonomous prod-ready loop Cycle 8.5 + Cycle 9): PFC-03 全面 rewrite (CA-08 v2.5 ADR-4 active state Geo CRIS default に sync、acceptance condition 5 → 6 項、Bedrock Geo CRIS quota verify + SCP enforce sandbox 実証 + data residency counsel sign-off prerequisite 追加)。本 PFC-03 update は CA-08 §16 PFC #3 + §17 open question #30-#32 + §18 R1/R11 と整合 |
@@ -150,7 +150,7 @@
   - AI work: 1 day (model card archive + sandbox test script 起稿 + SCP deploy CDK + DB row insert SQL)
   - Human review: 2 day (SRE review + Security 関係者 SCP review)
   - External waiting: 7-14 day (AWS Support service quota increase lead time)
-  - Risk: 低 (v2.0 で In-Region: Yes 確認済、継続 verify のみ)
+  - Risk: 中 (v2.5 P0-V correction で Sonnet 4.6 In-Region 不在判明、Geo CRIS profile に切替、In-Region status の継続 monitor + Geo CRIS quota 実態 verify が新たな main risk)
 - **(g) 上流依存**: AWS sandbox account + Bedrock access enable + Phase 1 想定 token 量 scenario 確定 (DOC-CA-08 §14)
 - **(h) deadline**: Phase 1 着手 -30 day (quota increase lead time 含む)
 - **(i) sign-off authority**: AI 管理者 + SRE co-sign

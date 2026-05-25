@@ -1,6 +1,6 @@
 # Backoffice AI v2 — SRE Runbook (v0.1 Draft)
 
-> **目的**: DOC-CA-08 v2.3.2 + DOC-DM-07 v1.6.2 が定義する surface を Phase 1 で operationally run するための SLO/SLI / Error budget policy / alert severity matrix / on-call rotation / incident response / postmortem template / runbook 集 の SSOT。
+> **目的**: DOC-CA-08 v2.6 + DOC-DM-07 v1.7.2 が定義する surface を Phase 1 で operationally run するための SLO/SLI / Error budget policy / alert severity matrix / on-call rotation / incident response / postmortem template / runbook 集 の SSOT。
 > **位置付け**: DOC-CA-08 §10 (CloudWatch baseline) + §10.4 (主要 alarm) を起点に、運用層 (SRE / on-call) の SSOT。Type B 設定承認 input package の SRE readiness 章として bundle。Phase 1 ops 開始後は本 doc が daily runbook reference となる。
 
 | 項目            | 値                                                                                                                                                                                |
@@ -13,7 +13,7 @@
 | 承認者          | 設定承認 Type B (operational readiness 評価を含むため)                                                                                                                            |
 | 閲覧対象        | Phase 1 implementation team / SRE team / on-call engineer / Security 関係者 / 業務責任者 / 経営層 (SLO breach escalation)                                                          |
 | 機密区分        | Internal                                                                                                                                                                          |
-| 関連文書        | **DOC-CA-08 v2.3.2 §10 (Observability) / §15 (DR) / §6.3.1 (warm pool sizing)**, **DOC-DM-07 v1.6.2 §10 (Operations Playbook)**, DOC-TM-10 §8 (Monitoring + Detection controls), DOC-PFC-09 PFC-06 (warm pool sizing 実測), DOC-MON-05 (KPI/KRI catalogue) |
+| 関連文書        | **DOC-CA-08 v2.6 §10 (Observability) / §15 (DR) / §6.3.1 (warm pool sizing)**, **DOC-DM-07 v1.7.2 §10 (Operations Playbook)**, DOC-TM-10 §8 (Monitoring + Detection controls), DOC-PFC-09 PFC-06 (warm pool sizing 実測), DOC-MON-05 (KPI/KRI catalogue) |
 | SSOT 区分       | SLO/SLI / Error budget policy / Alert severity matrix / On-call rotation / Incident response process / Postmortem template / Runbook 集 の SSOT                                    |
 | Evidence Status | 設計のみ。SLO 値は Phase 1 着手時点で実測 calibration (PFC-06 + 4 週運用後に first revision)                                                                                       |
 | 改版履歴        | v0.1 (2026-05-25、autonomous prod-ready loop Cycle 3): 初版作成、5 SLO + 4 KPI/KRI 接続 + Error budget policy + S0-S4 severity matrix + on-call rotation + incident response 5 phase + postmortem template + 12 主要 runbook 集 |
@@ -502,10 +502,10 @@ aws guardduty list-findings --finding-criteria 'type:UnauthorizedAccess:IAMUser/
 
 ## 11. 関連文書 + 出典
 
-- **DOC-CA-08 v2.3.2** (`docs/08-cloud-architecture.md` §10 Observability / §15 DR / §6.3.1 warm pool)
-- **DOC-DM-07 v1.6.2** (`docs/07-data-model.md` §10 Operations Playbook / §9 Audit verify)
+- **DOC-CA-08 v2.6** (`docs/08-cloud-architecture.md` §10 Observability / §15 DR / §6.3.1 warm pool)
+- **DOC-DM-07 v1.7.2** (`docs/07-data-model.md` §10 Operations Playbook / §9 Audit verify)
 - **DOC-TM-10 v0.1** (`docs/10-threat-model.md` §8 Monitoring + Detection controls)
-- **DOC-PFC-09 v0.1** (`docs/09-pre-flight-execution-checklist.md` PFC-06 warm pool 実測)
+- **DOC-PFC-09 v0.2** (`docs/09-pre-flight-execution-checklist.md` PFC-06 warm pool 実測 + PFC-03 Bedrock Geo CRIS verify)
 - **DOC-MON-05** (`docs/05-metrics-and-gates.md` 4 KPI / 9 KRI catalogue)
 - Google SRE Book + Workbook (SLO / error budget framework reference)
 - NYDFS 23 NYCRR Part 500.17 (72 hr cybersecurity event notification、Postmortem template §9 regulatory notification 項目)

@@ -36,7 +36,7 @@
 - **SSOT 接続 (introduced in v2.2、current v2.3.2)**: ✅ 完了 — `docs/_SSOT.md` **v0.11** に DOC-CA-08 row 追加済 (L57、US pivot 反映)、Plan **v1.7** で US pivot 承認 + Plan v1.6.1 で v1.1 lock done-mark 済 (~1,135 行)。本 doc §16 / §20 も同 PR で sync (DM-07 v1.3.2 governance metadata sync pattern の予防適用、v1.2 / v2.0 / v2.2 / v2.3.2 で継続実体化)
 - **External critic (v1.2 で done-mark)**: ✅ 完了 — Round 1 で 12 critical finding (4 Fail + 8 Concern) + 3 prerequisite 全件 v1.1 で反映、加えて user Decision Brief で ADR-4 (Bedrock in-region) P0 を検出 → v1.2 で全件 fix、v2.0 で US pivot、v2.1 / v2.2 で active stale cleanup
 - **想定 reader**: AI 管理者 + Security 関係者 + Network team + SRE team + Phase 1 implementation team。経営層向け summary は §0 + §13 ADR + §14 Cost
-- **残 pending**: `git add docs/07-data-model.md docs/08-cloud-architecture.md docs/_SSOT.md` (user 領域、**current: DM-07 v1.6.2 + DOC-CA-08 v2.3.2 + _SSOT.md v0.11 + Plan v1.7** を 1 commit 推奨) のみ
+- **残 pending**: `git add docs/{07-12}*.md docs/_SSOT.md` (user 領域、**current: DM-07 v1.7.2 + DOC-CA-08 v2.6 + 4 NEW doc (PFC-09 v0.2 / TM-10 v0.1 / SRE-11 v0.1 / CEM-12 v0.2) + _SSOT.md v0.12 + Plan v1.7** を feature branch で commit、PR merge 推奨) のみ
 
 ---
 

@@ -1,6 +1,6 @@
 # Backoffice AI v2 — Threat Model (v0.1 Draft)
 
-> **目的**: DOC-CA-08 v2.3.2 + DOC-DM-07 v1.6.2 の設計 surface に対し、STRIDE framework + AI/ML 固有 threat (prompt injection / model extraction / data poisoning) + insider / supply chain / key compromise scenario を逐軸で enumerate、各 threat に既存 mitigation の pointer + residual risk + monitoring control を pin する。
+> **目的**: DOC-CA-08 v2.6 + DOC-DM-07 v1.7.2 の設計 surface に対し、STRIDE framework + AI/ML 固有 threat (prompt injection / model extraction / data poisoning) + insider / supply chain / key compromise scenario を逐軸で enumerate、各 threat に既存 mitigation の pointer + residual risk + monitoring control を pin する。
 > **位置付け**: DOC-CA-08 §7.3.1 F10 (Computer Use prompt injection 4 段防御) を起点に、threat surface 全体を STRIDE × 12 layer matrix で覆い、Phase 1 Type B 設定承認 + FRB SR 11-7 model risk governance + OCC SR 11-7 third-party AI risk assessment の input doc として運用。
 
 | 項目            | 値                                                                                                                                                                                |
@@ -13,7 +13,7 @@
 | 承認者          | 設定承認 Type B (Security-impacting、threat surface 評価を含むため) + FRB SR 11-7 model risk governance committee                                                                  |
 | 閲覧対象        | Phase 1 implementation team / Security 関係者 / Compliance 関係者 / Model Risk Management / 外部監査 / external legal counsel                                                      |
 | 機密区分        | **Confidential** (attack scenario 詳述を含むため、本 doc 単独で attacker reference にならないよう取扱注意)                                                                          |
-| 関連文書        | **DOC-CA-08 v2.3.2 §7.3.1 (F10) / §5.3 (Computer Use egress) / §12 (Security baseline)**, **DOC-DM-07 v1.6.2 §5 (Enforcement) / §6 (PII) / §9 (Immutable Audit)**, DOC-PFC-09 (PFC-04 攻撃 scenario の SSOT), DOC-CEM-12 (Cycle 4、Compliance Evidence Matrix への入力), DOC-SRE-11 (Cycle 3、incident response への接続) |
+| 関連文書        | **DOC-CA-08 v2.6 §7.3.1 (F10) / §5.3 (Computer Use egress) / §12 (Security baseline)**, **DOC-DM-07 v1.7.2 §5 (Enforcement) / §6 (PII) / §9 (Immutable Audit)**, DOC-PFC-09 (PFC-04 攻撃 scenario の SSOT), DOC-CEM-12 (Cycle 4、Compliance Evidence Matrix への入力), DOC-SRE-11 (Cycle 3、incident response への接続) |
 | SSOT 区分       | Threat surface enumeration + STRIDE mapping + AI/ML threat catalog + abuse case の SSOT                                                                                            |
 | Evidence Status | 設計 + 公開 threat intelligence ベース (OWASP Top 10 for LLM / NIST AI RMF / MITRE ATLAS)。実測 verification は PFC-04 (Cycle 1 起稿済) で実行                                       |
 | 改版履歴        | v0.1 (2026-05-25、autonomous prod-ready loop Cycle 2): 初版作成、STRIDE × 12 layer matrix + AI/ML 固有 7 threat + insider 3 scenario + supply chain 4 scenario + key compromise 3 scenario + abuse case 12 件を catalog 化、各 threat に既存 mitigation pointer + residual risk + monitoring control 付与 |

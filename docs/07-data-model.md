@@ -21,7 +21,7 @@
 
 ## 0.1 Doc status + ガバナンス位置付け (Decision Brief P0 #1 反映)
 
-- **git 管理 (current v1.7.2、autonomous prod-ready loop Cycle 5-6 + Cycle 10 適用済)**: CLAUDE.md §Non-Negotiables 「非自明な scope 変更 (新 doc 追加) は plan を update してから実装」に従い、(1) Plan v1.5 section 追加 → ✅ 完了 + Plan **v1.7 US pivot 承認** 追加済 (`~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` L1001-1135、~1,135 行)、(2) `docs/_SSOT.md` への DM-07 row 追加 → ✅ 完了 (**v0.12、L56、current DM-07 v1.7.2 lock + US pivot 反映 + Cycle 5/6/10 operational depth 反映**)、(3) `git add docs/{07-12}*.md docs/_SSOT.md HANDOFF.md` → ✅ 完了 (`feature/prod-ready-design-loop` branch、16 commits、PR merge 待ち)。本 doc を Type B 設定承認 / Liquibase 化 / IaC bootstrap に流す前提条件は §2.9 pre-flight 3 項 (DDL validation / **US 規制 framework mapping verify (introduced in v1.4 US pivot、current v1.7.2、historical: FISC 章番号 review は v1.4 で superseded)** / streaming RPO) + PFC-09 PFC-02 counsel sign-off で別途定義
+- **git 管理 (current v1.7.2、autonomous prod-ready loop Cycle 5-6 + Cycle 10 + Cycle 13-15 governance fix 適用済)**: CLAUDE.md §Non-Negotiables 「非自明な scope 変更 (新 doc 追加) は plan を update してから実装」に従い、(1) Plan v1.5 section 追加 → ✅ 完了 + Plan **v1.7 US pivot 承認** 追加済 (`~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` L1001-1135、~1,135 行)、(2) `docs/_SSOT.md` への DM-07 row 追加 → ✅ 完了 (**v0.13、L56、current DM-07 v1.7.2 lock + US pivot 反映 + Cycle 5/6/10 operational depth + Cycle 13-15 metadata sync 反映**)、(3) git commit 全件 → ✅ 完了 (`feature/prod-ready-design-loop` branch、19 commits in prod-ready scope、worktree clean、PR scope option 選択後 main merge)。本 doc を Type B 設定承認 / Liquibase 化 / IaC bootstrap に流す前提条件は §2.9 pre-flight 3 項 (DDL validation / **US 規制 framework mapping verify (introduced in v1.4 US pivot、current v1.7.2、historical: FISC 章番号 review は v1.4 で superseded)** / streaming RPO) + PFC-09 PFC-02 counsel sign-off で別途定義
 - **SSOT 接続 (current v1.7.2)**: 本 doc が言及する `docs/_SSOT.md` §1.4 (snippet schema) / §1.5 (接続 control matrix) は既存、本 doc 側で contract を follow する立場。**`_SSOT.md` v0.13** で本 doc を **DM-07 v1.7.2 lock** として Topic mapping table L56 に登録済 (US pivot 反映 + §0.1/§2.9/§7.3 stale cleanup + §7.1 AlloyDB metadata sync)
 - **想定 reader**: AI 管理者 + 業務責任者 + Security 関係者 + Phase 1 implementation team。経営層向け summary は §0 + §2.8 + §7.3 で十分
 
@@ -2829,7 +2829,7 @@ API layer は本 doc 範囲外。OpenAPI / GraphQL schema は Phase 1 別 doc。
 ## 16. 後続 PR / TODO
 
 1. ✅ **完了 (v1.3.2 → current v1.7.2 で sync 済)** — `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` Plan v1.5 section 追加済 + Plan v1.7 US pivot 承認 (L1001-1135)
-2. ✅ **完了 (v1.3.2 → current v1.7.2 / _SSOT.md v0.11 で sync 済)** — `docs/_SSOT.md` v0.11 Topic mapping table L56 に DM-07 row 追加済
+2. ✅ **完了 (v1.3.2 → current v1.7.2 / _SSOT.md v0.13 で sync 済、autonomous prod-ready loop Cycle 7-15)** — `docs/_SSOT.md` v0.13 Topic mapping table L56 に DM-07 row 追加済 (Cycle 7 起稿 → Cycle 13/14/15 で version sync)
 3. **§2.9 Phase 1 pre-flight checklist 3 項 完了** (introduced in v1.4 US pivot、current v1.7.2: DDL syntactic validation / **US 規制 framework mapping verify** (NYDFS 500 + FRB SR 11-7 + OCC + BSA-AML + OFAC + GLBA + State、§13 #3 と同期、FISC 章番号 review は v1.4 で superseded) / streaming export RPO 計測)
 4. `db/changelog/v1.0.0/` に Liquibase changeset 起稿 (Phase 1 着手時、§2.9 #1 と同時)
 5. CDK / Terraform IaC repo の bootstrap (Aurora cluster + S3 OL bucket + KMS keys + Secrets rotation + Kinesis Firehose audit pipeline)

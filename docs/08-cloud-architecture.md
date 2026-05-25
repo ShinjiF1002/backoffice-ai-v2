@@ -36,7 +36,7 @@
 - **SSOT 接続 (introduced in v2.2、current v2.6)**: ✅ 完了 — `docs/_SSOT.md` **v0.11** に DOC-CA-08 row 追加済 (L57、US pivot 反映)、Plan **v1.7** で US pivot 承認 + Plan v1.6.1 で v1.1 lock done-mark 済 (~1,135 行)。本 doc §16 / §20 も同 PR で sync (DM-07 v1.3.2 governance metadata sync pattern の予防適用、v1.2 / v2.0 / v2.2 / v2.3.2 で継続実体化)
 - **External critic (v1.2 で done-mark)**: ✅ 完了 — Round 1 で 12 critical finding (4 Fail + 8 Concern) + 3 prerequisite 全件 v1.1 で反映、加えて user Decision Brief で ADR-4 (Bedrock in-region) P0 を検出 → v1.2 で全件 fix、v2.0 で US pivot、v2.1 / v2.2 で active stale cleanup
 - **想定 reader**: AI 管理者 + Security 関係者 + Network team + SRE team + Phase 1 implementation team。経営層向け summary は §0 + §13 ADR + §14 Cost
-- **残 pending**: `git add docs/{07-12}*.md docs/_SSOT.md` (user 領域、**current: DM-07 v1.7.2 + DOC-CA-08 v2.6 + 4 NEW doc (PFC-09 v0.2 / TM-10 v0.1 / SRE-11 v0.1 / CEM-12 v0.2) + _SSOT.md v0.12 + Plan v1.7** を feature branch で commit、PR merge 推奨) のみ
+- **Pre-merge action**: 6 doc + HANDOFF + _SSOT は `feature/prod-ready-design-loop` branch で全 commit 済 (19 commits、worktree clean)。**Current state**: DM-07 v1.7.2 + DOC-CA-08 v2.6 + 4 NEW doc (PFC-09 v0.2 / TM-10 v0.1 / SRE-11 v0.1 / CEM-12 v0.2) + _SSOT.md v0.13 + Plan v1.7。**Remaining decision**: PR scope option ((a) rebase from baseline `09e1e76` / (b) PR-only branch を Day 22 commits 除外で切り直し) を user 選択後 main merge
 
 ---
 
@@ -1657,5 +1657,5 @@ R10 と §15.3 の整合: 両 region Cognito + Entra federation で employee_ref
 10. **Cost approval gate** (Phase 1 case 件数想定確定後、§14 current US region pricing (introduced in v2.0) で再計算、経営層 approval)
 11. ✅ **closed (v2.0)** — ADR-4 3 択 gate は US pivot で Option A trivially closure
 12. **Phase 1 schema extension candidates**: `dr_paused` state + `cu_action_allowlist` field + `dr_approver_sub_snapshot` field (open question §17 #7 / #17)
-13. `git add docs/07-data-model.md docs/08-cloud-architecture.md docs/_SSOT.md` (user 領域、1 commit 推奨、v2.3.2 lock 後)
+13. ✅ **完了 (autonomous prod-ready loop Cycle 0-15、`feature/prod-ready-design-loop` 19 commits、worktree clean)** — 6 doc (07-12) + HANDOFF.md + _SSOT.md (v0.13) を全 commit 済、PR scope option 選択後 main merge
 14. **DOC-CA-09 起稿** (Phase 2、JP parent layer SOP — cross-border data flow / 連結 reporting / supervisory submission、open question §17 #28)

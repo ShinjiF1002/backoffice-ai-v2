@@ -1,10 +1,11 @@
 # Backoffice AI v2 — Phase 1 Design Hand-off (autonomous loop 完了報告、pre-merge review pending)
 
 > **branch**: `feature/prod-ready-design-loop`
-> **prod-ready baseline commit**: `09e1e76` (autonomous loop scope の起点、Day 22 slide deck commits は本 hand-off 対象外)
-> **prod-ready scope commits**: 21 (baseline `09e1e76` + Cycle 1-15 + 各 row hash 確定 commit を含めた cumulative count、`09e1e76^..HEAD` = 21 / `main..HEAD` = 23 で Day 22 slide deck 2 commits contaminate / 厳密 commit count は `git log --oneline 09e1e76^..HEAD | wc -l` で都度参照、本値は post-Cycle-15 snapshot)
+> **prod-ready baseline commit**: `a258be5` (autonomous loop scope の起点、Day 22 slide deck commits は本 hand-off 対象外)
+> **prod-ready scope commits**: 22 (baseline `a258be5` + Cycle 1-15 + 各 row hash 確定 commit、`main..HEAD` = 22 で全件 prod-ready scope only / Day 22 contamination は **post-Cycle-15 rebase で除外済** / 厳密 commit count は `git log --oneline main..HEAD | wc -l` で都度参照)
+> **rebase trace**: 2026-05-25 post-Cycle-15 で `git rebase --onto main 9b4f372 feature/prod-ready-design-loop` を実行、prod-ready scope 22 commits を main 直上に replay。全 commit hash が rewrite され (pre-rebase `09e1e76`→post-rebase `a258be5` 等)、HANDOFF §1 Deliverable table の hash は post-rebase 値に sync 済。Pre-rebase hash の original commits は `prod-ready-pre-rebase-<unix>` tag に保護、Day 22 slide deck commits は `origin/day-22-slide-deck` remote branch で別途保護
 > **scope**: Phase 1 hand-off package の 6 doc + HANDOFF.md を design-complete state に到達させる autonomous loop
-> **status**: ⚠ **pre-merge review pending (PR scope option 選択のみ残存、active stale literal 0)**。Design SSOT は本番投入意思決定会議 (Type B 設定承認) に持ち込める state に到達、ただし **pre-flight 外部 7 項 (DOC-PFC-09)** + **counsel sign-off (DOC-CEM-12)** + **経営層 Type B approval** が Phase 1 着手 prerequisite。**PR 切り出し方**: (a) `feature/prod-ready-design-loop` を `09e1e76 baseline` から rebase / squash-merge で main 直接 merge、または (b) Day 22 commits を除外する PR-only branch を切り直し
+> **status**: ✅ **rebase-ready (PR scope option (a) 適用済、main..HEAD = 22 commits prod-ready only)**。Design SSOT は本番投入意思決定会議 (Type B 設定承認) に持ち込める state に到達、ただし **pre-flight 外部 7 項 (DOC-PFC-09)** + **counsel sign-off (DOC-CEM-12)** + **経営層 Type B approval** が Phase 1 着手 prerequisite。**Next**: `git push origin feature/prod-ready-design-loop` + `gh pr create --base main` で PR 提出
 
 ---
 
@@ -30,25 +31,25 @@
 
 | Cycle | Deliverable | Doc / Sections | 行数 (実測) | Commit |
 |---|---|---|---|---|
-| 0 | Baseline | DM-07 v1.6.2 + CA-08 v2.3.2 onto feature branch | (existing) | `09e1e76` |
-| 1 | **NEW** Pre-Flight Execution Checklist | `docs/09-pre-flight-execution-checklist.md` v0.1→v0.2 | 462 | `74e101c` |
-| 2 | **NEW** Threat Model | `docs/10-threat-model.md` v0.1 (STRIDE × 12 layer × TB10、75 threat ID) | 305 | `58588c4` |
-| 3 | **NEW** SRE Runbook | `docs/11-sre-runbook.md` v0.1 (5 SLO + S0-S4 severity + 12 runbook + DR drill SOP) | 524 | `a85a5e3` |
-| 4 | **NEW** Compliance Evidence Matrix | `docs/12-compliance-evidence-matrix.md` v0.1→v0.2 | 279 | `1143149` |
-| 5 | DM-07 §5.10 + §9.5 + §9.6 | row-level encryption + audit chain repair + right-to-erasure resolution | +258 | `6cd4e3f` |
-| 6 | DM-07 §10.10 - §10.13 | PITR drill + RDS Proxy fail-mode + Liquibase + migration harness | +278 | `1168417` |
-| 7 | CA-08 §14.6 + §14A | FinOps governance + Tenant onboarding/offboarding SOP | +145 | `49de1f3` |
-| - | _SSOT.md v0.12 (→ v0.13 in Cycle 13 batch fix) | 6 new doc rows | +7 | `52c5772` |
-| 8.5 | **CA-08 v2.5 P0-V Bedrock correction** | AWS 公式 model card 再 verify で誤前提発覚 → ADR-4 active rewrite to Geo CRIS default | +122 | `55713dd` |
-| 9 | PFC-09 v0.2 + CEM-12 v0.2 | Cycle 8.5 downstream sync | +17 | `c89a094`, `0ec021b` |
-| 10 | DM-07 §10.14 expand-contract | 7 schema migration scenario × per-scenario SOP (angle pivot: operational) | +241 | `961b917` |
-| 11 | CA-08 §14.6.7 Geo CRIS cost | cross-region transfer cost deep dive (angle pivot: FinOps) | +74 | `7c4b37f` |
-| 12 | Final integration sweep | 13 version reference + 5 targeted stale → 0 active stale | +14/-14 | `7130314` |
-| 13 | HANDOFF.md + memory write | autonomous loop final summary | +162 | `be3238b` |
-| 14 (post-review batch fix #1) | **User review P1/P2 finding 一次反映**: CA-08 §0.1 status line v2.6 sync + DM-07 §0.1 v1.7.2 sync + _SSOT.md L56-61 4 row update + _SSOT.md self v0.13 + HANDOFF.md commits / version / surface 修正 + PR scope contamination 注記 + PR-ready トーンダウン (pre-merge review pending 明示) + 6 件 active stale 追加 fix (CA-08 §文書名 / §0 / line 1609 / DM-07 line 25 / ASCII diagram x3) | +44/-23 | `1fcb25d` |
-| 15 (post-review batch fix #2、residual active stale 全件 closure) | User Cycle 14 finding (residual `current v2.3.2` x32 + `current v1.6.2` x25 = 57 active stale 残存) を bulk bump fix。改版履歴 row のみ historical narrative として保留、それ以外の active prose で `current v2.3.2 → v2.6` / `current v1.6.2 → v1.7.2` を全面 sync | +58/-57 | `367926d` |
-| 16 (HANDOFF row hash 確定) | Cycle 15 commit hash の row update | +1/-1 | `28efe61` |
-| 17 (post-review micro-fix #3、handoff governance metadata closure) | **User Cycle 15 finding: handoff/governance metadata stale**: (i) commit count 16/18 → 19/21 (`09e1e76^..HEAD` = 19, `main..HEAD` = 21)、(ii) CA-08 §0.1 "残 pending git add" 文言が worktree clean 後も残存 → "Pre-merge action: PR scope selection" に rewrite、(iii) CA-08 §20 #13 TODO の `git add` pending + `v2.3.2 lock 後` → `19 commits / worktree clean / PR scope option` に rewrite、(iv) DM-07 §16 #2 `_SSOT.md v0.11 sync 済` → `v0.13 sync 済` + Cycle 7-15 trace 追加、(v) HANDOFF L182/L184 "User の P0 確認待ち" → "User Cycle 14 で confirm、P0 closed"、(vi) HANDOFF doc surface 6,234→6,072 (core) + 6,256 (+HANDOFF) + 6,489 (+_SSOT) 実測値、(vii) HANDOFF commit count 16→19 (prod-ready scope)、(viii) §8 §0 P0 row を "P0 (closed)" に更新 | +14/-12 | `da894c5` |
+| 0 | Baseline | DM-07 v1.6.2 + CA-08 v2.3.2 onto feature branch | (existing) | `a258be5` |
+| 1 | **NEW** Pre-Flight Execution Checklist | `docs/09-pre-flight-execution-checklist.md` v0.1→v0.2 | 462 | `fd547d8` |
+| 2 | **NEW** Threat Model | `docs/10-threat-model.md` v0.1 (STRIDE × 12 layer × TB10、75 threat ID) | 305 | `213eada` |
+| 3 | **NEW** SRE Runbook | `docs/11-sre-runbook.md` v0.1 (5 SLO + S0-S4 severity + 12 runbook + DR drill SOP) | 524 | `3d97dbe` |
+| 4 | **NEW** Compliance Evidence Matrix | `docs/12-compliance-evidence-matrix.md` v0.1→v0.2 | 279 | `4ea4a08` |
+| 5 | DM-07 §5.10 + §9.5 + §9.6 | row-level encryption + audit chain repair + right-to-erasure resolution | +258 | `c3c8aca` |
+| 6 | DM-07 §10.10 - §10.13 | PITR drill + RDS Proxy fail-mode + Liquibase + migration harness | +278 | `90f05f7` |
+| 7 | CA-08 §14.6 + §14A | FinOps governance + Tenant onboarding/offboarding SOP | +145 | `41d7c40` |
+| - | _SSOT.md v0.12 (→ v0.13 in Cycle 13 batch fix) | 6 new doc rows | +7 | `13bf864` |
+| 8.5 | **CA-08 v2.5 P0-V Bedrock correction** | AWS 公式 model card 再 verify で誤前提発覚 → ADR-4 active rewrite to Geo CRIS default | +122 | `58604c9` |
+| 9 | PFC-09 v0.2 + CEM-12 v0.2 | Cycle 8.5 downstream sync | +17 | `2247a7e`, `7079b30` |
+| 10 | DM-07 §10.14 expand-contract | 7 schema migration scenario × per-scenario SOP (angle pivot: operational) | +241 | `2539e21` |
+| 11 | CA-08 §14.6.7 Geo CRIS cost | cross-region transfer cost deep dive (angle pivot: FinOps) | +74 | `df3c7ce` |
+| 12 | Final integration sweep | 13 version reference + 5 targeted stale → 0 active stale | +14/-14 | `5e55bd3` |
+| 13 | HANDOFF.md + memory write | autonomous loop final summary | +162 | `3858c08` |
+| 14 (post-review batch fix #1) | **User review P1/P2 finding 一次反映**: CA-08 §0.1 status line v2.6 sync + DM-07 §0.1 v1.7.2 sync + _SSOT.md L56-61 4 row update + _SSOT.md self v0.13 + HANDOFF.md commits / version / surface 修正 + PR scope contamination 注記 + PR-ready トーンダウン (pre-merge review pending 明示) + 6 件 active stale 追加 fix (CA-08 §文書名 / §0 / line 1609 / DM-07 line 25 / ASCII diagram x3) | +44/-23 | `13daceb` |
+| 15 (post-review batch fix #2、residual active stale 全件 closure) | User Cycle 14 finding (residual `current v2.3.2` x32 + `current v1.6.2` x25 = 57 active stale 残存) を bulk bump fix。改版履歴 row のみ historical narrative として保留、それ以外の active prose で `current v2.3.2 → v2.6` / `current v1.6.2 → v1.7.2` を全面 sync | +58/-57 | `8ce8d8e` |
+| 16 (HANDOFF row hash 確定) | Cycle 15 commit hash の row update | +1/-1 | `11eee9a` |
+| 17 (post-review micro-fix #3、handoff governance metadata closure) | **User Cycle 15 finding: handoff/governance metadata stale**: (i) commit count 16/18 → 19/21 (`a258be5^..HEAD` = 19, `main..HEAD` = 21)、(ii) CA-08 §0.1 "残 pending git add" 文言が worktree clean 後も残存 → "Pre-merge action: PR scope selection" に rewrite、(iii) CA-08 §20 #13 TODO の `git add` pending + `v2.3.2 lock 後` → `19 commits / worktree clean / PR scope option` に rewrite、(iv) DM-07 §16 #2 `_SSOT.md v0.11 sync 済` → `v0.13 sync 済` + Cycle 7-15 trace 追加、(v) HANDOFF L182/L184 "User の P0 確認待ち" → "User Cycle 14 で confirm、P0 closed"、(vi) HANDOFF doc surface 6,234→6,072 (core) + 6,256 (+HANDOFF) + 6,489 (+_SSOT) 実測値、(vii) HANDOFF commit count 16→19 (prod-ready scope)、(viii) §8 §0 P0 row を "P0 (closed)" に更新 | +14/-12 | `e654cd9` |
 
 **Total doc surface (実測 2026-05-25 post-Cycle-15)**: core 6 docs **6,072 行** (DM-07 2,841 + CA-08 1,661 + PFC-09 462 + TM-10 305 + SRE-11 524 + CEM-12 279) + **HANDOFF.md 184 行** = **6,256 行**、`_SSOT.md` (233 行) 込みで **6,489 行**。
 
@@ -177,7 +178,7 @@ User の structured review で 5 finding 検出、本 Cycle 13 で batch fix:
 | **P0 (closed)** | Haiku 4.5 us-east-1 In-Region YES claim が AWS 公式 model card と乖離との初期指摘 → **User 再 verify で Cycle 13 pushback が正と confirm**、closure | **Primary source 再 fetch (2026-05-25 freshly fetched)** で AWS 公式 [Haiku 4.5 model card](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-haiku-4-5.html) Regional Availability table で **us-east-1 In-Region: icon-yes (=YES)** であることを再確認。In-Region available 5 region (us-east-1 / eu-north-1 / eu-west-1 / ap-northeast-1 Tokyo / ap-southeast-4 Melbourne) は Sonnet 4.6 (両 region NO) と異なる model card 上の data point。**User judgement (Cycle 14): Cycle 13 pushback 正、claim keep**。P0 closure |
 | P1 | active stale = 0 claim 撤回必要 (CA-08 §0.1 line 3 `v2.3.2 current` + `DM-07 v1.6.2` 残存、DM-07 §0.1 line 24 `current v1.6.2` + `_SSOT.md v0.11` 残存) | ✅ fix済 (Cycle 13 batch): CA-08 status line v2.6 + DM-07 v1.7.2 reference、DM-07 §0.1 v1.7.2 self-reference + _SSOT.md v0.12 reference に sync |
 | P1 | HANDOFF.md metadata (commits 14、PFC-09 v0.1、CEM-12 v0.1、Total 6,072) | ✅ fix済 (Cycle 13 batch): commits は prod-ready scope 16 (baseline + Cycle 1-12 + HANDOFF) に訂正、PFC-09 v0.1→v0.2 / CEM-12 v0.1→v0.2 表記訂正、Total surface 6,234 行に訂正、本 Cycle 13 batch fix 反映後は概算 6,434 行 (HANDOFF.md 拡張分) |
-| P1 | PR scope contamination (main..HEAD 18 commits に Day 22 slide deck 2 commits = `9b4f372` + `8239c1c` が含まれる) | ✅ 明示済 (Cycle 13 batch): HANDOFF.md header に `prod-ready baseline commit: 09e1e76` + `prod-ready scope commits: 16` + `Day 22 slide deck commits は本 hand-off 対象外` + PR 切り出し方 2 option (rebase from baseline / 別 PR-only branch) を pin |
+| P1 | PR scope contamination (main..HEAD 18 commits に Day 22 slide deck 2 commits = `9b4f372` + `8239c1c` が含まれる) | ✅ 明示済 (Cycle 13 batch): HANDOFF.md header に `prod-ready baseline commit: a258be5` + `prod-ready scope commits: 16` + `Day 22 slide deck commits は本 hand-off 対象外` + PR 切り出し方 2 option (rebase from baseline / 別 PR-only branch) を pin |
 | P2 | _SSOT.md L56-61 row stale (DM-07 v1.7.1 / CA-08 v2.4 / PFC-09 v0.1 / CEM-12 v0.1) | ✅ fix済 (Cycle 13 batch): 4 row update + _SSOT.md self version v0.12 → v0.13 + changelog 更新 |
 
 **P0 closure trace**:

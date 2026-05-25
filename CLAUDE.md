@@ -1,5 +1,7 @@
 # CLAUDE.md - Backoffice AI v2
 
+> **Research-compounder Recipe** — 設計書 (compliance / threat / SRE / HIL) は [`research-compounder/templates/artifact-recipes/ai-agent-spec.md`](../research-compounder/templates/artifact-recipes/ai-agent-spec.md) (R4) を起動 ladder として使用。Ship Gate 12 items + OWASP LLM Top 10 + Eval 4 階層 + Compliance matrix を継承。UI prototype は [R7](../research-compounder/templates/artifact-recipes/ai-native-ui-spec.md)、Session 4 board pitch は [R2](../research-compounder/templates/artifact-recipes/board-decision-deck.md)。Entry-point: [`research-compounder/PRODUCE.md`](../research-compounder/PRODUCE.md)。
+
 Backoffice 業務に AI Agent を段階自動化する構想 の v2 repo。cowork-workshop Session 4 (2026-06-12 Fri) で構想共有するための「設計書 + UI prototype + workshop demo」の 3 点 set。
 
 ## Plan

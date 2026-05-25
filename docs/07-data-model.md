@@ -6,7 +6,7 @@
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 文書 ID         | DOC-DM-07                                                                                                                                                                                                                                   |
 | 文書名          | Data Model & Persistence Architecture (logical model + physical schema + DB 技術選定 + immutable audit + ops playbook)                                                                                                                      |
-| 版数            | v1.7.1 (autonomous prod-ready loop Cycle 5-6: §5.10 row-level encryption + §9.5 audit chain repair playbook + §9.6 right-to-erasure × audit immutability conflict resolution + §10.10 PITR drill SOP + §10.11 RDS Proxy fail-mode runbook (FM-1 ~ FM-6) + §10.12 Liquibase changelog naming + lock convention + §10.13 prototype → physical migration validation harness) |
+| 版数            | v1.7.2 (autonomous prod-ready loop Cycle 5-6 + Cycle 10: §5.10 row-level encryption + §9.5 audit chain repair playbook + §9.6 right-to-erasure × audit immutability conflict resolution + §10.10 PITR drill SOP + §10.11 RDS Proxy fail-mode runbook (FM-1 ~ FM-6) + §10.12 Liquibase changelog naming + lock convention + §10.13 prototype → physical migration validation harness + **§10.14 Expand-Contract schema migration choreography (SM-1 ~ SM-7 7 scenario × per-scenario SOP + 5 invariant + 5 anti-pattern)**) |
 | ステータス      | Phase 1 hand-off Draft (前提条件未充足、§2.9 + §0.1 参照、production-ready claim 撤回済)                                                                                                                                                    |
 | オーナー        | backoffice-ai-v2 maintainer (AI 管理者 + 業務責任者 + Security 関係者 合議想定)                                                                                                                                                             |
 | 承認者          | 設定承認 Type B (Security-impacting、外部接続 + PII scope + 鍵管理を含むため) + Type C (Trust Level 進化 path を機械的に enforce する schema を含むため、業務責任者 co-A)                                                                    |
@@ -2476,6 +2476,246 @@ db/validation-harness/
 2. Day 14: medium-fi 切替時点で Daily 全 set を staging cluster で run、green status 確認
 3. Day 18: high-fi 完了時点で Weekly 全 set + PII test run、KMS Decrypt audit OK 確認
 4. Day 22: Pre-production deploy harness (07 test set + 02 production seed dry-run) を Type B 設定承認 input に bundle
+
+---
+
+### 10.14 Expand-Contract schema migration choreography (6 scenario × SOP、introduced in v1.7.2、autonomous prod-ready loop Cycle 10)
+
+§10.4 で expand-contract pattern を 3 段 (expand / migrate / contract) で pin、§10.5 + §10.12 で Liquibase forward-only を pin。本 §10.14 で **頻出 schema change 6 scenario** × per-scenario expand-contract choreography を SSOT 化、Phase 1 ops 開始後の schema evolution を mechanical execution 化する。
+
+#### 10.14.1 6 scenario catalog
+
+| Scenario ID | 内容                                                              | Risk class | Liquibase changeset count (典型値) | Multi-release required |
+| ----------- | ----------------------------------------------------------------- | ---------- | ---------------------------------- | ---------------------- |
+| SM-1        | **新 column 追加 (nullable / default あり)**                       | Low        | 1 changeset                        | No                     |
+| SM-2        | **新 column 追加 (NOT NULL + backfill 必要)**                      | Medium     | 3 changeset (add nullable → backfill → enforce NOT NULL) | **Yes (3 release)** |
+| SM-3        | **既存 column rename**                                            | High       | 4 changeset (新 column add → backfill → application cutover → 旧 column drop) | **Yes (3-4 release)** |
+| SM-4        | **既存 column type 変更 (例: TEXT → BIGINT)**                     | High       | 4-5 changeset (新 column add → backfill → constraint check → application cutover → 旧 drop) | **Yes (3-4 release)** |
+| SM-5        | **既存 table rename (e.g., `case` → `case_record` v1.1 で実施済)** | Very High  | 6+ changeset (新 table create → trigger sync → application cutover → 旧 table drop) | **Yes (4+ release)** |
+| SM-6        | **既存 partition table への range partition 追加** (e.g., new month partition for audit_event) | Low        | 1 changeset (pg_partman BGW disabled time window で SM-6.x)、Blue/Green との衝突は §10.4.1 SOP 適用 | No |
+| SM-7        | **既存 index online rebuild (CONCURRENTLY)**                       | Medium     | 1 changeset (`CREATE INDEX CONCURRENTLY` + `DROP INDEX CONCURRENTLY old`) | No (但し Blue/Green との衝突注意) |
+
+#### 10.14.2 SM-1: 新 column 追加 (nullable / default あり)
+
+**Choreography**: 単一 release で完結、application read/write は新 column を ignore 可能。
+
+```xml
+<!-- db/changelog/v0.2.0/010-001-add-case-record-priority.xml -->
+<changeSet id="010-001-add-case-record-priority" author="ai-mgr@example.com">
+  <addColumn tableName="case_record" schemaName="app">
+    <column name="priority" type="VARCHAR(16)" defaultValue="normal">
+      <constraints nullable="true"/>
+    </column>
+  </addColumn>
+  <rollback>
+    <dropColumn tableName="case_record" schemaName="app" columnName="priority"/>
+  </rollback>
+</changeSet>
+```
+
+**SOP**:
+1. Deploy changeset (Liquibase forward-only)
+2. Application は新 column を read/write しない (= ignore) 状態で Phase 1 通常稼働
+3. 新 feature が必要になった時点で application code で write/read 開始
+
+**Risk gates**: Squawk linter で `Adding column with default value rewrites entire table` 警告が出る → 大 table (`audit_event` 等) は `DEFAULT` を後付け add (SM-2 pattern に切替) が safer。
+
+#### 10.14.3 SM-2: 新 column 追加 (NOT NULL + backfill 必要)
+
+**Choreography**: 3 release sequence、各 release は数日 ~ 1 sprint 跨いで safe。
+
+```
+Release N (expand):
+  - Step 1: nullable で add (default 不要、application 側で write 開始)
+  - changeset 010-N-001-add-X-nullable
+
+Release N+1 (migrate):
+  - Step 2: backfill script を Step Functions で実行
+    - per-partition or per-tenant で chunk、locking 最小化
+    - audit_event 等 large table は monthly partition 単位で進める
+  - changeset 010-N+1-001-backfill-X (custom SQL or stored proc)
+
+Release N+2 (contract):
+  - Step 3: NOT NULL 制約 enforce
+  - changeset 010-N+2-001-enforce-X-not-null (USING expression あり)
+```
+
+**SOP**:
+1. Release N で新 column nullable add (即時)、application 側で書き込みのみ開始 (read は old/new 両 path で互換性確保)
+2. Release N+1 で Step Functions backfill job 実行 (per-partition、idempotent、failure 時 partition 単位 retry)、完了 verify (`SELECT COUNT(*) WHERE new_col IS NULL = 0`)
+3. Release N+2 で `ALTER TABLE ... ALTER COLUMN new_col SET NOT NULL` (Aurora PG 16 は scan、`audit_event` 等 large table は schema lock 短く)
+
+**Risk gates**:
+- Step 2 backfill 中に application が NULL を新規 insert する可能性 → application code で NOT NULL を先 enforce、Step 3 は schema 側を rectify (= application NOT NULL が release N から先行)
+- Squawk linter で `SET NOT NULL` を large table で警告 → release N+2 で `ALTER TABLE ... VALIDATE CONSTRAINT` 経路 (PG 16 `NOT VALID` then `VALIDATE`) も検討
+
+#### 10.14.4 SM-3: 既存 column rename
+
+**Choreography**: 4 release sequence、application cutover が core。
+
+```
+Release N (expand):
+  - Step 1: 新 column add (`new_name`、type は old と同じ)
+  - changeset 010-N-001-add-new-name
+
+Release N+1 (sync trigger):
+  - Step 2: BEFORE INSERT/UPDATE trigger で old ↔ new 値 sync (cross-write)
+  - changeset 010-N+1-001-trigger-sync-old-new
+
+Release N+2 (backfill):
+  - Step 3: existing row backfill (Step Functions)
+  - changeset 010-N+2-001-backfill-new-name
+
+Release N+3 (application cutover):
+  - Step 4: application code が new_name のみ read/write、old_name は trigger 経由で auto-sync
+  - (no schema change、application deploy のみ)
+
+Release N+4 (contract):
+  - Step 5: sync trigger drop + old column drop
+  - changeset 010-N+4-001-drop-old-name-and-trigger
+```
+
+**SOP**:
+1. Release N で新 column add (nullable で OK、後段 trigger で fill)
+2. Release N+1 で sync trigger deploy:
+   ```sql
+   CREATE OR REPLACE FUNCTION sync_old_new_name() RETURNS TRIGGER AS $$
+   BEGIN
+     IF NEW.new_name IS NOT NULL AND NEW.old_name IS NULL THEN
+       NEW.old_name := NEW.new_name;
+     ELSIF NEW.old_name IS NOT NULL AND NEW.new_name IS NULL THEN
+       NEW.new_name := NEW.old_name;
+     END IF;
+     RETURN NEW;
+   END;
+   $$ LANGUAGE plpgsql;
+   CREATE TRIGGER trg_sync_old_new BEFORE INSERT OR UPDATE ON app.case_record FOR EACH ROW EXECUTE FUNCTION sync_old_new_name();
+   ```
+3. Release N+2 で existing row backfill (`UPDATE app.case_record SET new_name = old_name WHERE new_name IS NULL`、partition 単位)
+4. Release N+3 で application cutover (deploy のみ、schema 不変)
+5. Release N+4 で trigger + old column drop
+
+**Risk gates**:
+- Step 4 application cutover が all-or-nothing でない場合 (canary deploy) → trigger sync が両 path をカバーする限り safe
+- Step 5 drop は destructive、Squawk linter で magic comment `[liquibase-destructive-approved]` + 2 reviewer 必須
+
+#### 10.14.5 SM-4: 既存 column type 変更 (TEXT → BIGINT 等)
+
+**Choreography**: SM-3 と類似、ただし type 変換 logic が必要。
+
+```
+Release N: 新 column add (BIGINT、nullable)
+Release N+1: trigger で type 変換 sync (TEXT → BIGINT、parse failure 時は default + audit log)
+Release N+2: backfill (`UPDATE ... SET new_col = old_col::BIGINT WHERE ...` per partition)
+Release N+3: application cutover (BIGINT 側を canonical に)
+Release N+4: type validation 完了 verify + old column drop
+```
+
+**Risk gates**:
+- TEXT → BIGINT 変換失敗 (non-numeric data) → backfill で `parse_int_safe` 関数を使う、failure row は `audit_event 'schema_migration_parse_fail'` で record、Compliance officer review 経路
+- Aurora PG 16 で `ALTER COLUMN TYPE` は full table rewrite を引き起こす → 大 table では SM-4 expand-contract が唯一 viable approach
+
+#### 10.14.6 SM-5: 既存 table rename (case → case_record v1.1 で実施済 lesson)
+
+**Choreography**: 最高 risk、v1.1 で実施済。次回適用時の SOP として固定:
+
+```
+Release N: 新 table create (= 旧 table の DDL clone + 新名)
+Release N+1: trigger で 旧 → 新 sync (cross-write)
+Release N+2: existing row backfill (大 table の場合 partition 単位)
+Release N+3: application cutover (canonical = 新 table)
+Release N+4: 旧 → 新 sync trigger reverse direction (新 → 旧 を keep、application が writeback する case 防御)
+Release N+5: monitoring period (1-2 sprint、旧 table への直接 write 0 を verify)
+Release N+6: 旧 table drop + trigger drop
+```
+
+**SOP**:
+1. v1.1 で実施済の trace は §2.8 patch trace 参照
+2. **Postgres 予約語衝突** (`case` 等) は最初の DDL 作成時に避ける、後付け rename は SM-5 高 risk
+3. FK / index / trigger / RLS policy は新 table に対し full set redeploy 必要、Liquibase changeset で network state migration を伴う場合あり
+
+**Risk gates**:
+- Release N+5 monitoring で旧 table への直接 write を CloudWatch CDC stream で detect、0 が連続 1 sprint 達成まで Release N+6 待機
+- Drop changeset は `[liquibase-destructive-approved]` + Type B 設定承認
+
+#### 10.14.7 SM-6: 既存 partition table への range partition 追加
+
+**Choreography**: `pg_partman` BGW で自動化されているが、Blue/Green との衝突は §10.4.1 で SOP 化。
+
+```
+通常 ops (Blue/Green 不要):
+  - pg_partman maintenance_proc が monthly に新 partition 自動生成
+  - audit_event_2026_06、audit_event_2026_07 等
+
+Blue/Green window 中 (SM-6 衝突防御):
+  - §10.4.1 SOP 適用: BGW disable → manual pre-create → switchover → BGW re-enable
+```
+
+**SOP**:
+1. 通常 ops では `pg_partman.run_maintenance_proc()` が cron 経由で自動 partition 生成
+2. Blue/Green window 7 day 前から `pg_partman_bgw.interval = 0` で停止 + 必要 partition pre-create
+3. Blue/Green switchover 後 BGW re-enable + `show_partitions()` で sync 確認
+
+#### 10.14.8 SM-7: 既存 index online rebuild
+
+**Choreography**: `CREATE INDEX CONCURRENTLY` で online build、Blue/Green と衝突注意。
+
+```xml
+<changeSet id="010-N-001-rebuild-index-concurrently" author="ai-mgr@example.com" runInTransaction="false">
+  <!-- CONCURRENTLY は transaction 内不可、runInTransaction=false 必須 -->
+  <sql>
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_case_record_workflow_status_v2
+      ON app.case_record (workflow_id, status, received_at DESC)
+      INCLUDE (assignee_user_id, alert_count);
+  </sql>
+  <sql>
+    DROP INDEX CONCURRENTLY IF EXISTS app.idx_case_record_workflow_status_v1;
+  </sql>
+  <rollback>
+    <!-- CONCURRENTLY rollback は別 changeset 推奨、Liquibase rollback 経由は注意 -->
+    <sql>
+      DROP INDEX CONCURRENTLY IF EXISTS app.idx_case_record_workflow_status_v2;
+      CREATE INDEX CONCURRENTLY idx_case_record_workflow_status_v1 ON app.case_record (workflow_id, status, received_at DESC);
+    </sql>
+  </rollback>
+</changeSet>
+```
+
+**SOP**:
+1. `runInTransaction="false"` 必須 (CONCURRENTLY は transaction 不可)
+2. New index build 中は table への DML は通常通り continue
+3. Build 完了 verify (`SELECT pg_size_pretty(pg_relation_size('new_idx'))` で 0 でない確認)
+4. 旧 index drop は確認後に独立 changeset で
+
+**Risk gates**:
+- Build 中 connection lost で `INVALID` 状態 (`SELECT * FROM pg_indexes WHERE indisvalid = false`) → drop + retry
+- Blue/Green window 中の `CREATE INDEX CONCURRENTLY` は green 側が logical replication consume に追加負荷 → schedule 外す
+
+#### 10.14.9 Scenario 横断 invariants
+
+全 6 scenario に共通する 5 invariant:
+
+1. **Forward-only**: rollback changeset は 緊急時のみ、Phase 1 ops では rollback 非運用 default (§10.5)
+2. **Idempotent**: 全 changeset は二度 apply で deterministic 失敗 (Liquibase hash check)、再実行 safe
+3. **Atomic per changeset**: 1 changeset = 1 schema change unit、cross-changeset transaction 不可
+4. **Blue/Green compatible**: 全 schema change は Aurora Blue/Green Deployment で expand pattern が green 側で先 apply 可能 (destructive は contract phase)、§10.4.1 衝突 SOP 適用
+5. **Audit trail**: 全 schema change は `audit_event (event_type='schema_migration', subtype=<scenario_id>, changeset_id=<liquibase_id>)` で record、Type B 設定承認 chain と integrity
+
+#### 10.14.10 Phase 1 着手後の scenario 実施 process
+
+1. AI 管理者 が schema change request を起案 (changeset draft + scenario ID 指定)
+2. Security 関係者 + SRE が expand-contract release sequence を CI で validate (Squawk linter + DM-07 §10.13 validation harness)
+3. Type B 設定承認 (Security-impacting な schema change の場合) で経営層 sign-off
+4. Release calendar に組み込み、cross-region (us-east-1 + us-west-2) sequential apply
+5. 各 release 完了で `audit_event` emit、DM-07 §10.13 harness で per-PR + daily + weekly verification
+
+#### 10.14.11 Anti-pattern (禁則)
+
+- ❌ `ALTER TABLE ... ALTER COLUMN TYPE` を大 table に直接適用 (full rewrite + schema lock)、SM-4 expand-contract が必須
+- ❌ `DROP COLUMN` を single changeset で実施 (= destructive、SM-3 / SM-5 multi-release pattern が必須)
+- ❌ `RENAME COLUMN` を application cutover なしで直接適用 (application breakage)、SM-3 が必須
+- ❌ `CREATE INDEX` (CONCURRENTLY なし) を production で apply (schema lock、SM-7 が必須)
+- ❌ schema_migration audit_event の omit (compliance / SOX ITGC violation、Compliance officer escalation)
 
 ---
 

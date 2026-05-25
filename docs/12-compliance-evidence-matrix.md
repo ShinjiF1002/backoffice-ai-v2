@@ -208,12 +208,12 @@ State law 適用は **実 operating state** に依存。Phase 1 で external leg
 | Right                     | Design evidence pointer                                                                                                                     | Status        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | Right to know             | (Customer-facing API + UI で response、本 doc 範囲外)                                                                                         | ⏸ Pending     |
-| Right to delete           | DM-07 §9 audit immutability **conflict** + GDPR/CCPA pseudo-anonymization SOP (Cycle 5 で詳細化予定)                                          | ⚠ Gap         |
+| Right to delete           | **DM-07 §9.6 Pseudo-anonymization resolution (introduced in DM-07 v1.7、Cycle 5 で詳細化済)** + DM-07 §5.10 crypto-erasure (column-level KMS DataKey destroy) | 🔍 Counsel review (resolution available、counsel sign-off pending) |
 | Right to opt-out (sale)   | Bank context で "sale" 概念限定的、counsel review                                                                                            | ⏸ Pending     |
 | Right to correct          | UC-BO-01 (法人住所変更) 自体が right-to-correct workflow                                                                                       | ⏸ Draft       |
 | Right to portability      | (Customer-facing data export API、本 doc 範囲外)                                                                                              | ⏸ Pending     |
 
-**Right to delete × Audit immutability conflict**: DM-07 §9 で audit immutability (7yr retention) は規制要件、CCPA/CPRA right-to-delete は customer request。**Resolution**: pseudo-anonymization (customer_reference field を pseudonymize、audit event は keep)、Cycle 5 で DM-07 §9 に詳細化予定 → **⚠ Gap identified**。
+**Right to delete × Audit immutability conflict (resolution、DM-07 v1.7 で実装)**: DM-07 §9 で audit immutability (7yr retention) は規制要件、CCPA/CPRA right-to-delete は customer request。**Resolution**: DM-07 §9.6 pseudo-anonymization (HMAC-SHA-256 stable pseudonym で customer_reference field を pseudonymize、audit_event row は immutable retention 維持、column-level KMS DataKey destroy で crypto-erasure) + §5.10 row-level encryption (KMS DataKey-per-tenant envelope encryption) で実装。CCPA 1798.145(e) banking exemption + GLBA Reg P 1016.3(q)(1) deidentified concept alignment、BSA 5yr retention 期間中は defer、5yr 経過後に erasure execute。Counsel review focus 4 件 (DM-07 §9.6.2.5) で final sign-off pending → **🔍 Counsel review (resolution available)**。
 
 ### 10.3 VA-CDPA / CO Privacy / CT DPA / UT CPA (same-day state privacy family)
 

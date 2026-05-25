@@ -6,7 +6,7 @@
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 文書 ID         | DOC-DM-07                                                                                                                                                                                                                                   |
 | 文書名          | Data Model & Persistence Architecture (logical model + physical schema + DB 技術選定 + immutable audit + ops playbook)                                                                                                                      |
-| 版数            | v1.6.2 (P1 改版履歴 entry v1.4-v1.6.2 追記 + P2 batch `introduced/current` provenance label 統一 + AWS Japan FISC reference を Historical label 化)                                                                                       |
+| 版数            | v1.7 (autonomous prod-ready loop Cycle 5: §5.10 row-level encryption + §9.5 audit chain repair playbook + §9.6 right-to-erasure × audit immutability conflict resolution、DOC-CEM-12 §10.2 ⚠ Gap → resolution、DOC-TM-10 T-ID-04 + T-IN-01 defense in depth) |
 | ステータス      | Phase 1 hand-off Draft (前提条件未充足、§2.9 + §0.1 参照、production-ready claim 撤回済)                                                                                                                                                    |
 | オーナー        | backoffice-ai-v2 maintainer (AI 管理者 + 業務責任者 + Security 関係者 合議想定)                                                                                                                                                             |
 | 承認者          | 設定承認 Type B (Security-impacting、外部接続 + PII scope + 鍵管理を含むため) + Type C (Trust Level 進化 path を機械的に enforce する schema を含むため、業務責任者 co-A)                                                                    |
@@ -15,7 +15,7 @@
 | 関連文書        | DOC-OV-00 §2.2 (接続層), DOC-FW-01 (Flywheel), DOC-APP-02 (3 層承認), DOC-UI-03 §4 (9 画面), DOC-KNW-04 §3 / §6-§8 (snippet schema / staging usage / audit event model), DOC-MON-05 (KPI/KRI), DOC-ROOT-\_SSOT, workflows/_index.md          |
 | SSOT 区分       | 物理データモデル / DB 技術選定 / immutable audit 設計 / RLS + RBAC policy / pgvector + embedding store / KMS + secret rotation / RPO/RTO + DR / retention policy の SSOT                                                                    |
 | Evidence Status | 設計のみ。Phase 1 で (a) sample workload で IO 計測、(b) AWS us-east-1 + us-west-2 multi-AZ で DR drill、(c) **US 規制 mapping table 作成** (Federal: FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + State: NYDFS Part 500 / NY SHIELD / CCPA-CPRA 等)、(d) cost 実測 → 設計 calibration (introduced in v1.4 US pivot、current v1.6.2)                                |
-| 改版履歴        | v1.0 (2026-05-24): 初版作成 (Phase 1 hand-off の foundation)。v1 から v4 までの内部 critique trace を §2 に記録、最終形を §3 以降に lock。`docs/00-06` の SSOT に整合、`docs/_SSOT.md` 拡張は本 doc lock 後に別 PR で行う (Out-of-scope 条項)。v1.1 (2026-05-24): 外部 critical review (AWS + JP メガバンク + FISC 監査経験 視点) から 13 finding を取得し全件反映 (§2.8 patch trace 参照)。主要修正: (a) `case` → `case_record` rename (Postgres 予約語衝突)、(b) CHECK subquery 不可問題を trigger へ移行 (Finding 1/4)、(c) audit immutability を 4-ring + streaming export 化 (Finding 2/3)、(d) idempotency_registry 分離 (Finding 7)、(e) retention class に kyc_document 7 年新設 (Finding 8)、(f) Blue/Green 3 段 expand-contract 詳細 (Finding 9)、(g) K3 precision/FP denominator 分離 (Finding 10)、(h) §2.4 stack 比較に Azure Confidential Ledger 列追加 (Finding 11)、(i) workflow_version publish 時 outbox 即時 Alert (Finding 12)、(j) boundary_definition_version typed threshold (Finding 13)、(k) FISC 9 版 章番号 mapping 表 (Finding 6)。v1.2 (2026-05-24): user Decision Brief round 1 (6 finding、3 P0 + 3 P1) 反映 (§2.10)。**main title から "Production-Ready" claim を撤回し "Phase 1 hand-off Draft" に降格**。主要修正: (a) §0.1 doc status + plan 接続順序の明文化、(b) §3 entity 数 42 → 47 訂正 + `customer_reference` 新規定義、(c) §6.1 FISC 章番号 placeholder 化 (版数特定を Phase 1 に委譲)、(d) §8 冒頭 DDL excerpt status disclaimer、(e) §10.4.1 pg_partman + Blue/Green 衝突 SOP、(f) §5.1 4-eyes trigger を 5 軸整合 (actor + tenant + case_id + decision_kind + 時系列) に強化、(g) §13 open question #19-#21 追加。**ただし v1.2 自己採点「全 6 finding 反映済」は不正確** (R2 で apply failure 5 件発見)。v1.3 (2026-05-24): user Decision Brief round 2 で v1.2 の apply failure 5 件を指摘 + 全件修正 (§2.11)。主要修正: (a) §2.10 / §16 で P0 #1 を未解消と honest 明記、(b) §2.9 / §13 / §2.10 から FISC "9 版" active claim 削除 (現行版 = v13 想定として表現)、(c) §0 / §1.1 で "本番 ready" / "本番投入可能" を Phase 1 文脈に paraphrase、(d) 全 11 trigger ON 句に schema-qualify 追加、outbox aggregate_type comment を entity rename と整合、(e) §16 TODO numbering を 1-11 で sequential 化。**ただし v1.3 の grep verify も apply failure 3 件残存** (R3 で指摘)。v1.3.1 (2026-05-24): user Decision Brief round 3 micro-patch — FISC 9 版 active claim 残存 2 箇所 (§7.3 row 2、§13 #3) + bare-table trigger 1 件 (§5.2 `trg_wfv_immutable ... ON workflow_version` → `ON app.workflow_version`) を修正。v1.3 検証で使った positive-enum grep pattern (table 名を私が enumerate) が `workflow_version` を見落としたため、§2.11 verification methodology note に **負パターン (`grep -vE 'ON (app\.\|audit\.)'`) を default にする教訓** を追記 (Decision Brief R3-P2)。v1.4 (2026-05-24、US pivot): user 新情報「US リージョン deploy + JP 銀行 America division」で DOC-CA-08 v2.0 と同期 pivot、§6.1 PII mapping を FISC + 個情法 + 銀行法 + 犯収法 → **US framework** (Federal: FRB SR 11-7 / OCC / FFIEC / BSA-AML (FinCEN) / USA PATRIOT 326 CIP / OFAC / GLBA + Reg P / Safeguards Rule / SOX、State: NYDFS 23 NYCRR Part 500 / NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA) に swap、§9.4 retention class を BSA + SOX baseline に swap (kyc_document 7 年 → 5 年、audit_immutable 10 年 → 7 年)、JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、Phase 2 検討、本 doc scope 外) と明示。v1.0-v1.3.2 は historical archive として trace に保存。Plan v1.7 で US pivot 承認済。v1.3.2 (2026-05-24): user Decision Brief round 5 governance micro-patch — Plan v1.5 + `_SSOT.md` v0.9 反映後に DM-07 本体の §0.1 / §16 が「未完 TODO」表現で stale だった問題を修正。§0.1 git 管理 + SSOT 接続 を「Plan v1.5 / _SSOT.md v0.9 反映済、残るは `git add` のみ (user 領域)」に update、§16 #1 + #2 を ✅ 完了マーク化。`v1.3.1 lock` は内容 lock (§3-§15) であり governance metadata sync (§0.1 / §16) は lock 違反外と判断。本 patch で active な状態不整合 0 を達成。v1.4 (2026-05-24、US pivot): §6.1 PII mapping + §9.4 retention class を FISC + 個情法 + 銀行法 + 犯収法 → US framework (NYDFS Part 500 / FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + Reg P + Safeguards Rule + SOX + State law) に swap、kyc_document 7yr → 5yr (BSA Section 1010.430)、audit_immutable 10yr → 7yr (SOX baseline)、JP parent reporting は別 doc DOC-CA-09 candidate scope。v1.5 (2026-05-24): §13 #3 + #20 + §16 #3 の active FISC claim を US framework に swap、§7.3 R3 推奨 rationale も US pivot 反映 (active FISC claim 0 達成)。v1.6 (2026-05-24): §7.3 R2 / §2.9 pre-flight / §0.1 governance / §7.1 / §7.2 / §10.1 / §10.7 / §14 R9/R10 の active stale US pivot reflect、AlloyDB row 比較軸を FISC → US 規制 (NYDFS / FRB / FFIEC) に swap。v1.6.1 (2026-05-24): §0.1 + §7.1 AlloyDB row + §7.3 R1/R2 + §16 TODO の metadata `introduced in vX.Y / current vX.Y.Z` provenance label 化、_SSOT.md v0.11 row + DOC-CA-08 v2.3.2 と sync 完了。v1.6.2 (2026-05-24): P1 metadata sync — §6.1 / §9.4 section headings の `(v1.4 US pivot)` → `(introduced in v1.4 US pivot、current v1.6.2)` 形式統一、§7.2 ASCII diagram の [v1.4 US pivot] label を [introduced v1.4、current v1.6.2] 化、§7.1 Aurora row の `(v1.4 US pivot)` を `(introduced in v1.4 US pivot、current v1.6.2)` 化、AWS Japan FISC reference を Historical reference only label 化 (§19.1)、改版履歴 v1.5/v1.6/v1.6.1 entry を本 entry まで継続。P2 batch: 全 active `v1.4 US pivot` literal を `introduced in vX.Y / current v1.6.2` provenance label に統一 (active stale literal 0、provenance trace 完全保存) |
+| 改版履歴        | v1.0 (2026-05-24): 初版作成 (Phase 1 hand-off の foundation)。v1 から v4 までの内部 critique trace を §2 に記録、最終形を §3 以降に lock。`docs/00-06` の SSOT に整合、`docs/_SSOT.md` 拡張は本 doc lock 後に別 PR で行う (Out-of-scope 条項)。v1.1 (2026-05-24): 外部 critical review (AWS + JP メガバンク + FISC 監査経験 視点) から 13 finding を取得し全件反映 (§2.8 patch trace 参照)。主要修正: (a) `case` → `case_record` rename (Postgres 予約語衝突)、(b) CHECK subquery 不可問題を trigger へ移行 (Finding 1/4)、(c) audit immutability を 4-ring + streaming export 化 (Finding 2/3)、(d) idempotency_registry 分離 (Finding 7)、(e) retention class に kyc_document 7 年新設 (Finding 8)、(f) Blue/Green 3 段 expand-contract 詳細 (Finding 9)、(g) K3 precision/FP denominator 分離 (Finding 10)、(h) §2.4 stack 比較に Azure Confidential Ledger 列追加 (Finding 11)、(i) workflow_version publish 時 outbox 即時 Alert (Finding 12)、(j) boundary_definition_version typed threshold (Finding 13)、(k) FISC 9 版 章番号 mapping 表 (Finding 6)。v1.2 (2026-05-24): user Decision Brief round 1 (6 finding、3 P0 + 3 P1) 反映 (§2.10)。**main title から "Production-Ready" claim を撤回し "Phase 1 hand-off Draft" に降格**。主要修正: (a) §0.1 doc status + plan 接続順序の明文化、(b) §3 entity 数 42 → 47 訂正 + `customer_reference` 新規定義、(c) §6.1 FISC 章番号 placeholder 化 (版数特定を Phase 1 に委譲)、(d) §8 冒頭 DDL excerpt status disclaimer、(e) §10.4.1 pg_partman + Blue/Green 衝突 SOP、(f) §5.1 4-eyes trigger を 5 軸整合 (actor + tenant + case_id + decision_kind + 時系列) に強化、(g) §13 open question #19-#21 追加。**ただし v1.2 自己採点「全 6 finding 反映済」は不正確** (R2 で apply failure 5 件発見)。v1.3 (2026-05-24): user Decision Brief round 2 で v1.2 の apply failure 5 件を指摘 + 全件修正 (§2.11)。主要修正: (a) §2.10 / §16 で P0 #1 を未解消と honest 明記、(b) §2.9 / §13 / §2.10 から FISC "9 版" active claim 削除 (現行版 = v13 想定として表現)、(c) §0 / §1.1 で "本番 ready" / "本番投入可能" を Phase 1 文脈に paraphrase、(d) 全 11 trigger ON 句に schema-qualify 追加、outbox aggregate_type comment を entity rename と整合、(e) §16 TODO numbering を 1-11 で sequential 化。**ただし v1.3 の grep verify も apply failure 3 件残存** (R3 で指摘)。v1.3.1 (2026-05-24): user Decision Brief round 3 micro-patch — FISC 9 版 active claim 残存 2 箇所 (§7.3 row 2、§13 #3) + bare-table trigger 1 件 (§5.2 `trg_wfv_immutable ... ON workflow_version` → `ON app.workflow_version`) を修正。v1.3 検証で使った positive-enum grep pattern (table 名を私が enumerate) が `workflow_version` を見落としたため、§2.11 verification methodology note に **負パターン (`grep -vE 'ON (app\.\|audit\.)'`) を default にする教訓** を追記 (Decision Brief R3-P2)。v1.4 (2026-05-24、US pivot): user 新情報「US リージョン deploy + JP 銀行 America division」で DOC-CA-08 v2.0 と同期 pivot、§6.1 PII mapping を FISC + 個情法 + 銀行法 + 犯収法 → **US framework** (Federal: FRB SR 11-7 / OCC / FFIEC / BSA-AML (FinCEN) / USA PATRIOT 326 CIP / OFAC / GLBA + Reg P / Safeguards Rule / SOX、State: NYDFS 23 NYCRR Part 500 / NY SHIELD / CCPA-CPRA / VA-CDPA / CO / CT / UT / IL BIPA) に swap、§9.4 retention class を BSA + SOX baseline に swap (kyc_document 7 年 → 5 年、audit_immutable 10 年 → 7 年)、JP parent (本店) reporting は別 doc (DOC-CA-09 candidate、Phase 2 検討、本 doc scope 外) と明示。v1.0-v1.3.2 は historical archive として trace に保存。Plan v1.7 で US pivot 承認済。v1.3.2 (2026-05-24): user Decision Brief round 5 governance micro-patch — Plan v1.5 + `_SSOT.md` v0.9 反映後に DM-07 本体の §0.1 / §16 が「未完 TODO」表現で stale だった問題を修正。§0.1 git 管理 + SSOT 接続 を「Plan v1.5 / _SSOT.md v0.9 反映済、残るは `git add` のみ (user 領域)」に update、§16 #1 + #2 を ✅ 完了マーク化。`v1.3.1 lock` は内容 lock (§3-§15) であり governance metadata sync (§0.1 / §16) は lock 違反外と判断。本 patch で active な状態不整合 0 を達成。v1.4 (2026-05-24、US pivot): §6.1 PII mapping + §9.4 retention class を FISC + 個情法 + 銀行法 + 犯収法 → US framework (NYDFS Part 500 / FRB SR 11-7 / OCC / BSA-AML / OFAC / GLBA + Reg P + Safeguards Rule + SOX + State law) に swap、kyc_document 7yr → 5yr (BSA Section 1010.430)、audit_immutable 10yr → 7yr (SOX baseline)、JP parent reporting は別 doc DOC-CA-09 candidate scope。v1.5 (2026-05-24): §13 #3 + #20 + §16 #3 の active FISC claim を US framework に swap、§7.3 R3 推奨 rationale も US pivot 反映 (active FISC claim 0 達成)。v1.6 (2026-05-24): §7.3 R2 / §2.9 pre-flight / §0.1 governance / §7.1 / §7.2 / §10.1 / §10.7 / §14 R9/R10 の active stale US pivot reflect、AlloyDB row 比較軸を FISC → US 規制 (NYDFS / FRB / FFIEC) に swap。v1.6.1 (2026-05-24): §0.1 + §7.1 AlloyDB row + §7.3 R1/R2 + §16 TODO の metadata `introduced in vX.Y / current vX.Y.Z` provenance label 化、_SSOT.md v0.11 row + DOC-CA-08 v2.3.2 と sync 完了。v1.6.2 (2026-05-24): P1 metadata sync — §6.1 / §9.4 section headings の `(v1.4 US pivot)` → `(introduced in v1.4 US pivot、current v1.6.2)` 形式統一、§7.2 ASCII diagram の [v1.4 US pivot] label を [introduced v1.4、current v1.6.2] 化、§7.1 Aurora row の `(v1.4 US pivot)` を `(introduced in v1.4 US pivot、current v1.6.2)` 化、AWS Japan FISC reference を Historical reference only label 化 (§19.1)、改版履歴 v1.5/v1.6/v1.6.1 entry を本 entry まで継続。P2 batch: 全 active `v1.4 US pivot` literal を `introduced in vX.Y / current v1.6.2` provenance label に統一 (active stale literal 0、provenance trace 完全保存)。v1.7 (2026-05-25、autonomous prod-ready loop Cycle 5): defense in depth + ⚠ Gap resolution の 3 章追加。(a) §5.10 Row-level encryption (PII tier 3 = `id_document_hash` 用 KMS DataKey-per-tenant envelope encryption、pgcrypto AES-256-GCM、RLS + at-rest との triple defense、NYDFS 500.15(a)(2)(B) alternative compensating controls + GLBA Safeguards 16 CFR 314.4(c)(3) over-meet 想定、key rotation half-yearly + yearly re-encrypt + performance trade-off catalog)。(b) §9.5 Audit chain repair playbook (DOC-SRE-11 RB-03 連動、7 phase: Detection → Immediate freeze → Forensic isolation → Scope identification → NYDFS 500.17 72hr notification → PITR + S3 export canonical reconciliation → Postmortem → Defense in depth strengthening)。(c) §9.6 Right-to-erasure × Audit immutability conflict resolution (DOC-CEM-12 §10.2 ⚠ Gap fix、pseudo-anonymization 推奨案 = HMAC-SHA-256 stable pseudonym + customer_reference erasure_status + column-level KMS DataKey destroy crypto-erasure + audit_event chain append-only 維持 + counsel review focus 4 件、Alternative 4 案 rejection rationale 完備、CCPA 1798.105 + 1798.145(e) banking exemption + GLBA Reg P 1016.3(q)(1) deidentified concept alignment)。改版履歴 P1 metadata sync 完了 (本 entry まで sequential)。 |
 
 ---
 
@@ -1443,6 +1443,77 @@ CREATE TRIGGER trg_boundary_approval_type BEFORE INSERT OR UPDATE ON app.boundar
   FOR EACH ROW EXECUTE FUNCTION enforce_boundary_approval_type();
 ```
 
+### 5.10 Row-level encryption (PII tier 3 = `id_document_hash`、introduced in v1.7、autonomous prod-ready loop Cycle 5)
+
+DOC-TM-10 T-ID-04 (RLS bypass scenario) + T-IN-01 (SREAdmin が console から PII 閲覧) + NYDFS Part 500.15 (encryption in transit + at rest) + GLBA Safeguards Rule (16 CFR 314.4(c)) を背景に、**Aurora encryption at rest (volume-level KMS) + RLS** に加え、**PII tier 3 (`id_document_hash` + 関連 ai_proposal_field) は column-level KMS DataKey-per-tenant envelope encryption を追加** (defense in depth)。
+
+#### 5.10.1 適用 column
+
+| Table.column                                                     | Encryption layer                                                                                  |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `input_artifact.payload_jsonb` (where `pii_classification='id_document_hash'`) | KMS DataKey-per-tenant envelope (column-level) on top of Aurora at-rest KMS                       |
+| `screenshot_stack.s3_pointer` (where related case の `kyc_document` retention) | S3 SSE-KMS + 同 DataKey で metadata index 暗号化                                                  |
+| `evidence_step.extracted_text` (where `pii_classification='id_document_hash'`) | KMS DataKey-per-tenant envelope (column-level)                                                    |
+| `customer_reference.normalized_name_hash` (high-entropy hash)    | Aurora at-rest のみ (hash済、column-level encryption 不要)                                         |
+
+#### 5.10.2 Envelope encryption scheme
+
+```sql
+-- pgcrypto extension で AES-256-GCM
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA app;
+
+-- per-tenant data key を Secrets Manager に保持 (rotation 半年)
+-- application が KMS Decrypt で plaintext data key を取得 → row-level encrypt/decrypt
+
+-- 暗号化 column 例
+ALTER TABLE app.evidence_step
+  ADD COLUMN extracted_text_ciphertext BYTEA,
+  ADD COLUMN extracted_text_key_version TEXT,
+  ADD COLUMN extracted_text_iv BYTEA;
+
+-- application側 encrypt (例、Lambda 内)
+-- ciphertext = aes_gcm_encrypt(plaintext, data_key, iv) ++ tag
+-- iv = random 96-bit
+-- key_version = `tenant_id:data_key_version_id`
+
+-- application側 decrypt (RLS 通過後、Lambda が KMS Decrypt で data key 取得し復号)
+```
+
+#### 5.10.3 RLS との重畳防御
+
+```sql
+-- RLS は tenant boundary を enforce、column-level encryption は AccessException 後の defense in depth
+-- 攻撃者が RLS bypass (T-ID-04) で別 tenant row に到達した場合、別 tenant の data key を持たないため復号不能
+
+-- Lambda 側 data key access pattern:
+-- 1. Lambda は IAM 経由で自分の tenant_id のみ KMS Decrypt 可
+-- 2. cross-tenant data key access は IAM policy で deny
+-- 3. break-glass cross-tenant access は Type B 設定承認 + audit_event
+```
+
+#### 5.10.4 Key rotation SOP
+
+| Rotation cadence | Action                                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Half-yearly      | Per-tenant data key を Secrets Manager rotation Lambda で rotate、新 key_version で新規 write、old version で read のみ |
+| Yearly           | Re-encrypt cron: 旧 key_version の row を新 key で re-encrypt (Step Functions、partition 単位、audit_event 記録)         |
+| Annual           | KMS CMK rotation (AWS managed、自動)、data key 自体は影響なし (CMK は envelope 上位 layer)                              |
+
+#### 5.10.5 Performance trade-off
+
+| Operation         | Latency overhead          | Mitigation                                                                                                                                    |
+| ----------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Per-row encrypt   | +0.5-1 ms (KMS Decrypt cache hit) | Lambda execution context で data key を 5 min cache、KMS Decrypt は 1 invocation あたり 1 回                                                  |
+| Per-row decrypt   | +0.5-1 ms                 | 同上                                                                                                                                          |
+| Bulk re-encrypt   | high cost (partition単位) | Yearly cron で off-peak window 実行、Aurora Serverless v2 で自動 scale                                                                       |
+| Index             | Cannot index ciphertext directly | hash-based search column (high-entropy salt) を別 column で保持、ciphertext 自体は equality search 不可 (Phase 1 で affected query なし) |
+
+#### 5.10.6 NYDFS 500.15 + GLBA Safeguards mapping
+
+- **NYDFS 500.15(a)(1)**: "Encryption of nonpublic information in transit over external networks" — TLS 1.2+ (CA-08 §5.5) で充足
+- **NYDFS 500.15(a)(2)**: "Encryption of nonpublic information at rest" — Aurora at-rest KMS で baseline、本 §5.10 column-level encryption で tier 3 PII の defense in depth (NYDFS 500.15(a)(2)(B) "alternative compensating controls" 解釈で counsel sign-off)
+- **GLBA Safeguards 16 CFR 314.4(c)(3)**: "Encrypt all customer information held or transmitted" — at-rest + transit + column-level の 3 layer で over-meet
+
 ---
 
 ## 6. PII / 機密 / Tier 分類
@@ -1829,6 +1900,193 @@ CREATE TRIGGER trg_input_artifact_retention BEFORE INSERT ON app.input_artifact 
 
 - `case_record` 全体一括 lifecycle は **不採用**、per-artifact retention で個別判定 (kyc が紛れた case の早期削除を防止)
 - S3 lifecycle policy は retention_class タグで分岐、Object Lock retain-until は class 別に PutObject 時設定
+
+### 9.5 Audit chain repair playbook (breach detection → recovery、introduced in v1.7、autonomous prod-ready loop Cycle 5)
+
+DOC-SRE-11 RB-03 (Audit chain verify failure S0) 連動。breach detection → mitigation → recovery の 7 phase playbook。
+
+#### Phase 0: Detection (automated)
+
+`verify_audit_chain()` daily cron が `audit_chain_head.chain_verify_status='fail'` を検出。CloudWatch alarm `BackofficeAi/Audit/ChainVerifyResult` で S0 page。
+
+#### Phase 1: Immediate freeze (5 min 以内)
+
+1. **Deploy freeze**: CodePipeline `manual_approval` step を auto-trigger (CDK 経由で immediate enforcement)
+2. **Application-side write block (optional)**: 該当 partition への `audit_event` insert を application 側 circuit breaker で停止 (case 処理一時停止と等価、業務 impact)、SRE Lead 判断で発動
+3. **Stakeholder paging**: SRE Lead + Security 関係者 + Compliance officer + AI 管理者 を 5 min 以内に page
+
+#### Phase 2: Forensic isolation (30 min 以内)
+
+1. **Aurora point-in-time recovery prep**: Last successful verify timestamp を identify (`audit_chain_head` 最終 success row の `verified_at`)
+2. **S3 Object Lock manifest preservation**: 該当 partition の S3 manifest を read-only fork (別 region / 別 account 想定の forensic bucket に copy)、original は touch しない
+3. **CloudTrail Lake cross-account manifest read**: 2 経路 hash 比較で発散点 identify
+
+#### Phase 3: Scope identification (1 hr 以内)
+
+1. **Tampered row enumeration**: chain walk で発散点以降の row を mark
+   ```sql
+   SELECT event_id, occurred_at, computed_hash, recorded_hash
+     FROM audit.audit_event ae
+     JOIN audit.audit_chain_head ch ON ch.tenant_id = ae.tenant_id
+    WHERE ae.tenant_id = $1
+      AND ae.occurred_at >= ch.last_verified_at_failure
+    ORDER BY ae.occurred_at;
+   ```
+2. **Cross-reference S3 export**: S3 export manifest hash と比較、`audit_event` row が S3 export と一致するか確認
+3. **Affected case + tenant + actor mapping**: SoD chain (DM-07 §5.1 + §5.8) を含めて impact assessment
+
+#### Phase 4: Regulatory notification (72 hr 以内、NYDFS 500.17)
+
+1. **Compliance officer 主導** で NYDFS 500.17 reportable assessment (Cybersecurity Event 定義に該当するか)
+2. 該当する場合 72 hr 以内に NYDFS Superintendent に notice (electronic filing)
+3. **GLBA breach notification** assessment (consumer impact あれば state-specific notification rule、CCPA/NY SHIELD Act 等)
+4. Customer notification timing (state law per-state) は Compliance officer + legal team で finalize
+
+#### Phase 5: Recovery (24 hr - 5 business day)
+
+1. **Aurora point-in-time recovery**: 発散点 -10 min を target、`audit_event` partition を staging cluster に restore
+2. **S3 export 経路 reconciliation**: tampered window (発散点 ~ detection time) の S3 export を canonical source として採用 (Object Lock Compliance のため tamper 不能)
+3. **Audit chain rebuild**: staging cluster で chain hash 再計算、verify pass 確認
+4. **Production swap**: Type B 緊急設定承認経由で production audit_event partition を staging で置換
+5. **Re-verify**: Recovery 後の chain walk + S3 manifest 2 経路 hash 一致確認、`audit_chain_head` row 再作成
+
+#### Phase 6: Postmortem (5 business day 以内)
+
+1. DOC-SRE-11 §7 template で postmortem 起稿
+2. **Root cause investigation**: DBA / root account compromise / trigger drop / hash chain logic bug 等の hypothesis 系統的検証
+3. **Action items**: process gap fix (e.g., DB super-user activity の per-action audit 強化、KMS administrative event の review cadence 短縮)
+4. External audit + regulator follow-up (quarterly external audit との sync)
+
+#### Phase 7: Defense in depth strengthening (Phase 1 ops 開始後 quarterly review に組み込み)
+
+1. **Ring 5 防御候補**: AWS CloudHSM-backed CMK で envelope encryption 上位 layer 強化 (Phase 2 評価)
+2. **Privileged session monitoring (PSM)**: DB super-user activity の screen recording (Phase 2 評価)
+3. **AI/ML anomaly detection**: audit_event volume per-tenant baseline + ML drift alarm (Phase 2 評価)
+
+### 9.6 Right-to-erasure × Audit immutability conflict resolution (CCPA/CPRA 1798.105 vs §9 audit chain、introduced in v1.7、autonomous prod-ready loop Cycle 5)
+
+DOC-CEM-12 §10.2 で identify した ⚠ Gap (CCPA right-to-delete vs §9.1 audit immutability 7yr retention) の resolution。
+
+#### 9.6.1 Conflict 定義
+
+| Side                                  | 要件                                                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| CCPA/CPRA 1798.105 (consumer rights)  | 12 month 以内に consumer の personal information を delete (state-specific、CCPA = CA、similar VA/CO/CT/UT/etc.)                  |
+| GLBA / NYDFS / SOX / BSA (audit imm.) | audit_event は 5-7 year retention 必須、tamper 不能                                                                              |
+| **Conflict point**                    | audit_event 内に customer_reference (PII) が含まれる場合、delete request で全体 erase 不能、partial erasure では audit chain 破壊 |
+
+#### 9.6.2 Resolution = Pseudo-anonymization (推奨案)
+
+**Principle**: audit_event 自体は immutable + retention 保持、ただし audit_event 内の **customer_reference field を pseudonymize** することで personal information 不在状態に変換。
+
+##### 9.6.2.1 Schema design
+
+```sql
+-- 既存 audit_event は customer_reference を直接持たず、`customer_reference_id` FK のみ保持
+ALTER TABLE audit.audit_event
+  ADD COLUMN customer_reference_id_pseudo TEXT;  -- pseudonymized stable ID
+
+-- customer_reference table 側で pseudonymize 状態 enum 追加
+ALTER TABLE app.customer_reference
+  ADD COLUMN erasure_status TEXT NOT NULL DEFAULT 'active',
+  ADD COLUMN erasure_requested_at TIMESTAMPTZ,
+  ADD COLUMN erasure_executed_at TIMESTAMPTZ,
+  ADD CONSTRAINT erasure_status_chk CHECK (erasure_status IN ('active','erasure_requested','pseudonymized'));
+```
+
+##### 9.6.2.2 Pseudo-anonymization process
+
+```sql
+CREATE OR REPLACE FUNCTION pseudonymize_customer_reference(p_customer_ref_id UUID)
+RETURNS VOID AS $$
+DECLARE
+  v_pseudo_id TEXT;
+BEGIN
+  -- Step 1: Generate stable pseudonym (HMAC-SHA-256 with tenant-specific salt)
+  v_pseudo_id := encode(
+    hmac(p_customer_ref_id::TEXT, current_setting('app.pseudonym_salt'), 'sha256'),
+    'hex'
+  );
+
+  -- Step 2: customer_reference の PII field を pseudonymize
+  UPDATE app.customer_reference
+     SET normalized_name_hash = v_pseudo_id,
+         pii_classification = 'pseudonymized',  -- 新 enum value
+         erasure_status = 'pseudonymized',
+         erasure_executed_at = NOW()
+   WHERE customer_reference_id = p_customer_ref_id;
+
+  -- Step 3: 関連 input_artifact / evidence_step / screenshot_stack を pseudo-replace
+  -- (column-level encryption key を destroy、ciphertext は残るが復号不能)
+  UPDATE app.evidence_step
+     SET extracted_text_ciphertext = NULL,  -- ciphertext destroy
+         extracted_text_key_version = 'erased:' || v_pseudo_id
+   WHERE case_id IN (SELECT case_id FROM app.case_record WHERE customer_reference_id = p_customer_ref_id);
+
+  -- Step 4: audit_event 自体は immutable、ただし customer_reference_id_pseudo を append
+  -- (新 row insert で「erasure executed」event を chain に追加、過去 row は touch しない)
+  INSERT INTO audit.audit_event (
+    tenant_id, event_type, customer_reference_id_pseudo, occurred_at, actor_user_id, ...
+  ) VALUES (
+    current_setting('app.tenant_id')::UUID,
+    'consumer_erasure_executed',
+    v_pseudo_id,
+    NOW(),
+    current_setting('app.actor_user_id')::UUID,
+    ...
+  );
+
+  -- Step 5: Compliance officer notify (audit_event 経由 + Slack)
+END;
+$$ LANGUAGE plpgsql;
+```
+
+##### 9.6.2.3 Compliance posture
+
+| Regulator view                         | Posture                                                                                                                                |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| CCPA/CPRA 1798.105                     | Pseudonymization は personal information の definition (1798.140(o)) を満たさない pseudonymous information への変換、erasure 要件充足 (CCPA 1798.140(r) "deidentified"-similar concept) |
+| **CCPA banking exemption (1798.145(e))** | GLBA-covered consumer financial information の retention は federal 規制で優先、ただし pseudonymization は best-effort で実施可能      |
+| GLBA Reg P + Safeguards                | Pseudonymized state は NPI に該当せず、Safeguards Rule の対象外 (Reg P 1016.3(q)(1) deidentified definition と整合)                    |
+| NYDFS 500.13 (data minimization)       | 必要以上の保持を防止する原則と整合 (erasure executed 状態が NPI 排除)                                                                  |
+| SOX / NYDFS 500.06 audit trail         | audit_event row 自体は immutable retention 7yr、customer_reference_id_pseudo は audit chain integrity を保ったまま PII 不在化           |
+| BSA 1010.430                           | KYC retention 5yr after account closure までは pseudo-anonymization 不可、5yr 経過後に consumer request あれば pseudonymize 可          |
+
+##### 9.6.2.4 Consumer request workflow
+
+```
+consumer erasure request
+  ↓
+Compliance officer + legal review (12 month SLA、CCPA)
+  ↓
+判断 split:
+  ├─ BSA 5yr retention 期間中 → defer (federal exemption 通知 + erasure 受付 record 保持)
+  ├─ NYDFS 500.13 義務外 + 5yr 経過 → pseudonymize_customer_reference() 実行
+  └─ Other state (VA/CO/CT/UT) → state-specific SLA で同様判定
+  ↓
+audit_event 'consumer_erasure_executed' chain 内 append (immutable)
+  ↓
+consumer notification (state-specific format)
+  ↓
+12 month sliding window で consumer request 件数 + execution rate を Compliance dashboard で monitor
+```
+
+##### 9.6.2.5 Counsel review (PFC-02 acceptance condition #6)
+
+本 §9.6 は counsel review session で sign-off 取得必須。Counsel review focus:
+1. Pseudonymization の technical definition が CCPA "deidentified" 同等であることの legal opinion
+2. BSA / SOX retention exemption が CCPA 1798.145(e) で適用可能であることの legal opinion
+3. State-specific (VA / CO / CT / UT) でも同 framework が適用可能か逐 state confirm
+4. 上記 sign-off 後、本 §9.6 を DOC-CEM-12 §10.2 ⚠ Gap → ✅ Counsel signed-off に切替
+
+##### 9.6.2.6 Alternative considered (rejected)
+
+| 案                                       | Rejection 理由                                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| audit_event 自体を delete                | NYDFS 500.06 + SOX baseline violation、deploy 不可                                            |
+| customer_reference table を delete       | audit_event の FK 整合性破壊 + chain hash divergence、§9.1 ring 1 violation                  |
+| Encryption key destroy (crypto-erasure)  | §5.10 で column-level KMS DataKey-per-tenant + erasure_executed 時 destroy = 本 §9.6 で採用 |
+| 物理 storage purge                       | Aurora + S3 layer の operational complexity 高、Object Lock Compliance との conflict        |
 
 ---
 

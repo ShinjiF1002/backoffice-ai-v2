@@ -185,3 +185,34 @@ User の structured review で 5 finding 検出、本 Cycle 13 で batch fix:
 User Cycle 12 で P0 finding 提示 → Cycle 13 で本 doc が primary source evidence (再 fetch) で pushback → User Cycle 14 で「公式 HTML 直接確認で user judgement 側 (Cycle 13 pushback 正) を confirm」、P0 closed。SOUL.md §Decision Principles 「Validate only what survives scrutiny」適用 success。Conservative path (Haiku 4.5 も Geo CRIS uniform 採用) は reversal cost 低い (cost impact $0、token unit price 同等) ことを試算済、将来の primary source 変動時に容易に切替可能。
 
 **Decision: 本 hand-off は依然 "pre-merge review pending" (PR scope option 選択のみ残存、active stale literal 0)**。次 action = PR scope option ((a) rebase / (b) 別 branch) を user 選択後 main merge。
+
+---
+
+# Prototype Audit Addendum (Day 26 Research-Compounder × E2E UI/UX Audit、prod-ready commit count 不変)
+
+> 本 Addendum block は **Day 26 audit task の record only**、Phase 1 hand-off の prod-ready scope commit count (上記 §scope の 22 commits) には**含めない**。Implementation Plan v3.0 §PR 0 step (c) HANDOFF Addendum 規範に従い追記。
+
+## Day 26 Research-Compounder Audit (G2 Conditional Pass approved 2026-05-26)
+
+- **Plan**: `prototype/audit/day-26-research-compounder-audit-plan.md` v1.0 (G0 locked)
+- **Report**: `prototype/audit/day-26-research-compounder-audit-report.md` v1.3 (G2 Conditional Pass approved closure metadata sync)
+- **Findings**: 10 件 (F-1〜F-10、P0 ×2 / P1 ×4 / P2 ×3 / Defer ×1)
+- **Working artifacts**: `prototype/audit/day-26/` (applied-ledger / cards-claims / observation-log / pattern-matrix / unified-findings / closure-table / claude-design-input / screenshots)
+- **Audit scope**: 5 review angle (R0 SSOT 差分 / R1 Layout end-to-end / R2 R7 Pattern Conformance / R3 Workflow temporal / R4 Oversight surface / R5 Mechanical preflight) × 9 route
+- **Reviewer**: single Claude Opus 4.7 (Day 19 4-AI converged の重複避け)
+- **Evidence Status**: visual observation log only (PNG 保存なし → PR 1-4 で per-wave 実保存予定)
+- **a11y**: partial / backlog (Lighthouse 未測定、manual smoke で final 通過予定)
+- **Mechanical gate**: `npm run check:all` pass (lint clean / no-op 37 .tsx / build 423kb gzip 118kb)
+
+## Implementation Plan (current active: Implementation Plan v3.0、別 plan file)
+
+- **Plan file**: `~/.claude/plans/tl-dr-approve-glistening-allen.md` (Implementation Plan v3.0、CR 8 round converged final)
+- **PR strategy**: 5 sequential wave PR (PR 0 closure + PR 1-4 wave implementation)
+- **Wave 0 (本 PR)** = audit closure deliverable + Claude Design bundle creation
+- **Wave 1** = F-1 mobile responsive shell
+- **Wave 2** = F-2 + F-5 + F-7 approval trust system (preceded by user Claude Design Gate 1 manual)
+- **Wave 3** = F-3 + F-4 + F-10 state machine + audit failure
+- **Wave 4** = F-6 + F-8 + F-9 cockpit + governance (preceded by user Claude Design Gate 2 manual)
+- **Total commit**: 11 (PR 0 = 1 / PR 1 = 1 / PR 2 = 4 / PR 3 = 3 / PR 4 = 2)
+- **a11y final gate**: manual smoke (keyboard + focus + aria) on 4 critical page、Lighthouse / axe は backlog
+- **Closure table**: `prototype/audit/day-26/closure-table.md` v0.1 skeleton 作成済、各 PR 末 append、PR 4 末で v1.0 lock

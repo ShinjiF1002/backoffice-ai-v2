@@ -40,6 +40,11 @@ export const mockCases: CaseRecord[] = [
         confidence: 0.84,
         hasDiff: true,
         monospace: false,
+        // F-2 metadata (Wave 2 PR 2 Commit 2、MetadataStrip 5 element)
+        changeAuthor: 'AI 抽出 v2.3',
+        changeReason: 'OCR 信頼度 0.84 (閾値 0.85 未達)、新住所の番地表記',
+        affectedScope: '1 customer (CASE-2026-0142)',
+        reversibility: 'Revertible',
       },
       {
         label: '支店コード',
@@ -166,6 +171,21 @@ export const mockCases: CaseRecord[] = [
     ],
     businessApprovalStatus: '未送付',
     assignee: '田中 美咲',
+    // F-7 SLA per step + Delegate (Wave 2 PR 2 Commit 2、SLA は `[仮説 / 要検証]` label 付与)
+    lifecycleSpecs: [
+      { step: '受付', state: 'done', slaTargetLabel: '即時 [仮説 / 要検証]', slaTargetMinutes: 'instant', elapsedLabel: '14 秒', elapsedPercent: 100, approver: { name: 'system', role: 'system' } },
+      { step: 'AI処理', state: 'done', slaTargetLabel: '5 分 [仮説 / 要検証]', slaTargetMinutes: 5, elapsedLabel: '1:57', elapsedPercent: 39, approver: { name: 'AI 抽出 v2.3', role: 'AI' } },
+      { step: '入力者確認', state: 'current', slaTargetLabel: '4 h target [仮説 / 要検証]', slaTargetMinutes: 240, elapsedLabel: '2:18', elapsedPercent: 57, approver: { name: '田中 美咲', role: '入力者' } },
+      { step: '承認者承認', state: 'pending', slaTargetLabel: '24 h escalation [仮説 / 要検証]', slaTargetMinutes: 1440, approver: { name: '渡辺 真理', role: '承認者' } },
+      { step: '反映', state: 'pending', slaTargetLabel: '即時 [仮説 / 要検証]', slaTargetMinutes: 'instant', approver: { name: 'system', role: 'system' } },
+    ],
+    // Demo Hero scenario: CASE-2026-0142 にも delegate 表示 (Open Q resolution #2)
+    delegate: {
+      from: '渡辺 真理',
+      to: '鈴木 直樹',
+      absentFrom: '2026-05-30',
+      absentTo: '2026-06-02',
+    },
   },
   {
     id: 'CASE-2026-0143',
@@ -421,6 +441,13 @@ export const mockCases: CaseRecord[] = [
     relatedRuleUpdates: [],
     businessApprovalStatus: '承認済',
     assignee: '高橋 美穂',
+    // F-7 Delegate (Wave 2 PR 2 Commit 2、CASE-0118 = past delegate case)
+    delegate: {
+      from: '渡辺 真理',
+      to: '鈴木 直樹',
+      absentFrom: '2026-05-12',
+      absentTo: '2026-05-19',
+    },
   },
   {
     id: 'CASE-2026-0095',
@@ -444,6 +471,13 @@ export const mockCases: CaseRecord[] = [
     relatedRuleUpdates: [],
     businessApprovalStatus: '承認済',
     assignee: '田中 美咲',
+    // F-7 Delegate (Wave 2 PR 2 Commit 2、CASE-0095 = past delegate case)
+    delegate: {
+      from: '田中 美咲',
+      to: '佐藤 隆',
+      absentFrom: '2026-04-22',
+      absentTo: '2026-04-30',
+    },
   },
 ]
 

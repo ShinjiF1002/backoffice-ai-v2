@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1320" />
+<title>F-5 案 A — 4px color band + icon prefix (ActorBand)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../_shared/tokens.css" />
+<style>
+  .triptych {
+    display: grid;
+    gap: 18px;
+  }
+  .surface {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+  .surface__head {
+    padding: 10px 16px;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--color-fg-muted);
+  }
+  .surface__head strong {
+    color: var(--color-fg);
+    font-weight: 600;
+    font-size: 12.5px;
+  }
+
+  .swatch-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 18px 16px;
+    background: #FFF;
+  }
+  .swatch {
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-control);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .swatch-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-fg-subtle);
+  }
+  .swatch h4 {
+    margin: 0; font-size: 12px; font-weight: 600; color: var(--color-fg);
+  }
+
+  /* Dashboard card breakdown row */
+  .bk-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; padding: 4px 0;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .bk-row:last-child { border-bottom: 0; }
+  .bk-row .val { font-family: "JetBrains Mono", monospace; color: var(--color-fg); font-weight: 500; }
+
+  /* AuditTrail row */
+  .audit-row {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 14px;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .audit-row:last-child { border-bottom: 0; }
+  .audit-row .body { min-width: 0; flex: 1; }
+  .audit-row .body .title { font-size: 12px; font-weight: 600; color: var(--color-fg); }
+  .audit-row .body .desc { font-size: 11.5px; color: #475569; margin-top: 2px; }
+  .audit-row .body .ts {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--color-fg-subtle);
+    margin-top: 4px;
+    display: flex; gap: 6px;
+  }
+  .audit-row .body .ts .sep { color: #CBD5E1; }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    padding: 10px 14px;
+    align-items: center;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 11.5px;
+  }
+  .spec-row:last-child { border-bottom: 0; }
+  .spec-row .label { color: var(--color-fg-muted); font-weight: 500; font-family: "JetBrains Mono", monospace; font-size: 10px; }
+
+  /* Inbox preview table - small */
+  .queue .actor-A { margin-left: 0; }
+  .delegate-icon {
+    display: inline-flex; align-items: center; gap: 3px;
+    color: var(--color-alert-soft-fg);
+    background: var(--color-alert-soft);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="frame__head">
+    <div class="frame__crumbs">gate-1 · wave-2 · F-5 / ActorBand · 案 A</div>
+    <h1 class="frame__title">案 A — 4px 左 color band + lucide-react icon prefix</h1>
+    <p class="frame__sub">
+      <strong>4px の左 vertical color band</strong> と <strong>icon prefix</strong> (<code>Bot</code> / <code>User</code> / <code>Cog</code>) の併用で、
+      scrolling 中の actor 判別を「色」「形」両軸で支える primitive。Inbox 担当者 column / Dashboard 業務 card breakdown / AuditTrail row で共通利用。
+      density first、装飾なし。sm (h-5) / md (h-7) 2 size。
+    </p>
+    <div class="frame__meta">
+      <span class="meta-chip meta-chip--primary">ActorBand</span>
+      <span class="meta-chip">agent · indigo</span>
+      <span class="meta-chip">human · slate</span>
+      <span class="meta-chip">system · neutral</span>
+    </div>
+  </header>
+
+  <!-- Swatch / spec strip -->
+  <div class="triptych" style="margin-bottom:18px;">
+    <div class="surface">
+      <div class="surface__head">
+        <strong>3 actor × 2 size</strong>
+        <span>Operational Premium Light · 4px band + icon</span>
+      </div>
+      <div class="swatch-row">
+        <div class="swatch">
+          <span class="swatch-label">agent · indigo</span>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="actor-A actor-A--agent actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></span>
+              AI 抽出
+            </span>
+            <span class="actor-A actor-A--agent">
+              <span class="icon-wrap"><svg class="lu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></span>
+              AI 日次分析
+            </span>
+          </div>
+          <p style="margin:0;font-size:11px;color:var(--color-fg-muted);line-height:1.55;">band: <code>--color-primary (#635BFF)</code>, icon: <code>lucide Bot</code></p>
+        </div>
+
+        <div class="swatch">
+          <span class="swatch-label">human · slate</span>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="actor-A actor-A--human actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              田中 美咲
+            </span>
+            <span class="actor-A actor-A--human">
+              <span class="icon-wrap"><svg class="lu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              渡辺 真理
+            </span>
+          </div>
+          <p style="margin:0;font-size:11px;color:var(--color-fg-muted);line-height:1.55;">band: <code>slate-600 (#475569)</code>, icon: <code>lucide User</code></p>
+        </div>
+
+        <div class="swatch">
+          <span class="swatch-label">system · neutral</span>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span class="actor-A actor-A--system actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+              PDF 受付
+            </span>
+            <span class="actor-A actor-A--system">
+              <span class="icon-wrap"><svg class="lu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+              ロールバック
+            </span>
+          </div>
+          <p style="margin:0;font-size:11px;color:var(--color-fg-muted);line-height:1.55;">band: <code>slate-400</code>, icon: <code>lucide Cog</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Triptych: 3 page context -->
+  <div class="triptych" style="grid-template-columns: 1fr 1fr; gap:16px;">
+    <!-- Inbox 担当者 column -->
+    <div class="surface" style="grid-column: span 2;">
+      <div class="surface__head"><strong>Inbox · 担当者 column inline</strong><span>row scrolling 中の actor 判別速度</span></div>
+      <table class="queue">
+        <thead>
+          <tr>
+            <th>案件 ID</th><th>業務</th><th>状態</th><th>経過</th><th>担当者</th><th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cell-id">CASE-2026-0142</td>
+            <td>法人住所変更</td>
+            <td><span class="status-badge status-badge--ready">入力者確認待ち</span></td>
+            <td class="cell-elapsed">00:12:34</td>
+            <td>
+              <span class="actor-A actor-A--human actor-A--sm">
+                <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                田中 美咲
+              </span>
+            </td>
+            <td><span class="alert-pill"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg> 2</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">CASE-2026-0148</td>
+            <td>口座開設書類完備</td>
+            <td><span class="status-badge status-badge--triage">AI 処理中</span></td>
+            <td class="cell-elapsed">00:03:11</td>
+            <td>
+              <span class="actor-A actor-A--agent actor-A--sm">
+                <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></span>
+                AI 抽出 v2.3
+              </span>
+            </td>
+            <td><span style="color:#CBD5E1;">—</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">CASE-2026-0118</td>
+            <td>法人住所変更</td>
+            <td><span class="status-badge status-badge--waiting">承認者承認待ち</span></td>
+            <td class="cell-elapsed">01:42:50</td>
+            <td>
+              <span class="actor-A actor-A--human actor-A--sm">
+                <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                渡辺 真理
+              </span>
+            </td>
+            <td><span style="color:#CBD5E1;">—</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">CASE-2026-0095</td>
+            <td>法人住所変更</td>
+            <td><span class="status-badge status-badge--triage">反映済</span></td>
+            <td class="cell-elapsed">00:24:08</td>
+            <td>
+              <span class="actor-A actor-A--system actor-A--sm">
+                <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg></span>
+                system 反映
+              </span>
+            </td>
+            <td><span style="color:#CBD5E1;">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dashboard breakdown row -->
+    <div class="surface">
+      <div class="surface__head"><strong>Dashboard · 業務 card breakdown row</strong></div>
+      <div style="padding:16px;">
+        <div style="margin-bottom:10px;">
+          <span class="font-mono" style="font-size:10px;color:#64748B;">UC-BO-01</span>
+          <div style="font-size:13px;font-weight:600;margin-top:2px;">法人住所変更</div>
+        </div>
+        <dl style="display:flex;flex-direction:column;gap:0;">
+          <div class="bk-row">
+            <span class="actor-A actor-A--agent actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></span>
+              AI 処理中
+            </span>
+            <span class="val">3</span>
+          </div>
+          <div class="bk-row">
+            <span class="actor-A actor-A--human actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              入力者確認待ち
+            </span>
+            <span class="val">5</span>
+          </div>
+          <div class="bk-row">
+            <span class="actor-A actor-A--human actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              承認者承認待ち
+            </span>
+            <span class="val">2</span>
+          </div>
+          <div class="bk-row">
+            <span class="actor-A actor-A--system actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg></span>
+              反映済
+            </span>
+            <span class="val">8</span>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- AuditTrail rows -->
+    <div class="surface">
+      <div class="surface__head"><strong>AuditTrail · row 左端</strong></div>
+      <div>
+        <div class="audit-row">
+          <div style="display:flex; flex-direction:column; gap:6px; min-width:140px;">
+            <span class="actor-A actor-A--agent actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></span>
+              AI 入力
+            </span>
+          </div>
+          <div class="body">
+            <div class="title">AI 入力</div>
+            <div class="desc">CASE-2026-0142 OCR 抽出 0.84、新住所 番地誤抽出を検知</div>
+            <div class="ts"><span>2026-05-31 09:02:11</span><span class="sep">·</span><span>ai.address-extractor v2.3</span></div>
+          </div>
+        </div>
+        <div class="audit-row">
+          <div style="display:flex; flex-direction:column; gap:6px; min-width:140px;">
+            <span class="actor-A actor-A--human actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              入力者確認
+            </span>
+          </div>
+          <div class="body">
+            <div class="title">入力者確認</div>
+            <div class="desc">CASE-2026-0142 新住所を「2 丁目 3 番 5 号」に手動修正</div>
+            <div class="ts"><span>2026-05-31 09:18:42</span><span class="sep">·</span><span>田中 美咲</span></div>
+          </div>
+        </div>
+        <div class="audit-row">
+          <div style="display:flex; flex-direction:column; gap:6px; min-width:140px;">
+            <span class="actor-A actor-A--system actor-A--sm">
+              <span class="icon-wrap"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg></span>
+              反映
+            </span>
+          </div>
+          <div class="body">
+            <div class="title">反映</div>
+            <div class="desc">CASE-2026-0118 顧客マスタへ住所変更を反映、diff-id <code>chg-0118-2026-0531</code></div>
+            <div class="ts"><span>2026-05-31 11:02:55</span><span class="sep">·</span><span>system</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="rationale">
+    <div>
+      <h4>設計意図</h4>
+      <p>
+        <strong>色 (band) + 形 (icon)</strong> の dual cue で actor を区別。色覚 a11y を守りつつ、 16-22px の slim 高さで <em>density-first</em> の queue / breakdown / audit row に統合できる。
+        4px の <code>::before</code> band は token <code>--color-primary</code> / slate / slate-subtle を再利用するため、Operational Premium Light の chip taxonomy (StatusBadge / FilterChip / MetaChip 3 系統) と一切競合しない。
+        sm/md 2 size は Inbox (sm) と AuditTrail row (md) で出し分け。
+      </p>
+      <h4 style="margin-top:14px;">採用適性</h4>
+      <p>
+        既存 mock-audit の actor enum (<code>'AI' | '入力者' | '承認者' | 'system'</code>) を <code>'agent' | 'human' | 'system'</code> に薄く normalize するだけで使い回せる。一画面密度が高い Inbox queue で最も効く。
+        Card 1 の "icon prefix + color band で agent/human 区別" を装飾なしで字義通り実現。
+      </p>
+    </div>
+    <div>
+      <h4>Props shape (PR 2 Commit 5 reference)</h4>
+<pre><span class="tok-com">// components/shared/ActorBand.tsx</span>
+<span class="tok-key">type</span> <span class="tok-type">Actor</span> = <span class="tok-str">'agent'</span> | <span class="tok-str">'human'</span> | <span class="tok-str">'system'</span>
+
+<span class="tok-key">interface</span> <span class="tok-type">ActorBandProps</span> {
+  actor: Actor
+  label?: string                <span class="tok-com">// e.g. '田中 美咲' / 'AI 抽出 v2.3'</span>
+  size?: <span class="tok-str">'sm'</span> | <span class="tok-str">'md'</span>      <span class="tok-com">// sm = h-5 (queue), md = h-7 (audit row)</span>
+  className?: string
+}
+
+<span class="tok-com">// Color mapping (binding to existing tokens, no new tokens)</span>
+<span class="tok-com">// agent  → --color-primary</span>
+<span class="tok-com">// human  → slate-600</span>
+<span class="tok-com">// system → slate-400</span></pre>
+    </div>
+  </section>
+</div>
+</body>
+</html>

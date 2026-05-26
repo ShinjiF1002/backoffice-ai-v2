@@ -9,6 +9,8 @@ import { DisabledAction } from '@/components/shared/DisabledAction'
 import { DetailDrawer } from '@/components/shared/DetailDrawer'
 import { NextActionStrip } from '@/components/shared/NextActionStrip'
 import { PageFooter } from '@/components/shared/PageFooter'
+import { DiffPreviewBlock } from '@/components/shared/DiffPreviewBlock'
+import { MetadataStrip } from '@/components/shared/MetadataStrip'
 import { proposalStatusToTone } from '@/lib/status-tones'
 import type { ProposalSourceCase } from '@/data/types'
 
@@ -51,6 +53,12 @@ export function ProposalReview() {
   // Day 19 Commit 3b U-6: Demo Chapter 2 提案レビュー scene のみ drawer default open (Cluster 2 Q1 採用)
   const isDemo = searchParams.get('demo') === '1'
   const [drawerOpen, setDrawerOpen] = useState<boolean>(isDemo)
+  /**
+   * F-2 Wave 2 PR 2 Commit 4: 業務責任者へ送付 button metadata gate (gate1-decision.md F-2-B 採用 spec)。
+   * MetadataStrip (PageHeader 直下、placement='header') が viewport visible になった瞬間 ack、
+   * ack 前の 送付 button は disabled、user に metadata 確認を強制。
+   */
+  const [metadataAcked, setMetadataAcked] = useState(false)
   const p = getProposalById(id || '')
 
   if (!p) {
@@ -220,6 +228,27 @@ export function ProposalReview() {
                 提案詳細を見る (RACI + メタ情報)
               </button>
             </div>
+            {/* F-2 Wave 2 PR 2 Commit 4: ProposalReview MetadataStrip placement='header' (gate1-decision.md F-2-B spec)
+              * 提案メタ (Change author=AI 日次分析 v1.2 / Reason=人手上書き率 / Confidence=0.81 / Affected scope=12 cases / Reversibility) を PageHeader 直下に配置、業務責任者へ送付 button gate trigger */}
+            {(() => {
+              const meta = p.proposedDiff.find((d) => d.changeAuthor || d.changeReason)
+              const aggregateConfidence =
+                p.decisionCriteria.find((c) => /pattern|一致/.test(c.label))?.value
+              const confidenceNum = aggregateConfidence ? parseFloat(aggregateConfidence) : undefined
+              if (!meta) return null
+              return (
+                <MetadataStrip
+                  changeAuthor={meta.changeAuthor}
+                  changeReason={meta.changeReason}
+                  confidence={Number.isFinite(confidenceNum) ? confidenceNum : undefined}
+                  affectedScope={meta.affectedScope}
+                  reversibility={meta.reversibility}
+                  placement="header"
+                  onAck={() => setMetadataAcked(true)}
+                />
+              )
+            })()}
+
             <div className="rounded-lg border border-slate-200 bg-white p-4">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold text-slate-900">
@@ -230,30 +259,13 @@ export function ProposalReview() {
               </div>
               <p className="mb-4 text-xs leading-relaxed text-slate-700">{p.summary}</p>
 
-              <div className="space-y-4">
-                {p.proposedDiff.map((d, i) => (
-                  <div key={i} className="overflow-hidden rounded-md border border-slate-200">
-                    <div className="border-b border-slate-200 bg-slate-50 px-3 py-2">
-                      <p className="font-mono text-[11px] text-slate-600 tabular">{d.targetFile}</p>
-                      <p className="mt-0.5 text-[11px] font-medium text-slate-900">{d.section}</p>
-                    </div>
-                    {/* 変更前 (Day 12.4 CR R31 M2: border-l-2 hairline + tint /40 → /20 で Operational Premium Light §2.7.3 hairline-first grammar へ寄せる) */}
-                    <div className="border-b border-slate-100 border-l-2 border-l-[var(--color-error)] bg-red-50/20 p-3">
-                      <p className="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-error)]">
-                        − 変更前
-                      </p>
-                      <p className="text-xs leading-relaxed text-slate-700">{d.before}</p>
-                    </div>
-                    {/* 変更後 */}
-                    <div className="border-l-2 border-l-[var(--color-success)] bg-emerald-50/20 p-3">
-                      <p className="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-success)]">
-                        ＋ 変更後
-                      </p>
-                      <p className="text-xs leading-relaxed text-slate-700">{d.after}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* F-2 Wave 2 PR 2 Commit 4: DiffPreviewBlock (gate1-decision.md F-2-B 採用 spec)
+                * defaultView='sideBySide' + availableViews=['sideBySide','inline']、proposedDiff を structured object として渡す */}
+              <DiffPreviewBlock
+                source={{ kind: 'sections', sections: p.proposedDiff }}
+                defaultView="sideBySide"
+                availableViews={['sideBySide', 'inline']}
+              />
             </div>
           </section>
 
@@ -349,7 +361,11 @@ export function ProposalReview() {
             </DisabledAction>
             <DisabledAction
               mode="wrapper"
-              reason={`業務責任者送付動作は次の実装段階で対応 (業務責任者 ${p.approver} の承認者承認待ちへ転送)`}
+              reason={
+                metadataAcked
+                  ? `業務責任者送付動作は次の実装段階で対応 (業務責任者 ${p.approver} の承認者承認待ちへ転送、変更メタデータ確認済)`
+                  : `画面上部の変更メタデータを確認してください (F-2 metadata gate)。送付動作自体は次の実装段階で対応`
+              }
               className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60"
             >
               <Send className="h-3.5 w-3.5" />

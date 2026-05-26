@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gate 1 — Wave 2 Design Exploration (F-2 + F-5 + F-7)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="screenshots/wave2-design-exploration/_shared/tokens.css" />
+<style>
+  .hub {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 40px 32px 96px;
+  }
+  .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 28px;
+  }
+  .hero__crumbs {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--color-fg-subtle);
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-fg);
+    margin: 0;
+  }
+  .hero p {
+    margin: 0;
+    color: #475569;
+    font-size: 13.5px;
+    line-height: 1.7;
+    max-width: 88ch;
+  }
+  .hero__chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+  .finding {
+    margin-top: 28px;
+  }
+
+  .finding__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .finding__head h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-fg);
+    margin: 0;
+  }
+  .finding__head .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-soft-fg);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+  }
+  .finding__head .priority {
+    display: inline-flex; align-items: center;
+    background: #FEE2E2;
+    color: var(--color-error-soft-fg);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .finding__head .priority.p1 { background: #FEF3C7; color: var(--color-alert-soft-fg); }
+  .finding__head .priority.p2 { background: #E2E8F0; color: #475569; }
+
+  .finding__sub {
+    font-size: 12.5px;
+    color: var(--color-fg-muted);
+    line-height: 1.65;
+    max-width: 90ch;
+    margin: 0 0 16px;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    overflow: hidden;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+  }
+  .card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  }
+
+  .card__preview {
+    aspect-ratio: 16 / 9;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .card__body {
+    padding: 14px 16px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .card__variant {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--color-fg-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card__title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-fg);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .card__desc {
+    font-size: 11.5px;
+    color: var(--color-fg-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .card__chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .badge-pick {
+    background: var(--color-success-soft);
+    color: var(--color-success-soft-fg);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .badge-alt {
+    background: #F1F5F9;
+    color: #475569;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Mini previews per card (SVG-ish in HTML) */
+  .pv {
+    position: absolute; inset: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: white;
+    padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 8px;
+    font-size: 9px;
+    color: #475569;
+    overflow: hidden;
+  }
+  .pv__head { display: flex; align-items: center; gap: 4px; padding-bottom: 4px; border-bottom: 1px solid var(--color-border); }
+  .pv__head .dot { width:4px; height:4px; border-radius:50%; background:var(--color-primary); }
+  .pv__head .h { font-weight:600; color:var(--color-fg); font-size:9.5px; }
+  .pv__head .ms { color:#94A3B8; font-family:"JetBrains Mono", monospace; font-size:8px; margin-left:auto; }
+  .pv__steps { display:flex; gap:3px; font-family:"JetBrains Mono", monospace; font-size:7.5px; }
+  .pv__step { background:#F1F5F9; padding:1px 4px; border-radius:2px; color:#94A3B8; }
+  .pv__step--cur { background: var(--color-primary-soft); color: var(--color-primary-soft-fg); font-weight:600; }
+  .pv__step--done { background: var(--color-success-soft); color: var(--color-success-soft-fg); }
+  .pv__row { display:flex; gap:6px; align-items:center; }
+  .pv__del { text-decoration: line-through; color: var(--color-error); }
+  .pv__add { background: var(--color-diff-add-bg); color: var(--color-diff-add); padding:0 2px; border-radius:2px; }
+  .pv__meta { display:grid; grid-template-columns: repeat(5, 1fr); gap:4px; border:1px solid var(--color-border); border-radius:4px; padding:4px; background:#F8FAFC; }
+  .pv__meta-cell { display:flex; flex-direction:column; gap:1px; min-width: 0; }
+  .pv__meta-key { font-family:"JetBrains Mono", monospace; font-size:6.5px; color:#94A3B8; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pv__meta-val { font-size:8px; color: var(--color-fg); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pv__sbs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border:1px solid var(--color-border); border-radius:4px; overflow:hidden; }
+  .pv__sbs > div { padding: 5px 6px; font-size: 8.5px; }
+  .pv__sbs > div:first-child { background: rgba(254,226,226,0.16); border-right: 1px solid var(--color-border); }
+  .pv__sbs > div:last-child { background: rgba(220,252,231,0.18); }
+  .pv__table { border:1px solid var(--color-border); border-radius:4px; overflow:hidden; }
+  .pv__table-row { display:grid; grid-template-columns: 1fr 2fr 2fr; gap:0; padding:3px 5px; font-size:8.5px; border-bottom:1px solid #F1F5F9; }
+  .pv__table-row:last-child { border-bottom:0; }
+  .pv__table-row.head { background:#F8FAFC; color:#94A3B8; font-family:"JetBrains Mono", monospace; font-size:7.5px; text-transform:uppercase; }
+
+  /* Actor band mini */
+  .pv__actor { display:flex; align-items:center; gap:4px; font-size:9px; padding: 2px 5px 2px 7px; border-radius:3px; position:relative; }
+  .pv__actor::before { content:""; position:absolute; left:2px; top:3px; bottom:3px; width:2px; border-radius:2px; }
+  .pv__actor--agent { background: rgba(99,91,255,0.06); }
+  .pv__actor--agent::before { background: var(--color-primary); }
+  .pv__actor--human { background: rgba(15,23,42,0.04); }
+  .pv__actor--human::before { background: #475569; }
+  .pv__actor--system::before { background: #94A3B8; }
+  .pv__avatar { width:14px;height:14px;border-radius:50%; font-size:7px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; color:#fff; }
+  .pv__avatar--agent { background: var(--color-primary); }
+  .pv__avatar--human { background: #475569; }
+  .pv__avatar--system { background: #F1F5F9; color: #94A3B8; }
+
+  /* SLA progress mini */
+  .pv__sla-bar { flex:1; height:2.5px; background:#F1F5F9; border-radius:99px; overflow:hidden; }
+  .pv__sla-bar i { display:block; height:100%; }
+  .pv__sla-bar i.warn { background: var(--color-alert); }
+  .pv__sla-bar i.ok { background: var(--color-success); }
+
+  /* gate-1 decision link */
+  .decision-link {
+    margin-top: 32px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 18px 22px;
+    background: var(--color-primary-soft);
+    display: flex; align-items: center; gap: 16px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .decision-link:hover { border-color: var(--color-primary); }
+  .decision-link__icon {
+    width: 36px; height: 36px;
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+  .decision-link__body { flex: 1; }
+  .decision-link__body h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--color-fg); }
+  .decision-link__body p { margin: 0; font-size: 11.5px; color: #475569; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="hub">
+
+  <header class="hero">
+    <div class="hero__crumbs">gate 1 · wave 2 · approval trust system · PR 2 前段</div>
+    <h1>Wave 2 Design Exploration — F-2 + F-5 + F-7</h1>
+    <p>
+      backoffice-ai-v2 prototype の Wave 2 implementation 前 visual decision gate。
+      3 finding (F-2 Diff Preview + MetadataStrip / F-5 ActorBand / F-7 LifecycleStepper SLA + Delegate) について 7 案を生成、各案に design rationale と PR 2 で使う props shape を併記しています。
+      下の <a href="gate1-decision.md">gate1-decision.md</a> に各案の Safety rail 5 軸 check と採用結論をまとめました。
+    </p>
+    <div class="hero__chips">
+      <span class="meta-chip meta-chip--primary">Operational Premium Light</span>
+      <span class="meta-chip">JP-only UI</span>
+      <span class="meta-chip">UC-BO-01 + UC-BO-02</span>
+      <span class="meta-chip">5 既存 primitive 不変</span>
+    </div>
+  </header>
+
+  <!-- ───── F-2 ───── -->
+  <section class="finding">
+    <div class="finding__head">
+      <h2><span class="tag">F-2</span>Diff Preview 3-view + MetadataStrip 5-element</h2>
+      <span class="priority">P0 · adjacent-to-Day19</span>
+    </div>
+    <p class="finding__sub">
+      CaseReview / ProposalReview の承認 surface で Inline diff のみ、 metadata strip 部分実装、 承認 button gate 不在。
+      3 view (Inline / Side-by-side / Field table) + 5-element MetadataStrip (Change author / reason / confidence / affected scope / reversibility) を Card 2 ★ verbatim で実装する。
+    </p>
+    <div class="cards">
+      <a class="card" href="screenshots/wave2-design-exploration/F-2-A.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">案件処理</span><span class="ms">CASE-2026-0142</span></div>
+            <div class="pv__steps"><span class="pv__step pv__step--done">受付</span><span class="pv__step pv__step--done">AI処理</span><span class="pv__step pv__step--cur">入力者確認</span><span class="pv__step">承認者承認</span><span class="pv__step">反映</span></div>
+            <div style="padding:5px 6px;border:1px solid var(--color-border);border-radius:4px;background:#F8FAFC;font-size:8.5px;">
+              <span style="font-weight:600;">新住所</span> 東京都千代田区丸の内 <span class="pv__del">1丁目1</span><span class="pv__add">2丁目3</span>...
+            </div>
+            <div class="pv__meta">
+              <div class="pv__meta-cell"><span class="pv__meta-key">著者</span><span class="pv__meta-val">AI v2.3</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">理由</span><span class="pv__meta-val">OCR 0.84</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">信頼</span><span class="pv__meta-val">0.84</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">範囲</span><span class="pv__meta-val">1 cust</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">取消</span><span class="pv__meta-val">Rev.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-2 / 案 A</span><span class="badge-pick">採用 (CaseReview)</span></div>
+          <h3 class="card__title">Inline default + Field table toggle</h3>
+          <p class="card__desc">既存 AddressDiffBlock を inline default で温存、 Field table を toggle で出す。 MetadataStrip は footer 直上 anchor。</p>
+        </div>
+      </a>
+
+      <a class="card" href="screenshots/wave2-design-exploration/F-2-B.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">AI 提案レビュー</span><span class="ms">PROP-2026-031</span></div>
+            <div class="pv__meta">
+              <div class="pv__meta-cell"><span class="pv__meta-key">著者</span><span class="pv__meta-val">AI 日次</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">理由</span><span class="pv__meta-val">上書 75%</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">信頼</span><span class="pv__meta-val">0.81</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">範囲</span><span class="pv__meta-val">12 cs</span></div>
+              <div class="pv__meta-cell"><span class="pv__meta-key">取消</span><span class="pv__meta-val">Rev.</span></div>
+            </div>
+            <div class="pv__sbs">
+              <div>−<br/>信頼度 <span class="pv__del">0.85</span> 以上で自動補完</div>
+              <div>＋<br/>信頼度 <span class="pv__add">0.88</span> 以上で自動補完</div>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-2 / 案 B</span><span class="badge-pick">採用 (ProposalReview)</span></div>
+          <h3 class="card__title">Side-by-side default + Inline toggle</h3>
+          <p class="card__desc">手順 markdown を左右 column 化、Inline は toggle。 MetadataStrip は PageHeader 直下に anchor。</p>
+        </div>
+      </a>
+
+      <a class="card" href="screenshots/wave2-design-exploration/F-2-C.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">案件処理 (両 page 統一)</span><span class="ms">3-view tab</span></div>
+            <div style="display:flex;gap:3px;font-size:8px;align-items:center;background:#F1F5F9;border-radius:4px;padding:1px;width:fit-content;">
+              <span style="padding:1px 5px;border-radius:3px;color:#475569;">インライン</span>
+              <span style="padding:1px 5px;border-radius:3px;color:#475569;">左右</span>
+              <span style="padding:1px 5px;border-radius:3px;background:#fff;color:var(--color-fg);font-weight:600;">項目一覧</span>
+            </div>
+            <div class="pv__table">
+              <div class="pv__table-row head"><span>項目</span><span>前</span><span>後</span></div>
+              <div class="pv__table-row"><span>法人名</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">サンプル HD</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">サンプル HD</span></div>
+              <div class="pv__table-row"><span>新住所</span><span class="pv__del">1丁目1</span><span class="pv__add">2丁目3</span></div>
+              <div class="pv__table-row"><span>発効日</span><span>—</span><span>2026-06-15</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-2 / 案 C</span><span class="badge-alt">参考</span></div>
+          <h3 class="card__title">Field table default + 3-view toggle</h3>
+          <p class="card__desc">両 page 統一 API 案。 MetadataStrip は collapsible (PageHelpDisclosure 連携)。 ProposalReview への適合は弱め。</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ───── F-5 ───── -->
+  <section class="finding">
+    <div class="finding__head">
+      <h2><span class="tag">F-5</span>ActorBand primitive</h2>
+      <span class="priority p1">P1 · new</span>
+    </div>
+    <p class="finding__sub">
+      Inbox / Dashboard / AuditTrail で agent / human / system 区別が text のみで、 scrolling 中の actor 判定速度が低下。
+      icon prefix + color band の併用で「色」「形」 dual cue を提供する primitive を新規追加。
+    </p>
+    <div class="cards">
+      <a class="card" href="screenshots/wave2-design-exploration/F-5-A.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">受信トレイ</span><span class="ms">5 件</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span class="pv__actor pv__actor--human">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                田中 美咲
+              </span>
+              <span class="pv__actor pv__actor--agent">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg>
+                AI 抽出 v2.3
+              </span>
+              <span class="pv__actor pv__actor--human">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                渡辺 真理
+              </span>
+              <span class="pv__actor pv__actor--system">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/></svg>
+                system 反映
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-5 / 案 A</span><span class="badge-pick">採用</span></div>
+          <h3 class="card__title">4px color band + icon prefix</h3>
+          <p class="card__desc">指定 ::before band と lucide-react icon の combo。 density 不変、 chip taxonomy 影響 0。 sm/md の 2 size。</p>
+        </div>
+      </a>
+
+      <a class="card" href="screenshots/wave2-design-exploration/F-5-B.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">受信トレイ</span><span class="ms">avatar 24px</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="pv__row"><span class="pv__avatar pv__avatar--human">田中</span><span>田中 美咲</span></div>
+              <div class="pv__row"><span class="pv__avatar pv__avatar--agent"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><rect x="3" y="11" width="18" height="10" rx="2"/></svg></span><span>AI 抽出 v2.3</span></div>
+              <div class="pv__row"><span class="pv__avatar pv__avatar--human">渡辺</span><span>渡辺 真理</span></div>
+              <div class="pv__row"><span class="pv__avatar pv__avatar--system"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="3"/></svg></span><span>system 反映</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-5 / 案 B</span><span class="badge-alt">参考</span></div>
+          <h3 class="card__title">Circle avatar + tone-tinted halo</h3>
+          <p class="card__desc">面積で識別。 human は initial 文字、 agent は Bot icon、 system は Cog。 row height +4px の trade-off あり。</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ───── F-7 ───── -->
+  <section class="finding">
+    <div class="finding__head">
+      <h2><span class="tag">F-7</span>LifecycleStepper SLA per step + Delegate visibility</h2>
+      <span class="priority p2">P2 · new</span>
+    </div>
+    <p class="finding__sub">
+      CaseReview の 5 step Lifecycle は visible だが per-step SLA (4h/24h target) 不可視、 delegate routing 不在、 approver 名が anonymous step label に隠れている。
+      Card 8 の "SLA per step visible + all approvers visible + delegate model" を装飾なしで実装。
+    </p>
+    <div class="cards">
+      <a class="card" href="screenshots/wave2-design-exploration/F-7-A.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">CaseReview · 5 step + SLA</span><span class="ms">CASE-2026-0142</span></div>
+            <div style="display:flex;gap:4px;align-items:flex-start;">
+              <div style="flex:1;text-align:center;">
+                <div class="pv__step pv__step--done" style="display:inline-block;">受付</div>
+                <div style="font-family:'JetBrains Mono', monospace;font-size:7px;color:var(--color-success-soft-fg);margin-top:2px;background:var(--color-success-soft);border-radius:2px;padding:1px 3px;">14秒</div>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div class="pv__step pv__step--done" style="display:inline-block;">AI処理</div>
+                <div style="font-family:'JetBrains Mono', monospace;font-size:7px;color:var(--color-success-soft-fg);margin-top:2px;background:var(--color-success-soft);border-radius:2px;padding:1px 3px;">1:57</div>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div class="pv__step pv__step--cur" style="display:inline-block;">入力</div>
+                <div style="font-family:'JetBrains Mono', monospace;font-size:7px;color:var(--color-alert-soft-fg);margin-top:2px;background:var(--color-alert-soft);border-radius:2px;padding:1px 3px;">2:18/4h</div>
+                <div style="font-size:7px;color:var(--color-fg-subtle);margin-top:2px;">田中 美咲</div>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div class="pv__step" style="display:inline-block;">承認</div>
+                <div style="font-family:'JetBrains Mono', monospace;font-size:7px;color:var(--color-fg-subtle);margin-top:2px;">目標 24h</div>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div class="pv__step" style="display:inline-block;">反映</div>
+                <div style="font-family:'JetBrains Mono', monospace;font-size:7px;color:var(--color-fg-subtle);margin-top:2px;">即時</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-7 / 案 A</span><span class="badge-pick">採用 (Stepper)</span></div>
+          <h3 class="card__title">Per-step SLA badge + Delegate icon</h3>
+          <p class="card__desc">target/elapsed chip 2 行 + step hover で approver 名。 Inbox は UserSwitch icon + tooltip 「代理」。</p>
+        </div>
+      </a>
+
+      <a class="card" href="screenshots/wave2-design-exploration/F-7-B.html">
+        <div class="card__preview">
+          <div class="pv">
+            <div class="pv__head"><span class="dot"></span><span class="h">CaseReview · card stepper</span><span class="ms">click expand</span></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;">
+              <div style="border:1px solid #BBF7D0;background:var(--color-success-soft);border-radius:3px;padding:3px 4px;">
+                <div style="font-size:7.5px;font-weight:600;color:var(--color-fg);">1. 受付</div>
+                <div class="pv__row"><span class="pv__sla-bar"><i class="ok" style="width:100%"></i></span></div>
+              </div>
+              <div style="border:1px solid #BBF7D0;background:var(--color-success-soft);border-radius:3px;padding:3px 4px;">
+                <div style="font-size:7.5px;font-weight:600;color:var(--color-fg);">2. AI</div>
+                <div class="pv__row"><span class="pv__sla-bar"><i class="ok" style="width:100%"></i></span></div>
+              </div>
+              <div style="border:1px solid #C7D2FE;background:var(--color-primary-soft);border-radius:3px;padding:3px 4px;">
+                <div style="font-size:7.5px;font-weight:600;color:var(--color-fg);">3. 入力</div>
+                <div class="pv__row"><span class="pv__sla-bar"><i class="warn" style="width:57%"></i></span></div>
+              </div>
+              <div style="border:1px solid var(--color-border);border-radius:3px;padding:3px 4px;">
+                <div style="font-size:7.5px;font-weight:600;color:var(--color-fg);">4. 承認</div>
+                <div class="pv__row"><span class="pv__sla-bar"></span></div>
+              </div>
+              <div style="border:1px solid var(--color-border);border-radius:3px;padding:3px 4px;">
+                <div style="font-size:7.5px;font-weight:600;color:var(--color-fg);">5. 反映</div>
+                <div class="pv__row"><span class="pv__sla-bar"></span></div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--color-border);padding-top:4px;font-size:8px;">
+              <span style="color:var(--color-alert-soft-fg);background:var(--color-alert-soft);font-family:'JetBrains Mono', monospace;font-size:7.5px;padding:1px 4px;border-radius:3px;">代理中 (山田 → 高橋)</span>
+            </div>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="card__variant"><span>F-7 / 案 B</span><span class="badge-alt">参考 (Delegate のみ採用)</span></div>
+          <h3 class="card__title">Compact SLA progress bar + Delegate badge</h3>
+          <p class="card__desc">step card + 3px progress bar。 click で詳細 expand。 Inbox の MetaChip 「代理中 (元 → 代理)」 は採用案として hybrid 化。</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <a class="decision-link" href="gate1-decision.md">
+    <span class="decision-link__icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    </span>
+    <div class="decision-link__body">
+      <h3>gate1-decision.md — 採用結論と Safety rail 5 軸 check</h3>
+      <p>F-2 = 案 A + 案 B / F-5 = 案 A / F-7 = 案 A + 案 B Delegate hybrid。 PR 2 Commit 構成と open question 3 件を含む。</p>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary); flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+  </a>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1320" />
+<title>F-5 案 B — Circle avatar + tone-tinted halo (ActorBand)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../_shared/tokens.css" />
+<style>
+  .triptych { display: grid; gap: 18px; }
+  .surface {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+  .surface__head {
+    padding: 10px 16px;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--color-fg-muted);
+  }
+  .surface__head strong { color: var(--color-fg); font-weight: 600; font-size: 12.5px; }
+
+  .swatch-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 18px 16px;
+  }
+  .swatch {
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-control);
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .swatch-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-fg-subtle);
+  }
+
+  .bk-row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; padding: 6px 0;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .bk-row:last-child { border-bottom: 0; }
+  .bk-row .val { font-family: "JetBrains Mono", monospace; color: var(--color-fg); font-weight: 500; }
+
+  .audit-row {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 12px 14px;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .audit-row:last-child { border-bottom: 0; }
+  .audit-row .body { min-width: 0; flex: 1; }
+  .audit-row .body .title { font-size: 12px; font-weight: 600; color: var(--color-fg); }
+  .audit-row .body .desc { font-size: 11.5px; color: #475569; margin-top: 2px; }
+  .audit-row .body .ts {
+    font-family: "JetBrains Mono", monospace; font-size: 10px;
+    color: var(--color-fg-subtle); margin-top: 4px;
+    display: flex; gap: 6px;
+  }
+  .audit-row .body .ts .sep { color: #CBD5E1; }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="frame__head">
+    <div class="frame__crumbs">gate-1 · wave-2 · F-5 / ActorBand · 案 B</div>
+    <h1 class="frame__title">案 B — Circle avatar + tone-tinted halo (text fallback)</h1>
+    <p class="frame__sub">
+      <strong>24px circle avatar</strong> + 3-4px の <strong>tone-tinted halo</strong>。agent には Bot icon、human には氏名 initial、system には Cog icon。
+      halo は scroll 中の actor 判別を「面積」で支える視覚 anchor。Inbox / Dashboard / AuditTrail で同 component を reuse。
+      avatar の白抜き icon により色覚 a11y は icon shape が冗長 cue。
+    </p>
+    <div class="frame__meta">
+      <span class="meta-chip meta-chip--primary">ActorBand</span>
+      <span class="meta-chip">avatar 24px</span>
+      <span class="meta-chip">halo -3px inset</span>
+      <span class="meta-chip">initial fallback</span>
+    </div>
+  </header>
+
+  <div class="triptych" style="margin-bottom:18px;">
+    <div class="surface">
+      <div class="surface__head"><strong>3 actor · avatar + halo</strong><span>面積 = 24px / halo halo = 30px</span></div>
+      <div class="swatch-row">
+        <div class="swatch">
+          <span class="swatch-label">agent · indigo halo</span>
+          <div style="display:flex; gap:18px; align-items:center;">
+            <span class="actor-B actor-B--agent">
+              <span class="avatar">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+              </span>
+              <span>
+                <span class="actor-label">AI 抽出</span>
+                <div class="actor-sub">ai.address-extractor v2.3</div>
+              </span>
+            </span>
+          </div>
+          <p style="margin:0;font-size:11px;color:var(--color-fg-muted);line-height:1.55;">avatar: <code>--color-primary</code> bg + Bot white, halo: <code>indigo /12</code></p>
+        </div>
+
+        <div class="swatch">
+          <span class="swatch-label">human · slate halo</span>
+          <div style="display:flex; gap:18px; align-items:center;">
+            <span class="actor-B actor-B--human">
+              <span class="avatar">田中</span>
+              <span>
+                <span class="actor-label">田中 美咲</span>
+                <div class="actor-sub">入力者</div>
+              </span>
+            </span>
+          </div>
+          <p style="margin:0;font-size:11px;color:var(--color-fg-muted);line-height:1.55;">avatar: <code>slate-600</code> bg + initial 2 文字 (氏 1 + 名 1)、halo: <code>slate /10</code></p>
+        </div>
+
+        <div class="swatch">
+          <span class="swatch-label">system · neutral halo</span>
+          <div style="display:flex; gap:18px; align-items:center;">
+            <span class="actor-B actor-B--system">
+              <span class="avatar">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg>
+              </span>
+              <span>
+                <span class="actor-label">PDF 受付</span>
+                <div class="actor-sub">intake.pdf-upload v1</div>
+              </span>
+            </span>
+          </div>
+          <p style="margin:0;font-size:11px;color:var(--color-fg-muted);line-height:1.55;">avatar: <code>slate-100</code> bg + Cog slate-500、halo: <code>slate /12</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="triptych" style="grid-template-columns: 1fr 1fr; gap:16px;">
+    <!-- Inbox -->
+    <div class="surface" style="grid-column: span 2;">
+      <div class="surface__head"><strong>Inbox · 担当者 column inline</strong><span>avatar + initial — text fallback</span></div>
+      <table class="queue">
+        <thead>
+          <tr>
+            <th>案件 ID</th><th>業務</th><th>状態</th><th>経過</th><th>担当者</th><th>注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cell-id">CASE-2026-0142</td>
+            <td>法人住所変更</td>
+            <td><span class="status-badge status-badge--ready">入力者確認待ち</span></td>
+            <td class="cell-elapsed">00:12:34</td>
+            <td>
+              <span class="actor-B actor-B--human">
+                <span class="avatar">田中</span>
+                <span class="actor-label">田中 美咲</span>
+              </span>
+            </td>
+            <td><span class="alert-pill"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg> 2</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">CASE-2026-0148</td>
+            <td>口座開設書類完備</td>
+            <td><span class="status-badge status-badge--triage">AI 処理中</span></td>
+            <td class="cell-elapsed">00:03:11</td>
+            <td>
+              <span class="actor-B actor-B--agent">
+                <span class="avatar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></span>
+                <span class="actor-label">AI 抽出 v2.3</span>
+              </span>
+            </td>
+            <td><span style="color:#CBD5E1;">—</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">CASE-2026-0118</td>
+            <td>法人住所変更</td>
+            <td><span class="status-badge status-badge--waiting">承認者承認待ち</span></td>
+            <td class="cell-elapsed">01:42:50</td>
+            <td>
+              <span class="actor-B actor-B--human">
+                <span class="avatar">渡辺</span>
+                <span class="actor-label">渡辺 真理</span>
+              </span>
+            </td>
+            <td><span style="color:#CBD5E1;">—</span></td>
+          </tr>
+          <tr>
+            <td class="cell-id">CASE-2026-0095</td>
+            <td>法人住所変更</td>
+            <td><span class="status-badge status-badge--triage">反映済</span></td>
+            <td class="cell-elapsed">00:24:08</td>
+            <td>
+              <span class="actor-B actor-B--system">
+                <span class="avatar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg></span>
+                <span class="actor-label">system 反映</span>
+              </span>
+            </td>
+            <td><span style="color:#CBD5E1;">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="surface">
+      <div class="surface__head"><strong>Dashboard · 業務 card breakdown row</strong></div>
+      <div style="padding:16px;">
+        <div style="margin-bottom:10px;">
+          <span class="font-mono" style="font-size:10px;color:#64748B;">UC-BO-01</span>
+          <div style="font-size:13px;font-weight:600;margin-top:2px;">法人住所変更</div>
+        </div>
+        <dl style="display:flex;flex-direction:column;">
+          <div class="bk-row">
+            <span class="actor-B actor-B--agent">
+              <span class="avatar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></span>
+              <span class="actor-label">AI 処理中</span>
+            </span>
+            <span class="val">3</span>
+          </div>
+          <div class="bk-row">
+            <span class="actor-B actor-B--human">
+              <span class="avatar">田中</span>
+              <span class="actor-label">入力者確認待ち</span>
+            </span>
+            <span class="val">5</span>
+          </div>
+          <div class="bk-row">
+            <span class="actor-B actor-B--human">
+              <span class="avatar">渡辺</span>
+              <span class="actor-label">承認者承認待ち</span>
+            </span>
+            <span class="val">2</span>
+          </div>
+          <div class="bk-row">
+            <span class="actor-B actor-B--system">
+              <span class="avatar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg></span>
+              <span class="actor-label">反映済</span>
+            </span>
+            <span class="val">8</span>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- AuditTrail -->
+    <div class="surface">
+      <div class="surface__head"><strong>AuditTrail · row 左端</strong></div>
+      <div>
+        <div class="audit-row">
+          <span class="actor-B actor-B--agent" style="flex-shrink:0;">
+            <span class="avatar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></span>
+          </span>
+          <div class="body">
+            <div class="title">AI 入力</div>
+            <div class="desc">CASE-2026-0142 OCR 抽出 0.84、新住所 番地誤抽出を検知</div>
+            <div class="ts"><span>2026-05-31 09:02:11</span><span class="sep">·</span><span>ai.address-extractor v2.3</span></div>
+          </div>
+        </div>
+        <div class="audit-row">
+          <span class="actor-B actor-B--human" style="flex-shrink:0;">
+            <span class="avatar">田中</span>
+          </span>
+          <div class="body">
+            <div class="title">入力者確認</div>
+            <div class="desc">CASE-2026-0142 新住所を「2 丁目 3 番 5 号」に手動修正</div>
+            <div class="ts"><span>2026-05-31 09:18:42</span><span class="sep">·</span><span>田中 美咲</span></div>
+          </div>
+        </div>
+        <div class="audit-row">
+          <span class="actor-B actor-B--system" style="flex-shrink:0;">
+            <span class="avatar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6m6.36-13.36L16 6m-8 12-2.36 2.36M23 12h-6M7 12H1m13.36-7.36L17 7m-12 12-2 2"/></svg></span>
+          </span>
+          <div class="body">
+            <div class="title">反映</div>
+            <div class="desc">CASE-2026-0118 顧客マスタへ住所変更を反映</div>
+            <div class="ts"><span>2026-05-31 11:02:55</span><span class="sep">·</span><span>system</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="rationale">
+    <div>
+      <h4>設計意図</h4>
+      <p>
+        <strong>面積で識別</strong>。circle avatar の塗り + halo の二重円が、 row scroll 中 200ms 以下で actor type を脳が拾えるよう設計。
+        human だけ initial (2 文字) を text fallback として置き、誰の操作かを 1 row 内で完結する。
+        avatar のサイズは <code>StatusBadge</code> や <code>FilterChip</code> よりわずかに高く (24px)、 row の vertical rhythm を壊さない最大半径に揃えた。
+      </p>
+      <h4 style="margin-top:14px;">採用適性</h4>
+      <p>
+        色覚 a11y は icon / initial が冗長 cue として効くが、row height が <strong>+4px 高くなる</strong> trade-off がある (32px → 36px)。
+        Inbox queue で「人の顔感」を出したい場合は強い差別化となる一方、density 重視 (Operational Premium Light の本流) との張力がある。
+        2 actor type の場合 (e.g. system event のみ) は overkill になりやすい。
+      </p>
+    </div>
+    <div>
+      <h4>Props shape (PR 2 Commit 5 reference)</h4>
+<pre><span class="tok-com">// components/shared/ActorBand.tsx (案 B)</span>
+<span class="tok-key">type</span> <span class="tok-type">Actor</span> = <span class="tok-str">'agent'</span> | <span class="tok-str">'human'</span> | <span class="tok-str">'system'</span>
+
+<span class="tok-key">interface</span> <span class="tok-type">ActorBandProps</span> {
+  actor: Actor
+  label?: string                  <span class="tok-com">// 表示文字列</span>
+  /** human のとき initial 抽出元、未指定なら label の先頭 2 字 */
+  initial?: string
+  size?: <span class="tok-str">'sm'</span> | <span class="tok-str">'md'</span>        <span class="tok-com">// sm = 20px avatar, md = 24px (default)</span>
+  hideLabel?: boolean             <span class="tok-com">// avatar のみ表示 (audit row 等)</span>
+  className?: string
+}
+
+<span class="tok-com">// Color mapping</span>
+<span class="tok-com">// agent  → primary fill + Bot white + indigo halo /12</span>
+<span class="tok-com">// human  → slate-600 fill + initial white + slate halo /10</span>
+<span class="tok-com">// system → slate-100 fill + Cog slate-500 + slate halo /12</span></pre>
+    </div>
+  </section>
+</div>
+</body>
+</html>

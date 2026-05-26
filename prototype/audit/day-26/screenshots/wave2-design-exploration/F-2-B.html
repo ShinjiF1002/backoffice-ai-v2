@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1320" />
+<title>F-2 案 B — Side-by-side default + Inline toggle (ProposalReview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../_shared/tokens.css" />
+<style>
+  .layout-2col {
+    display: grid;
+    grid-template-columns: 4fr 8fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  .meta-anchor {
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    background: #F8FAFC;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .meta-anchor__lead {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--color-fg-muted);
+  }
+  .meta-anchor__lead strong { color: var(--color-fg); font-weight: 600; }
+  .meta-anchor__lead .dot { width:6px;height:6px;border-radius:50%;background:var(--color-primary); }
+  .gate-msg {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--color-alert-soft-fg);
+    background: var(--color-alert-soft);
+    padding: 2px 7px;
+    border-radius: var(--radius-chip);
+  }
+  .view-body { display: none; }
+  .view-body[aria-current="true"] { display: block; }
+
+  .diff-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+  .diff-card__head {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--color-border);
+    background: #F8FAFC;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .diff-card__file {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--color-fg-muted);
+  }
+  .diff-card__sec {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--color-fg);
+  }
+  .next-action {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 8px 24px;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 11px;
+  }
+  .next-action__left { display: flex; align-items: center; gap: 8px; color: var(--color-fg); }
+  .next-action__left .target-ic { color: var(--color-primary); }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="frame__head">
+    <div class="frame__crumbs">gate-1 · wave-2 · F-2 / Diff Preview · 案 B</div>
+    <h1 class="frame__title">案 B — Side-by-side default + Inline toggle (ProposalReview 最適)</h1>
+    <p class="frame__sub">
+      手順 markdown の <strong>変更前 / 変更後</strong> を <strong>左右 2 column</strong> に refactor。toggle で Inline 1-column diff に切替。
+      MetadataStrip は <strong>PageHeader 直下</strong> (案件 metadata と同列の高さ)、5 element 横並び。承認 button は同様 metadata gate。
+    </p>
+    <div class="frame__meta">
+      <span class="meta-chip meta-chip--primary">DiffPreviewBlock</span>
+      <span class="meta-chip meta-chip--primary">MetadataStrip</span>
+      <span class="meta-chip">PROP-2026-031</span>
+      <span class="meta-chip">UC-BO-01 OCR 閾値引き上げ</span>
+    </div>
+  </header>
+
+  <div class="app">
+    <!-- ───── PageHeader ───── -->
+    <div class="pageheader">
+      <nav class="crumb">
+        <a href="#">受信トレイ</a><span class="sep">›</span>
+        <a href="#">AI 提案レビュー</a><span class="sep">›</span>
+        <span class="case-id">PROP-2026-031</span>
+      </nav>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:4px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h2 class="h1">OCR 信頼度閾値の段階引き上げ提案 (0.85 → 0.88)</h2>
+          <span class="meta-chip">法人住所変更</span>
+          <span class="status-badge status-badge--triage">手順管理者の整理待ち</span>
+        </div>
+        <span class="font-mono" style="font-size:11px;color:#64748B;">経過 01:42:18</span>
+      </div>
+
+      <div style="margin-top:8px; display:flex; align-items:center; gap:6px; font-size:11px; color:#475569;">
+        <svg class="lu lu--xs" style="color:var(--color-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg>
+        <span>提案ソース: <strong style="color:var(--color-fg);font-weight:500;">AI (日次分析)</strong> · 判断根拠は左の判定基準 + 元案件 を参照</span>
+      </div>
+
+      <ol class="stepper">
+        <li><span class="step step--current">整理</span><svg class="arrow" viewBox="0 0 8 8"><path d="M2 1l4 3-4 3" stroke="currentColor" stroke-width="1.25" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+        <li><span class="step">承認</span><svg class="arrow" viewBox="0 0 8 8"><path d="M2 1l4 3-4 3" stroke="currentColor" stroke-width="1.25" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+        <li><span class="step">反映</span></li>
+      </ol>
+    </div>
+
+    <!-- ───── F-2 NEW: MetadataStrip (header 直下、ProposalReview 配置) ───── -->
+    <div class="meta-anchor" id="metadataStrip">
+      <div class="meta-anchor__lead">
+        <span class="dot"></span>
+        <strong>提案メタデータ</strong>
+        <span style="color:#94A3B8;">·</span>
+        <span>本提案が誰により / なぜ / どの範囲に作られたかを確認してから業務責任者へ送付してください</span>
+      </div>
+      <div class="meta-strip" role="group" aria-label="変更メタデータ">
+        <div class="meta-strip__cell">
+          <span class="meta-strip__key">変更担当</span>
+          <span class="meta-strip__val">
+            <svg class="lu lu--xs" style="color:var(--color-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg>
+            AI 日次分析
+          </span>
+          <span class="meta-strip__sub">ai.daily-analyzer v1.2</span>
+        </div>
+        <div class="meta-strip__cell">
+          <span class="meta-strip__key">変更理由</span>
+          <span class="meta-strip__val">人手上書き 75%</span>
+          <span class="meta-strip__sub">信頼度 0.85-0.88 帯 · 12 件中 9 件</span>
+        </div>
+        <div class="meta-strip__cell">
+          <span class="meta-strip__key">提案信頼度</span>
+          <span class="meta-strip__val">
+            <span class="meta-strip__dot meta-strip__dot--ok"></span>
+            <span class="font-mono">0.81</span>
+          </span>
+          <span class="meta-strip__sub">共通 pattern 一致度 [仮説 / 要検証]</span>
+        </div>
+        <div class="meta-strip__cell">
+          <span class="meta-strip__key">影響範囲</span>
+          <span class="meta-strip__val">12 cases</span>
+          <span class="meta-strip__sub">3 週間履歴 + 今後の UC-BO-01 全件</span>
+        </div>
+        <div class="meta-strip__cell">
+          <span class="meta-strip__key">取り消し可否</span>
+          <span class="meta-strip__val">
+            <span class="meta-strip__dot meta-strip__dot--ok"></span>
+            Revertible
+          </span>
+          <span class="meta-strip__sub">設定承認で本番反映前に戻せます</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NextActionStrip -->
+    <div class="next-action">
+      <div class="next-action__left">
+        <svg class="lu lu--sm target-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <strong style="font-weight:500;color:var(--color-fg);">提案要約</strong>
+        <span style="color:#CBD5E1;">·</span>
+        <span style="color:#334155;">元案件 3 件、判定基準 3/3 達成、提案差分 2 ファイル</span>
+      </div>
+    </div>
+
+    <!-- ───── 2-col body ───── -->
+    <div class="layout-2col">
+      <!-- LEFT: 判定基準 / 元案件 / 未承認ヒント -->
+      <section style="display:flex; flex-direction:column; gap:12px;">
+        <div class="panel">
+          <div class="panel__title">判定基準</div>
+          <ul style="display:flex;flex-direction:column;gap:8px; font-size:11.5px;">
+            <li>
+              <div style="display:flex; justify-content:space-between;"><span style="color:#475569;">同種差戻し件数</span><span class="font-mono" style="color:var(--color-success-soft-fg);font-weight:600;">12 件</span></div>
+              <div class="font-mono" style="font-size:10px;color:#94A3B8; margin-top:2px;">基準: 3 件以上 [仮説 / 要検証]</div>
+            </li>
+            <li>
+              <div style="display:flex; justify-content:space-between;"><span style="color:#475569;">共通 pattern 一致度</span><span class="font-mono" style="color:var(--color-success-soft-fg);font-weight:600;">0.81</span></div>
+              <div class="font-mono" style="font-size:10px;color:#94A3B8; margin-top:2px;">基準: 0.70 以上 [仮説 / 要検証]</div>
+            </li>
+            <li>
+              <div style="display:flex; justify-content:space-between;"><span style="color:#475569;">staging 内部矛盾</span><span class="font-mono" style="color:var(--color-success-soft-fg);font-weight:600;">なし</span></div>
+              <div class="font-mono" style="font-size:10px;color:#94A3B8; margin-top:2px;">基準: 矛盾なし</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title"><span>元 案件</span><span class="panel__count">3 件</span></div>
+          <ul style="display:flex;flex-direction:column;gap:10px; font-size:11.5px;">
+            <li>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <a href="#" class="font-mono" style="font-weight:500;color:var(--color-primary);">CASE-2026-0142</a>
+                <span style="background:#F1F5F9;border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono', monospace;font-size:10px;color:#475569;">誤読</span>
+              </div>
+              <div style="margin-top:2px;color:#334155;">法人住所変更 (千代田区サンプルビル)</div>
+              <div style="margin-top:2px;color:#64748B;font-size:10.5px;line-height:1.5;">OCR 信頼度 0.86 で新住所の番地表記を誤抽出</div>
+            </li>
+            <li>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <a href="#" class="font-mono" style="font-weight:500;color:var(--color-primary);">CASE-2026-0118</a>
+                <span style="background:#F1F5F9;border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono', monospace;font-size:10px;color:#475569;">UI 差異</span>
+              </div>
+              <div style="margin-top:2px;color:#334155;">法人住所変更 (品川区テストプラザ)</div>
+              <div style="margin-top:2px;color:#64748B;font-size:10.5px;line-height:1.5;">OCR 信頼度 0.87 で建物名フォント差異により誤読</div>
+            </li>
+            <li>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <a href="#" class="font-mono" style="font-weight:500;color:var(--color-primary);">CASE-2026-0095</a>
+                <span style="background:#F1F5F9;border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono', monospace;font-size:10px;color:#475569;">誤読</span>
+              </div>
+              <div style="margin-top:2px;color:#334155;">法人住所変更 (中央区サンプルセンター)</div>
+              <div style="margin-top:2px;color:#64748B;font-size:10.5px;line-height:1.5;">OCR 信頼度 0.85 で旧字体住所を誤認識</div>
+            </li>
+          </ul>
+        </div>
+
+        <div style="background:#F8FAFC; border:1px solid var(--color-border); border-radius:var(--radius-card); padding:14px;">
+          <div class="panel__title" style="margin-bottom:6px;">
+            <span>未承認ヒント</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#475569;background:#E2E8F0;padding:1px 6px;border-radius:4px;">引用根拠 対象外</span>
+          </div>
+          <p style="font-size:10.5px;color:#64748B;margin:0 0 4px;">本提案を支える未承認ナレッジ。承認後、正式手順に昇格予定。</p>
+        </div>
+      </section>
+
+      <!-- RIGHT: DiffPreviewBlock — Side-by-side default + Inline toggle -->
+      <section>
+        <div class="panel" style="padding:0;">
+          <div style="padding:16px; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="panel__title" style="margin:0;">
+                <span>提案 差分 (変更前 / 変更後) <span class="panel__count" style="margin-left:6px;">2 ファイル</span></span>
+              </div>
+              <p style="font-size:11px; color:#64748B; margin:6px 0 0;">OCR 信頼度 0.85-0.88 範囲で人手上書き率が高い。閾値を 0.88 に引き上げ、0.85-0.88 範囲は人手確認に回す。</p>
+            </div>
+            <!-- View toggle -->
+            <div class="toggle-group" role="tablist" aria-label="差分表示モード">
+              <button type="button" role="tab" aria-selected="true" onclick="setView('sbs')">
+                <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                左右
+              </button>
+              <button type="button" role="tab" aria-selected="false" onclick="setView('inline')">
+                <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                インライン
+              </button>
+            </div>
+          </div>
+
+          <div style="padding:16px; display:flex; flex-direction:column; gap:14px;">
+            <!-- VIEW: Side-by-side (default) -->
+            <div class="view-body" data-view="sbs" aria-current="true" style="display:flex; flex-direction:column; gap:14px;">
+              <div class="diff-card">
+                <div class="diff-card__head">
+                  <span class="diff-card__file">workflows/corporate-address-change/agent-instructions.md</span>
+                  <span class="diff-card__sec">§3.2 OCR 信頼度判定</span>
+                </div>
+                <div class="sbs">
+                  <div class="sbs__col sbs__col--before">
+                    <h5>− 変更前</h5>
+                    <p>AI 抽出後に信頼度が <span class="diff-del">0.85</span> 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。</p>
+                  </div>
+                  <div class="sbs__col sbs__col--after">
+                    <h5>＋ 変更後</h5>
+                    <p>AI 抽出後に信頼度が <span class="diff-add">0.88</span> 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。<span class="diff-add">0.85-0.88 の場合は人手確認に回す。</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="diff-card">
+                <div class="diff-card__head">
+                  <span class="diff-card__file">workflows/corporate-address-change/approval-policy.md</span>
+                  <span class="diff-card__sec">§2.1 自動補完条件</span>
+                </div>
+                <div class="sbs">
+                  <div class="sbs__col sbs__col--before">
+                    <h5>− 変更前</h5>
+                    <p>住所 field の自動補完: OCR 信頼度 ≥ <span class="diff-del">0.85</span> [仮説 / 要検証]</p>
+                  </div>
+                  <div class="sbs__col sbs__col--after">
+                    <h5>＋ 変更後</h5>
+                    <p>住所 field の自動補完: OCR 信頼度 ≥ <span class="diff-add">0.88</span> [仮説 / 要検証] <span class="diff-add">(段階引き上げ、Phase 1 で実閾値を再検証)</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW: Inline (toggle) -->
+            <div class="view-body" data-view="inline" aria-current="false" style="flex-direction:column; gap:14px;">
+              <div class="diff-card">
+                <div class="diff-card__head">
+                  <span class="diff-card__file">workflows/corporate-address-change/agent-instructions.md</span>
+                  <span class="diff-card__sec">§3.2 OCR 信頼度判定</span>
+                </div>
+                <div style="padding:12px 14px; font-size:12px; line-height:1.7; color:#334155;">
+                  AI 抽出後に信頼度が <span class="diff-del">0.85</span><span class="diff-add">0.88</span> 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。<span class="diff-add">0.85-0.88 の場合は人手確認に回す。</span>
+                </div>
+              </div>
+              <div class="diff-card">
+                <div class="diff-card__head">
+                  <span class="diff-card__file">workflows/corporate-address-change/approval-policy.md</span>
+                  <span class="diff-card__sec">§2.1 自動補完条件</span>
+                </div>
+                <div style="padding:12px 14px; font-size:12px; line-height:1.7; color:#334155;">
+                  住所 field の自動補完: OCR 信頼度 ≥ <span class="diff-del">0.85</span><span class="diff-add">0.88</span> [仮説 / 要検証] <span class="diff-add">(段階引き上げ、Phase 1 で実閾値を再検証)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer (sticky) -->
+    <div class="footer-bar">
+      <div class="footer-bar__left">
+        <span class="gate-msg" id="gateMsg">業務責任者へ送付前にメタデータをご確認ください</span>
+      </div>
+      <div class="footer-bar__right">
+        <button class="btn">差戻し</button>
+        <button class="btn btn--primary" id="approveBtn" aria-disabled="true" onclick="onApprove(this)">
+          <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          業務責任者へ送付
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rationale + Props -->
+  <section class="rationale">
+    <div>
+      <h4>設計意図</h4>
+      <p>
+        手順 markdown の本文差分は段落単位で読まれることが多く、<strong>左右 2 column の Side-by-side が default</strong> として情報構造に最も忠実。
+        「文中に変更がどの語で生じたか」を 1 行で確認したいときだけ Inline に切替えればよい。
+        MetadataStrip を PageHeader 直下に置くことで「提案レビューを開いた瞬間、何のメタが付いているか」を 0 秒で目に入れ、scroll 動作なしで gate を満たせる (CaseReview 案 A と違い、メタが文書差分の <em>前</em> に来るのが手順承認の心理 model に合う)。
+      </p>
+      <h4 style="margin-top:14px;">採用適性</h4>
+      <p>
+        既存 ProposalReview の border-l-2 hairline + tint /20 grammar を維持しつつ、左右 column 化で
+        Card 2 ★ の 3-view 要件 (Side-by-side / Inline) を 2 view まで満たす。3 view 目 (Field table) は本 page では適合性が低いため除外。
+      </p>
+    </div>
+    <div>
+      <h4>Props shape (PR 2 Commit 3 reference)</h4>
+<pre><span class="tok-com">// components/proposal/DiffPreviewBlock.tsx</span>
+<span class="tok-key">interface</span> <span class="tok-type">DiffPreviewBlockProps</span> {
+  sections: ProposalDiffSection[]   <span class="tok-com">// 2 file × before/after</span>
+  defaultView?: <span class="tok-str">'sideBySide'</span> | <span class="tok-str">'inline'</span>
+  availableViews?: DiffView[]       <span class="tok-com">// = ['sideBySide','inline']</span>
+}
+
+<span class="tok-com">// components/proposal/MetadataStrip.tsx</span>
+<span class="tok-key">interface</span> <span class="tok-type">MetadataStripProps</span> {
+  changeAuthor?: string             <span class="tok-com">// `AI 日次分析 v1.2`</span>
+  changeReason?: string             <span class="tok-com">// 上書き率 + 件数</span>
+  confidence?: number               <span class="tok-com">// 共通 pattern 一致度</span>
+  affectedScope?: string            <span class="tok-com">// 12 cases (3 週間)</span>
+  reversibility?: <span class="tok-str">'Revertible'</span> | <span class="tok-str">'Partial'</span> | <span class="tok-str">'Irreversible'</span>
+  placement?: <span class="tok-str">'header'</span> | <span class="tok-str">'footer'</span>  <span class="tok-com">// 案 B は 'header'</span>
+  onAck?: () => void
+}</pre>
+    </div>
+  </section>
+</div>
+
+<script>
+  function setView(name) {
+    document.querySelectorAll('.view-body').forEach(b => {
+      const on = b.dataset.view === name
+      b.setAttribute('aria-current', on ? 'true' : 'false')
+      b.style.display = on ? 'flex' : 'none'
+    })
+    document.querySelectorAll('.toggle-group [role="tab"]').forEach(t => {
+      const m = t.textContent.trim()
+      const match = (name === 'sbs' && m.includes('左右')) || (name === 'inline' && m.includes('インライン'))
+      t.setAttribute('aria-selected', match ? 'true' : 'false')
+    })
+  }
+
+  let ack = false
+  const strip = document.getElementById('metadataStrip')
+  const btn = document.getElementById('approveBtn')
+  const msg = document.getElementById('gateMsg')
+  function flipActive() {
+    if (ack) return
+    ack = true
+    btn.removeAttribute('aria-disabled')
+    msg.textContent = '送付可能 — メタデータ確認済'
+    msg.style.background = 'var(--color-success-soft)'
+    msg.style.color = 'var(--color-success-soft-fg)'
+  }
+  strip.addEventListener('click', flipActive)
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting && e.intersectionRatio > 0.7) flipActive() })
+  }, { threshold: [0.7] })
+  io.observe(strip)
+
+  function onApprove(b) {
+    if (b.getAttribute('aria-disabled') === 'true') {
+      b.animate([
+        { transform: 'translateX(0)' }, { transform: 'translateX(-4px)' },
+        { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }
+      ], { duration: 220 })
+      msg.textContent = '送付前にメタデータ (上) をご確認ください'
+      return
+    }
+    msg.textContent = '業務責任者 渡辺 真理 へ送付しました (モック)'
+  }
+</script>
+</body>
+</html>

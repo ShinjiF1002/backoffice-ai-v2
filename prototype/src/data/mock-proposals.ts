@@ -96,6 +96,11 @@ export const mockProposals: ProposalRecord[] = [
           'AI 抽出後に信頼度が 0.85 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。',
         after:
           'AI 抽出後に信頼度が 0.88 以上の場合、確認なしで自動補完を完了する [仮説 / 要検証]。0.85-0.88 の場合は人手確認に回す。',
+        // F-2 metadata (Wave 2 PR 2 Commit 2、MetadataStrip 5 element)
+        changeAuthor: 'AI 日次分析 v1.2',
+        changeReason: 'OCR 信頼度 0.85-0.88 帯で人手上書き率 75% (12 件中 9 件、3 週間集約)',
+        affectedScope: '12 cases (3 週間履歴) + 今後の UC-BO-01 全件',
+        reversibility: 'Revertible',
       },
       {
         targetFile: 'workflows/corporate-address-change/approval-policy.md',
@@ -103,6 +108,11 @@ export const mockProposals: ProposalRecord[] = [
         before: '住所 field の自動補完: OCR 信頼度 ≥ 0.85 [仮説 / 要検証]',
         after:
           '住所 field の自動補完: OCR 信頼度 ≥ 0.88 [仮説 / 要検証] (段階引き上げ、Phase 1 で実閾値を再検証)',
+        // F-2 metadata (Wave 2 PR 2 Commit 2、同 proposal の 2 nd section、metadata 共通)
+        changeAuthor: 'AI 日次分析 v1.2',
+        changeReason: 'OCR 信頼度 0.85-0.88 帯で人手上書き率 75%、§3.2 と整合',
+        affectedScope: '12 cases (3 週間履歴) + 今後の UC-BO-01 全件',
+        reversibility: 'Revertible',
       },
     ],
     raci: {

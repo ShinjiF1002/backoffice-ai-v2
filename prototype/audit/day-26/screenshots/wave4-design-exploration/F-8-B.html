@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>F-8-B · ProposalReview RACI via PageHelpDisclosure (1-click)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="tokens.css">
+</head>
+<body class="min-h-screen">
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+</svg>
+
+<div class="flex h-screen flex-col bg-[var(--color-canvas)]">
+
+  <!-- TopBar -->
+  <div class="h-14 shrink-0 border-b border-slate-200 bg-white px-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="h-6 w-6 rounded bg-[var(--color-primary)]"></div>
+      <span class="text-sm font-semibold text-slate-900">backoffice-ai-v2</span>
+      <span class="ml-3 rounded bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-600">prototype mock</span>
+    </div>
+    <div class="text-[11px] text-slate-500 font-mono">田中 美咲 · 手順管理者</div>
+  </div>
+
+  <!-- PageHeader (sticky 88px) -->
+  <header data-page-header class="sticky top-0 z-30 min-h-[88px] border-b border-slate-200 bg-white px-6 py-3">
+    <nav aria-label="breadcrumb" class="flex items-center gap-1.5 text-xs text-slate-500">
+      <a class="hover:text-slate-700">受信トレイ</a>
+      <svg class="h-3 w-3"><use href="#i-chevron-right"/></svg>
+      <span class="text-slate-700">AI 提案レビュー</span>
+      <svg class="h-3 w-3"><use href="#i-chevron-right"/></svg>
+      <span class="font-mono text-slate-700 tabular">PROP-2026-031</span>
+    </nav>
+    <div class="mt-1.5 flex items-center justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-3">
+        <h1 class="truncate text-lg font-semibold text-slate-900">OCR 信頼度判定 境界条件の更新 (v0.1 → v0.2)</h1>
+        <span class="shrink-0 inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">UC-BO-01 法人住所変更</span>
+        <span class="shrink-0 inline-flex items-center rounded-[4px] bg-[var(--color-primary-soft)] px-2 py-0.5 text-xs font-medium text-[var(--color-primary)]">整理中</span>
+      </div>
+      <div class="flex shrink-0 items-center gap-3">
+        <span class="font-mono text-[11px] text-slate-500 tabular">経過 18:42:11</span>
+      </div>
+    </div>
+    <div class="mt-2.5 flex items-center gap-2 text-[11px] text-slate-600">
+      <svg class="h-3 w-3 text-[var(--color-primary)]"><use href="#i-sparkles"/></svg>
+      <span>提案ソース: <span class="font-medium text-slate-800">AI 日次分析 v0.1.3</span><span class="text-slate-500"> · 判断根拠は左の判定基準 + 元案件 を参照</span></span>
+    </div>
+    <div class="mt-2.5 flex items-center gap-2 text-[11px]">
+      <span class="inline-flex items-center gap-1.5 font-semibold text-[var(--color-primary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]"></span>整理 (現在)</span>
+      <span class="text-slate-300">→</span>
+      <span class="text-slate-500">業務責任者 承認</span>
+      <span class="text-slate-300">→</span>
+      <span class="text-slate-500">反映</span>
+    </div>
+  </header>
+
+  <!-- PageHelpDisclosure (Day 19 U-5 primitive、本提案の RACI 5 role surface を L1 anchor として page header 直下に常時 visible)
+       Open state: 5 role inline + 詳細 drawer trigger -->
+  <section aria-labelledby="raci-surface-heading"
+    class="border-b border-slate-200 bg-white px-6 py-3">
+    <div class="flex items-center gap-2 mb-2.5">
+      <svg class="h-3.5 w-3.5 text-[var(--color-primary)]"><use href="#i-users"/></svg>
+      <h2 id="raci-surface-heading" class="text-xs font-semibold text-slate-900">担当役割 (RACI · 5 role)</h2>
+      <span class="font-mono text-[10px] text-slate-500">この提案で誰が何を担うか</span>
+
+      <!-- 1-click trigger -->
+      <button class="ml-auto inline-flex items-center gap-1.5 rounded-md border border-[var(--color-primary)] bg-white px-2.5 py-1 text-[11px] font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)]">
+        <svg class="h-3 w-3"><use href="#i-help"/></svg>
+        詳細を見る (Drawer)
+        <svg class="h-3 w-3"><use href="#i-arrow-right"/></svg>
+      </button>
+    </div>
+
+    <!-- 5 role 1-line inline (PageHelpDisclosure 展開 default — L1 visible で disclosure surface 要件 satisfied) -->
+    <ol class="grid grid-cols-5 gap-2 text-[11px]">
+      <li class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">提案ソース · E</p>
+        <p class="mt-0.5 font-medium text-slate-800">AI 日次分析 v0.1.3</p>
+        <p class="mt-0.5 text-[10px] text-slate-500">Agent (execute 専用)</p>
+      </li>
+      <li class="rounded-md border border-slate-200 bg-white px-2.5 py-1.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">R · 整理担当</p>
+        <p class="mt-0.5 font-medium text-slate-800">田中 美咲</p>
+        <p class="mt-0.5 text-[10px] text-slate-500">手順管理者</p>
+      </li>
+      <li class="rounded-md border border-slate-200 bg-white px-2.5 py-1.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">A · 承認 <span class="inline-flex items-center rounded bg-[var(--color-success-soft)] px-1 ml-0.5 font-mono text-[9px] font-medium text-[var(--color-success-soft-fg)]"><svg class="h-2 w-2 mr-0.5"><use href="#i-check"/></svg>named</span></p>
+        <p class="mt-0.5 font-medium text-slate-800">渡辺 真理</p>
+        <p class="mt-0.5 text-[10px] text-slate-500">業務責任者</p>
+      </li>
+      <li class="rounded-md border border-slate-200 bg-white px-2.5 py-1.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">C · 相談</p>
+        <p class="mt-0.5 font-medium text-slate-800 truncate">佐藤 隆 / 高橋 健</p>
+        <p class="mt-0.5 text-[10px] text-slate-500">AI 管理者 / リスク</p>
+      </li>
+      <li class="rounded-md border border-slate-200 bg-white px-2.5 py-1.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">I · 情報共有</p>
+        <p class="mt-0.5 font-medium text-slate-800 truncate">Audit / 情報管理</p>
+        <p class="mt-0.5 text-[10px] text-slate-500">AuditTrail 経由</p>
+      </li>
+    </ol>
+
+    <p class="mt-2 text-[10px] leading-relaxed text-slate-500">
+      職務分離 (SoD): 整理担当 ≠ 承認者 (同一人物化禁止、Type A 既定) ·
+      <span class="font-medium text-slate-700">Agent (E) は責任 actor ではない</span>
+    </p>
+  </section>
+
+  <!-- NextActionStrip (summary mode) -->
+  <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-6 py-2.5">
+    <div class="flex min-w-0 items-center gap-2">
+      <svg class="h-3.5 w-3.5 text-[var(--color-primary)]"><use href="#i-target"/></svg>
+      <span class="shrink-0 text-[11px] font-medium text-slate-700">提案要約</span>
+      <span class="text-slate-300">·</span>
+      <span class="truncate text-xs text-slate-700">元案件 3 件、判定基準 4/4 達成、提案差分 2 ファイル</span>
+    </div>
+  </div>
+
+  <!-- F-8-B banner -->
+  <div class="border-b border-[var(--color-primary)]/30 bg-[var(--color-primary-soft)]/40 px-6 py-2">
+    <p class="text-[11px] leading-relaxed text-[var(--color-primary)]">
+      <span class="font-semibold">F-8-B 採用時の挙動:</span>
+      PageHelpDisclosure pattern (上 ↑) で 5 role surface を L1 常時 visible。`?demo=1` query は deprecated。詳細 (SoD note + メタ情報) は「詳細を見る (Drawer)」button click で右 DetailDrawer 展開 (1-click 到達)。
+    </p>
+  </div>
+
+  <!-- === Main body (3-col、drawer 領域なし default で screen real estate 12/12) === -->
+  <div class="flex-1 overflow-y-auto p-4">
+    <div class="grid grid-cols-12 gap-4">
+
+      <!-- Left 4/12 -->
+      <section class="space-y-3 col-span-4">
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <h2 class="mb-3 text-sm font-semibold text-slate-900">判定基準</h2>
+          <ul class="space-y-2">
+            <li class="text-xs">
+              <div class="flex items-center justify-between gap-2"><span class="text-slate-600">同種差戻し pattern 一致度</span><span class="font-mono font-medium text-[var(--color-success)] tabular">3 件</span></div>
+              <p class="mt-0.5 font-mono text-[10px] text-slate-400">基準: ≥ 3 件</p>
+            </li>
+            <li class="text-xs">
+              <div class="flex items-center justify-between gap-2"><span class="text-slate-600">staging 内部矛盾</span><span class="font-mono font-medium text-[var(--color-success)] tabular">なし</span></div>
+              <p class="mt-0.5 font-mono text-[10px] text-slate-400">基準: 矛盾 0 件</p>
+            </li>
+            <li class="text-xs">
+              <div class="flex items-center justify-between gap-2"><span class="text-slate-600">提案 weight</span><span class="font-mono font-medium text-[var(--color-success)] tabular">medium</span></div>
+              <p class="mt-0.5 font-mono text-[10px] text-slate-400">基準: medium 以上</p>
+            </li>
+            <li class="text-xs">
+              <div class="flex items-center justify-between gap-2"><span class="text-slate-600">関連 KPI 改善見込み</span><span class="font-mono font-medium text-[var(--color-success)] tabular">+1.2pt</span></div>
+              <p class="mt-0.5 font-mono text-[10px] text-slate-400">基準: K3 Alert 発生率 改善 [仮説 / 要検証]</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-900">元 案件</h2>
+            <span class="font-mono text-[10px] text-slate-500">3 件</span>
+          </div>
+          <ul class="space-y-3">
+            <li class="text-xs">
+              <div class="flex items-center gap-1.5">
+                <a class="inline-flex items-center gap-1 font-mono font-medium text-[var(--color-primary)] tabular hover:underline">CASE-2026-0118</a>
+                <span class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">境界条件</span>
+              </div>
+              <p class="mt-0.5 text-slate-700">町字表記の半角全角混在で OCR 信頼度 0.82 (閾値直下)</p>
+              <p class="mt-0.5 text-[10px] leading-relaxed text-slate-500">入力者コメント: 0.82 でも全て正解だった、閾値 0.85 は厳格すぎる</p>
+            </li>
+            <li class="text-xs">
+              <div class="flex items-center gap-1.5">
+                <a class="inline-flex items-center gap-1 font-mono font-medium text-[var(--color-primary)] tabular hover:underline">CASE-2026-0124</a>
+                <span class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">境界条件</span>
+              </div>
+              <p class="mt-0.5 text-slate-700">郵便番号 7 桁の hyphen 有無で 0.83 (閾値直下)</p>
+            </li>
+            <li class="text-xs">
+              <div class="flex items-center gap-1.5">
+                <a class="inline-flex items-center gap-1 font-mono font-medium text-[var(--color-primary)] tabular hover:underline">CASE-2026-0131</a>
+                <span class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">判断境界</span>
+              </div>
+              <p class="mt-0.5 text-slate-700">登記情報の旧字体で 0.84 (閾値直下)</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div class="mb-2 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-900">未承認ヒント</h2>
+            <span class="inline-flex items-center rounded bg-slate-200 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">引用根拠 対象外</span>
+          </div>
+          <p class="mb-2 text-[10px] leading-relaxed text-slate-500">承認後、正式手順 (承認済) に昇格予定。</p>
+          <ul class="space-y-2.5">
+            <li class="text-xs">
+              <div class="flex items-start gap-1.5">
+                <span class="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-alert)]"></span>
+                <span class="font-medium text-slate-800">OCR 閾値 0.85 → 0.83 引き下げ + normalize 強化</span>
+              </div>
+              <p class="mt-1 text-[10px] leading-relaxed text-slate-600">町字表記・郵便番号 normalize により 0.83 でも誤判定が観測されていない (3 件中 0 件)</p>
+            </li>
+            <li class="text-xs">
+              <div class="flex items-start gap-1.5">
+                <span class="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span>
+                <span class="font-medium text-slate-800">旧字体 normalize ルール拡張</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Middle 8/12 (Hero、drawer なしで full 8/12 を使う) -->
+      <section class="space-y-3 col-span-8">
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <div class="mb-2 flex items-center justify-between gap-2">
+            <h2 class="text-sm font-semibold text-slate-900">提案 差分 (変更前 / 変更後) <span class="ml-2 font-mono text-[10px] font-normal text-slate-500">· 文書テキスト差分</span></h2>
+            <span class="shrink-0 font-mono text-[10px] text-slate-500">2 ファイル</span>
+          </div>
+          <p class="mb-4 text-xs leading-relaxed text-slate-700">
+            UC-BO-01 法人住所変更 Agent の OCR 抽出 step で、閾値直下 (0.82-0.84) でも入力者修正なしで通過した 3 件を根拠に、信頼度閾値を 0.85 → 0.83 に調整し、町字 / 郵便番号 / 旧字体 の normalize 強化を併せて実施する。Alert 発生率 (K3) の改善見込み +1.2pt [仮説 / 要検証]。
+          </p>
+          <div class="space-y-4">
+            <div class="overflow-hidden rounded-md border border-slate-200">
+              <div class="border-b border-slate-200 bg-slate-50 px-3 py-2">
+                <p class="font-mono text-[11px] text-slate-600 tabular">workflows/UC-BO-01/agent-instructions.md</p>
+                <p class="mt-0.5 text-[11px] font-medium text-slate-900">§3.2 OCR 信頼度判定</p>
+              </div>
+              <div class="border-b border-slate-100 border-l-2 border-l-[var(--color-error)] bg-red-50/20 p-3">
+                <p class="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-error)]">− 変更前</p>
+                <p class="text-xs leading-relaxed text-slate-700">OCR 信頼度 0.85 未満の field は <span class="font-mono">注意</span> を発し、入力者確認を必須とする。normalize は基本 tier のみ。</p>
+              </div>
+              <div class="border-l-2 border-l-[var(--color-success)] bg-emerald-50/20 p-3">
+                <p class="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-success)]">＋ 変更後</p>
+                <p class="text-xs leading-relaxed text-slate-700">OCR 信頼度 <span class="font-mono">0.83</span> 未満の field は <span class="font-mono">注意</span> を発し、入力者確認を必須とする。町字 / 郵便番号 hyphen / 旧字体 の normalize tier 2 を適用後に評価する。</p>
+              </div>
+            </div>
+
+            <div class="overflow-hidden rounded-md border border-slate-200">
+              <div class="border-b border-slate-200 bg-slate-50 px-3 py-2">
+                <p class="font-mono text-[11px] text-slate-600 tabular">workflows/UC-BO-01/approval-policy.md</p>
+                <p class="mt-0.5 text-[11px] font-medium text-slate-900">§2 Alert 条件</p>
+              </div>
+              <div class="border-b border-slate-100 border-l-2 border-l-[var(--color-error)] bg-red-50/20 p-3">
+                <p class="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-error)]">− 変更前</p>
+                <p class="text-xs leading-relaxed text-slate-700">境界条件 (信頼度 0.85-0.90) は 注意 1 件 として扱う。</p>
+              </div>
+              <div class="border-l-2 border-l-[var(--color-success)] bg-emerald-50/20 p-3">
+                <p class="mb-1 text-[10px] font-medium tracking-wide text-[var(--color-success)]">＋ 変更後</p>
+                <p class="text-xs leading-relaxed text-slate-700">境界条件 (信頼度 <span class="font-mono">0.83-0.90</span>) は 注意 1 件 として扱う。normalize tier 2 適用後の信頼度を用いる。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <p class="mt-4 rounded-md border border-dashed border-slate-300 bg-white p-3 text-[11px] text-slate-500">
+      <span class="font-medium text-slate-700">F-8-B 採用時の disclosure surface 達成:</span>
+      PageHelpDisclosure の inline 展開で 5 role が L1 visible (0 click)、SoD note も 1 行 visible。
+      詳細メタ情報 (提案 ID / 業務 / 生成日時 / 経過 / Agent 版数) と SoD 詳細解説は Drawer (1 click)。
+      Drawer は default 閉、screen real estate を提案差分 hero に集約。
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <footer class="shrink-0 border-t border-slate-200 bg-white px-6 py-2.5">
+    <div class="flex items-center justify-between">
+      <span class="text-xs text-slate-500"><span class="font-medium text-slate-700">手順管理者:</span> 提案を整理し、業務責任者へ送付するか差戻しを判断してください</span>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-400 opacity-70" title="差戻し動作は次の実装段階で対応">
+          <svg class="h-3.5 w-3.5"><use href="#i-x"/></svg> 差戻し
+        </span>
+        <span class="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white opacity-60" title="業務責任者送付動作は次の実装段階で対応">
+          <svg class="h-3.5 w-3.5"><use href="#i-send"/></svg> 業務責任者へ送付
+        </span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

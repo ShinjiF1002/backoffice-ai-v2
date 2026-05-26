@@ -1,0 +1,57 @@
+/* Operational Premium Light — token SSOT (01-design-system-constraints.md) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Surfaces */
+  --color-canvas: #F8FAFC;        /* slate-50 (shell) */
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+
+  /* Primary (indigo) */
+  --color-primary: #635BFF;
+  --color-primary-strong: #4F46E5;
+  --color-primary-soft: #EEF2FF;  /* indigo-50 */
+
+  /* Success (emerald) */
+  --color-success: #10B981;
+  --color-success-soft: #ECFDF5;
+  --color-success-soft-fg: #047857; /* emerald-700 */
+
+  /* Alert (amber) */
+  --color-alert: #F59E0B;
+  --color-alert-soft: #FEF3C7;
+  --color-alert-soft-fg: #92400E; /* amber-900 */
+
+  /* Error (red) */
+  --color-error: #DC2626;
+  --color-error-soft: #FEF2F2;
+  --color-error-soft-fg: #B91C1C; /* red-700 */
+
+  /* Subtle */
+  --color-fg-subtle: #94A3B8;     /* slate-400 */
+
+  /* Radius */
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-chip: 4px;
+
+  /* Layout */
+  --height-pageheader: 88px;
+}
+
+html, body {
+  background: var(--color-canvas);
+  color: #0F172A; /* slate-900 */
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  font-feature-settings: "ss01" on;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mono utility used in source (`tabular` class for tabular-nums) */
+.tabular { font-variant-numeric: tabular-nums; }
+.font-mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: "tnum" on; }
+
+/* Hairline used by source */
+.border-hairline { border-color: var(--color-border); }
+
+/* No decoration: never gradient/glow/glass/3D — restraint pattern */

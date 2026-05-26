@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Gate 2 — Wave 4 Cockpit + Governance · Design Exploration (F-6 / F-8 / F-9)</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  body { margin: 0; }
+  /* iframe inside artboard fills it without scrollbars */
+  .ab-frame { width: 100%; height: 100%; border: 0; display: block; background: #F8FAFC; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+
+function Frame({ src }) {
+  return <iframe className="ab-frame" src={src} loading="lazy" />;
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+
+      {/* ============ F-6 Dashboard 3-viewport cockpit ============ */}
+      <DCSection
+        id="f-6"
+        title="F-6 · Dashboard 3-viewport cockpit refactor"
+        subtitle="P1 / new · aggregate KPI strip + per-workflow grid (UC-BO-01/02 のみ) + drill-down — Card 7 翻案 (per-agent 5-30 cards → per-workflow 2 only / kill switch → read-only)"
+      >
+        <DCArtboard id="f-6-a" label="案 A · top KPI strip + workflow grid + right DetailDrawer drill-down" width={1440} height={1200}>
+          <Frame src="screenshots/wave4-design-exploration/F-6-A.html" />
+        </DCArtboard>
+
+        <DCArtboard id="f-6-b" label="案 B · full-width KPI band + inline Disclosure expand (drawer 不使用)" width={1440} height={1400}>
+          <Frame src="screenshots/wave4-design-exploration/F-6-B.html" />
+        </DCArtboard>
+
+        <DCPostIt top={20} right={-340} width={300} rotate={-1.5}>
+          F-6 rationale<br/>
+          ─────────<br/>
+          A は drill-down を DetailDrawer (Day 19 primitive 再利用) で実現、3-viewport F-pattern を厳密に踏襲。<br/>
+          B は drawer を避け Disclosure primitive で in-card 展開、screen real estate を業務 card 中心に保ち動線 lane を右常設。<br/>
+          <br/>
+          推奨: <b>A</b>。<br/>
+          理由: Card 7 の 3-viewport drill-down と Day 19 DetailDrawer SSOT が直結し、route 遷移なし in-page navigation を満たす。B の inline expand は per-workflow 2 件のみで viewport 不足にはならないが、Cockpit pattern 名義からは drift する。
+        </DCPostIt>
+      </DCSection>
+
+      {/* ============ F-8 ProposalReview RACI default surface ============ */}
+      <DCSection
+        id="f-8"
+        title="F-8 · ProposalReview RACI default surface"
+        subtitle="P2 / adjacent-to-Day19 · 5 role visible が disclosure surface 要件、`?demo=1` query gate 廃止 — Card 9 翻案"
+      >
+        <DCArtboard id="f-8-a" label="案 A · DetailDrawer default open (no query gate)" width={1440} height={1100}>
+          <Frame src="screenshots/wave4-design-exploration/F-8-A.html" />
+        </DCArtboard>
+
+        <DCArtboard id="f-8-b" label="案 B · PageHelpDisclosure inline (5 role L1 visible + drawer for detail 1-click)" width={1440} height={1100}>
+          <Frame src="screenshots/wave4-design-exploration/F-8-B.html" />
+        </DCArtboard>
+
+        <DCPostIt top={20} right={-340} width={300} rotate={1.5}>
+          F-8 rationale<br/>
+          ─────────<br/>
+          A は drawer 自動展開で 5 role を最初の見え方に固定する代わり screen real estate を 480px 消費し続ける。<br/>
+          B は PageHelpDisclosure で 5 role の 1-line を L1 常時 visible、SoD note も inline、詳細は drawer (1-click)。<br/>
+          <br/>
+          推奨: <b>B</b>。<br/>
+          理由: 1st-time user / 入力者 が 0-click で 5 role surface に到達 (disclosure surface 要件 ≥A)、Hero 提案差分の screen real estate を 8/12 full で確保、drawer は明示意図 (詳細を見る) でのみ展開。`?demo=1` query gate は同様に deprecated。<br/>
+          採用案で Day 19 U-6 DetailDrawer primitive は reuse + extend (default closed)、`adjacent-to-Day19` tag が成立。
+        </DCPostIt>
+      </DCSection>
+
+      {/* ============ F-9 AgentSettings tool scope badge ============ */}
+      <DCSection
+        id="f-9"
+        title="F-9 · AgentSettings Tool list scope badge"
+        subtitle="P2 / new · 各 tool の RBAC scope (read / write / approval-gated) を inline 可視化、least-privilege expression 強化"
+      >
+        <DCArtboard id="f-9-a" label="案 A · inline scope badge per tool row (MetaChip 6px no-border、3 variant)" width={1440} height={1200}>
+          <Frame src="screenshots/wave4-design-exploration/F-9-A.html" />
+        </DCArtboard>
+
+        <DCPostIt top={20} right={-340} width={300} rotate={-1.5}>
+          F-9 rationale<br/>
+          ─────────<br/>
+          MetaChip pattern (6px no-border + tone-soft 背景) で 3 variant を同 grammar 維持:<br/>
+          • read = slate-100 / 読み取り<br/>
+          • write = amber-soft / 書き込み<br/>
+          • approval-gated = red-soft / 承認必須<br/>
+          <br/>
+          Disclosure 折りたたみ中でも badge は tool name 行で常時 visible (description との co-existence)。<br/>
+          row 背景の tint は scope 強度の secondary cue (slate-none / amber-50/30 / red-50/30)。<br/>
+          <br/>
+          推奨: <b>A</b> (single 案)。
+        </DCPostIt>
+      </DCSection>
+
+      {/* ============ Summary / Safety rail check skeleton ============ */}
+      <DCSection
+        id="summary"
+        title="Decision summary + Safety rail check (gate2-decision.md 反映用)"
+        subtitle="採用案を確定する際に gate2-decision.md の Decision Table へ転記"
+      >
+        <DCArtboard id="summary-table" label="Decision Table (採用案候補と Safety rail 5 軸 check)" width={1400} height={680}>
+          <div style={{fontFamily:'Inter, "Noto Sans JP", sans-serif', padding:24, background:'#fff', height:'100%', overflow:'auto', color:'#0F172A'}}>
+            <h2 style={{fontSize:14, fontWeight:600, marginBottom:12}}>Decision Table</h2>
+            <table style={{width:'100%', borderCollapse:'collapse', fontSize:12, fontVariantNumeric:'tabular-nums'}}>
+              <thead>
+                <tr style={{borderBottom:'1px solid #E5E7EB', textAlign:'left'}}>
+                  <th style={{padding:'8px 6px', fontWeight:600, color:'#475569'}}>Finding</th>
+                  <th style={{padding:'8px 6px', fontWeight:600, color:'#475569'}}>生成案</th>
+                  <th style={{padding:'8px 6px', fontWeight:600, color:'#475569'}}>推奨</th>
+                  <th style={{padding:'8px 6px', fontWeight:600, color:'#475569'}}>Rationale (1 文)</th>
+                  <th style={{padding:'8px 6px', fontWeight:600, color:'#475569'}}>Export path</th>
+                  <th style={{padding:'8px 6px', fontWeight:600, color:'#475569'}}>tag</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{borderBottom:'1px solid #F1F5F9', verticalAlign:'top'}}>
+                  <td style={{padding:'10px 6px', fontWeight:600}}>F-6 Dashboard 3-viewport</td>
+                  <td style={{padding:'10px 6px'}}>A / B</td>
+                  <td style={{padding:'10px 6px', fontWeight:600, color:'#635BFF'}}>A</td>
+                  <td style={{padding:'10px 6px', color:'#334155'}}>Card 7 3-viewport pattern を厳密踏襲、Day 19 DetailDrawer primitive 再利用、route 遷移廃止で in-page drill-down。</td>
+                  <td style={{padding:'10px 6px', fontFamily:'JetBrains Mono, monospace', color:'#475569', fontSize:11}}>screenshots/wave4-design-exploration/F-6-A.html</td>
+                  <td style={{padding:'10px 6px'}}><span style={{display:'inline-block', padding:'2px 6px', background:'#EEF2FF', color:'#635BFF', borderRadius:4, fontSize:10, fontFamily:'JetBrains Mono, monospace'}}>new</span></td>
+                </tr>
+                <tr style={{borderBottom:'1px solid #F1F5F9', verticalAlign:'top'}}>
+                  <td style={{padding:'10px 6px', fontWeight:600}}>F-8 RACI default surface</td>
+                  <td style={{padding:'10px 6px'}}>A / B</td>
+                  <td style={{padding:'10px 6px', fontWeight:600, color:'#635BFF'}}>B</td>
+                  <td style={{padding:'10px 6px', color:'#334155'}}>PageHelpDisclosure で 5 role を L1 常時 visible (0-click)、Hero 提案差分の screen real estate を 8/12 full に確保、drawer は明示意図のみ。</td>
+                  <td style={{padding:'10px 6px', fontFamily:'JetBrains Mono, monospace', color:'#475569', fontSize:11}}>screenshots/wave4-design-exploration/F-8-B.html</td>
+                  <td style={{padding:'10px 6px'}}><span style={{display:'inline-block', padding:'2px 6px', background:'#FEF3C7', color:'#92400E', borderRadius:4, fontSize:10, fontFamily:'JetBrains Mono, monospace'}}>adjacent-to-Day19</span></td>
+                </tr>
+                <tr style={{verticalAlign:'top'}}>
+                  <td style={{padding:'10px 6px', fontWeight:600}}>F-9 permission scope badge</td>
+                  <td style={{padding:'10px 6px'}}>A</td>
+                  <td style={{padding:'10px 6px', fontWeight:600, color:'#635BFF'}}>A</td>
+                  <td style={{padding:'10px 6px', color:'#334155'}}>MetaChip 6px no-border + tone-soft の 3 variant、Disclosure 折り畳み中も visible、AgentToolEntry に scope?: 'read' | 'write' | 'approval-gated' を追加。</td>
+                  <td style={{padding:'10px 6px', fontFamily:'JetBrains Mono, monospace', color:'#475569', fontSize:11}}>screenshots/wave4-design-exploration/F-9-A.html</td>
+                  <td style={{padding:'10px 6px'}}><span style={{display:'inline-block', padding:'2px 6px', background:'#EEF2FF', color:'#635BFF', borderRadius:4, fontSize:10, fontFamily:'JetBrains Mono, monospace'}}>new</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h2 style={{fontSize:14, fontWeight:600, marginTop:24, marginBottom:8}}>Safety rail check (5 軸、全 finding 共通)</h2>
+            <ul style={{fontSize:12, lineHeight:1.7, color:'#334155', paddingLeft:20, margin:0}}>
+              <li><b>Token SSOT</b>: 5 mock 共通で <code style={{fontFamily:'JetBrains Mono'}}>tokens.css</code> から var(--color-*) 経由、Tailwind palette text-{'{amber|emerald|red}'}-{'{700|800|900}'} 直接使用なし。</li>
+              <li><b>装飾禁止</b>: gradient / glow / glass / 3D / large rounded (&gt;8px) / cream-beige / dark mode いずれも不在。restraint pattern 維持。</li>
+              <li><b>Day 19 重複 check</b>: HypothesisChip / Disclosure / DetailDrawer / PageHelpDisclosure / NextActionStrip は reuse のみ、新規 primitive 追加なし。新規実装の予定は DiffPreviewBlock / MetadataStrip / ActorBand (F-2 + F-5)。</li>
+              <li><b>JP typography</b>: UI copy は日本語のみ、英語は React/AI/PDF/OCR/API/SLO/KPI/Trust Level 等の技術固有名詞のみ。Tier 1 vocab (案件承認 / 手順承認 / 設定承認 / 入力者 / 承認者) は label にそのまま使用。</li>
+              <li><b>Quota</b>: F-6 (2 案) + F-8 (2 案) + F-9 (1 案) = 5 案 / 約 5 prompt 想定通り。</li>
+            </ul>
+
+            <h2 style={{fontSize:14, fontWeight:600, marginTop:24, marginBottom:8}}>Implementation spec hint (PR 4 Commit 9-10)</h2>
+            <ul style={{fontSize:12, lineHeight:1.7, color:'#334155', paddingLeft:20, margin:0}}>
+              <li><b>Commit 9 (F-6 採用 A)</b>: <code style={{fontFamily:'JetBrains Mono'}}>pages/Dashboard.tsx</code> に aggregate KPI strip section を PageHeader 直下に挿入、per-workflow card は selectable (state: <code style={{fontFamily:'JetBrains Mono'}}>selectedWorkflowId</code>)、DetailDrawer (480px) で drill-down、動線 5 button を drawer footer に移動。<code style={{fontFamily:'JetBrains Mono'}}>mock-metrics.ts</code> に <code style={{fontFamily:'JetBrains Mono'}}>AggregateKpi</code> interface 追加 (5 指標 + previousDay)。</li>
+              <li><b>Commit 10 (F-8 採用 B)</b>: <code style={{fontFamily:'JetBrains Mono'}}>pages/ProposalReview.tsx</code> に PageHelpDisclosure section を PageHeader 直下 (NextActionStrip より上) に挿入、5 role を grid-cols-5 で inline 配置、Drawer の <code style={{fontFamily:'JetBrains Mono'}}>defaultOpen</code> は false、`?demo=1` 削除。</li>
+              <li><b>Commit 10 (F-9 採用 A)</b>: <code style={{fontFamily:'JetBrains Mono'}}>data/types.ts</code> の <code style={{fontFamily:'JetBrains Mono'}}>AgentToolEntry</code> に <code style={{fontFamily:'JetBrains Mono'}}>scope?: 'read' | 'write' | 'approval-gated'</code> 追加、<code style={{fontFamily:'JetBrains Mono'}}>data/mock-agents.ts</code> の 6 tool に scope 付与 (default 'read')、<code style={{fontFamily:'JetBrains Mono'}}>pages/AgentSettings.tsx</code> の Tool list row 末尾に inline MetaChip badge 追加。</li>
+            </ul>
+          </div>
+        </DCArtboard>
+
+        <DCPostIt top={20} right={-340} width={300} rotate={1.2}>
+          このページの読み方<br/>
+          ─────────<br/>
+          各 artboard は <b>1440 × 実際の page 高さ</b> で iframe load、Operational Premium Light tokens (slate-50 / white / indigo / emerald / amber / red) を統一適用。<br/>
+          <br/>
+          artboard ラベルの<b>展開アイコン</b> (右上) で fullscreen focus、↑↓キーで artboard 移動、ESC で close。<br/>
+          <br/>
+          採用案を確定したら <code>gate2-decision.md</code> の Decision Table に転記。
+        </DCPostIt>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>

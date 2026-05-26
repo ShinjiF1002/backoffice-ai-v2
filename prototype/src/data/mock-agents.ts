@@ -12,10 +12,15 @@ import type { TrustLevel, RiskLevel, AutomationStatus, ApprovalType } from './ty
  * 編集 form / submit-approval interaction は Day 14-15+ で AppContext 経由。
  */
 
+/** F-9 Wave 4 PR 4 Commit 10: Tool scope (read / write / approval-gated)、Card 9 RBAC sub-check rbac-4 (Implementation Plan v3.0、gate2-decision.md spec) */
+export type ToolScope = 'read' | 'write' | 'approval-gated'
+
 export interface AgentToolEntry {
   id: string
   name: string
   description: string
+  /** F-9: tool scope (least-privilege expression、scope badge 表示用) */
+  scope?: ToolScope
 }
 
 export interface AgentPermissions {
@@ -70,16 +75,19 @@ export const mockAgents: AgentRecord[] = [
         id: 'tool-ocr',
         name: 'OCR 抽出',
         description: 'PDF → テキスト抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
+        scope: 'read',
       },
       {
         id: 'tool-master-lookup',
         name: '住所マスタ照合',
         description: '都道府県マスタ + 郵便番号 突合 (未登録時は 注意 を発する)',
+        scope: 'read',
       },
       {
         id: 'tool-staging-knowledge',
         name: '未承認ナレッジ参照',
         description: '未承認のナレッジを プロンプトに付加 (引用根拠としては使わない)',
+        scope: 'read',
       },
     ],
     permissions: {
@@ -127,16 +135,19 @@ export const mockAgents: AgentRecord[] = [
         id: 'tool-ocr',
         name: 'OCR 抽出',
         description: 'PDF → テキスト抽出 (信頼度 0.85 閾値、未達時は 注意 を発する)',
+        scope: 'read',
       },
       {
         id: 'tool-seal-verification',
         name: '印鑑照合',
         description: '届出印鑑画像との照合 (信頼度 0.80 閾値)',
+        scope: 'read',
       },
       {
         id: 'tool-id-doc-check',
         name: '本人確認書類チェック',
         description: '2 点完備 + 有効期限確認 (運転免許証 / マイナンバーカード等)',
+        scope: 'approval-gated',
       },
     ],
     permissions: {

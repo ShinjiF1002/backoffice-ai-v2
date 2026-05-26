@@ -248,19 +248,45 @@ export function AgentSettings() {
                 <dd>
                   {/* Day 19 Commit 5 U-17: Tool entries description は Disclosure で L4 demote、tool name のみ default visible */}
                   <ul className="space-y-1.5">
-                    {a.tools.map((t) => (
+                    {a.tools.map((t) => {
+                      // F-9 Wave 4 PR 4 Commit 10: scope badge (Card 9 rbac-4、polish: approval-gated を amber-50 で de-escalate)
+                      const scopeBadge =
+                        t.scope === 'read'
+                          ? { label: '読み取り', class: 'bg-slate-100 text-slate-700' }
+                          : t.scope === 'write'
+                            ? { label: '書き込み', class: 'bg-amber-50 text-[var(--color-alert-soft-fg)]' }
+                            : t.scope === 'approval-gated'
+                              ? { label: '承認必須', class: 'bg-amber-50 text-[var(--color-alert-soft-fg)]' }
+                              : null
+                      return (
                       <li key={t.id} className="flex items-start gap-2">
                         <Wrench
                           className="mt-0.5 h-3 w-3 shrink-0 text-slate-400"
                           aria-hidden="true"
                         />
                         <div className="min-w-0 flex-1">
-                          <Disclosure title={t.name} defaultOpen={false} className="text-[11px]">
-                            <p className="leading-relaxed text-slate-600">{t.description}</p>
-                          </Disclosure>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <Disclosure title={t.name} defaultOpen={false} className="text-[11px]">
+                                <p className="leading-relaxed text-slate-600">{t.description}</p>
+                              </Disclosure>
+                            </div>
+                            {scopeBadge && (
+                              <span
+                                className={cn(
+                                  'inline-flex shrink-0 items-center rounded-md px-1.5 py-0.5 font-mono text-[10px] tabular',
+                                  scopeBadge.class
+                                )}
+                                title={`scope: ${t.scope}`}
+                              >
+                                {scopeBadge.label}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </li>
-                    ))}
+                      )
+                    })}
                   </ul>
                 </dd>
               </div>

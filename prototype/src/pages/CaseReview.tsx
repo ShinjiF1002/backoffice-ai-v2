@@ -14,6 +14,8 @@ import { BusinessApprovalChip } from '@/components/shared/BusinessApprovalChip'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { NextActionStrip } from '@/components/shared/NextActionStrip'
+import { DiffPreviewBlock } from '@/components/shared/DiffPreviewBlock'
+import { MetadataStrip } from '@/components/shared/MetadataStrip'
 import { caseStatusToTone } from '@/lib/status-tones'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 
@@ -44,6 +46,20 @@ export function CaseReview() {
    * setTimeout は useEffect で cleanup し、unmount 時の double navigate を防ぐ。
    */
   const [caseApproved, setCaseApproved] = useState(false)
+  /**
+   * F-2 Wave 2 PR 2 Commit 4: 承認 button metadata gate (gate1-decision.md F-2-A 採用案 spec)。
+   * MetadataStrip が viewport に visible (IntersectionObserver 60% threshold) になった瞬間 ack、
+   * ack 前の 承認 button は disabled、user に metadata 確認を強制。
+   * Day 18.5 U-3 拡張 in-memory state は preserve、metadata ack は新規 gate。
+   */
+  const [metadataAcked, setMetadataAcked] = useState(false)
+  /**
+   * F-2 Wave 2 PR 2 Commit 4: AI 入力結果 view toggle (gate1-decision.md F-2-A 採用案 spec)。
+   * default='inline' (existing 既存 field-by-field form rendering、ConfidenceBar 含む)、
+   * 'fieldTable' (DiffPreviewBlock fieldTable view、structured before/after column 一覧)。
+   */
+  const [fieldsView, setFieldsView] = useState<'inline' | 'fieldTable'>('inline')
+
   useEffect(() => {
     if (!caseApproved) return
     const timer = setTimeout(() => navigate('/inbox'), 3000)
@@ -159,11 +175,50 @@ export function CaseReview() {
           {/* Left: AI 入力結果 (form) === 4/12 */}
           <section className="lg:col-span-4">
             <div className="sticky top-0 rounded-lg border border-slate-200 bg-white p-4">
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold text-slate-900">AI 入力結果</h2>
-                <span className="font-mono text-[10px] text-slate-500">{c.fields.length} 項目</span>
+                <div className="flex items-center gap-2">
+                  {/* F-2 view toggle (gate1-decision.md F-2-A: inline default + fieldTable toggle) */}
+                  <div role="group" aria-label="表示モード" className="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setFieldsView('inline')}
+                      className={cn(
+                        'rounded-md px-2 py-0.5 text-[10px] transition-colors',
+                        fieldsView === 'inline'
+                          ? 'bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
+                          : 'text-slate-500 hover:bg-slate-50'
+                      )}
+                      aria-pressed={fieldsView === 'inline'}
+                    >
+                      フォーム
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFieldsView('fieldTable')}
+                      className={cn(
+                        'rounded-md px-2 py-0.5 text-[10px] transition-colors',
+                        fieldsView === 'fieldTable'
+                          ? 'bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
+                          : 'text-slate-500 hover:bg-slate-50'
+                      )}
+                      aria-pressed={fieldsView === 'fieldTable'}
+                    >
+                      項目表
+                    </button>
+                  </div>
+                  <span className="font-mono text-[10px] text-slate-500">{c.fields.length} 項目</span>
+                </div>
               </div>
 
+              {fieldsView === 'fieldTable' ? (
+                <DiffPreviewBlock
+                  source={{ kind: 'fields', fields: c.fields }}
+                  defaultView="fieldTable"
+                  availableViews={['fieldTable']}
+                  className="border-0 shadow-none"
+                />
+              ) : (
               <div className="space-y-3">
                 {c.fields.map((f) => (
                   <div key={f.label}>
@@ -199,7 +254,10 @@ export function CaseReview() {
                   </div>
                 ))}
               </div>
-              <ConfidenceLegend className="mt-1 border-t border-slate-100" />
+              )}
+              {fieldsView === 'inline' && (
+                <ConfidenceLegend className="mt-1 border-t border-slate-100" />
+              )}
             </div>
           </section>
 
@@ -224,6 +282,26 @@ export function CaseReview() {
             <StagingHintPanel hints={c.stagingHints} />
           </section>
         </div>
+
+        {/* === F-2 Wave 2 PR 2 Commit 4: MetadataStrip footer 直上 (gate1-decision.md F-2-A 採用 spec、placement='footer')
+          * AI 入力結果 の diff-bearing field (新住所) の metadata 5 element を 1 行で表示、承認 button gate trigger */}
+        {(() => {
+          const fieldWithMeta = c.fields.find((f) => f.changeAuthor || f.changeReason)
+          if (!fieldWithMeta) return null
+          return (
+            <div className="px-4 pb-4">
+              <MetadataStrip
+                changeAuthor={fieldWithMeta.changeAuthor}
+                changeReason={fieldWithMeta.changeReason}
+                confidence={fieldWithMeta.confidence}
+                affectedScope={fieldWithMeta.affectedScope}
+                reversibility={fieldWithMeta.reversibility}
+                placement="footer"
+                onAck={() => setMetadataAcked(true)}
+              />
+            </div>
+          )
+        })()}
       </div>
 
       {/* === Sticky bottom action bar (Day 14 P1.5 C4: PageFooter primitive 経由)
@@ -254,10 +332,14 @@ export function CaseReview() {
             >
               差戻し
             </button>
+            {/* F-2 Wave 2 PR 2 Commit 4: metadata gate — MetadataStrip が viewport visible になるまで disabled
+              * gate1-decision.md F-2-A 採用 spec: 承認 button = MetadataStrip ack で active 化 */}
             <button
               type="button"
               onClick={() => setCaseApproved(true)}
-              disabled={caseApproved}
+              disabled={caseApproved || !metadataAcked}
+              title={!metadataAcked ? '変更内容を確認してください (画面下部の変更メタデータを確認)' : undefined}
+              aria-describedby={!metadataAcked ? 'approve-gate-hint' : undefined}
               className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send className="h-3.5 w-3.5" />

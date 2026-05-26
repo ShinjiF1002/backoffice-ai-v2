@@ -16,9 +16,9 @@ import { Search, Bell } from 'lucide-react'
  */
 export function TopBar() {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-6">
+    <header className="flex h-14 items-center justify-end border-b border-slate-200 bg-white px-3 sm:justify-between sm:px-6">
       {/* Left: search silhouette (aria-hidden、cursor-default、Day 18.5 P1 + R4) */}
-      <div className="flex items-center gap-3">
+      <div className="hidden items-center gap-3 sm:flex">
         <div
           aria-hidden="true"
           className="relative flex h-9 w-72 cursor-default items-center rounded-md border border-slate-200 bg-slate-50 pl-9 pr-3"
@@ -31,10 +31,10 @@ export function TopBar() {
       </div>
 
       {/* Right: notification static icon + prototype label (Day 18.5 P1 + R5) */}
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <span
           aria-hidden="true"
-          className="relative flex h-8 w-8 cursor-default items-center justify-center rounded-md text-slate-500"
+          className="relative hidden h-8 w-8 cursor-default items-center justify-center rounded-md text-slate-500 sm:flex"
         >
           <Bell className="h-4 w-4" />
           <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-alert)]" />

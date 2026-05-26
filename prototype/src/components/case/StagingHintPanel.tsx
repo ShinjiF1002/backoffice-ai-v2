@@ -1,6 +1,5 @@
 import { cn } from '@/lib/cn'
 import { Disclosure } from '@/components/shared/Disclosure'
-import { KNOWLEDGE_WEIGHT_STYLE } from '@/lib/knowledge-labels'
 import type { StagingHintRef } from '@/data/types'
 
 /**
@@ -33,16 +32,15 @@ export function StagingHintPanel({ hints }: { hints: StagingHintRef[] }) {
               className="rounded-md border border-slate-200 bg-white p-2.5"
             >
               <div className="flex items-center gap-1.5">
-                {/* P1-B fix (2026-05-26): raw `{h.weight}` → `KNOWLEDGE_WEIGHT_STYLE[h.weight].shortLabel` (= 「確認済」/「未承認」) backport from KnowledgeBrowser reference paradigm */}
                 <span
                   className={cn(
-                    'inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium',
+                    'inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-medium',
                     h.weight === 'medium'
                       ? 'bg-slate-200 text-slate-700'
                       : 'bg-slate-100 text-slate-500'
                   )}
                 >
-                  {KNOWLEDGE_WEIGHT_STYLE[h.weight].shortLabel}
+                  {h.weight}
                 </span>
                 <span className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 ring-1 ring-slate-200">
                   引用根拠 対象外

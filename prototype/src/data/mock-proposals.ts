@@ -41,7 +41,8 @@ export const mockProposals: ProposalRecord[] = [
         met: true,
       },
       {
-        label: 'staging 内部矛盾',
+        // P1-C fix (2026-05-26): 「staging 内部矛盾」 → 「未承認ナレッジ 内部矛盾」 (governance paraphrase 辞書遵守、staging→未承認)
+        label: '未承認ナレッジ 内部矛盾',
         value: 'なし',
         threshold: '矛盾なし',
         met: true,

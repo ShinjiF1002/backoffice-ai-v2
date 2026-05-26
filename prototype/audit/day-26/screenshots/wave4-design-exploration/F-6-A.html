@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>F-6-A · Dashboard 3-viewport (top KPI strip + grid + right drawer)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* sparkline gridless */
+  .spark path { fill: none; stroke-width: 1.5; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- inline icon sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+</svg>
+
+<div class="flex h-screen flex-col bg-[var(--color-canvas)]">
+
+  <!-- TopBar stand-in (AppShell) -->
+  <div class="h-14 shrink-0 border-b border-slate-200 bg-white px-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="h-6 w-6 rounded bg-[var(--color-primary)]"></div>
+      <span class="text-sm font-semibold text-slate-900">backoffice-ai-v2</span>
+      <span class="ml-3 rounded bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-600">prototype mock</span>
+    </div>
+    <div class="text-[11px] text-slate-500 font-mono">佐藤 隆 · AI 管理者</div>
+  </div>
+
+  <!-- === PageHeader (sticky 88px) === -->
+  <header data-page-header class="sticky top-0 z-30 min-h-[88px] border-b border-slate-200 bg-white px-6 py-3">
+    <nav aria-label="breadcrumb" class="flex items-center gap-1.5 text-xs text-slate-500">
+      <span class="text-slate-700">ダッシュボード</span>
+    </nav>
+    <div class="mt-1.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-semibold text-slate-900">ダッシュボード</h1>
+        <span class="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-medium text-slate-700 tabular">案件数 28</span>
+        <span class="inline-flex items-center gap-1 rounded bg-[var(--color-alert-soft)] px-2 py-0.5 font-mono text-xs font-medium text-[var(--color-alert)] tabular">
+          <svg class="h-3 w-3"><use href="#i-alert"/></svg> 注意 5
+        </span>
+        <span class="inline-flex items-center rounded bg-[var(--color-primary-soft)] px-2 py-0.5 font-mono text-xs font-medium text-[var(--color-primary)] tabular">承認者承認待ち 3</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-600">推移・SLA 閾値は [仮説 / 要検証]</span>
+        <span class="font-mono text-[11px] text-slate-500 tabular">UC-BO-01 + UC-BO-02</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- === Viewport 1 — Aggregate KPI strip (5 指標、PageHeader 直下、horizontal 1 row) === -->
+  <section aria-label="aggregate KPI strip" class="border-b border-slate-200 bg-white px-6 py-3">
+    <div class="mb-2 flex items-center justify-between">
+      <p class="text-[11px] font-medium text-slate-700">本日の Cockpit 集計</p>
+      <span class="font-mono text-[10px] text-slate-500 tabular">2 業務横断 · 自動更新 30s · [仮説 / 要検証]</span>
+    </div>
+    <div class="grid grid-cols-5 gap-3">
+      <!-- 案件総数 -->
+      <div class="rounded-md border border-slate-200 bg-white px-3 py-2.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">案件総数</p>
+        <div class="mt-0.5 flex items-baseline justify-between gap-2">
+          <p class="font-mono text-2xl font-semibold text-slate-900 tabular">28</p>
+          <p class="font-mono text-[10px] text-slate-500 tabular">前日 24</p>
+        </div>
+      </div>
+      <!-- 注意 -->
+      <div class="rounded-md border border-amber-200 bg-amber-50/40 px-3 py-2.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-[var(--color-alert-soft-fg)]">注意</p>
+        <div class="mt-0.5 flex items-baseline justify-between gap-2">
+          <p class="font-mono text-2xl font-semibold text-[var(--color-alert)] tabular">5</p>
+          <p class="font-mono text-[10px] text-[var(--color-alert-soft-fg)] tabular">前日 3</p>
+        </div>
+      </div>
+      <!-- 承認者承認待ち -->
+      <div class="rounded-md border border-slate-200 bg-[var(--color-primary-soft)]/50 px-3 py-2.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-[var(--color-primary)]">承認者承認待ち</p>
+        <div class="mt-0.5 flex items-baseline justify-between gap-2">
+          <p class="font-mono text-2xl font-semibold text-[var(--color-primary)] tabular">3</p>
+          <p class="font-mono text-[10px] text-[var(--color-primary)] tabular">前日 2</p>
+        </div>
+      </div>
+      <!-- SLA 経過 -->
+      <div class="rounded-md border border-amber-200 bg-white px-3 py-2.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">SLA 経過 <span class="text-[var(--color-alert-soft-fg)]">/ 仮閾値 3h</span></p>
+        <div class="mt-0.5 flex items-baseline justify-between gap-2">
+          <p class="font-mono text-2xl font-semibold text-[var(--color-alert)] tabular">2</p>
+          <p class="font-mono text-[10px] text-slate-500 tabular">前日 1</p>
+        </div>
+      </div>
+      <!-- 反映済 -->
+      <div class="rounded-md border border-slate-200 bg-white px-3 py-2.5">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">反映済 (本日)</p>
+        <div class="mt-0.5 flex items-baseline justify-between gap-2">
+          <p class="font-mono text-2xl font-semibold text-slate-700 tabular">19</p>
+          <p class="font-mono text-[10px] text-slate-500 tabular">前日 21</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- === NextActionStrip (Day 19 U-13、preserve) === -->
+  <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-6 py-2.5">
+    <div class="flex min-w-0 items-center gap-2">
+      <svg class="h-3.5 w-3.5 text-[var(--color-primary)]"><use href="#i-target"/></svg>
+      <span class="shrink-0 text-[11px] font-medium text-slate-700">次に処理すべき案件</span>
+      <span class="text-slate-300">·</span>
+      <span class="truncate text-xs text-slate-700">CASE-2026-0148 (経過 03:45:51)</span>
+    </div>
+    <a class="inline-flex shrink-0 items-center gap-1 rounded-md bg-[var(--color-primary)] px-2.5 py-1 text-[11px] font-medium text-white">開く<svg class="h-3 w-3"><use href="#i-arrow-right"/></svg></a>
+  </div>
+
+  <!-- === Attention strip (queue level、preserve) === -->
+  <div class="border-b border-amber-200 bg-amber-50/40 px-6 py-2.5">
+    <div class="flex items-start gap-3">
+      <span class="shrink-0 font-mono text-[10px] font-medium uppercase tracking-wide text-[var(--color-alert-soft-fg)]">注意 · 1 件</span>
+      <div class="flex flex-1 flex-wrap gap-2">
+        <div class="inline-flex max-w-3xl items-start gap-1.5 rounded-md border border-amber-200 bg-white px-2.5 py-1.5 text-[11px]">
+          <svg class="mt-0.5 h-3 w-3 shrink-0 text-[var(--color-alert)]"><use href="#i-alert"/></svg>
+          <p class="flex-1 leading-relaxed text-slate-800">入力者確認待ちで 3 時間以上経過した案件があります (CASE-2026-0148 · 法人住所変更 · 経過 03:45:51)</p>
+          <a class="shrink-0 font-medium text-[var(--color-alert)] hover:underline">確認</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Viewport 2 + 3 (per-workflow grid + right drawer drill-down) === -->
+  <div class="relative flex-1 overflow-hidden">
+
+    <!-- Viewport 2: Per-workflow grid (existing 2 card preserved、Day 19 不変) -->
+    <div class="absolute inset-0 overflow-y-auto p-4 pr-[496px]">
+      <section aria-labelledby="dashboard-workflows" class="mb-4">
+        <div class="mb-3 flex items-center justify-between">
+          <h2 id="dashboard-workflows" class="text-sm font-semibold text-slate-900">業務別の状況</h2>
+          <span class="font-mono text-[10px] text-slate-500">表示対象: 登録済み 2 業務 · 1 件を選択中</span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+          <!-- UC-BO-01 (selected = ring + indigo border、drill-down 表示中) -->
+          <article class="flex flex-col rounded-lg border-2 border-[var(--color-primary)] bg-white p-5 shadow-[0_0_0_3px_rgba(99,91,255,0.08)]">
+            <div class="mb-3 flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">UC-BO-01</p>
+                <h3 class="mt-0.5 truncate text-base font-semibold text-slate-900">法人住所変更</h3>
+              </div>
+              <span class="inline-flex items-center rounded-md bg-[var(--color-primary-soft)] px-2 py-0.5 text-xs font-medium text-[var(--color-primary)]">通常稼働</span>
+            </div>
+            <div class="mb-3 grid grid-cols-3 gap-3">
+              <div><p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">案件数</p><p class="mt-0.5 font-mono text-lg font-semibold text-slate-900 tabular">17</p></div>
+              <div><p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">注意</p><p class="mt-0.5 font-mono text-lg font-semibold text-[var(--color-alert)] tabular">3</p></div>
+              <div><p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">承認者承認待ち</p><p class="mt-0.5 font-mono text-lg font-semibold text-[var(--color-primary)] tabular">2</p></div>
+            </div>
+            <dl class="mb-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600">
+              <div class="flex justify-between"><dt>AI 処理中</dt><dd class="font-mono text-slate-800 tabular">2</dd></div>
+              <div class="flex justify-between"><dt>入力者確認待ち</dt><dd class="font-mono text-slate-800 tabular">8</dd></div>
+              <div class="flex justify-between"><dt>再処理中</dt><dd class="font-mono text-slate-800 tabular">1</dd></div>
+              <div class="flex justify-between"><dt>承認者承認待ち</dt><dd class="font-mono text-slate-800 tabular">2</dd></div>
+              <div class="flex justify-between"><dt>反映済</dt><dd class="font-mono text-slate-800 tabular">4</dd></div>
+            </dl>
+            <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+              <span class="text-[10px] text-slate-500">直近 7 日 注意発生率</span>
+              <svg class="spark" width="88" height="20" viewBox="0 0 88 20"><path d="M0 14 L14 12 L29 10 L44 12 L58 6 L73 9 L88 11" stroke="var(--color-primary)"/></svg>
+            </div>
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <a class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline">受信トレイで開く<svg class="h-3 w-3"><use href="#i-chevron-right"/></svg></a>
+              <span class="inline-flex items-center gap-1 rounded bg-[var(--color-primary-soft)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--color-primary)]"><svg class="h-2.5 w-2.5"><use href="#i-chevron-right"/></svg> 詳細表示中</span>
+            </div>
+          </article>
+
+          <!-- UC-BO-02 (not selected) -->
+          <article class="flex cursor-pointer flex-col rounded-lg border border-slate-200 bg-white p-5 hover:border-slate-300">
+            <div class="mb-3 flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">UC-BO-02</p>
+                <h3 class="mt-0.5 truncate text-base font-semibold text-slate-900">口座開設書類完備</h3>
+              </div>
+              <span class="inline-flex items-center rounded-md bg-[var(--color-alert-soft)] px-2 py-0.5 text-xs font-medium text-[var(--color-alert-soft-fg)]">要注意</span>
+            </div>
+            <div class="mb-3 grid grid-cols-3 gap-3">
+              <div><p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">案件数</p><p class="mt-0.5 font-mono text-lg font-semibold text-slate-900 tabular">11</p></div>
+              <div><p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">注意</p><p class="mt-0.5 font-mono text-lg font-semibold text-[var(--color-alert)] tabular">2</p></div>
+              <div><p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">承認者承認待ち</p><p class="mt-0.5 font-mono text-lg font-semibold text-[var(--color-primary)] tabular">1</p></div>
+            </div>
+            <dl class="mb-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600">
+              <div class="flex justify-between"><dt>AI 処理中</dt><dd class="font-mono text-slate-800 tabular">1</dd></div>
+              <div class="flex justify-between"><dt>入力者確認待ち</dt><dd class="font-mono text-slate-800 tabular">4</dd></div>
+              <div class="flex justify-between"><dt>再処理中</dt><dd class="font-mono text-slate-800 tabular">2</dd></div>
+              <div class="flex justify-between"><dt>承認者承認待ち</dt><dd class="font-mono text-slate-800 tabular">1</dd></div>
+              <div class="flex justify-between"><dt>反映済</dt><dd class="font-mono text-slate-800 tabular">3</dd></div>
+            </dl>
+            <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+              <span class="text-[10px] text-slate-500">直近 7 日 注意発生率</span>
+              <svg class="spark" width="88" height="20" viewBox="0 0 88 20"><path d="M0 8 L14 7 L29 6 L44 6 L58 7 L73 5 L88 4" stroke="var(--color-alert)"/></svg>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <a class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline">受信トレイで開く<svg class="h-3 w-3"><use href="#i-chevron-right"/></svg></a>
+              <span class="text-[10px] text-slate-400">card click で右に展開</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <p class="rounded-md border border-dashed border-slate-300 bg-white p-3 text-[11px] text-slate-500">
+        <span class="font-medium text-slate-700">F-6-A の置換 spec:</span>
+        従来の「業務オペレーション動線 5 button」section は drawer footer に移動 (右側 column 内 footer の lane に集約)。
+        in-page drill-down は右 DetailDrawer で実現、route 遷移 (`/inbox?workflow=…`) は drawer 内 CTA に内包。
+      </p>
+    </div>
+
+    <!-- Viewport 3: DetailDrawer (480px) drill-down — open with UC-BO-01 selected -->
+    <aside role="complementary" aria-labelledby="drill-down-heading"
+      class="absolute right-0 top-0 z-40 flex h-full w-[480px] flex-col border-l border-slate-200 bg-white shadow-[-4px_0_16px_-8px_rgba(15,23,42,0.12)]">
+
+      <!-- Drawer header -->
+      <header class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+        <div class="min-w-0">
+          <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">UC-BO-01 詳細</p>
+          <h2 id="drill-down-heading" class="truncate text-sm font-semibold text-slate-900">法人住所変更 · ドリルダウン</h2>
+        </div>
+        <button class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-50 hover:text-slate-600" aria-label="閉じる">
+          <svg class="h-4 w-4"><use href="#i-x"/></svg>
+        </button>
+      </header>
+
+      <!-- Drawer body -->
+      <div class="flex-1 overflow-y-auto p-4">
+
+        <!-- 状態分布 -->
+        <section class="mb-4">
+          <h3 class="mb-2 text-xs font-semibold text-slate-900">状態分布 (17 件)</h3>
+          <div class="overflow-hidden rounded-md border border-slate-200">
+            <div class="flex h-2.5">
+              <div class="bg-slate-300" style="width:11.7%" title="AI 処理中 2"></div>
+              <div class="bg-[var(--color-primary)]/40" style="width:47%" title="入力者確認待ち 8"></div>
+              <div class="bg-[var(--color-alert)]" style="width:5.9%" title="再処理中 1"></div>
+              <div class="bg-[var(--color-primary)]" style="width:11.8%" title="承認者承認待ち 2"></div>
+              <div class="bg-[var(--color-success)]" style="width:23.5%" title="反映済 4"></div>
+            </div>
+          </div>
+          <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600">
+            <div class="flex items-center justify-between"><dt class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-slate-300"></span>AI 処理中</dt><dd class="font-mono text-slate-800 tabular">2</dd></div>
+            <div class="flex items-center justify-between"><dt class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-[var(--color-primary)]/40"></span>入力者確認待ち</dt><dd class="font-mono text-slate-800 tabular">8</dd></div>
+            <div class="flex items-center justify-between"><dt class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-[var(--color-alert)]"></span>再処理中</dt><dd class="font-mono text-slate-800 tabular">1</dd></div>
+            <div class="flex items-center justify-between"><dt class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-[var(--color-primary)]"></span>承認者承認待ち</dt><dd class="font-mono text-slate-800 tabular">2</dd></div>
+            <div class="flex items-center justify-between"><dt class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-[var(--color-success)]"></span>反映済</dt><dd class="font-mono text-slate-800 tabular">4</dd></div>
+          </dl>
+        </section>
+
+        <!-- Recent SLA-at-risk cases -->
+        <section class="mb-4 border-t border-slate-100 pt-4">
+          <div class="mb-2 flex items-center justify-between">
+            <h3 class="text-xs font-semibold text-slate-900">注意のある案件</h3>
+            <span class="font-mono text-[10px] text-slate-500">3 件</span>
+          </div>
+          <ul class="space-y-2 text-xs">
+            <li class="rounded-md border border-amber-200 bg-amber-50/40 px-2.5 py-2">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-medium text-[var(--color-primary)] tabular">CASE-2026-0148</span>
+                <span class="inline-flex items-center rounded-[4px] bg-[var(--color-alert)] px-1.5 py-0.5 text-[10px] font-medium text-white">入力者確認待ち</span>
+                <span class="ml-auto inline-flex items-center gap-1 font-mono text-[10px] text-[var(--color-alert-soft-fg)] tabular"><svg class="h-2.5 w-2.5"><use href="#i-clock"/></svg> 03:45:51</span>
+              </div>
+              <p class="mt-1 text-[11px] leading-relaxed text-slate-700">SLA 経過 (仮閾値 3h) · OCR 信頼度 0.83、注意 2 件</p>
+            </li>
+            <li class="rounded-md border border-slate-200 px-2.5 py-2">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-medium text-[var(--color-primary)] tabular">CASE-2026-0142</span>
+                <span class="inline-flex items-center rounded-[4px] bg-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-700">再処理中</span>
+                <span class="ml-auto font-mono text-[10px] text-slate-500 tabular">02:12:08</span>
+              </div>
+              <p class="mt-1 text-[11px] leading-relaxed text-slate-600">差戻しコメント 1 件、判断境界 category</p>
+            </li>
+            <li class="rounded-md border border-slate-200 px-2.5 py-2">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-medium text-[var(--color-primary)] tabular">CASE-2026-0139</span>
+                <span class="inline-flex items-center rounded-[4px] bg-[var(--color-primary)] px-1.5 py-0.5 text-[10px] font-medium text-white">承認者承認待ち</span>
+                <span class="ml-auto font-mono text-[10px] text-slate-500 tabular">01:34:22</span>
+              </div>
+              <p class="mt-1 text-[11px] leading-relaxed text-slate-600">業務責任者 渡辺 真理 へ送付済</p>
+            </li>
+          </ul>
+        </section>
+
+        <!-- KPI trend -->
+        <section class="border-t border-slate-100 pt-4">
+          <div class="mb-2 flex items-center justify-between">
+            <h3 class="text-xs font-semibold text-slate-900">7 日推移 <span class="ml-1 font-normal text-[10px] text-slate-500">[仮説 / 要検証]</span></h3>
+          </div>
+          <dl class="space-y-2.5">
+            <div>
+              <div class="flex items-center justify-between text-[11px] text-slate-600">
+                <dt>案件件数 (正規化)</dt>
+                <dd class="font-mono text-slate-800 tabular">0.62 → 0.76</dd>
+              </div>
+              <svg class="spark mt-1 w-full" height="32" viewBox="0 0 280 32" preserveAspectRatio="none"><path d="M0 18 L46 16 L93 8 L140 12 L186 5 L233 11 L280 9" stroke="var(--color-primary)" stroke-width="1.5" fill="none"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center justify-between text-[11px] text-slate-600">
+                <dt>注意発生率</dt>
+                <dd class="font-mono text-slate-800 tabular">0.18 → 0.20</dd>
+              </div>
+              <svg class="spark mt-1 w-full" height="32" viewBox="0 0 280 32" preserveAspectRatio="none"><path d="M0 22 L46 18 L93 14 L140 19 L186 9 L233 14 L280 16" stroke="var(--color-alert)" stroke-width="1.5" fill="none"/></svg>
+            </div>
+          </dl>
+        </section>
+      </div>
+
+      <!-- Drawer footer — 動線 5 button (Operational Premium Light: hairline border、no decoration) -->
+      <div class="shrink-0 border-t border-slate-200 bg-slate-50 px-4 py-3">
+        <p class="mb-2 text-[10px] font-medium uppercase tracking-wide text-slate-500">業務オペレーション動線</p>
+        <ol class="grid grid-cols-2 gap-1.5">
+          <li><a class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 hover:border-slate-300 hover:bg-white"><svg class="h-3 w-3 text-[var(--color-primary)]"><use href="#i-inbox"/></svg><span class="text-[11px] font-medium text-slate-800">受信トレイ</span><span class="ml-auto font-mono text-[10px] text-slate-500 tabular">17</span></a></li>
+          <li><a class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 hover:border-slate-300"><svg class="h-3 w-3 text-[var(--color-primary)]"><use href="#i-file"/></svg><span class="text-[11px] font-medium text-slate-800">案件レビュー</span></a></li>
+          <li><a class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 hover:border-slate-300"><svg class="h-3 w-3 text-[var(--color-primary)]"><use href="#i-msg"/></svg><span class="text-[11px] font-medium text-slate-800">差戻し</span></a></li>
+          <li><a class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 hover:border-slate-300"><svg class="h-3 w-3 text-[var(--color-primary)]"><use href="#i-sparkles"/></svg><span class="text-[11px] font-medium text-slate-800">AI 提案</span></a></li>
+          <li class="col-span-2"><a class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 hover:border-slate-300"><svg class="h-3 w-3 text-[var(--color-primary)]"><use href="#i-gauge"/></svg><span class="text-[11px] font-medium text-slate-800">メトリクス確認</span></a></li>
+        </ol>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Page footer (sticky、Day 14 PageFooter primitive 等価) -->
+  <footer class="shrink-0 border-t border-slate-200 bg-white px-6 py-2.5">
+    <span class="text-xs text-slate-500">業務カード・KPI strip・注意行は画面内モック状態からの集計。集計閾値は [仮説 / 要検証]。</span>
+  </footer>
+</div>
+
+</body>
+</html>

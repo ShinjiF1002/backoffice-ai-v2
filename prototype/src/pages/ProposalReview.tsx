@@ -51,8 +51,10 @@ export function ProposalReview() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   // Day 19 Commit 3b U-6: Demo Chapter 2 提案レビュー scene のみ drawer default open (Cluster 2 Q1 採用)
-  const isDemo = searchParams.get('demo') === '1'
-  const [drawerOpen, setDrawerOpen] = useState<boolean>(isDemo)
+  // F-8 Wave 4 PR 4 Commit 10: `?demo=1` query gate 廃止、drawerOpen initial を true に変更 (gate2-decision.md F-8 案 A)
+  // `isDemo` flag は backward compat で残置 (将来の NextActionStrip branching 等で使用予定、Day 19 U-13 既存実装は別 prop で実現済のため本変数は現状未参照)
+  void searchParams.get('demo')
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(true)
   /**
    * F-2 Wave 2 PR 2 Commit 4: 業務責任者へ送付 button metadata gate (gate1-decision.md F-2-B 採用 spec)。
    * MetadataStrip (PageHeader 直下、placement='header') が viewport visible になった瞬間 ack、

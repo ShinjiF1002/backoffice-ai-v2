@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>F-9-A · AgentSettings Tool list scope badge (inline)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="tokens.css">
+</head>
+<body class="min-h-screen">
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+</svg>
+
+<div class="flex h-screen flex-col bg-[var(--color-canvas)]">
+
+  <!-- TopBar -->
+  <div class="h-14 shrink-0 border-b border-slate-200 bg-white px-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="h-6 w-6 rounded bg-[var(--color-primary)]"></div>
+      <span class="text-sm font-semibold text-slate-900">backoffice-ai-v2</span>
+      <span class="ml-3 rounded bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-600">prototype mock</span>
+    </div>
+    <div class="text-[11px] text-slate-500 font-mono">佐藤 隆 · AI 管理者</div>
+  </div>
+
+  <!-- PageHeader (sticky 88px) -->
+  <header data-page-header class="sticky top-0 z-30 min-h-[88px] border-b border-slate-200 bg-white px-6 py-3">
+    <nav aria-label="breadcrumb" class="flex items-center gap-1.5 text-xs text-slate-500">
+      <a class="hover:text-slate-700">ダッシュボード</a>
+      <svg class="h-3 w-3"><use href="#i-chevron-right"/></svg>
+      <span class="text-slate-700">Agent 設定</span>
+      <svg class="h-3 w-3"><use href="#i-chevron-right"/></svg>
+      <span class="text-slate-700">法人住所変更 Agent</span>
+    </nav>
+    <div class="mt-1.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-semibold text-slate-900">法人住所変更 Agent</h1>
+        <span class="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-medium text-slate-700 tabular">UC-BO-01</span>
+        <span class="inline-flex items-center rounded-[4px] bg-slate-200 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">Supervised</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-[11px] text-slate-500 tabular">Agent 版数 v0.1</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto">
+    <div class="space-y-4 p-4">
+
+      <!-- F-9-A spec banner -->
+      <div class="rounded-md border border-[var(--color-primary)]/30 bg-[var(--color-primary-soft)]/40 px-4 py-2.5">
+        <p class="text-[11px] leading-relaxed text-[var(--color-primary)]">
+          <span class="font-semibold">F-9-A spec:</span>
+          Tool list の各 row 末尾に <span class="font-medium">scope badge</span> (read / write / approval-gated の 3 variant、MetaChip pattern: 6px no-border、tone-soft 背景) を inline 表示。
+          tool description (Disclosure 内) と co-existence、tool name 行で常時 visible (Disclosure 折りたたみ中でも見える)。
+        </p>
+      </div>
+
+      <!-- Hero — Trust Level Progression (compact、Day 19 U-17 keep) -->
+      <section class="rounded-lg border-2 border-[var(--color-primary)]/30 bg-white p-5">
+        <div class="mb-3">
+          <h2 class="text-base font-semibold text-slate-900">Trust Level の進化段階</h2>
+          <p class="mt-1 text-[12px] leading-relaxed text-slate-700">
+            <span class="font-medium text-slate-900">AIに任せる量は段階的に増やすが、人によるコントロールは渡さない。</span>
+            案件確認は減らす。手順承認 / 設定承認 は同強度で残る。
+          </p>
+        </div>
+        <!-- 3-stage stepper compact -->
+        <ol class="flex items-center gap-2">
+          <li class="flex flex-1 flex-col items-start gap-1 rounded-md border-2 border-[var(--color-primary)] bg-[var(--color-primary-soft)] px-3 py-2">
+            <span class="font-mono text-[10px] uppercase tracking-wide text-[var(--color-primary)]">現在 · Stage 1</span>
+            <span class="text-sm font-semibold text-slate-900">Supervised</span>
+            <span class="text-[11px] text-slate-600">全件 案件確認 + 手順承認 / 設定承認 で人が制御</span>
+          </li>
+          <li class="text-slate-300">→</li>
+          <li class="flex flex-1 flex-col items-start gap-1 rounded-md border border-slate-200 bg-white px-3 py-2 opacity-70">
+            <span class="font-mono text-[10px] uppercase tracking-wide text-slate-500">Stage 2</span>
+            <span class="text-sm font-semibold text-slate-700">Checkpoint</span>
+            <span class="text-[11px] text-slate-500">重要分岐 のみ 案件確認、手順 / 設定 承認は同強度</span>
+          </li>
+          <li class="text-slate-300">→</li>
+          <li class="flex flex-1 flex-col items-start gap-1 rounded-md border border-slate-200 bg-white px-3 py-2 opacity-70">
+            <span class="font-mono text-[10px] uppercase tracking-wide text-slate-500">Stage 3</span>
+            <span class="text-sm font-semibold text-slate-700">Autonomous</span>
+            <span class="text-[11px] text-slate-500">案件確認は 例外時のみ、手順 / 設定 承認は同強度</span>
+          </li>
+        </ol>
+        <p class="mt-3 text-[11px] leading-relaxed text-slate-600">
+          Trust Level 引き上げは <span class="font-medium text-slate-800">Type C 設定承認</span> (AI 管理者 + 業務責任者 co-A 必須) で判定されます。
+        </p>
+      </section>
+
+      <!-- Agent config (focus = Tool list section with scope badges) -->
+      <section class="rounded-lg border border-slate-200 bg-white p-5">
+        <div class="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">Agent 構成</h2>
+            <p class="mt-1 text-[11px] text-slate-500">5 領域の現状設定 (閲覧のみ)、編集は次の実装段階で対応</p>
+          </div>
+          <span class="font-mono text-[10px] text-slate-500 tabular">5 領域</span>
+        </div>
+
+        <dl class="space-y-3 text-[12px]">
+
+          <!-- Model -->
+          <div class="grid grid-cols-1 gap-1.5 border-b border-slate-100 pb-3 sm:grid-cols-[140px_1fr] sm:gap-3">
+            <dt class="font-medium text-slate-700">Model</dt>
+            <dd>
+              <span class="font-mono tabular text-slate-900">AI ベースモデル A (検証用)</span>
+              <span class="ml-2 inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-600 tabular">v0.1</span>
+            </dd>
+          </div>
+
+          <!-- Prompt -->
+          <div class="grid grid-cols-1 gap-1.5 border-b border-slate-100 pb-3 sm:grid-cols-[140px_1fr] sm:gap-3">
+            <dt class="font-medium text-slate-700">Prompt</dt>
+            <dd>
+              <span class="font-mono tabular text-slate-900">v0.1</span>
+              <p class="mt-1 leading-relaxed text-slate-700">OCR 抽出 + 住所マスタ照合 + 信頼度 0.85 閾値 + 境界判定</p>
+            </dd>
+          </div>
+
+          <!-- Tool list ★ F-9-A 主焦点 ★ -->
+          <div class="grid grid-cols-1 gap-1.5 border-b border-slate-100 pb-3 sm:grid-cols-[140px_1fr] sm:gap-3">
+            <dt class="font-medium text-slate-700">
+              Tool <span class="font-mono text-[10px] text-slate-500 tabular">(5)</span>
+              <span class="mt-2 block font-normal font-mono text-[10px] uppercase tracking-wide text-slate-500">scope: read / write / approval-gated</span>
+            </dt>
+            <dd>
+              <ul class="space-y-1.5">
+
+                <!-- Tool 1: OCR 抽出 — read -->
+                <li class="rounded-md border border-slate-200 bg-white">
+                  <div class="flex items-center gap-2 px-2.5 py-2">
+                    <svg class="h-3 w-3 shrink-0 text-slate-400"><use href="#i-wrench"/></svg>
+                    <button class="flex flex-1 items-center justify-between gap-2 text-left">
+                      <span class="text-[11px] font-medium text-slate-800">OCR 抽出</span>
+                      <span class="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] text-slate-500"><svg class="h-2.5 w-2.5"><use href="#i-chevron-right"/></svg>説明</span>
+                    </button>
+                    <!-- scope badge: read (slate-100、MetaChip 6px no-border) -->
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700" title="scope: read · データ閲覧のみ、書き込み / 承認 介在なし">
+                      <svg class="h-2.5 w-2.5"><use href="#i-eye"/></svg> 読み取り
+                    </span>
+                  </div>
+                </li>
+
+                <!-- Tool 2: 住所マスタ照合 — read -->
+                <li class="rounded-md border border-slate-200 bg-white">
+                  <div class="flex items-center gap-2 px-2.5 py-2">
+                    <svg class="h-3 w-3 shrink-0 text-slate-400"><use href="#i-wrench"/></svg>
+                    <button class="flex flex-1 items-center justify-between gap-2 text-left">
+                      <span class="text-[11px] font-medium text-slate-800">住所マスタ照合</span>
+                      <span class="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] text-slate-500"><svg class="h-2.5 w-2.5"><use href="#i-chevron-right"/></svg>説明</span>
+                    </button>
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700" title="scope: read · データ閲覧のみ">
+                      <svg class="h-2.5 w-2.5"><use href="#i-eye"/></svg> 読み取り
+                    </span>
+                  </div>
+                </li>
+
+                <!-- Tool 3: 案件 状態更新 — write (Disclosure open で description visible) -->
+                <li class="rounded-md border border-amber-200 bg-amber-50/30">
+                  <div class="flex items-center gap-2 px-2.5 py-2">
+                    <svg class="h-3 w-3 shrink-0 text-slate-400"><use href="#i-wrench"/></svg>
+                    <button class="flex flex-1 items-center justify-between gap-2 text-left" aria-expanded="true">
+                      <span class="text-[11px] font-medium text-slate-800">案件 状態更新</span>
+                      <span class="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] text-slate-500"><svg class="h-2.5 w-2.5"><use href="#i-chevron-down"/></svg>説明を表示中</span>
+                    </button>
+                    <!-- scope badge: write (amber-soft、書き込み) -->
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-[var(--color-alert-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-alert-soft-fg)]" title="scope: write · データ書き込み権限あり、入力者確認後の状態更新">
+                      <svg class="h-2.5 w-2.5"><use href="#i-edit"/></svg> 書き込み
+                    </span>
+                  </div>
+                  <!-- Disclosure body open -->
+                  <div class="border-t border-amber-200 px-2.5 py-2 pl-8 text-[11px] leading-relaxed text-slate-600">
+                    入力者確認・承認者承認の通過後に 案件 lifecycle status を `受付 → AI処理 → 入力者確認 → 承認者承認 → 反映` の次 step へ進める (CaseStatus enum に従って書き込み)。Trust Level Supervised では人の確認 step 経由のみ実行可。
+                  </div>
+                </li>
+
+                <!-- Tool 4: 未承認ナレッジ参照 — read -->
+                <li class="rounded-md border border-slate-200 bg-white">
+                  <div class="flex items-center gap-2 px-2.5 py-2">
+                    <svg class="h-3 w-3 shrink-0 text-slate-400"><use href="#i-wrench"/></svg>
+                    <button class="flex flex-1 items-center justify-between gap-2 text-left">
+                      <span class="text-[11px] font-medium text-slate-800">未承認ナレッジ参照</span>
+                      <span class="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] text-slate-500"><svg class="h-2.5 w-2.5"><use href="#i-chevron-right"/></svg>説明</span>
+                    </button>
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700" title="scope: read · staging knowledge を prompt に付加 (引用根拠 対象外)">
+                      <svg class="h-2.5 w-2.5"><use href="#i-eye"/></svg> 読み取り
+                    </span>
+                  </div>
+                </li>
+
+                <!-- Tool 5: 住所マスタ 更新提案 — approval-gated -->
+                <li class="rounded-md border border-red-200 bg-red-50/30">
+                  <div class="flex items-center gap-2 px-2.5 py-2">
+                    <svg class="h-3 w-3 shrink-0 text-slate-400"><use href="#i-wrench"/></svg>
+                    <button class="flex flex-1 items-center justify-between gap-2 text-left">
+                      <span class="text-[11px] font-medium text-slate-800">住所マスタ 更新提案</span>
+                      <span class="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] text-slate-500"><svg class="h-2.5 w-2.5"><use href="#i-chevron-right"/></svg>説明</span>
+                    </button>
+                    <!-- scope badge: approval-gated (red-soft、承認必須) -->
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-[var(--color-error-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-error-soft-fg)]" title="scope: approval-gated · 業務責任者 + 情報管理 co-A 必須 (Type B 設定承認 経由のみ実行可)">
+                      <svg class="h-2.5 w-2.5"><use href="#i-shield"/></svg> 承認必須
+                    </span>
+                  </div>
+                </li>
+
+              </ul>
+
+              <!-- Scope legend (MetaChip taxonomy explainer、L4 info) -->
+              <div class="mt-3 rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-2">
+                <p class="mb-2 font-mono text-[10px] uppercase tracking-wide text-slate-500">Scope badge 凡例 (RBAC sub-check rbac-4 + least-privilege)</p>
+                <ul class="grid grid-cols-3 gap-2 text-[11px]">
+                  <li class="flex items-start gap-2">
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700"><svg class="h-2.5 w-2.5"><use href="#i-eye"/></svg> 読み取り</span>
+                    <span class="text-slate-600">データ閲覧のみ、書き込み / 承認 介在なし</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-[var(--color-alert-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-alert-soft-fg)]"><svg class="h-2.5 w-2.5"><use href="#i-edit"/></svg> 書き込み</span>
+                    <span class="text-slate-600">人の確認 step 経由でデータ書き込み可</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-[var(--color-error-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-error-soft-fg)]"><svg class="h-2.5 w-2.5"><use href="#i-shield"/></svg> 承認必須</span>
+                    <span class="text-slate-600">設定承認 (Type B / C co-A) 経由のみ実行可</span>
+                  </li>
+                </ul>
+              </div>
+            </dd>
+          </div>
+
+          <!-- 権限 / 範囲 -->
+          <div class="grid grid-cols-1 gap-1.5 border-b border-slate-100 pb-3 sm:grid-cols-[140px_1fr] sm:gap-3">
+            <dt class="font-medium text-slate-700">権限 / 範囲</dt>
+            <dd>
+              <p class="text-slate-700">UC-BO-01 法人住所変更 内の個別顧客データ (閲覧のみ)</p>
+              <p class="mt-1 text-[11px] text-slate-500">通常 AI 自動化対象、Trust Level Supervised で全件確認</p>
+            </dd>
+          </div>
+
+          <!-- Trust Level -->
+          <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-[140px_1fr] sm:gap-3">
+            <dt class="font-medium text-slate-700">Trust Level</dt>
+            <dd>
+              <span class="inline-flex items-center rounded-[4px] bg-slate-200 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">Supervised</span>
+              <p class="mt-1 text-[11px] text-slate-500">詳細は上部 Trust Level Progression セクション参照</p>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- Mock-agents.ts Tool interface 拡張 spec (1-line spec hint) -->
+      <section class="rounded-md border border-dashed border-slate-300 bg-white p-3">
+        <p class="font-mono text-[10px] uppercase tracking-wide text-slate-500">mock-agents.ts AgentToolEntry 拡張 spec</p>
+        <pre class="mt-1.5 overflow-x-auto rounded bg-slate-900 px-3 py-2 font-mono text-[11px] leading-relaxed text-slate-100"><code>export interface AgentToolEntry {
+  id: string
+  name: string
+  description: string
+  /** F-9 PR 4 Commit 10 追加: 各 tool の RBAC scope (default 'read') */
+  scope?: 'read' | 'write' | 'approval-gated'
+}</code></pre>
+        <p class="mt-1.5 text-[11px] leading-relaxed text-slate-600">
+          5 件の既存 tool は default 'read'、F-9 で書き込み / 承認制御を伴う 2 件を新規追加 (UI mock のみ、実 LLM 接続は v2 scope 外)。<br>
+          AuditTrail との連携 (R7 deferred ledger rbac sub-check 4) は Phase 2 で対応予定 [仮説 / 要検証]。
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="shrink-0 border-t border-slate-200 bg-white px-6 py-2.5">
+    <div class="flex items-center justify-between">
+      <a class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">ダッシュボードに戻る</a>
+      <span class="inline-flex items-center gap-1.5 rounded-md bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-400 opacity-70" title="設定変更を Type A/B/C 区分で申請 (動作は次の実装段階で対応)">
+        <svg class="h-3.5 w-3.5"><use href="#i-send"/></svg> 変更を申請
+      </span>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

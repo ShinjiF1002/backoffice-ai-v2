@@ -41,6 +41,28 @@ export type EventType =
   | 'reflect'
   | 'rule_update_alert'
   | 'config_approve'
+  // F-10 Wave 3 PR 3 Commit 8: failure event types (Defer 解除、mock-audit に failed event 追加)
+  | 'ai_failed'
+  | 'computer_use_timeout'
+
+/**
+ * F-4 Wave 3 PR 3 Commit 8: Card 3 action-history-timeline-audit-trail-ui の 7 outcome state
+ * (Proposed / Approved / Rejected / Executed / Failed / Reverted / Escalated)
+ *
+ * Action verb 系の EventType (`ai_input`, `human_sendback` 等) とは別軸:
+ *  - Outcome は「結果状態」(成功 / 失敗 / 差戻し / 取消 / 上位エスカレーション)
+ *  - EventType は「何の操作か」(AI 抽出 / 人手確認 / 反映 等)
+ *
+ * Day 19 schema gate (?debug=1) 経由で display、production timeline 上は controlled vocab chip としても表示
+ */
+export type OutcomeState =
+  | 'Proposed'
+  | 'Approved'
+  | 'Rejected'
+  | 'Executed'
+  | 'Failed'
+  | 'Reverted'
+  | 'Escalated'
 
 export type EventActor =
   | 'system'
@@ -97,6 +119,28 @@ export interface AuditEvent {
   type: EventType
   /** Display summary for timeline row */
   summary: string
+  /** F-4 Wave 3 PR 3 Commit 8: Card 3 outcome state (Proposed/Approved/Rejected/Executed/Failed/Reverted/Escalated) — optional、未指定なら deriveOutcome(type) で derive */
+  outcome?: OutcomeState
+}
+
+/** EventType → OutcomeState default mapping (Card 3 7 state controlled vocab) */
+export function deriveOutcome(event: Pick<AuditEvent, 'type' | 'outcome'>): OutcomeState {
+  if (event.outcome) return event.outcome
+  switch (event.type) {
+    case 'system_intake': return 'Proposed'
+    case 'ai_input': return 'Proposed'
+    case 'ai_analysis': return 'Proposed'
+    case 'human_review': return 'Approved'
+    case 'human_sendback': return 'Rejected'
+    case 'proposal_approve': return 'Approved'
+    case 'business_approve': return 'Approved'
+    case 'reflect': return 'Executed'
+    case 'rule_update_alert': return 'Reverted'
+    case 'config_approve': return 'Approved'
+    case 'ai_failed': return 'Failed'
+    case 'computer_use_timeout': return 'Failed'
+    default: return 'Proposed'
+  }
 }
 
 export const mockAuditEvents: AuditEvent[] = [
@@ -280,6 +324,40 @@ export const mockAuditEvents: AuditEvent[] = [
     type: 'ai_input',
     summary: 'AI 入力結果 生成 (信頼度 0.84、Alert 1 件: 印鑑照合 未達)',
     aiProposalId: 'PROP-2026-0148-01',
+  },
+
+  // === F-10 Wave 3 PR 3 Commit 8: failed event 投入 (Defer 解除、failure explainability surface 検証可能化) ===
+
+  // CASE-0149 (法人住所変更) AI 抽出失敗 (OCR engine 内部エラー) → 再処理中
+  {
+    id: 'au-014',
+    caseId: 'CASE-2026-0149',
+    workflowId: 'UC-BO-01',
+    workflowVersion: 'v0.2',
+    agentId: 'agent-corporate-address-change',
+    agentVersion: 'v0.2',
+    promptConfigVersion: 'v0.2',
+    timestamp: '2026-05-31 04:21:18',
+    actor: 'AI',
+    actorLabel: 'AI 入力 (失敗)',
+    type: 'ai_failed',
+    summary: 'AI 抽出失敗 (OCR engine 内部エラー、retry 3 回まで実施済、re-route が必要)',
+    outcome: 'Failed',
+  },
+  // CASE-0152 (口座開設) Computer Use timeout (RPA 経路、外部システム応答 15 秒超過) → escalate
+  {
+    id: 'au-015',
+    caseId: 'CASE-2026-0152',
+    workflowId: 'UC-BO-02',
+    workflowVersion: 'v0.2',
+    agentId: 'agent-account-opening',
+    agentVersion: 'v0.2',
+    timestamp: '2026-05-31 03:08:45',
+    actor: 'AI',
+    actorLabel: 'AI 自動化 (タイムアウト)',
+    type: 'computer_use_timeout',
+    summary: 'Computer Use 経路 timeout (外部マスタ照合 API 応答 15 秒超過、escalate to 入力者)',
+    outcome: 'Escalated',
   },
 ]
 

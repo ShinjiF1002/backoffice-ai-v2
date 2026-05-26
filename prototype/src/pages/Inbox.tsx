@@ -8,6 +8,7 @@ import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DetailDrawer } from '@/components/shared/DetailDrawer'
 import { DisabledAction } from '@/components/shared/DisabledAction'
+import { ActorBand } from '@/components/shared/ActorBand'
 import { NextActionStrip } from '@/components/shared/NextActionStrip'
 import { cn } from '@/lib/cn'
 import { parseElapsed } from '@/lib/elapsed'
@@ -219,7 +220,25 @@ export function Inbox() {
                         <span className="font-mono text-xs text-slate-600 tabular">{c.elapsedLabel}</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-xs text-slate-700">{c.assignee ?? '—'}</td>
+                    <td className="px-3 py-2 text-xs text-slate-700">
+                      {/* F-5 Wave 2 PR 2 Commit 5: ActorBand (human assignee、Inbox queue 高密度行 size=sm)
+                        * F-7 hybrid: delegate active 時は MetaChip「代理中 (from → to)」を併記 (gate1-decision.md F-7 案 B Inbox 部分) */}
+                      {c.assignee ? (
+                        <div className="flex flex-col items-start gap-0.5">
+                          <ActorBand actor="human" label={c.assignee} size="sm" role="入力者" />
+                          {c.delegate && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[9px] text-slate-600 tabular"
+                              title={`不在: ${c.delegate.absentFrom} 〜 ${c.delegate.absentTo}`}
+                            >
+                              代理: {c.delegate.from} → {c.delegate.to}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2">
                       {c.alertCount > 0 ? (
                         <span className="inline-flex items-center gap-1 rounded bg-[var(--color-alert-soft)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--color-alert)] tabular">

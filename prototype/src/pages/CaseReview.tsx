@@ -104,9 +104,10 @@ export function CaseReview() {
           </div>
         </div>
 
-        {/* LifecycleStepper (手順承認 除外、Plan v1.4.1 訂正後) */}
+        {/* LifecycleStepper (手順承認 除外、Plan v1.4.1 訂正後)
+          * F-7 Wave 2 PR 2 Commit 5: lifecycleSpecs を渡して per-step SLA badge + approver hover を有効化 */}
         <div className="mt-2.5">
-          <LifecycleStepper current={c.currentStep} />
+          <LifecycleStepper current={c.currentStep} specs={c.lifecycleSpecs} />
         </div>
       </header>
 

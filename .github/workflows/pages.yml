@@ -1,4 +1,4 @@
-name: Deploy prototype to GitHub Pages
+name: Deploy prototype + showcase to GitHub Pages
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - prototype/**
+      - showcase/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -23,7 +24,7 @@ env:
 
 jobs:
   build:
-    name: Build prototype
+    name: Build prototype + showcase
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,29 +35,52 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: prototype/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Install dependencies
+      # --- prototype (root path /backoffice-ai-v2/) ---
+      - name: Install prototype dependencies
         working-directory: prototype
         run: npm ci
 
-      - name: Build
+      - name: Build prototype
         working-directory: prototype
         env:
           VITE_BASE_PATH: /backoffice-ai-v2/
         run: npm run build
 
-      - name: Add SPA fallback
+      - name: Add prototype SPA fallback
         working-directory: prototype
         run: cp dist/index.html dist/404.html
+
+      # --- showcase (subpath /backoffice-ai-v2/showcase/) ---
+      - name: Install showcase dependencies
+        working-directory: showcase
+        run: npm ci
+
+      - name: Build showcase
+        working-directory: showcase
+        env:
+          VITE_BASE_PATH: /backoffice-ai-v2/showcase/
+        run: npm run build
+
+      - name: Add showcase SPA fallback
+        working-directory: showcase
+        run: cp dist/index.html dist/404.html
+
+      # --- combine into single _site ---
+      - name: Assemble combined site
+        run: |
+          mkdir -p _site
+          cp -R prototype/dist/. _site/
+          mkdir -p _site/showcase
+          cp -R showcase/dist/. _site/showcase/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: prototype/dist
+          path: _site
 
   deploy:
     name: Deploy to GitHub Pages

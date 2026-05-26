@@ -20,14 +20,14 @@ export function PrototypeModeLabel() {
       aria-label="プロトタイプ表示の説明"
       aria-describedby="prototype-tooltip"
       tabIndex={0}
-      className="relative inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+      className="relative inline-flex max-w-full items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-medium leading-tight text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] sm:text-xs"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
       <Info className="h-3.5 w-3.5" aria-hidden="true" />
-      <span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
+      <span className="whitespace-nowrap">プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
 
       <div
         id="prototype-tooltip"

@@ -8,7 +8,7 @@
 | 関連文書 | DOC-AUDIT-D26-RC-REPORT v1.3 / DOC-AUDIT-D26-UNIFIED-FINDINGS / Implementation Plan v3.0 (`~/.claude/plans/tl-dr-approve-glistening-allen.md`) |
 | SSOT 区分 | Findings closure status の SSOT (per-PR end で append 更新、PR 4 末で all 10 finding 確定) |
 | Evidence Status | skeleton (PR 0 時点)、PR 1-4 実装 commit + verification 経て evidence pointer 付与 |
-| 改版履歴 | v0.1 (2026-05-26): PR 0 closure commit で skeleton 作成、F-1〜F-10 全 row status=pending 初期化 |
+| 改版履歴 | v0.1 (2026-05-26): PR 0 closure commit で skeleton 作成、F-1〜F-10 全 row status=pending 初期化。v0.2 (2026-05-26): PR 1 Wave 1 完了で F-1 row update → closed (mobile responsive shell: Sidebar + bottom nav + AppShell + TopBar + Dashboard PageHeader、Day 19 5 primitive 不変)、Note: 実装 pattern は plan v3.0 §PR 1 spec (drawer) ではなく bottom navigation に変更、Gate 1 含まない pure responsive shell |
 
 ---
 
@@ -20,7 +20,7 @@
 
 | Finding | Severity | Tag | Wave / PR | Implementation commit | Verification evidence | Safety rail check | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| F-1 | P0 | new | Wave 1 / PR 1 | (TBD: PR 1 Commit 1 hash) | (TBD: screenshots/wave1/) | (TBD: check:all + visual smoke) | **pending** |
+| F-1 | P0 | new | Wave 1 / PR 1 | (PR 1 commit、本 commit、hash post-push) | preview MCP 1440×900 + 390×844 visual smoke pass、check:all (lint clean / no-op 37 .tsx / build 424kb gzip 118kb) | Sidebar `hidden md:flex` + mobile bottom nav `fixed inset-x-0 bottom-0 md:hidden` (drawer pattern ではなく bottom nav に変更) / AppShell `flex-col md:flex-row` / TopBar `hidden sm:flex` search+bell / Dashboard PageHeader `flex-col lg:flex-row` / PrototypeModeLabel `whitespace-nowrap`、Day 19 5 primitive と co-existence | **closed** |
 | F-2 | P0 | adjacent-to-Day19 | Wave 2 / PR 2 | (TBD: PR 2 Commit 2-4 hashes) | (TBD: screenshots/wave2/ + gate1-decision.md) | (TBD: token / 装飾 / Day 19 / JP / quota) | **pending** |
 | F-3 | P1 | new | Wave 3 / PR 3 | (TBD: PR 3 Commit 6-7 hashes) | (TBD: screenshots/wave3/) | (TBD: per-page applicable/N/A matrix) | **pending** |
 | F-4 | P1 | adjacent-to-Day19 | Wave 3 / PR 3 | (TBD: PR 3 Commit 8 hash) | (TBD: screenshots/wave3/) | (TBD: 7 outcome state column + 5 facet) | **pending** |

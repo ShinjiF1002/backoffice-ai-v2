@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1320" />
+<title>F-7 案 B — Compact SLA progress bar + Delegate badge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../_shared/tokens.css" />
+<style>
+  .surface {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+  .surface__head {
+    padding: 10px 16px;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--color-fg-muted);
+  }
+  .surface__head strong { color: var(--color-fg); font-weight: 600; font-size: 12.5px; }
+
+  .stepper-host {
+    padding: 24px 28px;
+    background: #FFF;
+  }
+
+  .step-stack {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .step-cell {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    padding: 10px 12px;
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: border-color 150ms ease, background 150ms ease;
+    position: relative;
+  }
+  .step-cell:hover { background: #F8FAFC; border-color: #CBD5E1; }
+  .step-cell[data-state="done"] { background: var(--color-success-soft); border-color: #BBF7D0; }
+  .step-cell[data-state="current"] { background: var(--color-primary-soft); border-color: #C7D2FE; }
+
+  .step-cell__top {
+    display: flex; align-items: center; justify-content: space-between; gap: 4px;
+  }
+  .step-cell__num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.06);
+    color: var(--color-fg-muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .step-cell[data-state="done"] .step-cell__num { background: var(--color-success); color: #fff; }
+  .step-cell[data-state="current"] .step-cell__num { background: var(--color-primary); color: #fff; }
+
+  .step-cell__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-fg);
+  }
+  .step-cell__sla {
+    display: flex; align-items: center; gap: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--color-fg-muted);
+  }
+
+  .step-cell__expand {
+    grid-column: 1 / -1;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-control);
+    background: #F8FAFC;
+    padding: 14px 16px;
+    display: none;
+  }
+  .step-cell__expand[aria-current="true"] { display: block; }
+  .step-cell__expand h5 {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
+    margin: 0 0 8px;
+  }
+  .step-cell__expand .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    font-size: 11.5px;
+  }
+  .step-cell__expand .grid dt { color: var(--color-fg-subtle); font-size: 10.5px; }
+  .step-cell__expand .grid dd { margin: 4px 0 0; font-weight: 500; color: var(--color-fg); }
+
+  /* Delegate badge in Inbox */
+  .delegate-meta-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--color-alert-soft);
+    color: var(--color-alert-soft-fg);
+    border-radius: var(--radius-control);
+    padding: 1px 7px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    margin-left: 8px;
+  }
+
+  .arrow-rail {
+    grid-column: span 5;
+    height: 1px;
+    background: linear-gradient(90deg, #E5E7EB 0%, #E5E7EB 30%, var(--color-primary) 30%, var(--color-primary) 50%, #E5E7EB 50%, #E5E7EB 100%);
+    margin-top: -6px;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="frame__head">
+    <div class="frame__crumbs">gate-1 · wave-2 · F-7 / Lifecycle SLA · 案 B</div>
+    <h1 class="frame__title">案 B — Compact SLA progress bar + Delegate badge</h1>
+    <p class="frame__sub">
+      各 step を <strong>card 化</strong>し、底辺に <strong>3px progress bar</strong> (slate base + amber/red fill) で SLA を視覚化。
+      step click で expand panel に approver / SLA 詳細を inline で展開。Inbox では <code>MetaChip</code>「代理中 (元 → 代理)」を担当者名の隣に並べる。
+    </p>
+    <div class="frame__meta">
+      <span class="meta-chip meta-chip--primary">LifecycleStepper +Card</span>
+      <span class="meta-chip meta-chip--primary">SLA progress bar 3px</span>
+      <span class="meta-chip">step click expand</span>
+      <span class="meta-chip">Delegate · MetaChip 代理中</span>
+    </div>
+  </header>
+
+  <div class="surface" style="margin-bottom:18px;">
+    <div class="surface__head"><strong>CaseReview · LifecycleStepper (card variant)</strong><span>step click で詳細 + approver 名</span></div>
+    <div class="stepper-host">
+      <div class="step-stack" id="stack">
+        <div class="step-cell" data-state="done" data-step="0" onclick="toggle(this)">
+          <div class="step-cell__top">
+            <span class="step-cell__num">1</span>
+            <span class="font-mono" style="font-size:9.5px;color:var(--color-fg-subtle);">14 秒</span>
+          </div>
+          <div class="step-cell__label">受付</div>
+          <div class="sla-prog"><span class="bar"><i class="ok" style="width:100%"></i></span></div>
+          <div class="step-cell__sla">目標 即時 · 完了</div>
+        </div>
+
+        <div class="step-cell" data-state="done" data-step="1" onclick="toggle(this)">
+          <div class="step-cell__top">
+            <span class="step-cell__num">2</span>
+            <span class="font-mono" style="font-size:9.5px;color:var(--color-fg-subtle);">1:57</span>
+          </div>
+          <div class="step-cell__label">AI処理</div>
+          <div class="sla-prog"><span class="bar"><i class="ok" style="width:100%"></i></span></div>
+          <div class="step-cell__sla">目標 5 分 · 完了</div>
+        </div>
+
+        <div class="step-cell" data-state="current" data-step="2" onclick="toggle(this)" aria-expanded="true">
+          <div class="step-cell__top">
+            <span class="step-cell__num">3</span>
+            <span class="font-mono" style="font-size:9.5px;color:var(--color-alert-soft-fg);">2:18 / 4h</span>
+          </div>
+          <div class="step-cell__label">入力者確認</div>
+          <div class="sla-prog"><span class="bar"><i class="warn" style="width:57%"></i></span></div>
+          <div class="step-cell__sla" style="color:var(--color-alert-soft-fg);">経過 57% · 残 1:42</div>
+        </div>
+
+        <div class="step-cell" data-state="pending" data-step="3" onclick="toggle(this)">
+          <div class="step-cell__top">
+            <span class="step-cell__num">4</span>
+            <span class="font-mono" style="font-size:9.5px;color:var(--color-fg-subtle);">— / 24h</span>
+          </div>
+          <div class="step-cell__label">承認者承認</div>
+          <div class="sla-prog"><span class="bar"></span></div>
+          <div class="step-cell__sla">目標 24 h · 未着手</div>
+        </div>
+
+        <div class="step-cell" data-state="pending" data-step="4" onclick="toggle(this)">
+          <div class="step-cell__top">
+            <span class="step-cell__num">5</span>
+            <span class="font-mono" style="font-size:9.5px;color:var(--color-fg-subtle);">即時</span>
+          </div>
+          <div class="step-cell__label">反映</div>
+          <div class="sla-prog"><span class="bar"></span></div>
+          <div class="step-cell__sla">目標 即時 · 未着手</div>
+        </div>
+
+        <!-- Expand panel — shows for current step by default -->
+        <div class="step-cell__expand" data-for="2" aria-current="true">
+          <h5>入力者確認 — 詳細</h5>
+          <dl class="grid">
+            <div>
+              <dt>承認者</dt>
+              <dd>田中 美咲 <span style="color:var(--color-fg-subtle); font-weight:400;">(入力者)</span></dd>
+            </div>
+            <div>
+              <dt>SLA 目標</dt>
+              <dd class="font-mono">4 時間</dd>
+            </div>
+            <div>
+              <dt>経過</dt>
+              <dd class="font-mono" style="color:var(--color-alert-soft-fg);">2 時間 18 分 (57%)</dd>
+            </div>
+            <div>
+              <dt>残時間</dt>
+              <dd class="font-mono">1 時間 42 分</dd>
+            </div>
+            <div>
+              <dt>エスカレーション目標</dt>
+              <dd class="font-mono">24 時間</dd>
+            </div>
+            <div>
+              <dt>代理状態</dt>
+              <dd>本人対応中 <span style="color:var(--color-fg-subtle); font-weight:400;">(代理設定なし)</span></dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Over-target example -->
+      <div style="margin-top:24px; padding-top:18px; border-top:1px dashed var(--color-border);">
+        <div style="font-family:'JetBrains Mono', monospace; font-size:10px; color:#64748B; margin-bottom:10px;">参考: SLA 100% 超過時 (経過 5:12 / 4h、130%)</div>
+        <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:12px;">
+          <div class="step-cell" data-state="current" style="grid-column: 3;">
+            <div class="step-cell__top">
+              <span class="step-cell__num">3</span>
+              <span class="font-mono" style="font-size:9.5px;color:var(--color-error-soft-fg);">5:12 / 4h</span>
+            </div>
+            <div class="step-cell__label">入力者確認</div>
+            <div class="sla-prog"><span class="bar"><i class="over" style="width:100%"></i></span></div>
+            <div class="step-cell__sla" style="color:var(--color-error-soft-fg);">130% · 超過 1:12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inbox delegate -->
+  <div class="surface">
+    <div class="surface__head"><strong>Inbox · 担当者 column + MetaChip 「代理中」</strong><span>誰から誰へ — 1 行で完結</span></div>
+    <table class="queue">
+      <thead>
+        <tr><th>案件 ID</th><th>業務</th><th>状態</th><th>経過</th><th>担当者</th><th>注意</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-id">CASE-2026-0142</td>
+          <td>法人住所変更</td>
+          <td><span class="status-badge status-badge--ready">入力者確認待ち</span></td>
+          <td class="cell-elapsed">02:18:50</td>
+          <td>田中 美咲</td>
+          <td><span class="alert-pill"><svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg> 2</span></td>
+        </tr>
+        <tr>
+          <td class="cell-id">CASE-2026-0118</td>
+          <td>法人住所変更</td>
+          <td><span class="status-badge status-badge--waiting">承認者承認待ち</span></td>
+          <td class="cell-elapsed">01:42:50</td>
+          <td>
+            鈴木 直樹
+            <span class="delegate-meta-chip" title="代理: 渡辺 真理 → 鈴木 直樹">
+              <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
+              代理中 (渡辺 → 鈴木)
+            </span>
+          </td>
+          <td><span style="color:#CBD5E1;">—</span></td>
+        </tr>
+        <tr>
+          <td class="cell-id">CASE-2026-0148</td>
+          <td>口座開設書類完備</td>
+          <td><span class="status-badge status-badge--ready">入力者確認待ち</span></td>
+          <td class="cell-elapsed">00:24:08</td>
+          <td>佐藤 健</td>
+          <td><span style="color:#CBD5E1;">—</span></td>
+        </tr>
+        <tr>
+          <td class="cell-id">CASE-2026-0095</td>
+          <td>法人住所変更</td>
+          <td><span class="status-badge status-badge--triage">反映済</span></td>
+          <td class="cell-elapsed">00:08:11</td>
+          <td>
+            高橋 美穂
+            <span class="delegate-meta-chip">
+              <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>
+              代理中 (山田 → 高橋)
+            </span>
+          </td>
+          <td><span style="color:#CBD5E1;">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="rationale">
+    <div>
+      <h4>設計意図</h4>
+      <p>
+        <strong>SLA を 1 行で可視化</strong>。各 step を vertical card にすることで「step が独立した処理単位」であることが構造的に伝わる。
+        progress bar (3px) は density を保ったまま target に対する経過率を絵で示し、数値 (e.g. 2:18 / 4h) を併記して text 読解にも応える。
+        approver 名は <em>常時隠す</em> のではなく click expand で詳細 panel に開く設計 (Disclosure primitive と整合)。
+        Inbox の Delegate は MetaChip としてフル text 表記、tooltip 不要で誰が誰の代理かが scroll 中に読める。
+      </p>
+      <h4 style="margin-top:14px;">採用適性</h4>
+      <p>
+        既存 stepper の chip 並びを <strong>card grid に置換する大きめの変更</strong>。Card 8 の "all approvers visible" を click expand で達成する分、approver 名を <em>常時露出</em> しない trade-off がある。
+        画面 vertical 領域は 80px 程増えるため、CaseReview の 3-column 上部 density に圧迫感が出やすい。step 数 ≥ 6 でも grid に追加するだけで素直に scale する利点はある。
+      </p>
+    </div>
+    <div>
+      <h4>Props shape (PR 2 Commit 5 reference)</h4>
+<pre><span class="tok-com">// data/types.ts (拡張、案 A と共通)</span>
+<span class="tok-key">interface</span> <span class="tok-type">CaseLifecycleStepSpec</span> {
+  step: CaseLifecycleStep
+  state: <span class="tok-str">'done'</span> | <span class="tok-str">'current'</span> | <span class="tok-str">'pending'</span>
+  slaTargetLabel: string
+  slaTargetMinutes: number | <span class="tok-str">'instant'</span>
+  elapsedLabel?: string
+  elapsedPercent?: number
+  escalationLabel?: string              <span class="tok-com">// 24 h target</span>
+  approver?: { name: string; role: string }
+}
+
+<span class="tok-com">// components/case/LifecycleStepper.tsx (拡張)</span>
+<span class="tok-key">interface</span> <span class="tok-type">LifecycleStepperProps</span> {
+  current: CaseLifecycleStep
+  specs?: CaseLifecycleStepSpec[]
+  variant?: <span class="tok-str">'chip'</span> | <span class="tok-str">'card'</span>     <span class="tok-com">// 案 B = 'card'</span>
+  expandedStep?: CaseLifecycleStep    <span class="tok-com">// click で controlled</span>
+}
+
+<span class="tok-com">// data/types.ts (CaseRecord 拡張)</span>
+<span class="tok-key">interface</span> <span class="tok-type">DelegateInfo</span> {
+  from: string
+  to: string
+  absentFrom: string
+  absentTo: string
+}</pre>
+    </div>
+  </section>
+</div>
+
+<script>
+  function toggle(cell) {
+    const step = cell.dataset.step
+    const expand = document.querySelector('.step-cell__expand')
+    // For mock, just update which step the expand panel refers to
+    expand.setAttribute('data-for', step)
+    expand.setAttribute('aria-current', 'true')
+    // Re-fill content quickly for done/pending steps too (light demo)
+    const map = {
+      0: ['受付', 'system', '即時', '14 秒 (100%)', '—', '—', 'system 自動受付'],
+      1: ['AI処理', 'AI 抽出 v2.3', '5 分', '1 分 57 秒 (39%)', '—', '—', '完了'],
+      2: ['入力者確認', '田中 美咲 (入力者)', '4 時間', '2 時間 18 分 (57%)', '1 時間 42 分', '24 時間', '本人対応中'],
+      3: ['承認者承認', '渡辺 真理 (承認者)', '24 時間', '未着手', '24 時間', 'なし', '本人対応中'],
+      4: ['反映', 'system 反映', '即時', '未着手', '即時', '—', '—'],
+    }
+    const m = map[step]
+    if (!m) return
+    expand.innerHTML = `
+      <h5>${m[0]} — 詳細</h5>
+      <dl class="grid">
+        <div><dt>承認者</dt><dd>${m[1]}</dd></div>
+        <div><dt>SLA 目標</dt><dd class="font-mono">${m[2]}</dd></div>
+        <div><dt>経過</dt><dd class="font-mono">${m[3]}</dd></div>
+        <div><dt>残時間</dt><dd class="font-mono">${m[4]}</dd></div>
+        <div><dt>エスカレーション目標</dt><dd class="font-mono">${m[5]}</dd></div>
+        <div><dt>代理状態</dt><dd>${m[6]}</dd></div>
+      </dl>
+    `
+  }
+</script>
+</body>
+</html>

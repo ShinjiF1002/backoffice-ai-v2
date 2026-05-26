@@ -17,6 +17,42 @@ export type ApprovalType = 'A' | 'B' | 'C'
 export type CaseLifecycleStep = '受付' | 'AI処理' | '入力者確認' | '承認者承認' | '反映'
 export type CaseStatus = 'pending' | 'ready' | 'sent-back' | 'business-approval-waiting' | 'reflected'
 
+// === F-2 / F-5 / F-7 Wave 2 拡張 (Implementation Plan v3.0 §PR 2、gate1-decision.md spec 通り) ===
+
+/** Actor enum (ActorBand primitive 用、3 enum 統合: 入力者/承認者 → 'human') */
+export type Actor = 'agent' | 'human' | 'system'
+
+/** Reversibility (F-2 MetadataStrip 5 element の 1 つ) */
+export type Reversibility = 'Revertible' | 'Partial' | 'Irreversible'
+
+/** F-7 LifecycleStepper SLA per step + approver (Card 8 multi-step-approval-and-workflow 反映) */
+export interface CaseLifecycleStepSpec {
+  step: CaseLifecycleStep
+  state: 'done' | 'current' | 'pending'
+  /** SLA target label (`[仮説 / 要検証]` suffix 付与済、demo mock 固定値) */
+  slaTargetLabel: string
+  /** SLA target (分)、`'instant'` = 即時実行 */
+  slaTargetMinutes: number | 'instant'
+  /** current step のみ: 経過時間 label */
+  elapsedLabel?: string
+  /** current step のみ: 経過率 (0-200+、100 = SLA target ぴったり) */
+  elapsedPercent?: number
+  /** Approver (per step、Day 19 vocab 通り 入力者/承認者 etc.、ActorBand mapping は actor enum) */
+  approver?: { name: string; role: '入力者' | '承認者' | 'AI' | 'system' }
+}
+
+/** F-7 Delegate info (Inbox MetaChip + LifecycleStepper hover で表示) */
+export interface DelegateInfo {
+  /** 元 assignee (e.g. '渡辺 真理') */
+  from: string
+  /** 代理 assignee (e.g. '鈴木 直樹') */
+  to: string
+  /** 不在 開始日 */
+  absentFrom: string
+  /** 不在 終了日 */
+  absentTo: string
+}
+
 // === Case ===
 export interface CaseField {
   /** field 名 (日本語) */
@@ -31,6 +67,15 @@ export interface CaseField {
   hasDiff?: boolean
   /** monospace で表示するか (数値 / コード等) */
   monospace?: boolean
+  // === F-2 metadata (Wave 2、MetadataStrip 5 element 対応、Implementation Plan v3.0 §PR 2 Commit 2) ===
+  /** Change author (AI agent name + model version、e.g. 'AI 抽出 v2.3') */
+  changeAuthor?: string
+  /** Change reason (OCR 信頼度未達 等、operational rationale) */
+  changeReason?: string
+  /** Affected scope (e.g. '1 customer'、'12 cases (3 週間履歴)') */
+  affectedScope?: string
+  /** Reversibility (反映前/反映後 の rollback 可能性) */
+  reversibility?: Reversibility
 }
 
 export interface CaseAlert {
@@ -145,6 +190,11 @@ export interface CaseRecord {
   businessApprovalStatus: '未送付' | '承認待ち' | '承認済' | '差戻し'
   /** 担当者 (入力者 mock 氏名、Inbox queue 列で表示、Day 12 追加) */
   assignee?: string
+  // === F-7 lifecycle SLA + delegate (Wave 2、Implementation Plan v3.0 §PR 2 Commit 2/5) ===
+  /** Lifecycle step 別 SLA + approver spec (未指定なら従来の chip-only 表示) */
+  lifecycleSpecs?: CaseLifecycleStepSpec[]
+  /** 代理 routing が active な時のみ (Inbox MetaChip + LifecycleStepper hover で表示) */
+  delegate?: DelegateInfo
 }
 
 // === Proposal (procedure update proposal、Day 12 Page 2 ProposalReview 追加) ===
@@ -186,6 +236,15 @@ export interface ProposalDiffSection {
   section: string
   before: string
   after: string
+  // === F-2 metadata (Wave 2、MetadataStrip 5 element 対応、Implementation Plan v3.0 §PR 2 Commit 2) ===
+  /** Change author (AI agent name + model version、e.g. 'AI 日次分析 v1.2') */
+  changeAuthor?: string
+  /** Change reason */
+  changeReason?: string
+  /** Affected scope */
+  affectedScope?: string
+  /** Reversibility */
+  reversibility?: Reversibility
 }
 
 /** RACI box (提案ソース 列を追加した final patch 整合) */

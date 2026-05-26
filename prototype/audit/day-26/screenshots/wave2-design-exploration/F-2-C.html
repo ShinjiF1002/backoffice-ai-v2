@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1320" />
+<title>F-2 案 C — Field table default + 3-view toggle (両 page 統一)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../_shared/tokens.css" />
+<style>
+  .layout-3col {
+    display: grid;
+    grid-template-columns: 4fr 4fr 4fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  .view-body { display: none; }
+  .view-body[aria-current="true"] { display: block; }
+
+  /* PageHelpDisclosure-style collapsible for MetadataStrip */
+  .meta-disclosure {
+    border-top: 1px solid var(--color-border);
+    background: #FFF;
+  }
+  .meta-disclosure summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 9px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11.5px;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .meta-disclosure summary::-webkit-details-marker { display: none; }
+  .meta-disclosure .lead-left {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--color-fg);
+  }
+  .meta-disclosure .lead-left strong { font-weight: 600; }
+  .meta-disclosure .lead-left .dot {
+    width:6px;height:6px;border-radius:50%;background:var(--color-primary);
+  }
+  .meta-disclosure .chev {
+    color: var(--color-fg-subtle);
+    transition: transform 150ms ease;
+  }
+  .meta-disclosure[open] .chev { transform: rotate(180deg); }
+
+  /* short summary preview (always visible) */
+  .meta-preview {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    color: var(--color-fg-muted);
+  }
+  .meta-preview .sep { color: #CBD5E1; }
+
+  .meta-body {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .gate-msg {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--color-alert-soft-fg);
+    background: var(--color-alert-soft);
+    padding: 2px 7px;
+    border-radius: var(--radius-chip);
+  }
+  .next-action {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 8px 24px;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 11px;
+  }
+  .next-action__left { display: flex; align-items: center; gap: 8px; color: var(--color-fg); }
+  .next-action__left .target-ic { color: var(--color-primary); }
+
+  /* tab-style toggle (3 view) */
+  .tab-row {
+    display: inline-flex;
+    border-radius: var(--radius-control);
+    background: #F1F5F9;
+    padding: 2px;
+  }
+  .tab-row button {
+    background: transparent;
+    border: 0;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .tab-row button[aria-selected="true"] {
+    background: #fff;
+    color: var(--color-fg);
+    box-shadow: 0 1px 0 rgba(15,23,42,0.06);
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="frame__head">
+    <div class="frame__crumbs">gate-1 · wave-2 · F-2 / Diff Preview · 案 C</div>
+    <h1 class="frame__title">案 C — Field table default + 3-view toggle (両 page 統一)</h1>
+    <p class="frame__sub">
+      Field table view を <strong>default</strong> として、Inline / Side-by-side / Field table の <strong>3-view toggle</strong> を tab 形式で常時露出。
+      MetadataStrip は <code>PageHelpDisclosure</code> 連携の <strong>collapsible</strong>、collapsed 時は要約 1 行、expand で 5 element。
+      承認 button gate は <em>scroll-into-view</em> trigger に簡略化。
+    </p>
+    <div class="frame__meta">
+      <span class="meta-chip meta-chip--primary">DiffPreviewBlock · 3 view</span>
+      <span class="meta-chip meta-chip--primary">MetadataStrip · collapsible</span>
+      <span class="meta-chip">CASE-2026-0142</span>
+      <span class="meta-chip">両 page 統一 API</span>
+    </div>
+  </header>
+
+  <div class="app">
+    <!-- PageHeader -->
+    <div class="pageheader">
+      <nav class="crumb">
+        <a href="#">受信トレイ</a><span class="sep">›</span>
+        <span>案件処理</span><span class="sep">›</span>
+        <span class="case-id">CASE-2026-0142</span>
+      </nav>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:4px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h2 class="h1">CASE-2026-0142 法人住所変更</h2>
+          <span class="status-badge status-badge--ready">入力者確認待ち</span>
+        </div>
+        <span class="font-mono" style="font-size:11px;color:#64748B;">経過 00:12:34</span>
+      </div>
+
+      <ol class="stepper">
+        <li><span class="step step--done">受付</span><svg class="arrow" viewBox="0 0 8 8"><path d="M2 1l4 3-4 3" stroke="currentColor" stroke-width="1.25" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+        <li><span class="step step--done">AI処理</span><svg class="arrow" viewBox="0 0 8 8"><path d="M2 1l4 3-4 3" stroke="currentColor" stroke-width="1.25" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+        <li><span class="step step--current">入力者確認</span><svg class="arrow" viewBox="0 0 8 8"><path d="M2 1l4 3-4 3" stroke="currentColor" stroke-width="1.25" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+        <li><span class="step">承認者承認</span><svg class="arrow" viewBox="0 0 8 8"><path d="M2 1l4 3-4 3" stroke="currentColor" stroke-width="1.25" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
+        <li><span class="step">反映</span></li>
+      </ol>
+    </div>
+
+    <!-- F-2 NEW: MetadataStrip as collapsible disclosure -->
+    <details class="meta-disclosure" id="metaDisclosure">
+      <summary>
+        <div class="lead-left">
+          <span class="dot"></span>
+          <strong>変更メタデータ</strong>
+          <span class="meta-preview">
+            <span>AI 抽出 v2.3</span><span class="sep">·</span>
+            <span>信頼度 0.84</span><span class="sep">·</span>
+            <span>1 customer</span><span class="sep">·</span>
+            <span>Revertible</span>
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--color-fg-muted);">
+          <span>詳細</span>
+          <svg class="lu lu--xs chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </summary>
+      <div class="meta-body">
+        <div class="meta-strip">
+          <div class="meta-strip__cell">
+            <span class="meta-strip__key">変更担当</span>
+            <span class="meta-strip__val">
+              <svg class="lu lu--xs" style="color:var(--color-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+              AI 抽出
+            </span>
+            <span class="meta-strip__sub">ai.address-extractor v2.3</span>
+          </div>
+          <div class="meta-strip__cell">
+            <span class="meta-strip__key">変更理由</span>
+            <span class="meta-strip__val">OCR 信頼度 0.84</span>
+            <span class="meta-strip__sub">閾値 0.85 未達 · 番地表記</span>
+          </div>
+          <div class="meta-strip__cell">
+            <span class="meta-strip__key">信頼度</span>
+            <span class="meta-strip__val">
+              <span class="meta-strip__dot meta-strip__dot--warn"></span>
+              <span class="font-mono">0.84</span>
+            </span>
+            <span class="meta-strip__sub">閾値 0.85 / 平均 0.92</span>
+          </div>
+          <div class="meta-strip__cell">
+            <span class="meta-strip__key">影響範囲</span>
+            <span class="meta-strip__val">1 customer</span>
+            <span class="meta-strip__sub">本案件単独</span>
+          </div>
+          <div class="meta-strip__cell">
+            <span class="meta-strip__key">取り消し可否</span>
+            <span class="meta-strip__val">
+              <span class="meta-strip__dot meta-strip__dot--ok"></span>
+              Revertible
+            </span>
+            <span class="meta-strip__sub">反映前なら戻せます</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="next-action">
+      <div class="next-action__left">
+        <svg class="lu lu--sm target-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <strong style="font-weight:500;">判定要約</strong>
+        <span style="color:#CBD5E1;">·</span>
+        <span>AI 入力結果 5 項目確認、信頼度 0.84 で閾値未達、注意 2 件</span>
+      </div>
+    </div>
+
+    <!-- 3-col body -->
+    <div class="layout-3col">
+      <section class="panel" style="grid-column: span 2;">
+        <div class="panel__title">
+          <span>AI 入力結果 <span class="panel__count" style="margin-left:6px;">5 項目</span></span>
+          <!-- 3-view tab toggle -->
+          <div class="tab-row" role="tablist" aria-label="差分表示モード">
+            <button type="button" role="tab" aria-selected="false" onclick="setView('inline')">
+              <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              インライン
+            </button>
+            <button type="button" role="tab" aria-selected="false" onclick="setView('sbs')">
+              <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+              左右
+            </button>
+            <button type="button" role="tab" aria-selected="true" onclick="setView('table')">
+              <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              項目一覧
+            </button>
+          </div>
+        </div>
+
+        <!-- DEFAULT: Field table -->
+        <div class="view-body" data-view="table" aria-current="true">
+          <table class="field-table">
+            <thead>
+              <tr>
+                <th>項目</th>
+                <th>変更前</th>
+                <th>変更後</th>
+                <th>信頼度</th>
+                <th>差分</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="label">法人名</td>
+                <td>株式会社サンプルホールディングス</td>
+                <td>株式会社サンプルホールディングス</td>
+                <td class="mono" style="color:var(--color-success-soft-fg);">0.96</td>
+                <td><span class="chg-pill chg-pill--same">変更なし</span></td>
+              </tr>
+              <tr>
+                <td class="label">旧住所</td>
+                <td>東京都千代田区丸の内 1 丁目 1 番 1 号 サンプルビル 8F</td>
+                <td>東京都千代田区丸の内 1 丁目 1 番 1 号 サンプルビル 8F</td>
+                <td class="mono" style="color:var(--color-success-soft-fg);">0.92</td>
+                <td><span class="chg-pill chg-pill--same">参照</span></td>
+              </tr>
+              <tr>
+                <td class="label">新住所</td>
+                <td>東京都千代田区丸の内 <span class="diff-del">1 丁目 1 番 1</span> 号 サンプルビル 8F</td>
+                <td>東京都千代田区丸の内 <span class="diff-add">2 丁目 3 番 5</span> 号 サンプルビル 8F</td>
+                <td class="mono" style="color:var(--color-alert-soft-fg);">0.84</td>
+                <td><span class="chg-pill chg-pill--mod">修正 1</span></td>
+              </tr>
+              <tr>
+                <td class="label">支店コード</td>
+                <td class="mono">042</td>
+                <td class="mono">042</td>
+                <td class="mono" style="color:var(--color-success-soft-fg);">1.00</td>
+                <td><span class="chg-pill chg-pill--same">変更なし</span></td>
+              </tr>
+              <tr>
+                <td class="label">効力発生日</td>
+                <td class="mono">—</td>
+                <td class="mono">2026-06-15</td>
+                <td class="mono" style="color:var(--color-success-soft-fg);">1.00</td>
+                <td><span class="chg-pill chg-pill--mod">新規入力</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Inline view (toggle) -->
+        <div class="view-body" data-view="inline" aria-current="false">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div class="field-label"><label>新住所</label><span class="dot"></span></div>
+              <div class="diff-inline">
+                <div class="meta">差分 1 項目 · 1 セグメント</div>
+                <div>東京都千代田区丸の内 <span class="diff-del">1 丁目 1 番 1</span><span class="diff-add">2 丁目 3 番 5</span> 号 サンプルビル 8F</div>
+              </div>
+              <div class="conf-row"><span>信頼度</span><span class="conf-bar low"><i style="width:84%;"></i></span><span>0.84</span></div>
+            </div>
+            <div style="font-size:11px;color:#94A3B8;">他 4 項目は変更なし — Field table / Side-by-side 切替で確認</div>
+          </div>
+        </div>
+
+        <!-- Side-by-side view (toggle) -->
+        <div class="view-body" data-view="sbs" aria-current="false">
+          <div class="diff-card" style="border:1px solid var(--color-border); border-radius:var(--radius-control); overflow:hidden;">
+            <div style="padding:9px 12px;background:#F8FAFC;border-bottom:1px solid var(--color-border);">
+              <div style="font-size:11.5px;font-weight:500;">新住所</div>
+              <div class="font-mono" style="font-size:10px;color:#64748B;">CaseField · hasDiff: true</div>
+            </div>
+            <div class="sbs">
+              <div class="sbs__col sbs__col--before">
+                <h5>− 変更前</h5>
+                <p>東京都千代田区丸の内 <span class="diff-del">1 丁目 1 番 1</span> 号 サンプルビル 8F</p>
+              </div>
+              <div class="sbs__col sbs__col--after">
+                <h5>＋ 変更後</h5>
+                <p>東京都千代田区丸の内 <span class="diff-add">2 丁目 3 番 5</span> 号 サンプルビル 8F</p>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:#94A3B8;">他 4 項目は変更なし — Field table 切替で全件確認</div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Citation panel -->
+      <section style="display:flex; flex-direction:column; gap:12px;">
+        <div style="background:rgba(254,243,199,0.4); border:1px solid #FDE68A; border-radius:var(--radius-card); padding:12px;">
+          <div style="display:flex; gap:8px;">
+            <svg class="lu lu--sm" style="color:var(--color-alert);margin-top:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+            <div style="font-size:11.5px; line-height:1.55;">
+              <div style="font-weight:600;">関連手順更新があります</div>
+              <a href="#" style="color:var(--color-primary); font-size:11px; margin-top:4px; display:inline-block;">PROP-2026-031 ›</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title"><span>引用根拠</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--color-success-soft-fg);background:var(--color-success-soft);padding:1px 6px;border-radius:4px;">承認済</span></div>
+          <div style="border-left:2px solid var(--color-success); padding:6px 0 6px 10px; font-size:11.5px;">
+            <div style="font-weight:500;">OCR 信頼度閾値 0.85</div>
+            <div class="font-mono" style="font-size:10px;color:#64748B;margin-top:4px;">KN-CORP-001 · 0.94</div>
+          </div>
+        </div>
+
+        <div style="background:#F8FAFC; border:1px solid var(--color-border); border-radius:var(--radius-card); padding:14px;">
+          <div class="panel__title" style="margin-bottom:6px;">
+            <span>未承認ヒント</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#475569;background:#E2E8F0;padding:1px 6px;border-radius:4px;">引用根拠 対象外</span>
+          </div>
+          <div style="font-size:11.5px;color:#334155;">
+            <div style="display:flex; gap:6px; align-items:center;"><span style="width:6px;height:6px;border-radius:50%;background:var(--color-alert);"></span><span style="font-weight:500;">福岡支店の住所マスタが旧形式</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-bar">
+      <div class="footer-bar__left">
+        <span class="gate-msg" id="gateMsg">メタデータ詳細 (上) を開いてからご承認ください</span>
+      </div>
+      <div class="footer-bar__right">
+        <span style="font-size:11px;color:#64748B;">業務責任者承認: <span style="color:#334155;font-weight:500;">未送付</span></span>
+        <button class="btn">差戻し</button>
+        <button class="btn btn--primary" id="approveBtn" aria-disabled="true" onclick="onApprove(this)">
+          <svg class="lu lu--xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          承認
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <section class="rationale">
+    <div>
+      <h4>設計意図</h4>
+      <p>
+        Card 2 ★ の <strong>3 view 全部</strong> を強制揃えで露出し、CaseReview / ProposalReview の <em>両 page で同一 API + 同一 component</em> として共有する統一案。
+        Field table を default にすることで「5 field の audit grid を最初に目にする」体験を作り、Inline / Side-by-side は局所確認用に切替可能。
+        MetadataStrip を <code>PageHelpDisclosure</code> 連携の collapsible にすることで、density を下げつつ詳細は on-demand に展開できる (5 element 強制露出を緩和)。
+      </p>
+      <h4 style="margin-top:14px;">採用適性</h4>
+      <p>
+        最も <strong>card 完全準拠</strong>。ただし両 page を 1 component で書く強い制約があり、ProposalReview の手順 markdown 差分には Field table がうまく当てはまらない (項目構造ではないため)。
+        Side-by-side のみで運用する場面が多くなり、tab toggle が <em>常時露出しすぎる</em> リスクがある。
+      </p>
+    </div>
+    <div>
+      <h4>Props shape (PR 2 Commit 3 reference)</h4>
+<pre><span class="tok-com">// shared/DiffPreviewBlock.tsx (両 page 統一)</span>
+<span class="tok-key">type</span> <span class="tok-type">DiffSource</span> =
+  | { kind: <span class="tok-str">'fields'</span>; fields: CaseField[] }
+  | { kind: <span class="tok-str">'sections'</span>; sections: ProposalDiffSection[] }
+
+<span class="tok-key">interface</span> <span class="tok-type">DiffPreviewBlockProps</span> {
+  source: DiffSource
+  defaultView?: DiffView                <span class="tok-com">// = 'fieldTable' (案 C)</span>
+  availableViews?: DiffView[]           <span class="tok-com">// = all 3</span>
+  onViewChange?: (v: DiffView) => void
+}
+
+<span class="tok-com">// MetadataStrip is mounted inside PageHelpDisclosure</span>
+&lt;<span class="tok-type">PageHelpDisclosure</span> title=<span class="tok-str">"変更メタデータ"</span> preview={short}&gt;
+  &lt;<span class="tok-type">MetadataStrip</span> {...meta} /&gt;
+&lt;/<span class="tok-type">PageHelpDisclosure</span>&gt;</pre>
+    </div>
+  </section>
+</div>
+
+<script>
+  function setView(name) {
+    document.querySelectorAll('.view-body').forEach(b => {
+      b.setAttribute('aria-current', b.dataset.view === name ? 'true' : 'false')
+    })
+    document.querySelectorAll('.tab-row [role="tab"]').forEach(t => {
+      const m = t.textContent.trim()
+      const match = (name === 'inline' && m.includes('インライン'))
+                || (name === 'sbs' && m.includes('左右'))
+                || (name === 'table' && m.includes('項目一覧'))
+      t.setAttribute('aria-selected', match ? 'true' : 'false')
+    })
+  }
+
+  // gate: ack on MetadataStrip open OR scroll-into-view
+  let ack = false
+  const dis = document.getElementById('metaDisclosure')
+  const btn = document.getElementById('approveBtn')
+  const msg = document.getElementById('gateMsg')
+  function flipActive() {
+    if (ack) return
+    ack = true
+    btn.removeAttribute('aria-disabled')
+    msg.textContent = '承認可能 — メタデータ確認済'
+    msg.style.background = 'var(--color-success-soft)'
+    msg.style.color = 'var(--color-success-soft-fg)'
+  }
+  dis.addEventListener('toggle', () => { if (dis.open) flipActive() })
+
+  function onApprove(b) {
+    if (b.getAttribute('aria-disabled') === 'true') {
+      b.animate([
+        { transform: 'translateX(0)' }, { transform: 'translateX(-4px)' },
+        { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }
+      ], { duration: 220 })
+      msg.textContent = 'メタデータ詳細を開いてからご承認ください'
+      return
+    }
+    msg.textContent = '本案件は承認されました (モック)'
+  }
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ChevronRight,
   AlertTriangle,
@@ -19,6 +19,8 @@ import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { PageHelpDisclosure } from '@/components/shared/PageHelpDisclosure'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { LoadingState } from '@/components/shared/LoadingState'
 import { SHOW_INTERNAL_METADATA } from '@/lib/show-internal'
 
 /**
@@ -86,6 +88,7 @@ const EVENT_TYPE_STYLE: Record<EventType, EventTypeStyle> = {
 export function AuditTrail() {
   const [workflowFilter, setWorkflowFilter] = useState<string>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
 
   // Sort events by timestamp DESC (newest first) and apply workflow filter
   const filteredEvents = useMemo(() => {
@@ -177,6 +180,20 @@ export function AuditTrail() {
                 {filteredEvents.length} 件
               </span>
             </div>
+            {/* F-3 Wave 3 PR 3 Commit 7: applicable filtered-empty / loading state (AuditTrail) */}
+            {searchParams.get('demo-state') === 'loading' ? (
+              <div className="px-5 py-4">
+                <LoadingState variant="skeleton" rowCount={5} rowHeightClass="h-12" />
+              </div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="px-5 py-4">
+                <EmptyState
+                  subState="filtered-empty"
+                  title="フィルタに一致する監査イベントがありません"
+                  description={workflowFilter ? '業務フィルタの条件を見直してください' : '直近の処理が発生するとここに記録されます'}
+                />
+              </div>
+            ) : (
             <ol className="divide-y divide-slate-100">
               {filteredEvents.map((event) => {
                 const isExpanded = event.id === expandedId
@@ -245,6 +262,7 @@ export function AuditTrail() {
                 )
               })}
             </ol>
+            )}
           </section>
         </div>
       </div>

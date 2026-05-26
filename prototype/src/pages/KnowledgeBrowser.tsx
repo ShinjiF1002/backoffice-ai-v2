@@ -22,6 +22,7 @@ import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { PageHelpDisclosure } from '@/components/shared/PageHelpDisclosure'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { SHOW_INTERNAL_METADATA } from '@/lib/show-internal'
 import type { SendBackCategory, Weight } from '@/data/types'
 
@@ -235,9 +236,14 @@ export function KnowledgeBrowser() {
                 {filteredSnippets.length} 件
               </span>
             </div>
+            {/* F-3 Wave 3 PR 3 Commit 7: applicable filtered-empty state (KnowledgeBrowser) */}
             {filteredSnippets.length === 0 ? (
-              <div className="px-5 py-12 text-center text-[12px] text-slate-500">
-                該当するナレッジはありません。絞り込み条件を変更してください。
+              <div className="px-5 py-4">
+                <EmptyState
+                  subState="filtered-empty"
+                  title="フィルタに一致するナレッジがありません"
+                  description="業務 / 分類 / 重要度の条件を見直してください"
+                />
               </div>
             ) : (
               <ol className="divide-y divide-slate-100">

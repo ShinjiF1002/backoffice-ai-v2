@@ -1,4 +1,5 @@
 import { Sparkline } from '@/components/shared/Sparkline'
+import { KNOWLEDGE_WEIGHT_STYLE } from '@/lib/knowledge-labels'
 import type { CitationRef } from '@/data/types'
 
 /**
@@ -25,8 +26,9 @@ export function CitationPanel({ citations }: { citations: CitationRef[] }) {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="inline-flex items-center rounded bg-[var(--color-success-soft)] px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--color-success)]">
-                    high
+                  {/* P1-A fix (2026-05-26): raw `high` → `KNOWLEDGE_WEIGHT_STYLE.high.shortLabel` (= 「承認済」) backport from KnowledgeBrowser reference paradigm */}
+                  <span className="inline-flex items-center rounded bg-[var(--color-success-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-success)]">
+                    {KNOWLEDGE_WEIGHT_STYLE.high.shortLabel}
                   </span>
                   <span className="font-mono text-[10px] text-slate-400">{c.knowledgeId}</span>
                 </div>

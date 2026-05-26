@@ -9,6 +9,8 @@ import { MetaChip } from '@/components/shared/MetaChip'
 import { DetailDrawer } from '@/components/shared/DetailDrawer'
 import { DisabledAction } from '@/components/shared/DisabledAction'
 import { ActorBand } from '@/components/shared/ActorBand'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { LoadingState } from '@/components/shared/LoadingState'
 import { NextActionStrip } from '@/components/shared/NextActionStrip'
 import { cn } from '@/lib/cn'
 import { parseElapsed } from '@/lib/elapsed'
@@ -188,8 +190,22 @@ export function Inbox() {
                 <th className="px-3 py-2 text-right" aria-label="開く" />
               </tr>
             </thead>
+            {/* F-3 Wave 3 PR 3 Commit 7: applicable filtered-empty / loading state (Inbox)
+              * mock data 13 rows + filter 切替 disabled (Day 18.5) のため通常時は trigger せず、demo-state query で強制 trigger 可能 */}
             <tbody className="divide-y divide-slate-100">
-              {rows.map((c) => {
+              {searchParams.get('demo-state') === 'loading' && (
+                <tr><td colSpan={7} className="px-3 py-4"><LoadingState variant="skeleton" rowCount={5} rowHeightClass="h-9" /></td></tr>
+              )}
+              {searchParams.get('demo-state') !== 'loading' && rows.length === 0 && (
+                <tr><td colSpan={7} className="px-3 py-4">
+                  <EmptyState
+                    subState={workflowFilter ? 'filtered-empty' : 'truly-empty'}
+                    title={workflowFilter ? 'フィルタに一致する案件がありません' : 'まだ案件がありません'}
+                    description={workflowFilter ? '業務フィルタの条件を見直してください' : '新しい案件が登録されるとここに表示されます'}
+                  />
+                </td></tr>
+              )}
+              {searchParams.get('demo-state') !== 'loading' && rows.map((c) => {
                 const tone = slaTone(c.elapsedLabel, c.status)
                 return (
                   <tr

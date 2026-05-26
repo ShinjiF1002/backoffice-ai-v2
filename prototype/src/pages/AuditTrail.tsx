@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ChevronRight,
   AlertTriangle,
@@ -14,11 +14,13 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getSendbackCategoryLabel } from '@/lib/sendback-categories'
-import { mockAuditEvents, type AuditEvent, type EventType } from '@/data/mock-audit'
+import { mockAuditEvents, deriveOutcome, type AuditEvent, type EventType, type OutcomeState } from '@/data/mock-audit'
 import { PageFooter } from '@/components/shared/PageFooter'
 import { FilterChip } from '@/components/shared/FilterChip'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { PageHelpDisclosure } from '@/components/shared/PageHelpDisclosure'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { LoadingState } from '@/components/shared/LoadingState'
 import { SHOW_INTERNAL_METADATA } from '@/lib/show-internal'
 
 /**
@@ -62,6 +64,9 @@ const EVENT_TYPE_LABEL: Record<EventType, string> = {
   reflect: '反映',
   rule_update_alert: '関連ルール更新',
   config_approve: '設定承認',
+  // F-10 Wave 3 PR 3 Commit 8: failure event types
+  ai_failed: 'AI 抽出失敗',
+  computer_use_timeout: '自動化タイムアウト',
 }
 
 interface EventTypeStyle {
@@ -81,20 +86,75 @@ const EVENT_TYPE_STYLE: Record<EventType, EventTypeStyle> = {
   reflect:          { icon: RefreshCw,     iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
   rule_update_alert:{ icon: History,       iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
   config_approve:   { icon: Cog,           iconClass: 'text-slate-600', badgeClass: 'bg-slate-100 text-slate-700' },
+  // F-10 Wave 3 PR 3 Commit 8: failure event styles (red tone for visual distinction)
+  ai_failed:        { icon: AlertTriangle, iconClass: 'text-[var(--color-error-soft-fg)]', badgeClass: 'bg-red-50 text-[var(--color-error-soft-fg)]' },
+  computer_use_timeout: { icon: AlertTriangle, iconClass: 'text-[var(--color-error-soft-fg)]', badgeClass: 'bg-red-50 text-[var(--color-error-soft-fg)]' },
+}
+
+// F-4 Wave 3 PR 3 Commit 8: 7 outcome state controlled vocab + JP label + tone
+const OUTCOME_LABEL: Record<OutcomeState, string> = {
+  Proposed: '提案',
+  Approved: '承認',
+  Rejected: '却下',
+  Executed: '実行',
+  Failed: '失敗',
+  Reverted: '取消',
+  Escalated: 'エスカレ',
+}
+
+const OUTCOME_TONE_CLASS: Record<OutcomeState, string> = {
+  Proposed: 'bg-slate-100 text-slate-700',
+  Approved: 'bg-emerald-50 text-[var(--color-success-soft-fg)]',
+  Rejected: 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
+  Executed: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
+  Failed: 'bg-red-50 text-[var(--color-error-soft-fg)]',
+  Reverted: 'bg-slate-100 text-slate-600',
+  Escalated: 'bg-amber-50 text-[var(--color-alert-soft-fg)]',
 }
 
 export function AuditTrail() {
   const [workflowFilter, setWorkflowFilter] = useState<string>('all')
+  const [outcomeFilter, setOutcomeFilter] = useState<OutcomeState | 'all'>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
 
-  // Sort events by timestamp DESC (newest first) and apply workflow filter
+  // F-4 Wave 3 PR 3 Commit 8: Sort events + apply workflow / outcome filters (5 facet target、Date は Phase 1)
   const filteredEvents = useMemo(() => {
-    const all =
+    let all =
       workflowFilter === 'all'
         ? mockAuditEvents
         : mockAuditEvents.filter((e) => e.workflowId === workflowFilter)
+    if (outcomeFilter !== 'all') {
+      all = all.filter((e) => deriveOutcome(e) === outcomeFilter)
+    }
     return [...all].sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1))
-  }, [workflowFilter])
+  }, [workflowFilter, outcomeFilter])
+
+  // F-4 Wave 3 PR 3 Commit 8: CSV Export action (mock download、in-browser Blob)
+  const exportCsv = () => {
+    const header = ['timestamp', 'caseId', 'workflowId', 'workflowVersion', 'actor', 'actorLabel', 'type', 'outcome', 'summary']
+    const lines = [
+      header.join(','),
+      ...filteredEvents.map((e) => [
+        e.timestamp,
+        e.caseId,
+        e.workflowId,
+        e.workflowVersion,
+        e.actor,
+        `"${e.actorLabel.replace(/"/g, '""')}"`,
+        e.type,
+        deriveOutcome(e),
+        `"${e.summary.replace(/"/g, '""')}"`,
+      ].join(',')),
+    ]
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-trail-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id)
@@ -123,7 +183,7 @@ export function AuditTrail() {
               15 項目記録
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-[11px] text-slate-500">業務:</span>
             {(['all', 'UC-BO-01', 'UC-BO-02'] as const).map((wid) => {
               const isActive = wid === workflowFilter
@@ -139,6 +199,30 @@ export function AuditTrail() {
                 />
               )
             })}
+            <span className="ml-2 text-[11px] text-slate-500">結果:</span>
+            {(['all', 'Proposed', 'Approved', 'Rejected', 'Executed', 'Failed', 'Reverted', 'Escalated'] as const).map((oc) => {
+              const isActive = oc === outcomeFilter
+              const label = oc === 'all' ? '全結果' : OUTCOME_LABEL[oc as OutcomeState]
+              return (
+                <FilterChip
+                  key={oc}
+                  label={label}
+                  active={isActive}
+                  mono={true}
+                  onClick={() => setOutcomeFilter(oc as OutcomeState | 'all')}
+                  aria-pressed={isActive}
+                />
+              )
+            })}
+            {/* F-4 Wave 3 PR 3 Commit 8: CSV Export button (mock Blob download、in-browser) */}
+            <button
+              type="button"
+              onClick={exportCsv}
+              className="ml-auto inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 font-mono text-[11px] text-slate-700 transition-colors hover:bg-slate-50"
+              title="現在のフィルタ結果を CSV でダウンロード"
+            >
+              CSV エクスポート ({filteredEvents.length})
+            </button>
           </div>
         </div>
       </header>
@@ -177,6 +261,20 @@ export function AuditTrail() {
                 {filteredEvents.length} 件
               </span>
             </div>
+            {/* F-3 Wave 3 PR 3 Commit 7: applicable filtered-empty / loading state (AuditTrail) */}
+            {searchParams.get('demo-state') === 'loading' ? (
+              <div className="px-5 py-4">
+                <LoadingState variant="skeleton" rowCount={5} rowHeightClass="h-12" />
+              </div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="px-5 py-4">
+                <EmptyState
+                  subState="filtered-empty"
+                  title="フィルタに一致する監査イベントがありません"
+                  description={workflowFilter ? '業務フィルタの条件を見直してください' : '直近の処理が発生するとここに記録されます'}
+                />
+              </div>
+            ) : (
             <ol className="divide-y divide-slate-100">
               {filteredEvents.map((event) => {
                 const isExpanded = event.id === expandedId
@@ -221,6 +319,21 @@ export function AuditTrail() {
                               過去案件への影響
                             </span>
                           )}
+                          {/* F-4 Wave 3 PR 3 Commit 8: Outcome state column (Card 3 7-state controlled vocab) */}
+                          {(() => {
+                            const oc = deriveOutcome(event)
+                            return (
+                              <span
+                                className={cn(
+                                  'inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-medium tabular',
+                                  OUTCOME_TONE_CLASS[oc]
+                                )}
+                                title={`結果状態: ${OUTCOME_LABEL[oc]}`}
+                              >
+                                {OUTCOME_LABEL[oc]}
+                              </span>
+                            )
+                          })()}
                         </div>
                         <p className="mt-0.5 text-[12px] leading-relaxed text-slate-700">
                           {event.summary}
@@ -245,6 +358,7 @@ export function AuditTrail() {
                 )
               })}
             </ol>
+            )}
           </section>
         </div>
       </div>

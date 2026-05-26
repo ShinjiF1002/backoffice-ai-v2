@@ -35,6 +35,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: |
+            prototype/package-lock.json
+            showcase/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

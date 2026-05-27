@@ -50,7 +50,8 @@ export function OperatorCockpitDemo() {
     >
       <DemoFrame viewport="Desktop 1280×800 · 3 viewport cockpit">
         <div className="flex flex-col">
-          {/* === Top: KPI strip === */}
+          {/* === Top: KPI strip with section header (M11 layer-cake induce) === */}
+          <SectionHeader label="Fleet KPIs" accent="primary" />
           <div className="grid grid-cols-4 border-b border-[color:var(--color-border)] divide-x divide-[color:var(--color-border)]">
             <KpiCell label="Running"        value={fleet.running}  total={AGENTS.length} dot="bg-[color:var(--color-success)]" />
             <KpiCell label="Failed"         value={fleet.failed}   total={AGENTS.length} dot="bg-[color:var(--color-error)]" emphasis />
@@ -59,18 +60,39 @@ export function OperatorCockpitDemo() {
           </div>
           {/* === Body: agent grid + detail rail === */}
           <div className="flex h-[440px]">
-            <div className="flex-1 grid grid-cols-2 gap-3 p-4 overflow-y-auto bg-[color:var(--color-panel-inset)]/40">
-              {AGENTS.map((a) => (
-                <AgentCard key={a.id} a={a} selected={a.id === selected} onClick={() => setSelected(a.id)} />
-              ))}
+            <div className="flex-1 flex flex-col bg-[color:var(--color-panel-inset)]/40">
+              <SectionHeader label={`Agents (${AGENTS.length})`} accent="success" />
+              <div className="flex-1 grid grid-cols-2 gap-3 p-4 overflow-y-auto">
+                {AGENTS.map((a) => (
+                  <AgentCard key={a.id} a={a} selected={a.id === selected} onClick={() => setSelected(a.id)} />
+                ))}
+              </div>
             </div>
-            <div className="w-[360px] border-l border-[color:var(--color-border)] bg-[color:var(--color-panel)] p-5 overflow-y-auto">
-              <DetailRail a={sel} />
+            <div className="w-[360px] border-l border-[color:var(--color-border)] bg-[color:var(--color-panel)] flex flex-col">
+              <SectionHeader label="Selected" accent="alert" />
+              <div className="p-5 overflow-y-auto flex-1">
+                <DetailRail a={sel} />
+              </div>
             </div>
           </div>
         </div>
       </DemoFrame>
     </PatternDemo>
+  )
+}
+
+function SectionHeader({ label, accent }: { label: string; accent: 'primary' | 'success' | 'alert' | 'error' }) {
+  // Datadog-style color-coded group header — 2px left border + tinted strip + uppercase label
+  const accentColor = {
+    primary: 'border-l-[color:var(--color-primary)] bg-[color:var(--color-primary-soft)]/40 text-[color:var(--color-primary)]',
+    success: 'border-l-[color:var(--color-success)] bg-[color:var(--color-success-soft)]/40 text-[color:var(--color-success-soft-fg)]',
+    alert:   'border-l-[color:var(--color-alert)] bg-[color:var(--color-alert-soft)]/40 text-[color:var(--color-alert-soft-fg)]',
+    error:   'border-l-[color:var(--color-error)] bg-[color:var(--color-error-soft)]/40 text-[color:var(--color-error-soft-fg)]',
+  }[accent]
+  return (
+    <div className={cn('border-l-[3px] border-b border-[color:var(--color-border)] px-3 py-1.5', accentColor)}>
+      <span className="text-[10px] uppercase tracking-wider font-bold">{label}</span>
+    </div>
   )
 }
 
@@ -119,12 +141,12 @@ function AgentCard({ a, selected, onClick }: { a: Agent; selected: boolean; onCl
           <span className={cn('h-2 w-2 rounded-full', s.dot, a.status === 'running' && 'animate-pulse')} />
           <span className={cn('text-[10px] uppercase tracking-wider font-medium', s.text)}>{s.label}</span>
         </div>
-        <span className="text-[10px] text-[color:var(--color-fg-subtle)] font-mono tabular">
+        <span className="text-[11px] text-[color:var(--color-fg-subtle)] font-mono tabular">
           err {a.err24h}%
         </span>
       </div>
-      <div className="text-[13px] font-semibold text-[color:var(--color-ink)] tracking-tight mb-0.5">{a.name}</div>
-      <div className="text-[10px] font-mono text-[color:var(--color-fg-subtle)]">{a.id}</div>
+      <div className="text-[14px] font-semibold text-[color:var(--color-ink)] tracking-tight mb-0.5">{a.name}</div>
+      <div className="text-[11px] font-mono text-[color:var(--color-fg-subtle)]">{a.id}</div>
       <div className="mt-3 flex items-baseline gap-2">
         <span className="text-[22px] font-bold tabular text-[color:var(--color-ink)]">{a.queue}</span>
         <span className="text-[11px] text-[color:var(--color-fg-muted)]">queue</span>
@@ -164,8 +186,8 @@ function DetailRail({ a }: { a: Agent }) {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between">
-      <span className="text-[11px] text-[color:var(--color-fg-muted)]">{label}</span>
-      <span className="text-[12px] font-medium tabular text-[color:var(--color-fg)]">{value}</span>
+      <span className="text-[12px] text-[color:var(--color-fg-muted)]">{label}</span>
+      <span className="text-[13px] font-medium tabular text-[color:var(--color-fg)]">{value}</span>
     </div>
   )
 }
@@ -183,12 +205,12 @@ function TierButton({ tier, label, intent }: { tier: string; label: string; inte
       )}
     >
       <div className={cn(
-        'text-[9px] font-bold tracking-wider uppercase mb-0.5',
+        'text-[10px] font-bold tracking-wider uppercase mb-0.5',
         intent === 'danger' ? 'text-[color:var(--color-error-soft-fg)]'
           : intent === 'alert' ? 'text-[color:var(--color-alert-soft-fg)]'
           : 'text-[color:var(--color-fg-subtle)]'
       )}>{tier}</div>
-      <div className="text-[12px] font-medium text-[color:var(--color-fg)]">{label}</div>
+      <div className="text-[13px] font-medium text-[color:var(--color-fg)]">{label}</div>
     </button>
   )
 }

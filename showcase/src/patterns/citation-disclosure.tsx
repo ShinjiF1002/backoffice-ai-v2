@@ -112,61 +112,91 @@ function SourceCard({ c }: { c: Citation }) {
   return (
     <article
       className={cn(
-        'rounded-[var(--radius-control)] border p-3.5',
+        'rounded-[var(--radius-control)] border p-3.5 text-[color:var(--color-fg)]',
         c.staging
           ? 'border-[color:var(--color-alert-soft)] bg-[color:var(--color-panel)] border-dashed'
           : 'border-[color:var(--color-border)] bg-[color:var(--color-panel)]'
       )}
     >
-      <div className="flex items-center gap-2 mb-1.5">
+      {/* Primary anchor: Tier badge promoted to lead, freshness inline + meta right-aligned */}
+      <div className="flex items-start gap-2 mb-2">
         <TierBadge tier={c.tier} />
-        <FreshnessBadge fr={c.freshness} />
-        <span className="ml-auto text-[10px] font-mono tabular text-[color:var(--color-fg-subtle)]">
-          accessed {c.accessedAt}
+        <div className="flex-1 min-w-0">
+          <h5 className="text-[14px] font-semibold text-[color:var(--color-ink)] tracking-tight leading-[1.4]">
+            {c.title}
+          </h5>
+          <div className="mt-0.5 flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-mono text-[color:var(--color-fg-subtle)]">{c.domain}</span>
+            <span className="text-[color:var(--color-fg-subtle)]" aria-hidden>·</span>
+            <FreshnessBadge fr={c.freshness} />
+          </div>
+        </div>
+        <span className="text-[11px] font-mono tabular text-[color:var(--color-fg-subtle)] flex-none mt-0.5">
+          {c.accessedAt}
         </span>
       </div>
-      <h5 className="text-[13px] font-semibold text-[color:var(--color-ink)] tracking-tight mb-0.5">
-        {c.title}
-      </h5>
-      <div className="text-[10px] font-mono text-[color:var(--color-fg-subtle)] mb-2">{c.domain}</div>
-      <blockquote
-        className={cn(
-          'border-l-2 pl-3 py-1 text-[11px] leading-[1.55] text-[color:var(--color-fg)]',
-          c.staging
-            ? 'border-[color:var(--color-alert)] bg-[color:var(--color-alert-soft)]/30 italic'
-            : 'border-[color:var(--color-border-strong)]'
-        )}
-      >
-        {c.passage}
-      </blockquote>
+
+      {/* Quote: PD1 collapsed-by-default、details で reading-mode を deep-read に明示 expand */}
+      <details className="group/quote">
+        <summary className="list-none cursor-pointer inline-flex items-center gap-1.5 text-[12px] font-medium text-[color:var(--color-primary)] hover:underline">
+          <ChevronIcon />
+          引用文を読む
+        </summary>
+        <blockquote
+          className={cn(
+            'mt-2 border-l-2 pl-3 py-1 text-[12px] leading-[1.75] text-[color:var(--color-fg)]',
+            c.staging
+              ? 'border-[color:var(--color-alert)] bg-[color:var(--color-alert-soft)]/30 italic'
+              : 'border-[color:var(--color-border-strong)]'
+          )}
+        >
+          {c.passage}
+        </blockquote>
+      </details>
     </article>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="transition-transform group-open/quote:rotate-90" aria-hidden>
+      <path d="M3.5 2.5l3 2.5-3 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 }
 
 function TierBadge({ tier }: { tier: Tier }) {
   const map: Record<Tier, { bg: string; fg: string; label: string }> = {
-    T1: { bg: 'bg-[color:var(--color-success-soft)]', fg: 'text-[color:var(--color-success-soft-fg)]', label: 'T1 · primary' },
-    T2: { bg: 'bg-[color:var(--color-primary-soft)]', fg: 'text-[color:var(--color-primary)]',         label: 'T2 · secondary' },
-    T3: { bg: 'bg-[color:var(--color-panel-inset)]', fg: 'text-[color:var(--color-fg-muted)]',         label: 'T3 · derived' },
+    T1: { bg: 'bg-[color:var(--color-success-soft)]', fg: 'text-[color:var(--color-success-soft-fg)]', label: 'T1' },
+    T2: { bg: 'bg-[color:var(--color-primary-soft)]', fg: 'text-[color:var(--color-primary)]',         label: 'T2' },
+    T3: { bg: 'bg-[color:var(--color-panel-inset)]', fg: 'text-[color:var(--color-fg-muted)]',         label: 'T3' },
   }
   const m = map[tier]
+  // primary anchor: 大型 chip 化、aspect-1 で目立たせる
   return (
-    <span className={cn('inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider', m.bg, m.fg)}>
+    <span
+      className={cn(
+        'inline-flex h-7 min-w-[44px] items-center justify-center rounded-md px-2 text-[12px] font-bold tracking-wider flex-none',
+        m.bg, m.fg
+      )}
+      aria-label={`Source tier ${m.label}`}
+    >
       {m.label}
     </span>
   )
 }
 
 function FreshnessBadge({ fr }: { fr: Freshness }) {
-  const map: Record<Freshness, { bg: string; fg: string; label: string }> = {
-    breaking:  { bg: 'bg-[color:var(--color-error-soft)]', fg: 'text-[color:var(--color-error-soft-fg)]', label: 'breaking · 数日' },
-    monthly:   { bg: 'bg-[color:var(--color-alert-soft)]', fg: 'text-[color:var(--color-alert-soft-fg)]', label: 'monthly · 1ヶ月' },
-    quarterly: { bg: 'bg-[color:var(--color-primary-soft)]', fg: 'text-[color:var(--color-primary)]',     label: 'quarterly · 3ヶ月' },
-    stable:    { bg: 'bg-[color:var(--color-success-soft)]', fg: 'text-[color:var(--color-success-soft-fg)]', label: 'stable · 1-3年' },
+  const map: Record<Freshness, { fg: string; label: string }> = {
+    breaking:  { fg: 'text-[color:var(--color-error-soft-fg)]', label: 'breaking' },
+    monthly:   { fg: 'text-[color:var(--color-alert-soft-fg)]', label: 'monthly' },
+    quarterly: { fg: 'text-[color:var(--color-primary)]', label: 'quarterly' },
+    stable:    { fg: 'text-[color:var(--color-success-soft-fg)]', label: 'stable' },
   }
   const m = map[fr]
   return (
-    <span className={cn('inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-medium', m.bg, m.fg)}>
+    <span className={cn('inline-flex items-center gap-1 text-[11px] font-medium', m.fg)}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
       {m.label}
     </span>
   )

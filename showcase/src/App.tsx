@@ -16,27 +16,30 @@ export default function App() {
 }
 
 function SiteHeader() {
+  // Linear-style recessive chrome — bg muted、text 70-75% contrast、content 領域が visual weight 独占
   return (
-    <header className="border-b border-[color:var(--color-border)] bg-[color:var(--color-panel)]/80 backdrop-blur sticky top-0 z-30">
+    <header className="border-b border-[color:var(--color-border)] bg-[color:var(--color-panel-inset)]/60 backdrop-blur sticky top-0 z-30">
       <div className="mx-auto flex h-14 max-w-[var(--container-wide)] items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="h-6 w-6 rounded-md bg-[color:var(--color-ink)] grid place-items-center text-[color:var(--color-panel)] text-[11px] font-bold">
+          <div className="h-6 w-6 rounded-md bg-[color:var(--color-ink)]/85 grid place-items-center text-[color:var(--color-panel)] text-[11px] font-bold">
             BO
           </div>
           <div className="leading-tight">
-            <div className="text-[13px] font-semibold tracking-tight">Backoffice AI v2 — Pattern Showcase</div>
-            <div className="text-[11px] text-[color:var(--color-fg-muted)]">research-compounder × Figma MCP</div>
+            <div className="text-[13px] font-semibold tracking-tight text-[color:var(--color-fg)]/85">
+              Backoffice AI v2 — Pattern Showcase
+            </div>
+            <div className="text-[11px] text-[color:var(--color-fg-subtle)]">research-compounder × Figma MCP</div>
           </div>
         </Link>
         <nav className="flex items-center gap-6 text-[13px]">
           <a
-            href="https://github.com/"
-            className="text-[color:var(--color-fg-muted)] hover:text-[color:var(--color-fg)] transition-colors"
+            href="https://github.com/ShinjiF1002/backoffice-ai-v2"
+            className="text-[color:var(--color-fg-subtle)] hover:text-[color:var(--color-fg)] transition-colors"
             rel="noreferrer"
           >
             GitHub
           </a>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-alert-soft)] px-2.5 py-0.5 text-[11px] font-medium text-[color:var(--color-alert-soft-fg)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-alert-soft)]/80 px-2.5 py-0.5 text-[11px] font-medium text-[color:var(--color-alert-soft-fg)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-alert)]" />
             外部システム未接続 / モック
           </span>

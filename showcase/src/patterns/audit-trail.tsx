@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PatternDemo, DemoFrame } from '@/components/PatternShell'
+import { EmptyState } from '@/components/Kbd'
 import { cn } from '@/lib/cn'
 
 type Actor = 'agent' | 'human' | 'system'
@@ -53,29 +54,43 @@ export function AuditTrailDemo() {
     >
       <DemoFrame viewport="Desktop 1280×800 · Tabular audit log">
         <div className="flex flex-col">
-          {/* Toolbar */}
+          {/* Toolbar (with aggregate indicators — GitHub-style annotation badges) */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-[color:var(--color-border)] bg-[color:var(--color-panel-inset)]/60">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span className="text-[11px] uppercase tracking-wider font-medium text-[color:var(--color-fg-subtle)]">
                 Filter actor:
               </span>
               <div className="inline-flex rounded-[var(--radius-control)] border border-[color:var(--color-border)] bg-[color:var(--color-panel)] p-0.5">
-                {ACTORS.map((a) => (
-                  <button
-                    key={a.id}
-                    onClick={() => setFilter(a.id)}
-                    className={cn(
-                      'px-2.5 py-1 text-[11px] font-medium rounded-[3px] transition-colors',
-                      filter === a.id
-                        ? 'bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
-                        : 'text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]'
-                    )}
-                  >
-                    {a.label}
-                  </button>
-                ))}
+                {ACTORS.map((a) => {
+                  // Aggregate indicator: actor-type 別 count を Tab に併記
+                  const count = a.id === 'all' ? ROWS.length : ROWS.filter((r) => r.actor === a.id).length
+                  return (
+                    <button
+                      key={a.id}
+                      onClick={() => setFilter(a.id)}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-[3px] transition-colors',
+                        filter === a.id
+                          ? 'bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
+                          : 'text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]'
+                      )}
+                    >
+                      {a.label}
+                      <span
+                        className={cn(
+                          'inline-flex items-center justify-center min-w-[18px] h-[16px] rounded-full px-1 text-[9px] font-mono tabular',
+                          filter === a.id
+                            ? 'bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)]'
+                            : 'bg-[color:var(--color-panel-inset)] text-[color:var(--color-fg-subtle)]'
+                        )}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
-              <span className="text-[11px] text-[color:var(--color-fg-muted)] ml-2">
+              <span className="text-[11px] text-[color:var(--color-fg-muted)]">
                 {filtered.length} / {ROWS.length} rows
               </span>
             </div>
@@ -102,7 +117,14 @@ export function AuditTrailDemo() {
 
           {/* Rows */}
           <div className="max-h-[360px] overflow-y-auto">
-            {filtered.map((r, i) => (
+            {filtered.length === 0 ? (
+              <EmptyState
+                variant="filtered"
+                message={`${filter} actor の log 0 件`}
+                action={{ label: 'Clear filter', onClick: () => setFilter('all') }}
+              />
+            ) : (
+              filtered.map((r, i) => (
               <div
                 key={i}
                 className={cn(
@@ -127,7 +149,8 @@ export function AuditTrailDemo() {
                   {r.reason ?? '—'}
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Footer note */}

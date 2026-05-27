@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PatternDemo, DemoFrame } from '@/components/PatternShell'
+import { Kbd, EmptyState } from '@/components/Kbd'
 import { cn } from '@/lib/cn'
 
 type Field = { key: string; label: string; before: string | null; after: string | null; changed: boolean }
@@ -71,7 +72,14 @@ export function DiffPreviewDemo() {
 
           {/* Rows */}
           <div className="max-h-[340px] overflow-y-auto">
-            {filtered.map((f, i) => (
+            {filtered.length === 0 ? (
+              <EmptyState
+                variant="filtered"
+                message="変更された field がありません"
+                action={{ label: 'Show all fields', onClick: () => setShowOnlyChanges(false) }}
+              />
+            ) : (
+              filtered.map((f, i) => (
               <div
                 key={f.key}
                 className={cn(
@@ -99,7 +107,8 @@ export function DiffPreviewDemo() {
                   {f.after}
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Reason + footer */}
@@ -119,14 +128,14 @@ export function DiffPreviewDemo() {
                 Reason は 10 文字以上必須・audit log に append されます
               </span>
               <div className="flex gap-2">
-                <button className="text-[12px] px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel)] transition-colors">
-                  差戻し
+                <button className="inline-flex items-center gap-2 text-[12px] px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel)] transition-colors">
+                  差戻し <Kbd>⌘⌫</Kbd>
                 </button>
                 <button
                   disabled={reason.length < 10}
-                  className="text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)] hover:bg-[color:var(--color-primary-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)] hover:bg-[color:var(--color-primary-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  承認 ({changeCount} 件変更)
+                  承認 ({changeCount} 件変更) <Kbd tone="on-primary">⌘↵</Kbd>
                 </button>
               </div>
             </div>

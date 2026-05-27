@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PatternDemo, DemoFrame } from '@/components/PatternShell'
+import { Kbd, EmptyState } from '@/components/Kbd'
 import { cn } from '@/lib/cn'
 
 type State = 'pending' | 'approved' | 'rejected' | 'failed' | 'escalated'
@@ -74,6 +75,8 @@ const CASES: Case[] = [
 
 export function HilApprovalDemo() {
   const [selectedId, setSelectedId] = useState<string>('CASE-2026-0142')
+  const [filter, setFilter] = useState<'all' | State>('all')
+  const filteredCases = filter === 'all' ? CASES : CASES.filter((c) => c.state === filter)
   const selected = CASES.find((c) => c.id === selectedId) ?? CASES[0]
 
   return (
@@ -95,16 +98,25 @@ export function HilApprovalDemo() {
         <div className="flex h-[540px]">
           {/* === Table (master) === */}
           <div className="flex-1 border-r border-[color:var(--color-border)] flex flex-col">
+            <FilterBar filter={filter} setFilter={setFilter} total={CASES.length} shown={filteredCases.length} />
             <TableHeader />
             <div className="flex-1 overflow-y-auto">
-              {CASES.map((c) => (
-                <CaseRow
-                  key={c.id}
-                  c={c}
-                  selected={c.id === selectedId}
-                  onClick={() => setSelectedId(c.id)}
+              {filteredCases.length === 0 ? (
+                <EmptyState
+                  variant="filtered"
+                  message="filter で 0 件 一致"
+                  action={{ label: 'Reset filter', onClick: () => setFilter('all') }}
                 />
-              ))}
+              ) : (
+                filteredCases.map((c) => (
+                  <CaseRow
+                    key={c.id}
+                    c={c}
+                    selected={c.id === selectedId}
+                    onClick={() => setSelectedId(c.id)}
+                  />
+                ))
+              )}
             </div>
           </div>
           {/* === Drawer (detail) === */}
@@ -119,6 +131,49 @@ export function HilApprovalDemo() {
         </div>
       </DemoFrame>
     </PatternDemo>
+  )
+}
+
+function FilterBar({
+  filter,
+  setFilter,
+  total,
+  shown,
+}: {
+  filter: 'all' | State
+  setFilter: (s: 'all' | State) => void
+  total: number
+  shown: number
+}) {
+  const opts: Array<{ id: 'all' | State; label: string }> = [
+    { id: 'all', label: 'All' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'escalated', label: 'Escalated' },
+    { id: 'failed', label: 'Failed' },
+    { id: 'approved', label: 'Approved' },
+  ]
+  return (
+    <div className="flex items-center justify-between px-4 py-2 border-b border-[color:var(--color-border)] bg-[color:var(--color-panel-inset)]/60">
+      <div className="inline-flex rounded-[var(--radius-control)] border border-[color:var(--color-border)] bg-[color:var(--color-panel)] p-0.5">
+        {opts.map((o) => (
+          <button
+            key={o.id}
+            onClick={() => setFilter(o.id)}
+            className={cn(
+              'px-2 py-0.5 text-[11px] font-medium rounded-[3px] transition-colors',
+              filter === o.id
+                ? 'bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
+                : 'text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]'
+            )}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+      <span className="text-[11px] tabular text-[color:var(--color-fg-muted)]">
+        {shown} / {total} rows
+      </span>
+    </div>
   )
 }
 
@@ -361,22 +416,22 @@ function ActionBar({ state }: { state: State }) {
     <div className="px-5 py-3.5 border-t border-[color:var(--color-border)] bg-[color:var(--color-panel)] flex gap-2 items-center">
       <button
         disabled={disabled}
-        className="text-[12px] font-medium px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 text-[12px] font-medium px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Reject
+        Reject <Kbd>⌘⌫</Kbd>
       </button>
       <button
         disabled={disabled}
-        className="text-[12px] font-medium px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 text-[12px] font-medium px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Escalate
+        Escalate <Kbd>⌘E</Kbd>
       </button>
       <div className="flex-1" />
       <button
         disabled={disabled}
-        className="text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)] hover:bg-[color:var(--color-primary-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)] hover:bg-[color:var(--color-primary-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Approve
+        Approve <Kbd tone="on-primary">⌘↵</Kbd>
       </button>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PatternDemo, DemoFrame } from '@/components/PatternShell'
+import { Kbd } from '@/components/Kbd'
 import { cn } from '@/lib/cn'
 
 type Tier = 'T1' | 'T2' | 'T3' | 'T4'
@@ -62,7 +63,7 @@ export function ActionConfirmationDemo() {
                 <div className="flex items-center gap-1.5">
                   <ConfirmationChip type={a.confirmation} />
                   {a.auditAttach && (
-                    <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-medium bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]">
+                    <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]">
                       audit attach
                     </span>
                   )}
@@ -90,7 +91,7 @@ function TierChip({ tier }: { tier: Tier }) {
   }
   const m = map[tier]
   return (
-    <span className={cn('inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wider', m.bg, m.fg)}>
+    <span className={cn('inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wider', m.bg, m.fg)}>
       {tier}
     </span>
   )
@@ -104,7 +105,7 @@ function ConfirmationChip({ type }: { type: Action['confirmation'] }) {
     'second-factor': '2FA',
   }
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-mono bg-[color:var(--color-panel)] border border-[color:var(--color-border)] text-[color:var(--color-fg-muted)]">
+    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-mono bg-[color:var(--color-panel)] border border-[color:var(--color-border)] text-[color:var(--color-fg-muted)]">
       {map[type]}
     </span>
   )
@@ -142,11 +143,11 @@ function SampleDialog({ action }: { action: Action }) {
           {action.example}
         </p>
         <div className="mt-5 flex justify-end gap-2">
-          <button className="text-[12px] px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]">
-            キャンセル
+          <button className="inline-flex items-center gap-2 text-[12px] px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]">
+            キャンセル <Kbd>Esc</Kbd>
           </button>
-          <button className="text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)]">
-            実行
+          <button className="inline-flex items-center gap-2 text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)]">
+            実行 <Kbd tone="on-primary">⌘↵</Kbd>
           </button>
         </div>
       </div>
@@ -182,14 +183,14 @@ function SampleDialog({ action }: { action: Action }) {
         <div className="mt-5 flex items-center justify-between">
           <span className="text-[10px] text-[color:var(--color-fg-subtle)]">audit attach 必須</span>
           <div className="flex gap-2">
-            <button className="text-[12px] px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]">
-              キャンセル
+            <button className="inline-flex items-center gap-2 text-[12px] px-3 py-2 rounded-[var(--radius-control)] text-[color:var(--color-fg-muted)] hover:bg-[color:var(--color-panel-inset)]">
+              キャンセル <Kbd>Esc</Kbd>
             </button>
             <button
               disabled={typed !== requiredTyped}
-              className="text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-alert)] text-white disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 text-[12px] font-semibold px-4 py-2 rounded-[var(--radius-control)] bg-[color:var(--color-alert)] text-white disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              実行
+              実行 <Kbd tone="on-primary">⌘↵</Kbd>
             </button>
           </div>
         </div>
@@ -217,16 +218,16 @@ function SampleDialog({ action }: { action: Action }) {
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-[var(--radius-control)] border border-[color:var(--color-border)] bg-[color:var(--color-panel-inset)] px-3 py-2">
-          <div className="text-[9px] uppercase tracking-wider font-medium text-[color:var(--color-fg-subtle)]">Self</div>
-          <div className="text-[11px] font-mono text-[color:var(--color-fg)] mt-0.5">u-12345 (you)</div>
-          <div className="mt-1 inline-block text-[9px] font-medium rounded px-1.5 py-0.5 bg-[color:var(--color-success-soft)] text-[color:var(--color-success-soft-fg)]">
+          <div className="text-[10px] uppercase tracking-wider font-medium text-[color:var(--color-fg-subtle)]">Self</div>
+          <div className="text-[12px] font-mono text-[color:var(--color-fg)] mt-0.5">u-12345 (you)</div>
+          <div className="mt-1 inline-block text-[10px] font-medium rounded px-1.5 py-0.5 bg-[color:var(--color-success-soft)] text-[color:var(--color-success-soft-fg)]">
             ✓ requested
           </div>
         </div>
         <div className="rounded-[var(--radius-control)] border border-dashed border-[color:var(--color-border-strong)] px-3 py-2">
-          <div className="text-[9px] uppercase tracking-wider font-medium text-[color:var(--color-fg-subtle)]">Peer</div>
-          <div className="text-[11px] font-mono text-[color:var(--color-fg-muted)] mt-0.5">awaiting…</div>
-          <div className="mt-1 inline-block text-[9px] font-medium rounded px-1.5 py-0.5 bg-[color:var(--color-alert-soft)] text-[color:var(--color-alert-soft-fg)]">
+          <div className="text-[10px] uppercase tracking-wider font-medium text-[color:var(--color-fg-subtle)]">Peer</div>
+          <div className="text-[12px] font-mono text-[color:var(--color-fg-muted)] mt-0.5">awaiting…</div>
+          <div className="mt-1 inline-block text-[10px] font-medium rounded px-1.5 py-0.5 bg-[color:var(--color-alert-soft)] text-[color:var(--color-alert-soft-fg)]">
             pending 2FA
           </div>
         </div>

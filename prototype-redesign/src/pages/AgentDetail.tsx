@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon } from 'lucide-react'
-import { AGENT_CORP_ADDRESS } from '@/data/mock-agent-detail'
+import { AGENT_DETAILS } from '@/data/mock-agent-detail'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
@@ -14,11 +14,32 @@ import { cn } from '@/lib/cn'
  * A 4 KPI 全件 (集約値を捨てる) / B 裏付け sample + 設定 / C 申請 1 ボタン (単一決定面)。
  * Trust は業務語 (全件確認 / 要所確認) を主表示、Tier 名 (Supervised) は補助 chip。
  */
-const a = AGENT_CORP_ADDRESS
+/** 未知 id の not-found (業務語、token-clean inline)。 */
+function AgentNotFound() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+      <p className="text-sm text-[var(--color-fg-muted)]">指定のエージェントが見つかりません。</p>
+      <Link to="/agents" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+        エージェント一覧へ戻る
+      </Link>
+    </div>
+  )
+}
 
 export function AgentDetail() {
+  const { id } = useParams()
+  const a = id ? AGENT_DETAILS[id] : undefined
   const [applyOpen, setApplyOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
+  const [prevId, setPrevId] = useState(id)
+  if (id !== prevId) {
+    setPrevId(id)
+    setApplyOpen(false)
+    setToast(null)
+  }
+
+  if (!a) return <AgentNotFound />
 
   const showToast = (m: string) => {
     setToast(m)

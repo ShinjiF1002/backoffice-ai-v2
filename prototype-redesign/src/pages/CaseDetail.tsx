@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, CornerUpLeftIcon } from 'lucide-react'
-import { CASE_2026_0142 } from '@/data/mock-case-detail'
+import { CASE_DETAILS } from '@/data/mock-case-detail'
+import type { CaseDetailModel } from '@/data/mock-case-detail'
 import type { FieldReview } from '@/data/types'
 import { isResolved } from '@/lib/reconcile-display'
 import { DocumentViewer } from '@/components/case/DocumentViewer'
@@ -16,19 +17,50 @@ import { cn } from '@/lib/cn'
  * SSOT: reconcile-panel-spec §8 + screens-v2/04-case-detail/canonical-export.md
  * A 全体表示 (全項目可視) / B 証拠アンカー (左 申請書類ビューア) / C 単一決定面 (footer のみ)。
  */
-const c = CASE_2026_0142
+/** 初期 active field: 最初の要確認、なければ先頭項目 (空配列なら undefined)。 */
+function firstReviewLabel(c: CaseDetailModel | undefined): string | undefined {
+  if (!c || c.fields.length === 0) return undefined
+  const review = c.fields.find((f) => !isResolved(f.reconcileState))
+  return (review ?? c.fields[0]).fieldLabel
+}
+
+/** 未知 id の not-found (業務語、token-clean inline)。 */
+function CaseNotFound() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+      <p className="text-sm text-[var(--color-fg-muted)]">指定の案件が見つかりません。</p>
+      <Link to="/cases" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+        案件一覧へ戻る
+      </Link>
+    </div>
+  )
+}
 
 export function CaseDetail() {
+  const { id } = useParams()
+  const c = id ? CASE_DETAILS[id] : undefined
   // Approvals (承認待ち) からは ?view=checker で承認者ビュー初期化 (screen-contract: row → checker)
   const [params] = useSearchParams()
   const [mode, setMode] = useState<'input' | 'checker'>(params.get('view') === 'checker' ? 'checker' : 'input')
-  const [fields, setFields] = useState<FieldReview[]>(c.fields)
-  const [activeFieldLabel, setActiveFieldLabel] = useState<string | undefined>('ビル名')
+  const [fields, setFields] = useState<FieldReview[]>(c?.fields ?? [])
+  const [activeFieldLabel, setActiveFieldLabel] = useState<string | undefined>(() => firstReviewLabel(c))
   const [modalField, setModalField] = useState<FieldReview | null>(null)
   const [caseSendbackOpen, setCaseSendbackOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  // :id 変更で同 component が再 render される時の local state reset (set-state-in-effect 回避、render 中 adjusting)
+  const [prevId, setPrevId] = useState(id)
+  if (id !== prevId) {
+    setPrevId(id)
+    setFields(c?.fields ?? [])
+    setActiveFieldLabel(firstReviewLabel(c))
+    setModalField(null)
+    setCaseSendbackOpen(false)
+    setToast(null)
+  }
 
   const openCount = useMemo(() => fields.filter((f) => !isResolved(f.reconcileState)).length, [fields])
+
+  if (!c) return <CaseNotFound />
 
   const showToast = (m: string) => {
     setToast(m)

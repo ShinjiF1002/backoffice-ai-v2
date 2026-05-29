@@ -1,0 +1,16 @@
+# handoff-redesign — local ignore (export 結果 / handoff bundle のみ)
+# root .gitignore は触らない (prompt pack 本体は git tracked、PR review 対象)
+
+# Phase 1A/B export
+*-output.html
+*-output.pdf
+*-output.png
+*-export.*
+
+# Phase 1C handoff bundle (Claude Design の "Send to Claude Code" 結果)
+99-claude-code-handoff/bundle/
+
+# upload-once の user 任意 export
+00-shared/upload-once/*-export.*
+00-shared/upload-once/prototype-screenshot-*.png
+00-shared/upload-once/prototype-screenshot-*.jpg

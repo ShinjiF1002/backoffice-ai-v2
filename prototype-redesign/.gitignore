@@ -1,0 +1,29 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Day 18.5 audit bundle (artifact、再生成可能、bundle README §git-track-not の方針)
+audit-bundle/
+
+# NOTE: prototype/audit/ は ignore しない (audit prompt SSOT を含む、user 判断で track or rm)

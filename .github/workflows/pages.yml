@@ -1,4 +1,4 @@
-name: Deploy redesign (root) + prototype v1 + showcase to GitHub Pages
+name: Deploy redesign (root) + prototype v1 to GitHub Pages
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
     paths:
       - prototype-redesign/**
       - prototype/**
-      - showcase/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -25,7 +24,7 @@ env:
 
 jobs:
   build:
-    name: Build redesign + prototype v1 + showcase
+    name: Build redesign + prototype v1
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,7 +38,6 @@ jobs:
           cache-dependency-path: |
             prototype-redesign/package-lock.json
             prototype/package-lock.json
-            showcase/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -74,30 +72,13 @@ jobs:
         working-directory: prototype
         run: cp dist/index.html dist/404.html
 
-      # --- showcase (subpath /backoffice-ai-v2/showcase/) ---
-      - name: Install showcase dependencies
-        working-directory: showcase
-        run: npm ci
-
-      - name: Build showcase
-        working-directory: showcase
-        env:
-          VITE_BASE_PATH: /backoffice-ai-v2/showcase/
-        run: npm run build
-
-      - name: Add showcase SPA fallback
-        working-directory: showcase
-        run: cp dist/index.html dist/404.html
-
-      # --- combine into single _site (redesign at root, prototype v1 + showcase as subpaths) ---
+      # --- combine into single _site (redesign at root, prototype v1 as subpath) ---
       - name: Assemble combined site
         run: |
           mkdir -p _site
           cp -R prototype-redesign/dist/. _site/
           mkdir -p _site/v1
           cp -R prototype/dist/. _site/v1/
-          mkdir -p _site/showcase
-          cp -R showcase/dist/. _site/showcase/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4

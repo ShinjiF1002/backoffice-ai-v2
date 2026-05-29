@@ -74,6 +74,24 @@ describe('Phase 4a: 要確認ゼロ / change なし の detail も落ちない (
   })
 })
 
+describe('Phase 4b: evidence link coverage (根拠/裏付けリンクが NotFound に落ちない、CR P1)', () => {
+  it('全 proposal sourceCases の case link が CASE_DETAILS に存在', () => {
+    for (const p of Object.values(PROPOSAL_DETAILS)) {
+      for (const sc of p.sourceCases) expect(CASE_DETAILS[sc.id]).toBeDefined()
+    }
+  })
+  it('全 agent samples の case link が CASE_DETAILS に存在', () => {
+    for (const a of Object.values(AGENT_DETAILS)) {
+      for (const s of a.samples) expect(CASE_DETAILS[s.id]).toBeDefined()
+    }
+  })
+  it('historical 根拠案件 (store 非存在) は参照専用 = 承認・差戻し disabled', () => {
+    renderAt('/cases/CASE-2026-0098') // PROP-2026-031 の sourceCase、CASE_LIST 外
+    expect(screen.getByRole('button', { name: '承認' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '差戻し' })).toBeDisabled()
+  })
+})
+
 describe('Phase 4b: 承認ボタンが reducer precondition と整合 (false success 防止、CR P1)', () => {
   it('pending 案件 (入力者ビュー) は承認 disabled', () => {
     renderAt('/cases/CASE-2026-0150')

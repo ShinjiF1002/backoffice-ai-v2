@@ -247,3 +247,15 @@ export const CASE_DETAILS: Record<string, CaseDetailModel> = Object.fromEntries(
   CASE_LIST.map((row): [string, CaseDetailModel] => [row.id, buildCaseDetail(row)]),
 )
 CASE_DETAILS['CASE-2026-0142'] = CASE_2026_0142
+
+// 提案の根拠 (PROP-2026-031 sourceCases) として参照される過去案件 = 参照専用 historical detail。
+// CASE_LIST には載せない (store/list 非対象 = seed されない)。CASE_DETAILS にのみ登録し
+// 「元の案件を開く」リンクの NotFound を防ぐ (CR P1)。store entity が無いため detail は参照専用で描画される。
+const HISTORICAL_CASE_ROWS: CaseListRow[] = [
+  { id: 'CASE-2026-0098', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-22 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビルディング' } },
+  { id: 'CASE-2026-0087', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-18 処理済', owner: '山田太郎', flags: 0, change: { field: '新住所', from: '東京都千代田区丸の内 2 丁目 3', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
+  { id: 'CASE-2026-0079', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-14 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビル' } },
+]
+for (const row of HISTORICAL_CASE_ROWS) {
+  CASE_DETAILS[row.id] = buildCaseDetail(row)
+}

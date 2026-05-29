@@ -18,9 +18,11 @@ interface ReconcilePanelProps {
   activeFieldLabel?: string
   onSelectField?: (fieldLabel: string) => void
   onActOnField?: (fieldLabel: string) => void
+  /** 参照専用 (store に無い過去案件など): 対応ボタンを出さず空状態文言も参照専用にする */
+  readOnly?: boolean
 }
 
-export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActOnField }: ReconcilePanelProps) {
+export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActOnField, readOnly }: ReconcilePanelProps) {
   const open = fields.filter((f) => !isResolved(f.reconcileState))
   const resolved = fields.filter((f) => isResolved(f.reconcileState))
 
@@ -76,16 +78,18 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
                     {f.sourceLocator.page} {f.sourceLocator.region}
                   </span>
                 )}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onActOnField?.(f.fieldLabel)
-                  }}
-                  className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
-                >
-                  対応
-                </button>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onActOnField?.(f.fieldLabel)
+                    }}
+                    className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+                  >
+                    対応
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -93,7 +97,7 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
       ) : (
         <div className="flex items-center gap-2 rounded-[var(--radius-card)] bg-[var(--color-success-soft)] p-3 text-sm text-[var(--color-success-soft-fg)]">
           <CheckIcon className="h-4 w-4" aria-hidden="true" />
-          確認が必要な項目はありません — 承認できます
+          {readOnly ? '過去の案件 — 参照専用です' : '確認が必要な項目はありません — 承認できます'}
         </div>
       )}
 

@@ -70,6 +70,8 @@ export function CaseDetail() {
   // input は ready かつ要確認0、checker は business-approval-waiting のみ。それ以外は dispatch が no-op。
   const canApprove =
     mode === 'checker' ? entity?.status === 'business-approval-waiting' : entity?.status === 'ready' && openCount === 0
+  // store に無い = 参照専用 (提案根拠の過去案件など)。全操作を抑止し false success を防ぐ。
+  const readOnly = !entity
 
   if (!c) return <CaseNotFound />
 
@@ -79,7 +81,7 @@ export function CaseDetail() {
   }
 
   const handleAct = (fieldLabel: string, kind: 'accept' | 'override' | 'sendback' | 'escalate') => {
-    if (!id) return
+    if (!id || readOnly) return
     if (kind === 'accept' || kind === 'override') {
       dispatch({ type: 'case/override', id, fieldLabel })
       showToast(`${fieldLabel} を確定しました`)
@@ -151,6 +153,7 @@ export function CaseDetail() {
               activeFieldLabel={activeFieldLabel}
               onSelectField={setActiveFieldLabel}
               onActOnField={(label) => setModalField(fields.find((f) => f.fieldLabel === label) ?? null)}
+              readOnly={readOnly}
             />
           </div>
         </div>
@@ -159,7 +162,9 @@ export function CaseDetail() {
       {/* Footer: 単一決定面 (承認 / 差戻し) */}
       <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
         <div className="text-xs">
-          {mode === 'checker' ? (
+          {readOnly ? (
+            <span className="text-[var(--color-fg-muted)]">過去の案件 — 参照専用です（この画面では操作できません）</span>
+          ) : mode === 'checker' ? (
             entity?.status === 'business-approval-waiting' ? (
               <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
                 <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
@@ -179,8 +184,12 @@ export function CaseDetail() {
         <div className="flex gap-2">
           <button
             type="button"
+            disabled={readOnly}
             onClick={() => setCaseSendbackOpen(true)}
-            className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            className={cn(
+              'flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]',
+              readOnly && 'cursor-not-allowed opacity-50 hover:bg-[var(--color-panel)]'
+            )}
           >
             <CornerUpLeftIcon className="h-4 w-4" />
             差戻し

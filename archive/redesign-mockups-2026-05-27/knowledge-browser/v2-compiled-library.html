@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Knowledge v2 — Compiled Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.ph { background: var(--color-panel); border-bottom: 1px solid var(--color-border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: end; }
+.tg { display: flex; border: 1px solid var(--color-border); border-radius: 6px; overflow: hidden; }
+.tg .opt { padding: 4px 12px; font-size: 11px; cursor: pointer; }
+.tg .opt.active { background: var(--color-success-soft); color: var(--color-success-soft-fg); font-weight: 600; border: 1px solid var(--color-success); border-radius: 6px; }
+.tg .opt:not(.active) { background: var(--color-panel); color: var(--color-fg-muted); }
+.body { padding: 20px 40px; display: flex; flex-direction: column; gap: 14px; overflow: auto; height: calc(100% - 54px); }
+.intro { font-size: 11px; line-height: 1.55; color: var(--color-fg-muted); }
+.card { display: flex; gap: 14px; align-items: center; padding: 14px 18px; background: var(--color-panel); border: 1px solid var(--color-border); border-left: 3px solid var(--color-success); border-radius: 8px; }
+.card-tag { width: 36px; text-align: center; font-family: var(--font-sans); font-size: 18px; font-weight: 700; color: var(--color-success-soft-fg); }
+.card-mid { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.card-t { font-size: 14px; font-weight: 700; }
+.card-meta { font-family: var(--font-mono); font-size: 9px; color: var(--color-fg-muted); }
+.card-d { font-size: 11px; line-height: 1.55; color: var(--color-fg-muted); }
+.card-cat { display: inline-flex; padding: 1px 7px; border-radius: 3px; background: var(--color-panel-inset); color: var(--color-fg-muted); font-size: 9px; align-self: flex-start; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">B</div><div class="brand-text"><div class="brand-name">Backoffice AI</div><div class="brand-sub">v2 prototype</div></div></div>
+  <nav class="nav">
+    <a class="nav-item" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item active" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user"><div class="user-avatar"></div><div class="user-text"><div class="user-name">山田 太郎</div><div class="user-role">入力者</div></div></div>
+</aside>
+
+<header class="topbar">
+  <div class="search"><span class="ic">⌕</span><span> </span></div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill"><span class="ic">ⓘ</span><span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span></div>
+  </div>
+</header>
+
+<main class="main" style="display: flex; flex-direction: column;">
+<div class="variant-label">V2 · Compiled Library</div>
+
+<div class="ph">
+  <div style="display: flex; gap: 14px; align-items: end;">
+    <span style="font-size: 17px; font-weight: 700;">ナレッジ ライブラリ</span>
+    <span style="font-size: 11px; font-weight: 500; color: var(--color-success-soft-fg);">承認済 5 件</span>
+  </div>
+  <div style="display: flex; gap: 6px; align-items: center;">
+    <span style="font-size: 10px; color: var(--color-fg-muted);">表示:</span>
+    <div class="tg">
+      <span class="opt active">承認済のみ</span>
+      <span class="opt">未承認込み</span>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+  <p class="intro">AI が引用根拠として使えるのは 承認済 ナレッジのみです。未承認 / 確認済 は AI 提案の補助 (未承認ヒント) として可視ですが、引用根拠にはなりません。</p>
+
+  <div class="card">
+    <div class="card-tag">✓</div>
+    <div class="card-mid">
+      <span class="card-t">法人口座 + 個人口座 同時開設 — 別業務へ分離</span>
+      <span class="card-meta">2026-05-26 · 業務責任者 鈴木 純子</span>
+      <span class="card-d">法人口座と代表者個人口座を同時に開設する案件は別業務、対象外とし、書類群を法人 / 個人で分割して別業務に移行する。</span>
+      <span class="card-cat">UC-BO-02 口座開設書類完備 · 境界条件</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 14px;">›</span>
+  </div>
+
+  <div class="card">
+    <div class="card-tag">✓</div>
+    <div class="card-mid">
+      <span class="card-t">法人格変更を伴う住所変更 — 別業務へ移行</span>
+      <span class="card-meta">2026-05-20 · 業務責任者 鈴木 純子</span>
+      <span class="card-d">住所変更時に法人格に変更 (合同会社 → 株式会社) を変更する案件は法人格変更業務、対象外とし、法人格変更業務に移行する。</span>
+      <span class="card-cat">UC-BO-01 法人住所変更 · 境界条件</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 14px;">›</span>
+  </div>
+
+  <div class="card">
+    <div class="card-tag">✓</div>
+    <div class="card-mid">
+      <span class="card-t">多店舗法人の住所変更 — 全店舗一括処理</span>
+      <span class="card-meta">2026-04-15 · 業務責任者 鈴木 純子</span>
+      <span class="card-d">複数店舗を持つ法人の本店住所変更時は、住所マスタを店舗単位で一括更新する。各店舗の支店コードに対する更新確認が必要。</span>
+      <span class="card-cat">UC-BO-01 法人住所変更 · 判断境界</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 14px;">›</span>
+  </div>
+
+  <div class="card">
+    <div class="card-tag">✓</div>
+    <div class="card-mid">
+      <span class="card-t">corporate-address-change/ocr-confidence-threshold</span>
+      <span class="card-meta">2026-04-01 · 業務責任者 鈴木 純子</span>
+      <span class="card-d">OCR 信頼度の閾値は 0.85 を base とし、信頼度低下時は手動確認に振る。閾値変更は Type B 設定承認が必要。</span>
+      <span class="card-cat">UC-BO-01 法人住所変更 · 設定</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 14px;">›</span>
+  </div>
+
+  <div class="card">
+    <div class="card-tag">✓</div>
+    <div class="card-mid">
+      <span class="card-t">corporate-address-change/master-lookup-fallback</span>
+      <span class="card-meta">2026-03-22 · 業務責任者 鈴木 純子</span>
+      <span class="card-d">住所マスタ照合 未ヒット時の fallback パスを定義。郵便番号 → 地名 → 手動入力 の 3 段階。</span>
+      <span class="card-cat">UC-BO-01 法人住所変更 · 判断境界</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 14px;">›</span>
+  </div>
+
+</div>
+</main>
+
+</body>
+</html>

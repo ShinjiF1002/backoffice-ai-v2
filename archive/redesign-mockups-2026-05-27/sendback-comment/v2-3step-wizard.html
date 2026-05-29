@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>SendBack v2 — 3-step Wizard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.steps { display: flex; justify-content: center; align-items: center; gap: 6px; background: var(--color-panel); border-bottom: 1px solid var(--color-border); padding: 10px 80px; height: 64px; }
+.step { display: flex; gap: 7px; align-items: center; }
+.step-num { width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; }
+.step.cur .step-num { background: var(--color-primary); color: var(--color-fg-invert); }
+.step.cur .step-t { color: var(--color-fg); font-weight: 600; }
+.step:not(.cur) .step-num { background: var(--color-panel-inset); color: var(--color-fg-muted); }
+.step:not(.cur) .step-t { color: var(--color-fg-muted); }
+.step-t { font-size: 12px; font-weight: 500; }
+.step-bar { width: 48px; height: 1px; background: var(--color-border); margin: 0 4px; }
+.body { display: flex; justify-content: center; align-items: flex-start; padding: 36px 24px 16px; height: calc(100% - 64px - 60px); overflow: auto; }
+.wcard { width: 780px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 12px; padding: 32px 40px; display: flex; flex-direction: column; gap: 20px; }
+.wcard h1 { font-size: 22px; font-weight: 700; line-height: 1.3; }
+.wcard .lead { font-size: 12px; line-height: 1.6; color: var(--color-fg-muted); }
+.opt-row { display: flex; flex-direction: column; gap: 14px; }
+.opt { display: flex; gap: 14px; align-items: center; padding: 12px 16px; background: var(--color-canvas); border: 1px solid var(--color-border); border-radius: 8px; }
+.opt.selected { background: var(--color-primary-soft); border: 2px solid var(--color-primary); padding: 11px 15px; }
+.opt-rd { width: 18px; height: 18px; border-radius: 999px; background: var(--color-panel); border: 2px solid var(--color-border-strong); display: flex; align-items: center; justify-content: center; }
+.opt.selected .opt-rd { border-color: var(--color-primary); }
+.opt.selected .opt-rd::after { content: ''; width: 8px; height: 8px; border-radius: 999px; background: var(--color-primary); }
+.opt-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.opt-t { font-size: 14px; font-weight: 500; }
+.opt.selected .opt-t { font-weight: 600; }
+.opt-sub { font-size: 11px; color: var(--color-fg-muted); }
+.opt-tag { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: var(--color-panel); color: var(--color-primary-deep); }
+.foot { background: var(--color-panel); border-top: 1px solid var(--color-border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">B</div><div class="brand-text"><div class="brand-name">Backoffice AI</div><div class="brand-sub">v2 prototype</div></div></div>
+  <nav class="nav">
+    <a class="nav-item" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item active" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user"><div class="user-avatar"></div><div class="user-text"><div class="user-name">山田 太郎</div><div class="user-role">入力者</div></div></div>
+</aside>
+
+<header class="topbar">
+  <div class="search"><span class="ic">⌕</span><span> </span></div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill"><span class="ic">ⓘ</span><span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span></div>
+  </div>
+</header>
+
+<main class="main" style="display: flex; flex-direction: column;">
+<div class="variant-label">V2 · 3-step Wizard</div>
+
+<div class="steps">
+  <div class="step cur"><div class="step-num">1</div><span class="step-t">理由を選ぶ</span></div>
+  <div class="step-bar"></div>
+  <div class="step"><div class="step-num">2</div><span class="step-t">補足を書く</span></div>
+  <div class="step-bar"></div>
+  <div class="step"><div class="step-num">3</div><span class="step-t">確認して送信</span></div>
+</div>
+
+<div class="body">
+  <div class="wcard">
+    <h1>何を AI に学習させたいですか?</h1>
+    <p class="lead">差戻し理由を 1 つ選んでください。同じ間違いを次回 AI が繰り返さないように staging hint として保存されます。</p>
+
+    <div class="opt-row">
+      <div class="opt selected">
+        <div class="opt-rd"></div>
+        <div class="opt-text">
+          <span class="opt-t">AI が文書を読み間違えた</span>
+          <span class="opt-sub">誤読 · 例: 旧住所 ↔ 新住所、確認項目の取り違え</span>
+        </div>
+        <span class="opt-tag">✦ AI 推測</span>
+      </div>
+      <div class="opt">
+        <div class="opt-rd"></div>
+        <div class="opt-text">
+          <span class="opt-t">業務側 UI が変わっていた</span>
+          <span class="opt-sub">UI 差異 · 旧フォーマット、項目位置変更</span>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="opt-rd"></div>
+        <div class="opt-text">
+          <span class="opt-t">想定外のパターンだった</span>
+          <span class="opt-sub">境界条件 · 新形式、未登録、海外住所、特殊法人</span>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="opt-rd"></div>
+        <div class="opt-text">
+          <span class="opt-t">AI の判断ルールが足りない</span>
+          <span class="opt-sub">判断境界 · 既存ルール非適用、信頼度閾値外</span>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="opt-rd"></div>
+        <div class="opt-text">
+          <span class="opt-t">原本入力の方が誤っていた</span>
+          <span class="opt-sub">入力誤り · 別経路 (AI 学習対象外)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <a style="font-size: 11px; font-weight: 500; color: var(--color-fg-muted);" href="#">← 戻る</a>
+    <span style="font-size: 10px; color: var(--color-fg-subtle);">·</span>
+    <a style="font-size: 10px; font-weight: 500; color: var(--color-primary-deep);" href="#">案件レビューに戻る</a>
+  </div>
+  <button class="btn primary">次へ: 補足を書く →</button>
+</footer>
+</main>
+
+</body>
+</html>

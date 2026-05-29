@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>CaseReview v1 — Decision-focused</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.body { padding: 18px 28px; display: flex; flex-direction: column; gap: 14px; height: calc(100% - 50px - 50px); overflow: auto; }
+.summary { background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 12px; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.s-label { font-size: 11px; font-weight: 700; color: var(--color-fg-muted); letter-spacing: 1.5px; }
+.s-title { font-size: 18px; font-weight: 600; line-height: 1.4; }
+.diff-row { display: flex; gap: 14px; align-items: center; padding: 8px 0; }
+.diff-box { flex: 1; padding: 10px 14px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; }
+.diff-box.old { background: var(--color-error-soft); border-left: 3px solid var(--color-error); }
+.diff-box.new { background: var(--color-success-soft); border-left: 3px solid var(--color-success); }
+.diff-h { display: flex; gap: 6px; align-items: center; }
+.diff-h .tag { font-family: var(--font-mono); font-size: 10px; font-weight: 700; }
+.diff-h.old .tag { color: var(--color-error); }
+.diff-h.new .tag { color: var(--color-success-soft-fg); }
+.diff-l1 { font-size: 15px; font-weight: 500; }
+.diff-l2 { font-size: 13px; color: var(--color-fg-muted); }
+.arrow { font-size: 22px; font-weight: 600; color: var(--color-fg-muted); }
+.conf-row { display: flex; gap: 18px; align-items: center; padding-top: 10px; border-top: 1px solid var(--color-divider); }
+.conf-cell { display: flex; flex-direction: column; gap: 2px; }
+.conf-key { font-size: 10px; color: var(--color-fg-muted); }
+.conf-val-row { display: flex; gap: 4px; align-items: end; }
+.conf-val { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+.conf-sub { font-size: 10px; font-weight: 500; }
+.conf-sep { width: 1px; height: 32px; background: var(--color-divider); }
+.acc-row { display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 6px; }
+.acc-left { display: flex; gap: 12px; align-items: center; flex: 1; }
+.acc-t { font-size: 11px; font-weight: 600; }
+.acc-sub { font-size: 10px; color: var(--color-fg-muted); }
+.foot { background: var(--color-panel); border-top: 1px solid var(--color-border); padding: 0 28px; height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.foot-left { display: flex; gap: 14px; align-items: center; }
+.foot-chip { display: flex; gap: 6px; align-items: center; padding: 5px 10px; border-radius: 5px; background: var(--color-panel-inset); font-size: 10px; font-weight: 500; color: var(--color-fg-muted); }
+.foot-meta { font-size: 10px; color: var(--color-fg-muted); }
+.foot-right { display: flex; gap: 10px; align-items: center; }
+.case-ph { background: var(--color-panel); border-bottom: 1px solid var(--color-border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.case-ph-l { display: flex; gap: 10px; align-items: end; }
+.case-ph-l .crumb { font-size: 10px; color: var(--color-fg-muted); }
+.case-ph-l .cid { font-family: var(--font-mono); font-size: 13px; font-weight: 700; }
+.case-ph-l .wf { font-size: 11px; color: var(--color-fg-muted); }
+.case-ph-r { font-family: var(--font-mono); font-size: 11px; color: var(--color-fg-muted); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">B</div><div class="brand-text"><div class="brand-name">Backoffice AI</div><div class="brand-sub">v2 prototype</div></div></div>
+  <nav class="nav">
+    <a class="nav-item" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item active" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user"><div class="user-avatar"></div><div class="user-text"><div class="user-name">山田 太郎</div><div class="user-role">入力者</div></div></div>
+</aside>
+
+<header class="topbar">
+  <div class="search"><span class="ic">⌕</span><span> </span></div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill"><span class="ic">ⓘ</span><span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span></div>
+  </div>
+</header>
+
+<main class="main" style="display: flex; flex-direction: column;">
+<div class="variant-label">V1 · Decision-focused</div>
+
+<div class="case-ph">
+  <div class="case-ph-l">
+    <span class="crumb">受信トレイ ›</span>
+    <span class="cid">CASE-2026-0142</span>
+    <span class="wf">法人住所変更</span>
+  </div>
+  <span class="case-ph-r">経過 00:12:34</span>
+</div>
+
+<div class="body">
+
+  <!-- HERO summary -->
+  <div class="summary">
+    <div class="s-label">AI が提案する変更</div>
+    <div class="s-title">株式会社サンプルホールディングス の本店所在地を変更</div>
+    <div class="diff-row">
+      <div class="diff-box old">
+        <div class="diff-h old"><span class="tag">− 旧</span></div>
+        <div class="diff-l1" style="text-decoration: line-through;">東京都千代田区丸の内 1 丁目 1 番 1 号</div>
+        <div class="diff-l2">サンプルビル 8F</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="diff-box new">
+        <div class="diff-h new"><span class="tag">+ 新</span></div>
+        <div class="diff-l1" style="font-weight: 600;">東京都千代田区丸の内 <span style="text-decoration: line-through; color: var(--color-error);">1−2</span> <span style="text-decoration: underline; color: var(--color-success-soft-fg);">3-5</span> 号</div>
+        <div class="diff-l2">サンプルビル 8F</div>
+      </div>
+    </div>
+    <div class="conf-row">
+      <div class="conf-cell">
+        <span class="conf-key">AI 信頼度</span>
+        <div class="conf-val-row"><span class="conf-val" style="color: var(--color-alert-soft-fg);">0.84</span><span class="conf-sub" style="color: var(--color-alert-soft-fg);">閾値 0.85 未満</span></div>
+      </div>
+      <div class="conf-sep"></div>
+      <div class="conf-cell">
+        <span class="conf-key">注意 2 件</span>
+        <div class="conf-val-row">
+          <span style="font-size: 11px; font-weight: 500; color: var(--color-alert-soft-fg);">⚠ OCR 信頼度</span>
+          <span style="font-size: 11px; color: var(--color-fg-subtle);">·</span>
+          <span style="font-size: 11px; font-weight: 500; color: var(--color-alert-soft-fg);">⚠ 住所マスタ未登録</span>
+        </div>
+      </div>
+      <div style="flex: 1;"></div>
+      <span style="font-size: 11px; color: var(--color-primary-deep); font-weight: 500;">✓ 3 件の承認済みナレッジを参照</span>
+    </div>
+  </div>
+
+  <!-- Accordion: progressive disclosure -->
+  <div class="acc-row">
+    <div class="acc-left">
+      <span class="acc-t">📁 証跡を見る</span>
+      <span class="acc-sub">4 step · PDF 受付 → OCR 抽出 → マスタ照合 → AI 入力結果生成</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 11px;">▾</span>
+  </div>
+  <div class="acc-row">
+    <div class="acc-left">
+      <span class="acc-t">✓ 引用根拠 (3 件)</span>
+      <span class="acc-sub">KB-CORP-001 関連度 94% · KB-CORP-002 78% · KB-CORP-003 62%</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 11px;">▾</span>
+  </div>
+  <div class="acc-row">
+    <div class="acc-left">
+      <span class="acc-t">○ 未承認ヒント (2 件)</span>
+      <span class="acc-sub">citation 対象外 · 設定承認で正式手順化</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 11px;">▾</span>
+  </div>
+  <div class="acc-row">
+    <div class="acc-left">
+      <span class="acc-t">⚙ 他の AI 入力結果 (4 field)</span>
+      <span class="acc-sub">法人名 0.99 / 旧住所 0.96 / 支店コード 1.00 / 効力発生日 1.00</span>
+    </div>
+    <span style="color: var(--color-fg-subtle); font-size: 11px;">▾</span>
+  </div>
+
+</div>
+
+<footer class="foot">
+  <div class="foot-left">
+    <div class="foot-chip">業務承認: 承認待ち</div>
+    <span class="foot-meta">承認後、口座開設書類完備 へ進みます</span>
+  </div>
+  <div class="foot-right">
+    <button class="btn warning">差戻し</button>
+    <button class="btn primary large">承認 →</button>
+  </div>
+</footer>
+</main>
+
+</body>
+</html>

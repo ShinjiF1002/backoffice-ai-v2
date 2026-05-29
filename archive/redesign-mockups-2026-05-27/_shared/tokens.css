@@ -1,0 +1,62 @@
+/* Operational Premium Light tokens
+ * Mirror of prototype/src/index.css @theme inline (subset).
+ * Use in HTML mockup via <link rel="stylesheet" href="../_shared/tokens.css">
+ */
+:root {
+  --color-canvas: #f8fafc;
+  --color-panel: #ffffff;
+  --color-panel-inset: #f1f5f9;
+  --color-border: #e5e7eb;
+  --color-border-strong: #cbd5e1;
+  --color-divider: #f1f5f9;
+
+  --color-fg: #0f172a;
+  --color-fg-muted: #64748b;
+  --color-fg-subtle: #94a3b8;
+  --color-fg-invert: #ffffff;
+
+  --color-primary: #635bff;
+  --color-primary-hover: #4f46e5;
+  --color-primary-soft: #eef2ff;
+  --color-primary-deep: #4f46e5;
+
+  --color-success: #10b981;
+  --color-success-soft: #ecfdf5;
+  --color-success-soft-fg: #047857;
+
+  --color-alert: #f59e0b;
+  --color-alert-soft: #fffbeb;
+  --color-alert-soft-fg: #78350f;
+
+  --color-error: #dc2626;
+  --color-error-soft: #fef2f2;
+  --color-error-soft-fg: #b91c1c;
+
+  --color-violet: #7c3aed;
+  --color-violet-soft: #f5f3ff;
+
+  --color-info: #0ea5e9;
+  --color-info-soft: #e0f2fe;
+
+  --color-diff-add: #10b981;
+  --color-diff-del: #dc2626;
+  --color-diff-add-bg: #d1fae5;
+  --color-diff-del-bg: #fee2e2;
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-chip: 4px;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-jp: 'Noto Sans JP', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font-jp);
+  color: var(--color-fg);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: var(--font-mono); }
+.sans { font-family: var(--font-sans); }

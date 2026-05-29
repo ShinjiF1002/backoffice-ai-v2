@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/* Backoffice AI v2 — Showcase tokens
+ * Mirror of prototype/src/index.css with showcase-specific extensions
+ * SSOT bridge: prototype/ tokens are SSOT、showcase は consumer
+ */
+
+@theme inline {
+  /* === Color tokens (mirror prototype) === */
+  --color-canvas: #f8fafc;
+  --color-panel: #ffffff;
+  --color-panel-inset: #f1f5f9;
+  --color-border: #e5e7eb;
+  --color-border-strong: #cbd5e1;
+
+  --color-fg: #0f172a;
+  --color-fg-muted: #64748b;
+  --color-fg-subtle: #94a3b8;
+
+  --color-primary: #635bff;
+  --color-primary-hover: #4f46e5;
+  --color-primary-fg: #ffffff;
+  --color-primary-soft: #eef2ff;
+
+  --color-success: #10b981;
+  --color-success-fg: #ffffff;
+  --color-success-soft: #ecfdf5;
+  --color-success-soft-fg: #047857;
+
+  --color-alert: #f59e0b;
+  --color-alert-fg: #ffffff;
+  --color-alert-soft: #fffbeb;
+  --color-alert-soft-fg: #78350f;
+
+  --color-error: #dc2626;
+  --color-error-fg: #ffffff;
+  --color-error-soft: #fef2f2;
+  --color-error-soft-fg: #b91c1c;
+
+  --color-diff-add: #10b981;
+  --color-diff-del: #dc2626;
+  --color-diff-add-bg: #d1fae5;
+  --color-diff-del-bg: #fee2e2;
+
+  /* === Showcase-specific extensions === */
+  /* editorial accent for catalog landing */
+  --color-ink: #0a0e1a;
+  --color-ink-soft: #1a2236;
+  --color-accent-violet: #635bff;
+  --color-accent-violet-soft: #f4f3ff;
+
+  /* === Radius === */
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-chip: 4px;
+  --radius-hero: 16px;
+
+  /* === Layout === */
+  --height-pageheader: 88px;
+  --container-narrow: 880px;
+  --container-wide: 1200px;
+
+  /* === Typography stacks === */
+  --font-sans: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* === Shadow (subtle, premium-light) === */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --shadow-card-hover: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-drawer: 0 16px 48px rgba(15, 23, 42, 0.08);
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: 'tnum' 1, 'cv11' 1;
+  color: var(--color-fg);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:lang(ja) {
+  font-feature-settings: 'palt' 1;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+/* Editorial hero gradient — subtle, no AI-image cliche */
+.hero-gradient {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(99, 91, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(99, 91, 255, 0.04) 0%, transparent 50%);
+}
+
+/* Motion budget: prefers-reduced-motion で全 motion を instant に切替 (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Code block style (used in pattern detail pages) */
+.code-block {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--color-ink);
+  color: #e2e8f0;
+  padding: 16px 20px;
+  border-radius: var(--radius-control);
+  overflow-x: auto;
+}

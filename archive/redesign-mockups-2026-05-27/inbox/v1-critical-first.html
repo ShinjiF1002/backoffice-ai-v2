@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Inbox v1 — Critical-first</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.body { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.section-h { display: flex; gap: 8px; align-items: center; padding: 8px 0 4px; }
+.section-h .lbl { font-size: 11px; font-weight: 500; }
+.row { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 6px; }
+.row.top { background: var(--color-error-soft); border-left: 4px solid var(--color-error); padding: 12px 18px; }
+.r-key { width: 22px; height: 22px; border: 1px solid var(--color-border-strong); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--color-fg-muted); background: var(--color-panel); }
+.row.top .r-key { width: 32px; height: 32px; background: var(--color-error); color: var(--color-fg-invert); font-size: 14px; }
+.r-id { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+.row.top .r-id { font-size: 13px; font-weight: 700; }
+.r-wf { font-size: 10px; color: var(--color-fg-muted); }
+.r-status { font-size: 9px; font-weight: 500; padding: 1px 6px; border-radius: 3px; }
+.r-body { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.r-row { display: flex; gap: 8px; align-items: center; }
+.r-sub { font-size: 10px; color: var(--color-fg-muted); }
+.r-who { font-size: 10px; color: var(--color-fg-muted); }
+.r-meta { display: flex; gap: 10px; align-items: center; }
+.r-sla { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+.row.top .r-sla { font-size: 14px; color: var(--color-error); }
+.r-attn { font-family: var(--font-mono); font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+.r-chev { color: var(--color-fg-subtle); font-size: 13px; }
+.collapsed-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: var(--color-panel); border: 1px dashed var(--color-border); border-radius: 6px; color: var(--color-fg-muted); font-size: 11px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">B</div><div class="brand-text"><div class="brand-name">Backoffice AI</div><div class="brand-sub">v2 prototype</div></div></div>
+  <nav class="nav">
+    <a class="nav-item" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item active" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user"><div class="user-avatar"></div><div class="user-text"><div class="user-name">山田 太郎</div><div class="user-role">入力者</div></div></div>
+</aside>
+
+<header class="topbar">
+  <div class="search"><span class="ic">⌕</span><span> </span></div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill"><span class="ic">ⓘ</span><span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span></div>
+  </div>
+</header>
+
+<main class="main">
+<div class="variant-label">V1 · Critical-first</div>
+
+<header class="page-header">
+  <div style="display: flex; gap: 12px; align-items: end;">
+    <span class="page-title">受信トレイ</span>
+    <span style="font-size: 11px; color: var(--color-fg-muted); padding-bottom: 4px;">13 件 · 優先度順</span>
+  </div>
+  <div style="display: flex; gap: 6px; align-items: center;">
+    <span class="chip primary" style="border: 1px solid var(--color-primary);">優先度 (SLA + 注意)</span>
+    <span class="chip mute" style="border: 1px solid var(--color-border);">☰ 絞り込み (0)</span>
+  </div>
+</header>
+
+<div class="body">
+
+  <!-- Section 1: SLA 超過 -->
+  <div class="section-h">
+    <span class="chip error">⚠ SLA 超過 (3h+)</span>
+    <span class="lbl">1 件 — 直ちに処理してください</span>
+  </div>
+  <div class="row top">
+    <div class="r-key">1</div>
+    <div class="r-body">
+      <div class="r-row">
+        <span class="r-id">CASE-2026-0148</span>
+        <span class="r-wf">口座開設書類完備</span>
+        <span class="r-status" style="background: var(--color-error-soft); color: var(--color-error); border: 1px solid var(--color-error);">入力者確認待ち</span>
+      </div>
+      <div class="r-sub">山本 直樹 · AI 信頼度 0.84 · 印鑑照合 未済</div>
+    </div>
+    <div class="r-meta">
+      <span class="r-sla">03:45:51</span>
+      <button class="btn primary" style="background: var(--color-error); padding: 6px 16px; font-size: 11px;">開く →</button>
+    </div>
+  </div>
+
+  <!-- Section 2: 注意あり -->
+  <div class="section-h">
+    <span class="chip alert">⚠ 注意あり</span>
+    <span class="lbl">5 件</span>
+  </div>
+  <div class="row"><div class="r-key">2</div><div class="r-body"><div class="r-row"><span class="r-id">CASE-2026-0146</span><span class="r-wf">口座開設書類完備</span><span class="r-status alert" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">再処理中</span></div></div><div class="r-meta"><span class="r-sla sla-warning">01:19:45</span><span class="r-who">伊藤 翔</span><span class="r-attn" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">⚠ 1</span><span class="r-chev">›</span></div></div>
+  <div class="row"><div class="r-key">3</div><div class="r-body"><div class="r-row"><span class="r-id">CASE-2026-0147</span><span class="r-wf">法人住所変更</span><span class="r-status violet" style="background: var(--color-violet-soft); color: var(--color-violet);">承認者承認待ち</span></div></div><div class="r-meta"><span class="r-sla sla-warning">02:35:02</span><span class="r-who">渡辺 真理</span><span class="r-attn" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">⚠ 1</span><span class="r-chev">›</span></div></div>
+  <div class="row"><div class="r-key">4</div><div class="r-body"><div class="r-row"><span class="r-id">CASE-2026-0142</span><span class="r-wf">法人住所変更</span><span class="r-status primary" style="background: var(--color-primary-soft); color: var(--color-primary-deep);">入力者確認待ち</span></div></div><div class="r-meta"><span class="r-sla sla-normal">00:12:34</span><span class="r-who">田中 美咲</span><span class="r-attn" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">⚠ 2</span><span class="r-chev">›</span></div></div>
+  <div class="row"><div class="r-key">5</div><div class="r-body"><div class="r-row"><span class="r-id">CASE-2026-0143</span><span class="r-wf">口座開設書類完備</span><span class="r-status primary" style="background: var(--color-primary-soft); color: var(--color-primary-deep);">入力者確認待ち</span></div></div><div class="r-meta"><span class="r-sla sla-normal">00:08:21</span><span class="r-who">鈴木 健一</span><span class="r-attn" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">⚠ 1</span><span class="r-chev">›</span></div></div>
+  <div class="row"><div class="r-key">6</div><div class="r-body"><div class="r-row"><span class="r-id">CASE-2026-0152</span><span class="r-wf">口座開設書類完備</span><span class="r-status alert" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">再処理中</span></div></div><div class="r-meta"><span class="r-sla sla-warning">02:08:19</span><span class="r-who">加藤 千夏</span><span class="r-chev">›</span></div></div>
+
+  <!-- Section 3: 通常 (collapsed) -->
+  <div class="section-h">
+    <span class="chip mute">通常</span>
+    <span class="lbl">7 件 (SLA 1h 以内、注意なし)</span>
+  </div>
+  <div class="collapsed-bar">
+    <span>折りたたみ表示 — クリックで展開</span>
+    <span>›</span>
+  </div>
+
+</div>
+</main>
+
+</body>
+</html>

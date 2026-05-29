@@ -5,6 +5,7 @@ import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
+import { useProposals } from '@/store/hooks'
 
 /**
  * 提案一覧 (Proposals, /proposals) — B 型 queue / Manual 管理者
@@ -41,7 +42,12 @@ const filters: DataTableFilter<ProposalListRow>[] = [
   },
 ]
 
+const PROPOSAL_BY_ID = Object.fromEntries(PROPOSAL_LIST.map((r) => [r.id, r]))
+
 export function Proposals() {
+  const proposals = useProposals()
+  // store entity → list row view-model (status は store-truth、表示列は list mock を join)
+  const rows: ProposalListRow[] = proposals.map((e) => ({ ...PROPOSAL_BY_ID[e.id], status: e.status }))
   return (
     <div className="flex flex-col">
       <header
@@ -49,12 +55,12 @@ export function Proposals() {
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
         <h1 className="text-lg font-semibold text-[var(--color-fg)]">AI 提案レビュー — 提案一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">日次提案分析が差戻しパターンから生成した手順改定の候補 · {PROPOSAL_LIST.length} 件</p>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">日次提案分析が差戻しパターンから生成した手順改定の候補 · {rows.length} 件</p>
       </header>
 
       <div className="p-4">
         <DataTable
-          rows={PROPOSAL_LIST}
+          rows={rows}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/proposals/${r.id}`}

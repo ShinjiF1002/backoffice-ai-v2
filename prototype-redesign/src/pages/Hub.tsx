@@ -12,8 +12,9 @@ import {
   ZapIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { HUB_PROCESSES, HUB_HEADLINE, HUB_PRIMARY_ACTION, HUB_DAILY_SUMMARY } from '@/data/mock-hub'
+import { HUB_DAILY_SUMMARY } from '@/data/mock-hub'
 import type { HubHeadlineKpi, HubProcess } from '@/data/mock-hub'
+import { useHubModel } from '@/store/hooks'
 import type { CaseStatus } from '@/data/types'
 import type { Tone } from '@/components/shared/StatusBadge'
 import { caseStatusToTone, caseStatusLabel } from '@/lib/status-tones'
@@ -52,6 +53,7 @@ const DOT: Record<Tone, string> = {
 const STATUS_ORDER: CaseStatus[] = ['ready', 'business-approval-waiting', 'sent-back', 'pending', 'reflected']
 
 export function Hub() {
+  const { processes, headline, primaryAction } = useHubModel()
   const [summaryOpen, setSummaryOpen] = useState(false)
 
   return (
@@ -75,16 +77,16 @@ export function Hub() {
         <div className="mx-auto flex max-w-[1120px] flex-col gap-6">
           {/* PrimaryAnchor — 最優先アクションへの誘導 CTA (判断は遷移先 /approvals で行う) */}
           <Link
-            to={HUB_PRIMARY_ACTION.to}
+            to={primaryAction.to}
             className="flex items-center gap-4 rounded-[var(--radius-card)] bg-[var(--color-primary)] px-5 py-4 text-white transition-colors hover:bg-[var(--color-primary-hover)]"
           >
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-white/15">
               <ZapIcon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-white/85">{HUB_PRIMARY_ACTION.kicker}</div>
-              <div className="mt-0.5 text-base font-semibold">{HUB_PRIMARY_ACTION.title}</div>
-              <div className="mt-0.5 text-xs text-white/85">{HUB_PRIMARY_ACTION.detail}</div>
+              <div className="text-[11px] font-medium uppercase tracking-wide text-white/85">{primaryAction.kicker}</div>
+              <div className="mt-0.5 text-base font-semibold">{primaryAction.title}</div>
+              <div className="mt-0.5 text-xs text-white/85">{primaryAction.detail}</div>
             </div>
             <ArrowRightIcon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
           </Link>
@@ -93,7 +95,7 @@ export function Hub() {
           <section>
             <h2 className="mb-2.5 text-sm font-semibold text-[var(--color-fg)]">全業務の注意 — クリックで該当画面へ</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {HUB_HEADLINE.map((k) => {
+              {headline.map((k) => {
                 const Icon = KPI_ICON[k.icon]
                 const tone = KPI_TONE[k.tone]
                 return (
@@ -132,7 +134,7 @@ export function Hub() {
           <section>
             <h2 className="mb-2.5 text-sm font-semibold text-[var(--color-fg)]">業務別の状況</h2>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {HUB_PROCESSES.map((p) => {
+              {processes.map((p) => {
                 const ProcessIcon = PROCESS_ICON[p.icon]
                 const attention = (p.dist.ready ?? 0) + (p.dist['sent-back'] ?? 0)
                 return (

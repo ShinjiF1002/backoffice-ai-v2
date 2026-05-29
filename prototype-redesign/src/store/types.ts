@@ -19,6 +19,8 @@ export interface CaseEntity {
   assignee?: string
   /** 要確認 項目数 (0 = 全項目一致)。一括承認の gate: >0 は一括承認不可 */
   flags: number
+  /** detail で確定/上書きした field の fieldLabel 群 (overlay 用、Phase 4b)。rich fields は dict 側 (S8 境界) */
+  resolvedFieldIds: string[]
   elapsedLabel: string
 }
 
@@ -55,14 +57,12 @@ export interface StoreState {
  * 操作 Action union。reducer (storeReducer) が処理。
  * case/approve の `by` は入力者/承認者を区別 (ready→承認待ち / 承認待ち→反映)。
  * 要確認 (flags > 0) の案件は入力者承認で前進しない (reducer 不変条件)。
- *
- * ★ Phase 4 で追加予定 (現 union 未収載、field-action dispatch 配線時):
- *   - `case/override` or `case/resolveFlag` — field 確定/上書きで flags を減らし、要確認を解消する操作。
- *     これが無いと flagged 'ready' 案件は承認に前進できない (Phase 1 では UI dispatch が無いため非 blocker)。
- *   - `agent/togglePause` の命名は暫定。kill-switch (trust 降格) の正確な意味論は Phase 7 で確定。
+ * case/override (Phase 4b): field 確定/上書きで resolvedFieldIds に追加 + flags 減算 → 要確認を解消し承認に前進可能化。
+ *   `agent/togglePause` の命名は暫定。kill-switch (trust 降格) の正確な意味論は Phase 7 で確定。
  */
 export type StoreAction =
   | { type: 'case/approve'; id: string; by: 'input' | 'checker' }
+  | { type: 'case/override'; id: string; fieldLabel: string }
   | { type: 'case/sendback'; id: string }
   | { type: 'case/assign'; id: string; assignee: string }
   | { type: 'case/bulkApprove'; ids: string[]; by: 'input' | 'checker' }

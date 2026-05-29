@@ -17,6 +17,9 @@ describe('store foundation (Phase 1)', () => {
       expect(s.cases['CASE-2026-0150'].assignee).toBeUndefined()
       expect(s.cases['CASE-2026-0142'].assignee).toBe('山田太郎')
     })
+    it('resolvedFieldIds を空配列で初期化 (Phase 4b overlay 前提)', () => {
+      expect(seed().cases['CASE-2026-0142'].resolvedFieldIds).toEqual([])
+    })
   })
 
   describe('reducer: 案件', () => {
@@ -52,6 +55,20 @@ describe('store foundation (Phase 1)', () => {
       })
       expect(s.cases['CASE-2026-0142'].status).toBe('ready') // 要確認残 → 一括承認されない
       expect(s.cases['CASE-2026-0139'].status).toBe('business-approval-waiting')
+    })
+    it('case/override: resolvedFieldIds 追加 + flags 減算 (冪等)', () => {
+      // CASE-2026-0142 = flags1。override で flags0、再 override は無変更
+      let s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
+      expect(s.cases['CASE-2026-0142'].resolvedFieldIds).toEqual(['ビル名'])
+      expect(s.cases['CASE-2026-0142'].flags).toBe(0)
+      s = storeReducer(s, { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
+      expect(s.cases['CASE-2026-0142'].flags).toBe(0)
+      expect(s.cases['CASE-2026-0142'].resolvedFieldIds).toHaveLength(1)
+    })
+    it('case/override で要確認解消 → 入力者承認が通る (D1 フロー)', () => {
+      let s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
+      s = storeReducer(s, { type: 'case/approve', id: 'CASE-2026-0142', by: 'input' })
+      expect(s.cases['CASE-2026-0142'].status).toBe('business-approval-waiting')
     })
   })
 
@@ -100,18 +117,38 @@ describe('store foundation (Phase 1)', () => {
       expect(loadPersisted(seed()).caseOrder).toHaveLength(CASE_LIST.length)
     })
 
-    it('schema version 不一致は fallback', () => {
-      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 999, state: { caseOrder: [] } }))
+    it('schema version 不一致は fallback (旧 v1 localStorage → seed、R2)', () => {
+      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 1, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
-      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // seed fallback
+      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v2 と不一致 → seed fallback
     })
 
-    it('同一 version でも形が壊れた state は fallback (shape guard)', () => {
+    it('同一 version でも形が壊れた state は fallback (shape guard: dict 欠落)', () => {
       // v は一致するが cases/proposals/agents 等を欠く → selector 白画面化を防ぐため seed に戻す
-      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 1, state: { caseOrder: [] } }))
+      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 2, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
       expect(restored.caseOrder).toHaveLength(CASE_LIST.length)
       expect(restored.cases['CASE-2026-0142']).toBeDefined()
+    })
+
+    it('v2 だが case に resolvedFieldIds 欠落 → fallback (shape guard 深掘り、R2)', () => {
+      localStorage.setItem(
+        'bo-ai-v2:store',
+        JSON.stringify({
+          v: 2,
+          state: {
+            cases: { 'CASE-X': { id: 'CASE-X', status: 'ready', flags: 0 } }, // resolvedFieldIds 欠落
+            caseOrder: ['CASE-X'],
+            proposals: {},
+            proposalOrder: [],
+            agents: {},
+            agentOrder: [],
+          },
+        }),
+      )
+      const restored = loadPersisted(seed())
+      expect(restored.cases['CASE-2026-0142']).toBeDefined() // seed fallback
+      expect(restored.cases['CASE-X']).toBeUndefined()
     })
   })
 })

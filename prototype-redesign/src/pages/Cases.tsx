@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
+import { useCases } from '@/store/hooks'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
@@ -59,6 +60,16 @@ const filters: DataTableFilter<CaseListRow>[] = [
 ]
 
 export function Cases() {
+  const cases = useCases()
+  // store entity → list row view-model (status/flags/assignee は store-truth で reactive)
+  const rows: CaseListRow[] = cases.map((e) => ({
+    id: e.id,
+    workflow: e.workflowName,
+    status: e.status,
+    elapsed: e.elapsedLabel,
+    owner: e.assignee ?? '—',
+    flags: e.flags,
+  }))
   return (
     <div className="flex flex-col">
       <header
@@ -66,18 +77,18 @@ export function Cases() {
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
         <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">法人住所変更 · {CASE_LIST.length} 件 ／ 行を選んで案件を確認</p>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">法人住所変更 · {rows.length} 件 ／ 行を選んで案件を確認</p>
       </header>
 
       <div className="p-4">
         <DataTable
-          rows={CASE_LIST}
+          rows={rows}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}`}
           ariaLabel="案件一覧"
-          pinTop={(r) => !!r.recommended}
-          rowClassName={(r) => (r.recommended ? 'bg-[var(--color-alert-soft)]' : undefined)}
+          pinTop={(r) => r.flags > 0}
+          rowClassName={(r) => (r.flags > 0 ? 'bg-[var(--color-alert-soft)]' : undefined)}
           filters={filters}
           pageSize={10}
           caption="要確認のある案件を上部に強調表示しています。"

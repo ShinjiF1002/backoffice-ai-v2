@@ -5,6 +5,7 @@ import { CASE_DETAILS } from '@/data/mock-case-detail'
 import type { CaseDetailModel } from '@/data/mock-case-detail'
 import type { FieldReview } from '@/data/types'
 import { isResolved } from '@/lib/reconcile-display'
+import { useCase, useStoreDispatch } from '@/store/hooks'
 import { DocumentViewer } from '@/components/case/DocumentViewer'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 import { FieldActionModal } from '@/components/case/FieldActionModal'
@@ -17,10 +18,11 @@ import { cn } from '@/lib/cn'
  * SSOT: reconcile-panel-spec §8 + screens-v2/04-case-detail/canonical-export.md
  * A 全体表示 (全項目可視) / B 証拠アンカー (左 申請書類ビューア) / C 単一決定面 (footer のみ)。
  */
-/** 初期 active field: 最初の要確認、なければ先頭項目 (空配列なら undefined)。 */
-function firstReviewLabel(c: CaseDetailModel | undefined): string | undefined {
+/** 初期 active field: 最初の未解決 (store resolvedFieldIds overlay 後)、なければ先頭項目。 */
+function firstReviewLabel(c: CaseDetailModel | undefined, resolvedIds: string[] = []): string | undefined {
   if (!c || c.fields.length === 0) return undefined
-  const review = c.fields.find((f) => !isResolved(f.reconcileState))
+  const resolved = new Set(resolvedIds)
+  const review = c.fields.find((f) => !resolved.has(f.fieldLabel) && !isResolved(f.reconcileState))
   return (review ?? c.fields[0]).fieldLabel
 }
 
@@ -39,11 +41,12 @@ function CaseNotFound() {
 export function CaseDetail() {
   const { id } = useParams()
   const c = id ? CASE_DETAILS[id] : undefined
+  const entity = useCase(id)
+  const dispatch = useStoreDispatch()
   // Approvals (承認待ち) からは ?view=checker で承認者ビュー初期化 (screen-contract: row → checker)
   const [params] = useSearchParams()
   const [mode, setMode] = useState<'input' | 'checker'>(params.get('view') === 'checker' ? 'checker' : 'input')
-  const [fields, setFields] = useState<FieldReview[]>(c?.fields ?? [])
-  const [activeFieldLabel, setActiveFieldLabel] = useState<string | undefined>(() => firstReviewLabel(c))
+  const [activeFieldLabel, setActiveFieldLabel] = useState<string | undefined>(() => firstReviewLabel(c, entity?.resolvedFieldIds))
   const [modalField, setModalField] = useState<FieldReview | null>(null)
   const [caseSendbackOpen, setCaseSendbackOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -51,14 +54,22 @@ export function CaseDetail() {
   const [prevId, setPrevId] = useState(id)
   if (id !== prevId) {
     setPrevId(id)
-    setFields(c?.fields ?? [])
-    setActiveFieldLabel(firstReviewLabel(c))
+    setActiveFieldLabel(firstReviewLabel(c, entity?.resolvedFieldIds))
     setModalField(null)
     setCaseSendbackOpen(false)
     setToast(null)
   }
 
+  // overlay: dict の rich fields に store の resolvedFieldIds を被せ、解決済を確認済表示にする (store-truth)。
+  const fields = useMemo(() => {
+    const resolved = new Set(entity?.resolvedFieldIds ?? [])
+    return (c?.fields ?? []).map((f): FieldReview => (resolved.has(f.fieldLabel) ? { ...f, reconcileState: 'manually_confirmed' } : f))
+  }, [c, entity?.resolvedFieldIds])
   const openCount = useMemo(() => fields.filter((f) => !isResolved(f.reconcileState)).length, [fields])
+  // 承認可否を reducer precondition と一致させる (false success 防止、Phase 4b CR P1):
+  // input は ready かつ要確認0、checker は business-approval-waiting のみ。それ以外は dispatch が no-op。
+  const canApprove =
+    mode === 'checker' ? entity?.status === 'business-approval-waiting' : entity?.status === 'ready' && openCount === 0
 
   if (!c) return <CaseNotFound />
 
@@ -68,10 +79,12 @@ export function CaseDetail() {
   }
 
   const handleAct = (fieldLabel: string, kind: 'accept' | 'override' | 'sendback' | 'escalate') => {
+    if (!id) return
     if (kind === 'accept' || kind === 'override') {
-      setFields((prev) => prev.map((f) => (f.fieldLabel === fieldLabel ? { ...f, reconcileState: 'manually_confirmed' } : f)))
+      dispatch({ type: 'case/override', id, fieldLabel })
       showToast(`${fieldLabel} を確定しました`)
     } else if (kind === 'sendback') {
+      dispatch({ type: 'case/sendback', id })
       showToast(`${fieldLabel} を差戻しました — 再処理後に確認待ちへ`)
     } else {
       showToast(`${fieldLabel} をエスカレーションしました`)
@@ -147,10 +160,16 @@ export function CaseDetail() {
       <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
         <div className="text-xs">
           {mode === 'checker' ? (
-            <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
-              <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
-              入力者 <strong className="text-[var(--color-fg)]">{c.inputter}</strong> ≠ 承認者 <strong className="text-[var(--color-fg)]">{c.approver}</strong>
-            </span>
+            entity?.status === 'business-approval-waiting' ? (
+              <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
+                <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
+                入力者 <strong className="text-[var(--color-fg)]">{c.inputter}</strong> ≠ 承認者 <strong className="text-[var(--color-fg)]">{c.approver}</strong>
+              </span>
+            ) : (
+              <span className="text-[var(--color-fg-muted)]">この案件は承認者の最終承認の段階ではありません</span>
+            )
+          ) : entity?.status !== 'ready' ? (
+            <span className="text-[var(--color-fg-muted)]">この案件は入力者確認の段階ではありません</span>
           ) : openCount > 0 ? (
             <span className="text-[var(--color-alert-soft-fg)]">要確認 {openCount} 項目を解消してください</span>
           ) : (
@@ -168,12 +187,21 @@ export function CaseDetail() {
           </button>
           <button
             type="button"
-            disabled={openCount > 0}
-            title={openCount > 0 ? `要確認 ${openCount} 項目を解消してください` : undefined}
-            onClick={() => showToast(mode === 'checker' ? '最終承認しました' : '承認しました — 承認者待ちへ')}
+            disabled={!canApprove}
+            title={
+              !canApprove
+                ? mode === 'input' && entity?.status === 'ready'
+                  ? `要確認 ${openCount} 項目を解消してください`
+                  : 'この段階ではこの操作はできません'
+                : undefined
+            }
+            onClick={() => {
+              if (id) dispatch({ type: 'case/approve', id, by: mode === 'checker' ? 'checker' : 'input' })
+              showToast(mode === 'checker' ? '最終承認しました' : '承認しました — 承認者待ちへ')
+            }}
             className={cn(
               'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-              openCount > 0
+              !canApprove
                 ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
                 : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
             )}
@@ -190,7 +218,10 @@ export function CaseDetail() {
         caseLevel={caseSendbackOpen}
         caseId={c.id}
         onClose={() => setCaseSendbackOpen(false)}
-        onSubmit={() => showToast('案件を差戻しました — 再処理後に確認待ちへ')}
+        onSubmit={() => {
+          if (id) dispatch({ type: 'case/sendback', id })
+          showToast('案件を差戻しました — 再処理後に確認待ちへ')
+        }}
       />
 
       {toast && (

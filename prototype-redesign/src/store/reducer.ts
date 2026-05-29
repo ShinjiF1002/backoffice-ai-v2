@@ -48,6 +48,15 @@ export function storeReducer(state: StoreState, action: StoreAction): StoreState
   switch (action.type) {
     case 'case/approve':
       return approveCase(state, action.id, action.by)
+    case 'case/override': {
+      // field 確定/上書き: resolvedFieldIds に追加 (冪等) + flags 減算 (要確認解消)。
+      const cur = state.cases[action.id]
+      if (!cur || cur.resolvedFieldIds.includes(action.fieldLabel)) return state
+      return patchCase(state, action.id, {
+        resolvedFieldIds: [...cur.resolvedFieldIds, action.fieldLabel],
+        flags: Math.max(0, cur.flags - 1),
+      })
+    }
     case 'case/sendback':
       return patchCase(state, action.id, { status: 'sent-back' })
     case 'case/assign':

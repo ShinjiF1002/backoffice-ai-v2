@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon } from 'lucide-react'
 import { AGENT_DETAILS } from '@/data/mock-agent-detail'
+import { useAgent, useStoreDispatch } from '@/store/hooks'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
@@ -29,6 +30,8 @@ function AgentNotFound() {
 export function AgentDetail() {
   const { id } = useParams()
   const a = id ? AGENT_DETAILS[id] : undefined
+  const agentEntity = useAgent(id)
+  const dispatch = useStoreDispatch()
   const [applyOpen, setApplyOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
@@ -47,6 +50,7 @@ export function AgentDetail() {
   }
 
   const hasUnmet = a.metrics.some((m) => !m.achieved)
+  const requested = agentEntity?.promotionRequested ?? false
 
   return (
     <div className="flex h-full flex-col">
@@ -150,7 +154,12 @@ export function AgentDetail() {
       {/* Footer: 申請 1 ボタン (原則 C)、未達時は disabled + 理由明示 */}
       <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
         <div className="flex items-center gap-1.5 text-xs">
-          {hasUnmet ? (
+          {requested ? (
+            <>
+              <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
+              <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
+            </>
+          ) : hasUnmet ? (
             <>
               <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
               <span className="font-medium text-[var(--color-alert-soft-fg)]">承認率が基準 (95%) に未達のため、現時点では昇格を申請できません</span>
@@ -164,18 +173,18 @@ export function AgentDetail() {
         </div>
         <button
           type="button"
-          disabled={hasUnmet}
-          title={hasUnmet ? '承認率が基準に未達です' : undefined}
+          disabled={hasUnmet || requested}
+          title={hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
           onClick={() => setApplyOpen(true)}
           className={cn(
             'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-            hasUnmet
+            hasUnmet || requested
               ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
               : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
           )}
         >
           <BotIcon className="h-4 w-4" />
-          設定変更を申請
+          {requested ? '申請済み' : '設定変更を申請'}
         </button>
       </footer>
 
@@ -198,6 +207,7 @@ export function AgentDetail() {
               type="button"
               onClick={() => {
                 setApplyOpen(false)
+                if (id) dispatch({ type: 'agent/requestPromotion', id })
                 showToast('昇格を申請しました')
               }}
               className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"

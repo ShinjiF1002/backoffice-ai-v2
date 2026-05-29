@@ -1,28 +1,40 @@
-import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon } from 'lucide-react'
-import { APPROVAL_LIST } from '@/data/mock-approvals'
-import type { ApprovalRow } from '@/data/mock-approvals'
+import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon } from 'lucide-react'
+import { useApprovals, useStoreDispatch } from '@/store/hooks'
+import { CASE_DETAILS } from '@/data/mock-case-detail'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 
 /**
  * 承認待ち (Approvals, /approvals) — B 型 queue / 承認者
- * SSOT: screen-contracts-v2 §3 / screens-v2/03-approvals。Phase 3 で共通 DataTable に載せ替え。
- * row → CaseDetail (承認者ビュー、?view=checker)。承認者 ≠ 入力者 を明示。一括承認 (selection)。
+ * SSOT: screen-contracts-v2 §3 / screens-v2/03-approvals。Phase 4b で store-truth 化。
+ * rows は useApprovals() (business-approval-waiting) 由来。承認すると queue から消える (D1/D9)。
+ * inputter/approver は detail dict から join、modifiedCount は store の resolvedFieldIds.length 由来
+ * (この端末での修正件数。過去履歴の事実ではない、R3)。一括承認は case/bulkApprove(by:checker)。
  */
-const INPUTTERS = [...new Set(APPROVAL_LIST.map((r) => r.inputter))]
+interface ApprovalViewRow {
+  id: string
+  workflow: string
+  inputter: string
+  approver: string
+  /** この端末で確定/上書きした項目数 (resolvedFieldIds.length) */
+  modifiedCount: number
+  /** 残要確認 (business-approval-waiting は通常 0、一括承認 gate 用) */
+  flags: number
+  elapsed: string
+}
 
-const columns: DataTableColumn<ApprovalRow>[] = [
+const columns: DataTableColumn<ApprovalViewRow>[] = [
   { key: 'id', header: '案件 ID', className: 'font-mono text-[13px] text-[var(--color-fg)]', cell: (r) => r.id, sortValue: (r) => r.id },
   { key: 'workflow', header: '業務', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.workflow },
   {
-    key: 'judgement',
-    header: '入力者の判断',
+    key: 'modified',
+    header: '入力者の確認',
     cell: (r) =>
-      r.judgement === 'modified' ? (
-        <MetaChip tone="primary" label={`修正あり ${r.modifiedCount} 件`} />
+      r.modifiedCount > 0 ? (
+        <MetaChip tone="primary" label={`この端末で修正済 ${r.modifiedCount} 件`} />
       ) : (
-        <MetaChip tone="success" label="確認のみ (修正なし)" />
+        <MetaChip tone="success" label="修正なし" />
       ),
   },
   {
@@ -40,11 +52,24 @@ const columns: DataTableColumn<ApprovalRow>[] = [
   { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.elapsed },
 ]
 
-const filters: DataTableFilter<ApprovalRow>[] = [
-  { id: 'inputter', label: '入力者', options: INPUTTERS.map((i) => ({ value: i, label: i })), predicate: (r, v) => v.includes(r.inputter) },
-]
-
 export function Approvals() {
+  const approvals = useApprovals()
+  const dispatch = useStoreDispatch()
+  // store entity → view row。inputter/approver は detail dict から join、修正件数は resolvedFieldIds 由来 (R3)。
+  const rows: ApprovalViewRow[] = approvals.map((e) => ({
+    id: e.id,
+    workflow: e.workflowName,
+    inputter: CASE_DETAILS[e.id]?.inputter ?? '—',
+    approver: CASE_DETAILS[e.id]?.approver ?? '—',
+    modifiedCount: e.resolvedFieldIds.length,
+    flags: e.flags,
+    elapsed: e.elapsedLabel,
+  }))
+  const inputters = [...new Set(rows.map((r) => r.inputter))]
+  const filters: DataTableFilter<ApprovalViewRow>[] = [
+    { id: 'inputter', label: '入力者', options: inputters.map((i) => ({ value: i, label: i })), predicate: (r, v) => v.includes(r.inputter) },
+  ]
+
   return (
     <div className="flex flex-col">
       <header
@@ -52,24 +77,32 @@ export function Approvals() {
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
         <h1 className="text-lg font-semibold text-[var(--color-fg)]">承認待ち</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">入力者が確認済の案件を最終承認 · {APPROVAL_LIST.length} 件</p>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">入力者が確認済の案件を最終承認 · {rows.length} 件</p>
       </header>
 
       <div className="p-4">
         <DataTable
-          rows={APPROVAL_LIST}
+          rows={rows}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}?view=checker`}
           ariaLabel="承認待ち"
           filters={filters}
-          // Phase 3 は選択 UI (checkbox + 件数) のみ。一括承認 action は no-op を出さず、
-          // Phase 4 で store の case/bulkApprove (by:checker) に接続してから表示する。
-          selection={{ actions: [] }}
+          // 一括承認 = case/bulkApprove(by:checker)。要確認残 (flags>0) があれば一括不可。
+          selection={{
+            actions: [
+              {
+                label: '一括承認',
+                icon: <CheckIcon className="h-3 w-3" aria-hidden="true" />,
+                onRun: (ids) => dispatch({ type: 'case/bulkApprove', ids, by: 'checker' }),
+                disabled: (selectedRows) => selectedRows.some((r) => r.flags > 0),
+              },
+            ],
+          }}
           caption={
             <span className="flex items-center gap-1">
               <PencilLineIcon className="h-3 w-3" aria-hidden="true" />
-              「修正あり」は入力者が項目を上書き済。承認者は別担当者として最終確認します。
+              「修正済」は入力者がこの端末で項目を上書きした件数です。承認者は別担当者として最終確認します。
             </span>
           }
         />

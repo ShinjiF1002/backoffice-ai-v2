@@ -28,6 +28,7 @@ export function seed(): StoreState {
       status: row.status,
       assignee: row.owner === '—' ? undefined : row.owner,
       flags: row.flags,
+      resolvedFieldIds: [],
       elapsedLabel: row.elapsed,
     }
     caseOrder.push(row.id)

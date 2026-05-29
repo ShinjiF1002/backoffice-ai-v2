@@ -7,7 +7,7 @@
 import type { StoreState } from './types'
 
 const STORAGE_KEY = 'bo-ai-v2:store'
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2 // Phase 4b: CaseEntity に resolvedFieldIds 追加 (1→2)
 
 interface Persisted {
   v: number
@@ -19,13 +19,21 @@ function isStoreStateShape(s: unknown): s is StoreState {
   if (!s || typeof s !== 'object') return false
   const o = s as Record<string, unknown>
   const isDict = (v: unknown) => typeof v === 'object' && v !== null && !Array.isArray(v)
-  return (
-    isDict(o.cases) &&
-    Array.isArray(o.caseOrder) &&
-    isDict(o.proposals) &&
-    Array.isArray(o.proposalOrder) &&
-    isDict(o.agents) &&
-    Array.isArray(o.agentOrder)
+  if (
+    !(
+      isDict(o.cases) &&
+      Array.isArray(o.caseOrder) &&
+      isDict(o.proposals) &&
+      Array.isArray(o.proposalOrder) &&
+      isDict(o.agents) &&
+      Array.isArray(o.agentOrder)
+    )
+  ) {
+    return false
+  }
+  // v2 深掘り (R2): 各 case は overlay 前提の resolvedFieldIds 配列を持つこと。欠落は seed fallback。
+  return Object.values(o.cases as Record<string, unknown>).every(
+    (c) => isDict(c) && Array.isArray((c as Record<string, unknown>).resolvedFieldIds),
   )
 }
 

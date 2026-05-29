@@ -43,10 +43,12 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
   const reasonRef = useRef<HTMLTextAreaElement>(null)
 
   const open = caseLevel || !!field
-  // open / 対象 (caseLevel・field) が変わったら入力を初期化 (render 中の変化検知、set-state-in-effect 回避)。挙動は不変。
-  const [prev, setPrev] = useState({ open, caseLevel, field })
-  if (prev.open !== open || prev.caseLevel !== caseLevel || prev.field !== field) {
-    setPrev({ open, caseLevel, field })
+  // open / 対象 (caseLevel・fieldLabel) が変わったら入力を初期化 (render 中の変化検知、set-state-in-effect 回避)。
+  // 比較は object 参照でなく安定 key (fieldLabel)。overlay で field object が毎 render 新規でも spurious reset を防ぐ (Phase 4b hardening)。
+  const fieldLabel = field?.fieldLabel ?? null
+  const [prev, setPrev] = useState({ open, caseLevel, fieldLabel })
+  if (prev.open !== open || prev.caseLevel !== caseLevel || prev.fieldLabel !== fieldLabel) {
+    setPrev({ open, caseLevel, fieldLabel })
     if (open) {
       setKind(caseLevel ? 'sendback' : 'accept')
       setReason('')

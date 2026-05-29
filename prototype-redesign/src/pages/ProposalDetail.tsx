@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, XIcon, CornerUpLeftIcon, ArrowRightIcon } from 'lucide-react'
 import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
 import type { ProposalStatus } from '@/data/types'
+import { useStoreDispatch } from '@/store/hooks'
 import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
@@ -48,6 +49,7 @@ function ProposalNotFound() {
 export function ProposalDetail() {
   const { id } = useParams()
   const p = id ? PROPOSAL_DETAILS[id] : undefined
+  const dispatch = useStoreDispatch()
   const [mode, setMode] = useState<'manual' | 'owner'>('manual')
   const [dialog, setDialog] = useState<'reject' | 'sendback' | null>(null)
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>(() =>
@@ -307,7 +309,10 @@ export function ProposalDetail() {
             </button>
             <button
               type="button"
-              onClick={() => showToast('上長へ送付しました — 業務責任者の承認待ちへ')}
+              onClick={() => {
+                if (id) dispatch({ type: 'proposal/forward', id })
+                showToast('上長へ送付しました — 業務責任者の承認待ちへ')
+              }}
               className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
             >
               上長へ送付
@@ -326,7 +331,10 @@ export function ProposalDetail() {
             </button>
             <button
               type="button"
-              onClick={() => showToast('提案を承認しました — 反映に進みます')}
+              onClick={() => {
+                if (id) dispatch({ type: 'proposal/approve', id })
+                showToast('提案を承認しました — 反映に進みます')
+              }}
               className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
             >
               <CheckIcon className="h-4 w-4" />
@@ -344,7 +352,10 @@ export function ProposalDetail() {
         submitLabel="却下する"
         outcome="却下すると、この提案は反映されません。"
         onClose={() => setDialog(null)}
-        onSubmit={() => showToast('提案を却下しました')}
+        onSubmit={() => {
+          if (id) dispatch({ type: 'proposal/reject', id })
+          showToast('提案を却下しました')
+        }}
       />
       <ReasonDialog
         open={dialog === 'sendback'}

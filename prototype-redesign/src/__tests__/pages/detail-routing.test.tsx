@@ -74,6 +74,21 @@ describe('Phase 4a: 要確認ゼロ / change なし の detail も落ちない (
   })
 })
 
+describe('Phase 4b: 承認ボタンが reducer precondition と整合 (false success 防止、CR P1)', () => {
+  it('pending 案件 (入力者ビュー) は承認 disabled', () => {
+    renderAt('/cases/CASE-2026-0150')
+    expect(screen.getByRole('button', { name: '承認' })).toBeDisabled()
+  })
+  it('ready かつ要確認0 の案件 (入力者ビュー) は承認可能', () => {
+    renderAt('/cases/CASE-2026-0139')
+    expect(screen.getByRole('button', { name: '承認' })).toBeEnabled()
+  })
+  it('承認待ち案件を入力者ビューで開くと承認 disabled (input は ready のみ前進)', () => {
+    renderAt('/cases/CASE-2026-0128')
+    expect(screen.getByRole('button', { name: '承認' })).toBeDisabled()
+  })
+})
+
 describe('Phase 4a gate: dict coverage (gate 1 — 全 list id が detail を持つ)', () => {
   it('CASE_LIST 全 id が CASE_DETAILS に存在', () => {
     for (const row of CASE_LIST) expect(CASE_DETAILS[row.id]).toBeDefined()

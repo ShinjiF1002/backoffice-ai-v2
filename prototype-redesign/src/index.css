@@ -46,6 +46,7 @@
   --color-alert-soft-border: #fde68a;    /* amber-200、要確認 card 枠 */
   --color-primary-soft-border: #c7d2fe;  /* indigo-200、checker/primary soft 枠 */
   --color-success-soft-border: #a7f3d0;  /* emerald-200、一致 soft 枠 */
+  --color-error-soft-border: #fecaca;    /* red-200、ErrorState 枠 (Phase 2、4 tone 対称化) */
 
   /* === v2 拡張: 紙文書 token (canonical-design-spec §2.2、CaseDetail 文書ビューア専用) === */
   --color-paper: #ffffff;

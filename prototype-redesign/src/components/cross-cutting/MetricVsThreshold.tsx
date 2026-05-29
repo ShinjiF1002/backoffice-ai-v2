@@ -30,7 +30,7 @@ export interface MetricVsThresholdProps {
   subtitle?: string
   /** 対象 (spec、表全体)。例: 法人住所変更 Agent */
   owner?: string
-  /** 仮説ラベル (spec、表全体)。default で mock 値である旨を明示。 */
+  /** 仮説ラベル (spec、表全体)。default で実値でない参考値である旨を明示。 */
   hypothesisLabel?: string
 }
 
@@ -39,7 +39,7 @@ export function MetricVsThreshold({
   title = '実績 vs 閾値',
   subtitle,
   owner,
-  hypothesisLabel = '［仮説 / 要検証］モック値',
+  hypothesisLabel = '［仮説 / 要検証］参考値',
 }: MetricVsThresholdProps) {
   return (
     <section className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">

@@ -1,8 +1,9 @@
 import type { CaseStatus } from './types'
 
 /**
- * 案件一覧 (Cases) mock — screens-v2/02-cases parity / mock-fixture §3 (UC-BO-01 8 件)
- * status 分布: pending 2 / ready 3 / sent-back 1 / business-approval-waiting 1 / reflected 1。
+ * 案件一覧 (Cases) mock — screens-v2/02-cases parity / mock-fixture §3 (UC-BO-01)。
+ * 計 28 件: 代表 8 件 (BASE_CASES、各 status + recommended + change、detail dict と整合)
+ *   + pagination/sort/filter 実動検証用の deterministic fixture 20 件 (EXTRA_CASES、Phase 3)。
  */
 export interface CaseListRow {
   id: string
@@ -17,7 +18,8 @@ export interface CaseListRow {
   change?: { field: string; from: string; to: string }
 }
 
-export const CASE_LIST: CaseListRow[] = [
+/** 手書きの代表 8 件 (各 status + recommended + change データを持つ、detail dict と整合)。 */
+const BASE_CASES: CaseListRow[] = [
   { id: 'CASE-2026-0142', workflow: '法人住所変更', status: 'ready', elapsed: '1時間20分', owner: '山田太郎', flags: 1, recommended: true,
     change: { field: '新住所', from: '東京都千代田区丸の内 1 丁目 1 番 1 号', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
   { id: 'CASE-2026-0145', workflow: '法人住所変更', status: 'ready', elapsed: '38分', owner: '山田太郎', flags: 2,
@@ -33,3 +35,23 @@ export const CASE_LIST: CaseListRow[] = [
   { id: 'CASE-2026-0120', workflow: '法人住所変更', status: 'reflected', elapsed: '昨日 16:40', owner: '山田太郎', flags: 0,
     change: { field: '新住所', from: '札幌市中央区 1-2', to: '札幌市中央区大通西 3-1' } },
 ]
+
+/**
+ * pagination / sort / filter の実動検証用 deterministic fixture (+20 行、計 28)。
+ * Math.random は使わず index 由来で status/owner/flags/elapsed を生成 (再現性確保)。
+ */
+const STATUSES: CaseStatus[] = ['pending', 'ready', 'sent-back', 'business-approval-waiting', 'reflected']
+const OWNERS = ['山田太郎', '鈴木課長', '佐藤花子']
+const EXTRA_CASES: CaseListRow[] = Array.from({ length: 20 }, (_, i) => {
+  const status = STATUSES[i % STATUSES.length]
+  return {
+    id: `CASE-2026-0${100 + i}`,
+    workflow: '法人住所変更',
+    status,
+    elapsed: `${(i % 6) + 1}時間${((i * 7) % 60).toString().padStart(2, '0')}分`,
+    owner: status === 'pending' ? '—' : OWNERS[i % OWNERS.length],
+    flags: status === 'ready' ? i % 3 : 0,
+  }
+})
+
+export const CASE_LIST: CaseListRow[] = [...BASE_CASES, ...EXTRA_CASES]

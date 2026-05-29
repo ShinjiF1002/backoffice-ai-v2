@@ -29,6 +29,7 @@
 --color-alert-soft-border:   #FDE68A;  /* amber-200、要確認 card の枠 */
 --color-primary-soft-border: #C7D2FE;  /* indigo-200、checker/primary soft 枠 */
 --color-success-soft-border: #A7F3D0;  /* emerald-200、一致 soft 枠 */
+--color-error-soft-border:   #FECACA;  /* red-200、ErrorState 枠 (Phase 2 追加、4 tone 対称化) */
 ```
 ### 2.2 紙文書 token 追加 → drift (e) 解消 (CaseDetail 文書ビューア専用)
 ```

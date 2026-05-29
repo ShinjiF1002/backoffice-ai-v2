@@ -1,15 +1,50 @@
-import { useNavigate } from 'react-router-dom'
-import { ChevronRightIcon, PencilLineIcon, ShieldCheckIcon } from 'lucide-react'
+import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon } from 'lucide-react'
 import { APPROVAL_LIST } from '@/data/mock-approvals'
+import type { ApprovalRow } from '@/data/mock-approvals'
 import { MetaChip } from '@/components/shared/MetaChip'
+import { DataTable } from '@/components/shared/DataTable'
+import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 
 /**
  * 承認待ち (Approvals, /approvals) — B 型 queue / 承認者
- * SSOT: screen-contracts-v2 §3 / screens-v2/03-approvals。
- * row click → CaseDetail (承認者ビュー、?view=checker)。別担当者による確認 (承認者 ≠ 入力者) を明示。
+ * SSOT: screen-contracts-v2 §3 / screens-v2/03-approvals。Phase 3 で共通 DataTable に載せ替え。
+ * row → CaseDetail (承認者ビュー、?view=checker)。承認者 ≠ 入力者 を明示。一括承認 (selection)。
  */
+const INPUTTERS = [...new Set(APPROVAL_LIST.map((r) => r.inputter))]
+
+const columns: DataTableColumn<ApprovalRow>[] = [
+  { key: 'id', header: '案件 ID', className: 'font-mono text-[13px] text-[var(--color-fg)]', cell: (r) => r.id, sortValue: (r) => r.id },
+  { key: 'workflow', header: '業務', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.workflow },
+  {
+    key: 'judgement',
+    header: '入力者の判断',
+    cell: (r) =>
+      r.judgement === 'modified' ? (
+        <MetaChip tone="primary" label={`修正あり ${r.modifiedCount} 件`} />
+      ) : (
+        <MetaChip tone="success" label="確認のみ (修正なし)" />
+      ),
+  },
+  {
+    key: 'assignee',
+    header: '担当 (入力者 → 承認者)',
+    cell: (r) => (
+      <span className="flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)]">
+        <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" aria-hidden="true" />
+        <strong className="text-[var(--color-fg)]">{r.inputter}</strong>
+        <ChevronRightIcon className="h-3 w-3" />
+        <strong className="text-[var(--color-fg)]">{r.approver}</strong>
+      </span>
+    ),
+  },
+  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.elapsed },
+]
+
+const filters: DataTableFilter<ApprovalRow>[] = [
+  { id: 'inputter', label: '入力者', options: INPUTTERS.map((i) => ({ value: i, label: i })), predicate: (r, v) => v.includes(r.inputter) },
+]
+
 export function Approvals() {
-  const navigate = useNavigate()
   return (
     <div className="flex flex-col">
       <header
@@ -21,52 +56,23 @@ export function Approvals() {
       </header>
 
       <div className="p-4">
-        <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--color-border)] text-left text-xs text-[var(--color-fg-muted)]">
-                <th className="px-4 py-2 font-medium">案件 ID</th>
-                <th className="px-4 py-2 font-medium">業務</th>
-                <th className="px-4 py-2 font-medium">入力者の判断</th>
-                <th className="px-4 py-2 font-medium">担当 (入力者 → 承認者)</th>
-                <th className="px-4 py-2 font-medium">経過</th>
-                <th className="w-8" />
-              </tr>
-            </thead>
-            <tbody>
-              {APPROVAL_LIST.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => navigate(`/cases/${row.id}?view=checker`)}
-                  className="cursor-pointer border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-panel-inset)]"
-                >
-                  <td className="px-4 py-2.5 font-mono text-[13px] text-[var(--color-fg)]">{row.id}</td>
-                  <td className="px-4 py-2.5 text-[var(--color-fg-muted)]">{row.workflow}</td>
-                  <td className="px-4 py-2.5">
-                    {row.judgement === 'modified'
-                      ? <MetaChip tone="primary" label={`修正あり ${row.modifiedCount} 件`} />
-                      : <MetaChip tone="success" label="確認のみ (修正なし)" />}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className="flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)]">
-                      <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" aria-hidden="true" />
-                      <strong className="text-[var(--color-fg)]">{row.inputter}</strong>
-                      <ChevronRightIcon className="h-3 w-3" />
-                      <strong className="text-[var(--color-fg)]">{row.approver}</strong>
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-[var(--color-fg-muted)]">{row.elapsed}</td>
-                  <td className="px-2 py-2.5 text-[var(--color-fg-subtle)]"><ChevronRightIcon className="h-4 w-4" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 flex items-center gap-1 px-1 text-[10px] text-[var(--color-fg-subtle)]">
-          {/* lucide icon — pencil-dot は使わない */}
-          <PencilLineIcon className="h-3 w-3" aria-hidden="true" />
-          「修正あり」は入力者が項目を上書き済。承認者は別担当者として最終確認します。
-        </p>
+        <DataTable
+          rows={APPROVAL_LIST}
+          columns={columns}
+          rowKey={(r) => r.id}
+          rowHref={(r) => `/cases/${r.id}?view=checker`}
+          ariaLabel="承認待ち"
+          filters={filters}
+          // Phase 3 は選択 UI (checkbox + 件数) のみ。一括承認 action は no-op を出さず、
+          // Phase 4 で store の case/bulkApprove (by:checker) に接続してから表示する。
+          selection={{ actions: [] }}
+          caption={
+            <span className="flex items-center gap-1">
+              <PencilLineIcon className="h-3 w-3" aria-hidden="true" />
+              「修正あり」は入力者が項目を上書き済。承認者は別担当者として最終確認します。
+            </span>
+          }
+        />
       </div>
     </div>
   )

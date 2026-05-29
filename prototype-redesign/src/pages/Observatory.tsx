@@ -156,7 +156,7 @@ export function Observatory() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => showToast('証跡台帳をエクスポートしました（プロトタイプのためモックです）')}
+                      onClick={() => showToast('証跡台帳の控えを出力しました（参考表示・外部システム未保存）')}
                       className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-xs font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
                     >
                       <DownloadIcon className="h-3.5 w-3.5" aria-hidden="true" />

@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
-import { XIcon, AlertTriangleIcon } from 'lucide-react'
+import { useRef, useState } from 'react'
+import type { RefObject } from 'react'
+import { AlertTriangleIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { Modal } from './Modal'
 
 /**
  * ReasonDialog — 理由必須の確認 modal (汎用)
  * SSOT: screen-contracts-v2 (却下/差戻しは理由必須) + reference screens-v2/06-proposal-detail (ReasonDialog)。
  * 却下 / 差戻し 等、理由未入力では送信不可 (即 error)。outcome を 1 行明示。
- * overlay / validation 規律は FieldActionModal と共有 (単一決定面、submit は primary)。
+ * Phase 2: shell を共通 Modal に移譲。state / validation は本 component が保持 (挙動不変)。
  */
 export interface ReasonDialogProps {
   open: boolean
@@ -24,15 +26,17 @@ export interface ReasonDialogProps {
 export function ReasonDialog({ open, title, label, placeholder, submitLabel, outcome, onClose, onSubmit }: ReasonDialogProps) {
   const [reason, setReason] = useState('')
   const [showError, setShowError] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
+  // open に遷移したら入力を初期化 (render 中の prop 変化検知、set-state-in-effect 回避)。挙動は不変。
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (open) {
       setReason('')
       setShowError(false)
     }
-  }, [open])
-
-  if (!open) return null
+  }
 
   const handleSubmit = () => {
     if (!reason.trim()) {
@@ -44,66 +48,14 @@ export function ReasonDialog({ open, title, label, placeholder, submitLabel, out
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-overlay)] p-6"
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex w-[480px] max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl"
-      >
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
-          <h2 className="text-sm font-semibold text-[var(--color-fg)]">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            className="rounded p-1 text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]"
-          >
-            <XIcon className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-3 p-5">
-          <div>
-            <div className="mb-1 flex items-center justify-between">
-              <label htmlFor="reason-dialog-input" className="text-xs font-medium text-[var(--color-fg)]">
-                {label}
-              </label>
-              {showError && (
-                <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
-                  <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
-                  入力してください
-                </span>
-              )}
-            </div>
-            <textarea
-              id="reason-dialog-input"
-              value={reason}
-              onChange={(e) => {
-                setReason(e.target.value)
-                if (showError && e.target.value.trim()) setShowError(false)
-              }}
-              rows={3}
-              aria-invalid={showError}
-              className={cn(
-                'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
-                showError
-                  ? 'border-[var(--color-error)] bg-[var(--color-error-soft)]'
-                  : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] focus:border-[var(--color-primary)]'
-              )}
-              placeholder={placeholder}
-            />
-          </div>
-          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
-            {outcome}
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2 border-t border-[var(--color-border)] bg-[var(--color-panel-inset)] px-5 py-3">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      size="sm"
+      initialFocusRef={textareaRef as RefObject<HTMLElement | null>}
+      footer={
+        <>
           <button
             type="button"
             onClick={onClose}
@@ -118,8 +70,45 @@ export function ReasonDialog({ open, title, label, placeholder, submitLabel, out
           >
             {submitLabel}
           </button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <label htmlFor="reason-dialog-input" className="text-xs font-medium text-[var(--color-fg)]">
+              {label}
+            </label>
+            {showError && (
+              <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+                <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
+                入力してください
+              </span>
+            )}
+          </div>
+          <textarea
+            id="reason-dialog-input"
+            ref={textareaRef}
+            value={reason}
+            onChange={(e) => {
+              setReason(e.target.value)
+              if (showError && e.target.value.trim()) setShowError(false)
+            }}
+            rows={3}
+            aria-invalid={showError}
+            className={cn(
+              'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
+              showError
+                ? 'border-[var(--color-error)] bg-[var(--color-error-soft)]'
+                : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] focus:border-[var(--color-primary)]'
+            )}
+            placeholder={placeholder}
+          />
+        </div>
+        <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
+          {outcome}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

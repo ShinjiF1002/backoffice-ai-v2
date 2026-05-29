@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon, XIcon } from 'lucide-react'
+import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon } from 'lucide-react'
 import { AGENT_CORP_ADDRESS } from '@/data/mock-agent-detail'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
+import { Modal } from '@/components/shared/Modal'
 import { cn } from '@/lib/cn'
 
 /**
@@ -157,56 +158,39 @@ export function AgentDetail() {
         </button>
       </footer>
 
-      {/* 申請 confirm dialog */}
-      {applyOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="設定変更を申請"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-overlay)] p-6"
-          onClick={() => setApplyOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="flex w-[480px] max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl"
-          >
-            <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
-              <h2 className="text-sm font-semibold text-[var(--color-fg)]">設定変更を申請</h2>
-              <button
-                type="button"
-                onClick={() => setApplyOpen(false)}
-                aria-label="閉じる"
-                className="rounded p-1 text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]"
-              >
-                <XIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="p-5 text-sm leading-relaxed text-[var(--color-fg)]">
-              全件確認 → 要所確認 への昇格を申請します。承認後、人レビューが減り自動入力が増えます (帰結を参照)。
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[var(--color-border)] bg-[var(--color-panel-inset)] px-5 py-3">
-              <button
-                type="button"
-                onClick={() => setApplyOpen(false)}
-                className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setApplyOpen(false)
-                  showToast('昇格を申請しました')
-                }}
-                className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
-              >
-                <CheckIcon className="h-4 w-4" />
-                申請する
-              </button>
-            </div>
-          </div>
+      {/* 申請 confirm dialog (共通 Modal、Phase 2) */}
+      <Modal
+        open={applyOpen}
+        onClose={() => setApplyOpen(false)}
+        title="設定変更を申請"
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setApplyOpen(false)}
+              className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setApplyOpen(false)
+                showToast('昇格を申請しました')
+              }}
+              className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+            >
+              <CheckIcon className="h-4 w-4" />
+              申請する
+            </button>
+          </>
+        }
+      >
+        <div className="text-sm leading-relaxed text-[var(--color-fg)]">
+          全件確認 → 要所確認 への昇格を申請します。承認後、人レビューが減り自動入力が増えます (帰結を参照)。
         </div>
-      )}
+      </Modal>
 
       {toast && (
         <div

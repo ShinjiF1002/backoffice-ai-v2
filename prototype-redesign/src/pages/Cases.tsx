@@ -1,15 +1,17 @@
-import { useNavigate } from 'react-router-dom'
-import { ChevronRightIcon } from 'lucide-react'
 import { CASE_LIST } from '@/data/mock-case-list'
+import type { CaseListRow } from '@/data/mock-case-list'
+import type { CaseStatus } from '@/data/types'
 import { caseStatusToTone, caseStatusLabel } from '@/lib/status-tones'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MetaChip } from '@/components/shared/MetaChip'
-import { cn } from '@/lib/cn'
+import { DataTable } from '@/components/shared/DataTable'
+import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
- * SSOT: screen-contracts-v2 §2 / screens-v2/02-cases。row click → CaseDetail (入力者ビュー)。
- * confidence 生数字なし、status は resolver 経由 (業務語)、要確認サマリは MetaChip。
+ * SSOT: screen-contracts-v2 §2 / screens-v2/02-cases。Phase 3 で共通 DataTable に載せ替え。
+ * row → CaseDetail (入力者ビュー)。confidence 生数字なし、status は resolver 経由、要確認は MetaChip。
+ * 状態 + 担当 filter / 列 sort / pagination / 要確認上部固定 (recommended)。
  */
 function AttentionCell({ status, flags }: { status: string; flags: number }) {
   if (status === 'pending') return <span className="text-xs text-[var(--color-fg-subtle)]">AI 処理待ち</span>
@@ -19,8 +21,44 @@ function AttentionCell({ status, flags }: { status: string; flags: number }) {
   return <MetaChip tone="success" label="全項目一致" />
 }
 
+const STATUS_VALUES: CaseStatus[] = ['pending', 'ready', 'sent-back', 'business-approval-waiting', 'reflected']
+const OWNER_VALUES = [...new Set(CASE_LIST.map((r) => r.owner))]
+
+const columns: DataTableColumn<CaseListRow>[] = [
+  { key: 'id', header: '案件 ID', className: 'font-mono text-[13px] text-[var(--color-fg)]', cell: (r) => r.id, sortValue: (r) => r.id },
+  { key: 'workflow', header: '業務', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.workflow },
+  {
+    key: 'status',
+    header: '状態',
+    cell: (r) => <StatusBadge tone={caseStatusToTone(r.status)} label={caseStatusLabel(r.status)} />,
+    sortValue: (r) => r.status,
+  },
+  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.elapsed },
+  {
+    key: 'owner',
+    header: '担当',
+    className: 'text-[var(--color-fg)]',
+    cell: (r) => (r.owner === '—' ? <span className="text-[var(--color-fg-subtle)]">未割当</span> : r.owner),
+  },
+  { key: 'attention', header: '確認', cell: (r) => <AttentionCell status={r.status} flags={r.flags} /> },
+]
+
+const filters: DataTableFilter<CaseListRow>[] = [
+  {
+    id: 'status',
+    label: '状態',
+    options: STATUS_VALUES.map((s) => ({ value: s, label: caseStatusLabel(s) })),
+    predicate: (r, v) => v.includes(r.status),
+  },
+  {
+    id: 'owner',
+    label: '担当',
+    options: OWNER_VALUES.map((o) => ({ value: o, label: o === '—' ? '未割当' : o })),
+    predicate: (r, v) => v.includes(r.owner),
+  },
+]
+
 export function Cases() {
-  const navigate = useNavigate()
   return (
     <div className="flex flex-col">
       <header
@@ -32,42 +70,18 @@ export function Cases() {
       </header>
 
       <div className="p-4">
-        <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--color-border)] text-left text-xs text-[var(--color-fg-muted)]">
-                <th className="px-4 py-2 font-medium">案件 ID</th>
-                <th className="px-4 py-2 font-medium">業務</th>
-                <th className="px-4 py-2 font-medium">状態</th>
-                <th className="px-4 py-2 font-medium">経過</th>
-                <th className="px-4 py-2 font-medium">担当</th>
-                <th className="px-4 py-2 font-medium">確認</th>
-                <th className="w-8" />
-              </tr>
-            </thead>
-            <tbody>
-              {CASE_LIST.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => navigate(`/cases/${row.id}`)}
-                  className={cn(
-                    'cursor-pointer border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-panel-inset)]',
-                    row.recommended && 'bg-[var(--color-alert-soft)]'
-                  )}
-                >
-                  <td className="px-4 py-2.5 font-mono text-[13px] text-[var(--color-fg)]">{row.id}</td>
-                  <td className="px-4 py-2.5 text-[var(--color-fg-muted)]">{row.workflow}</td>
-                  <td className="px-4 py-2.5"><StatusBadge tone={caseStatusToTone(row.status)} label={caseStatusLabel(row.status)} /></td>
-                  <td className="px-4 py-2.5 text-[var(--color-fg-muted)]">{row.elapsed}</td>
-                  <td className="px-4 py-2.5 text-[var(--color-fg)]">{row.owner}</td>
-                  <td className="px-4 py-2.5"><AttentionCell status={row.status} flags={row.flags} /></td>
-                  <td className="px-2 py-2.5 text-[var(--color-fg-subtle)]"><ChevronRightIcon className="h-4 w-4" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 px-1 text-[10px] text-[var(--color-fg-subtle)]">要確認のある案件を上部に強調表示しています。</p>
+        <DataTable
+          rows={CASE_LIST}
+          columns={columns}
+          rowKey={(r) => r.id}
+          rowHref={(r) => `/cases/${r.id}`}
+          ariaLabel="案件一覧"
+          pinTop={(r) => !!r.recommended}
+          rowClassName={(r) => (r.recommended ? 'bg-[var(--color-alert-soft)]' : undefined)}
+          filters={filters}
+          pageSize={10}
+          caption="要確認のある案件を上部に強調表示しています。"
+        />
       </div>
     </div>
   )

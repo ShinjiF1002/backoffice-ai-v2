@@ -1,10 +1,11 @@
-name: Deploy prototype + showcase to GitHub Pages
+name: Deploy redesign (root) + prototype v1 + showcase to GitHub Pages
 
 on:
   push:
     branches:
       - main
     paths:
+      - prototype-redesign/**
       - prototype/**
       - showcase/**
       - .github/workflows/pages.yml
@@ -24,7 +25,7 @@ env:
 
 jobs:
   build:
-    name: Build prototype + showcase
+    name: Build redesign + prototype v1 + showcase
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -36,24 +37,40 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: |
+            prototype-redesign/package-lock.json
             prototype/package-lock.json
             showcase/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # --- prototype (root path /backoffice-ai-v2/) ---
-      - name: Install prototype dependencies
-        working-directory: prototype
+      # --- redesign (root path /backoffice-ai-v2/) — Phase 2 Process-First v2 ---
+      - name: Install redesign dependencies
+        working-directory: prototype-redesign
         run: npm ci
 
-      - name: Build prototype
-        working-directory: prototype
+      - name: Build redesign
+        working-directory: prototype-redesign
         env:
           VITE_BASE_PATH: /backoffice-ai-v2/
         run: npm run build
 
-      - name: Add prototype SPA fallback
+      - name: Add redesign SPA fallback
+        working-directory: prototype-redesign
+        run: cp dist/index.html dist/404.html
+
+      # --- prototype v1 (subpath /backoffice-ai-v2/v1/) — Session 4 demo (Plan v1.3 locked) ---
+      - name: Install prototype v1 dependencies
+        working-directory: prototype
+        run: npm ci
+
+      - name: Build prototype v1
+        working-directory: prototype
+        env:
+          VITE_BASE_PATH: /backoffice-ai-v2/v1/
+        run: npm run build
+
+      - name: Add prototype v1 SPA fallback
         working-directory: prototype
         run: cp dist/index.html dist/404.html
 
@@ -72,11 +89,13 @@ jobs:
         working-directory: showcase
         run: cp dist/index.html dist/404.html
 
-      # --- combine into single _site ---
+      # --- combine into single _site (redesign at root, prototype v1 + showcase as subpaths) ---
       - name: Assemble combined site
         run: |
           mkdir -p _site
-          cp -R prototype/dist/. _site/
+          cp -R prototype-redesign/dist/. _site/
+          mkdir -p _site/v1
+          cp -R prototype/dist/. _site/v1/
           mkdir -p _site/showcase
           cp -R showcase/dist/. _site/showcase/
 

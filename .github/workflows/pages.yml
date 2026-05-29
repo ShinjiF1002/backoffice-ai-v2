@@ -45,7 +45,10 @@ jobs:
       # --- redesign (root path /backoffice-ai-v2/) — Phase 2 Process-First v2 ---
       - name: Install redesign dependencies
         working-directory: prototype-redesign
-        run: npm ci
+        # npm ci ではなく install: macOS 生成の lockfile が linux CI 用 optional 依存
+        # (@emnapi/* = wasm fallback chain) を取りこぼし npm ci が EUSAGE で fail するため
+        # (cross-platform lockfile の既知問題)。install は drift を許容しビルドを通す。
+        run: npm install --no-audit --no-fund
 
       - name: Build redesign
         working-directory: prototype-redesign

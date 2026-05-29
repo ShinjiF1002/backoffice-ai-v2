@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Dashboard v1 — Today's Action</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.body { padding: 24px 32px; display: flex; flex-direction: column; gap: 18px; }
+.hero {
+  display: flex; gap: 24px; align-items: center; justify-content: space-between;
+  background: var(--color-panel);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-error);
+  padding: 24px 32px;
+}
+.hero-left { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.hero-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700;
+  color: var(--color-error);
+  letter-spacing: 1.5px;
+}
+.sla-pill {
+  background: var(--color-error-soft); color: var(--color-error);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+}
+.hero-meta { display: flex; gap: 10px; align-items: end; }
+.hero-meta .case-id { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--color-fg-muted); }
+.hero-name { font-size: 24px; font-weight: 700; line-height: 1.25; }
+.hero-sub { font-size: 12px; color: var(--color-fg-muted); }
+.cta-large {
+  padding: 14px 28px; gap: 10px;
+  font-size: 14px; font-weight: 700;
+}
+.section-h { display: flex; justify-content: space-between; align-items: end; padding-top: 4px; }
+.section-h .t { font-size: 12px; font-weight: 600; }
+.section-h .sub { font-size: 10px; color: var(--color-fg-muted); }
+.queue { display: flex; flex-direction: column; gap: 6px; }
+.queue-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 16px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+.q-key {
+  width: 24px; height: 24px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  color: var(--color-fg-muted);
+}
+.q-id { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+.q-wf { font-size: 10px; color: var(--color-fg-muted); }
+.q-status { font-size: 9px; font-weight: 500; color: var(--color-fg-muted); background: var(--color-panel-inset); padding: 1px 6px; border-radius: 3px; }
+.q-body { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.q-body-row { display: flex; gap: 8px; align-items: center; }
+.q-meta { display: flex; gap: 10px; align-items: center; }
+.q-meta .sla { font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+.q-attn { font-family: var(--font-mono); font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+.q-chev { color: var(--color-fg-subtle); font-size: 14px; }
+.totals {
+  display: flex; gap: 18px; align-items: center; justify-content: space-between;
+  padding-top: 12px; border-top: 1px solid var(--color-divider);
+}
+.totals-left { display: flex; gap: 18px; align-items: center; }
+.totals-link { color: var(--color-primary-deep); font-size: 11px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">B</div>
+    <div class="brand-text">
+      <div class="brand-name">Backoffice AI</div>
+      <div class="brand-sub">v2 prototype</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a class="nav-item active" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user">
+    <div class="user-avatar"></div>
+    <div class="user-text">
+      <div class="user-name">山田 太郎</div>
+      <div class="user-role">入力者</div>
+    </div>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div class="search">
+    <span class="ic">⌕</span>
+    <span> </span>
+  </div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill">
+      <span class="ic">ⓘ</span>
+      <span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+<div class="variant-label">V1 · Today's Action</div>
+<div class="body">
+
+  <!-- HERO: single most important action -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-label">
+        <span>今あなたが処理すべき案件</span>
+        <span class="sla-pill">⚠ SLA 03:45:51 経過</span>
+      </div>
+      <div class="hero-meta">
+        <span class="case-id">CASE-2026-0148</span>
+        <span class="chip mute">口座開設書類完備</span>
+      </div>
+      <div class="hero-name">株式会社サンプルホールディングス</div>
+      <div class="hero-sub">入力者確認待ち · AI 信頼度 0.84 · 印鑑照合 未済</div>
+    </div>
+    <button class="btn primary cta-large">
+      この案件を開く <span>→</span>
+    </button>
+  </div>
+
+  <!-- QUEUE: continuation candidates -->
+  <div class="section-h">
+    <span class="t">続けて処理する候補 (4 件)</span>
+    <span class="sub">優先度: SLA 経過 + 注意件数</span>
+  </div>
+  <div class="queue">
+    <div class="queue-row">
+      <div class="q-key">2</div>
+      <div class="q-body">
+        <div class="q-body-row"><span class="q-id">CASE-2026-0146</span><span class="q-wf">口座開設書類完備</span><span class="q-status">再処理中</span></div>
+      </div>
+      <div class="q-meta"><span class="sla sla-warning">01:19:45</span><span class="q-attn" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">⚠ 1</span><span class="q-chev">›</span></div>
+    </div>
+    <div class="queue-row">
+      <div class="q-key">3</div>
+      <div class="q-body">
+        <div class="q-body-row"><span class="q-id">CASE-2026-0147</span><span class="q-wf">法人住所変更</span><span class="q-status">承認者承認待ち</span></div>
+      </div>
+      <div class="q-meta"><span class="sla sla-warning">02:35:02</span><span class="q-attn" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">⚠ 1</span><span class="q-chev">›</span></div>
+    </div>
+    <div class="queue-row">
+      <div class="q-key">4</div>
+      <div class="q-body">
+        <div class="q-body-row"><span class="q-id">CASE-2026-0152</span><span class="q-wf">口座開設書類完備</span><span class="q-status">再処理中</span></div>
+      </div>
+      <div class="q-meta"><span class="sla sla-warning">02:08:29</span><span class="q-chev">›</span></div>
+    </div>
+    <div class="queue-row">
+      <div class="q-key">5</div>
+      <div class="q-body">
+        <div class="q-body-row"><span class="q-id">CASE-2026-0143</span><span class="q-wf">口座開設書類完備</span><span class="q-status">入力者確認待ち</span></div>
+      </div>
+      <div class="q-meta"><span class="sla sla-normal">00:08:21</span><span class="q-chev">›</span></div>
+    </div>
+  </div>
+
+  <!-- TOTALS: secondary context -->
+  <div class="totals">
+    <div class="totals-left">
+      <span class="chip mute">稼働 13</span>
+      <span class="chip alert">注意 6</span>
+      <span class="chip primary">承認者承認待ち 1</span>
+      <span class="chip success">反映済 (本日) 2</span>
+    </div>
+    <a class="totals-link" href="#">受信トレイ 全件を見る →</a>
+  </div>
+
+</div>
+</main>
+
+</body>
+</html>

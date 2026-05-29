@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Redesign Mockups — Backoffice AI v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared/tokens.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { padding: 32px 48px; max-width: 1400px; margin: 0 auto; }
+h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: var(--color-fg-muted); margin-bottom: 32px; line-height: 1.6; }
+.section { margin-bottom: 36px; }
+.section-h { display: flex; align-items: end; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); margin-bottom: 14px; }
+.section-h .title { font-size: 16px; font-weight: 700; }
+.section-h .meta { font-size: 11px; color: var(--color-fg-muted); }
+.grid { display: grid; gap: 14px; }
+.grid.c3 { grid-template-columns: repeat(3, 1fr); }
+.grid.c2 { grid-template-columns: repeat(2, 1fr); }
+.thumb { display: flex; flex-direction: column; gap: 6px; padding: 14px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 8px; text-decoration: none; color: inherit; transition: transform 0.1s, box-shadow 0.1s; }
+.thumb:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.thumb-tag { font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--color-primary-deep); }
+.thumb-t { font-size: 13px; font-weight: 700; }
+.thumb-d { font-size: 11px; line-height: 1.5; color: var(--color-fg-muted); }
+.problem-tags { display: flex; gap: 4px; padding-top: 4px; }
+.pt { font-family: var(--font-mono); font-size: 8px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: var(--color-panel-inset); color: var(--color-fg-muted); }
+.pt.active { background: var(--color-success-soft); color: var(--color-success-soft-fg); }
+.intro-block { padding: 16px 20px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 24px; }
+.intro-block h3 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.intro-block .p { font-size: 11px; line-height: 1.7; color: var(--color-fg-muted); }
+.intro-block ol { padding-left: 18px; font-size: 11px; color: var(--color-fg-muted); margin-top: 4px; }
+.intro-block ol li { padding: 2px 0; }
+</style>
+</head>
+<body>
+
+<h1>Redesign Mockups — Backoffice AI v2 prototype</h1>
+<p class="subtitle">既存 prototype 9 画面 × 20 改善案 (HTML mockup)。3 問題対処の方向性を視覚で比較し、採用案を choose する reference set。</p>
+
+<div class="intro-block">
+  <h3>使い方</h3>
+  <p class="p">各画面の variant カードをクリックして mockup を新タブで開く。Cmd+クリックで複数 variant を並べて比較すると効率的です。</p>
+  <ol>
+    <li>採用したい variant を画面ごとに 1 つ選ぶ (採用しない、保留も可)</li>
+    <li>採用後の Phase 2 で React 実装 → 既存 prototype 置き換え</li>
+    <li>本ディレクトリは reference として残し、Phase 2 後にも参照可能</li>
+  </ol>
+</div>
+
+<div class="intro-block" style="border-left: 3px solid var(--color-primary);">
+  <h3>3 問題 と対処方針</h3>
+  <p class="p"><strong>① 文字が多すぎる</strong> — instructional copy / 「次の実装段階で対応」 footer / 重複 chip を削減、accordion / 折りたたみ / drawer に逃がす</p>
+  <p class="p"><strong>② 一目で次にやることが分からない</strong> — primary CTA の唯一性 + 大型化 + 色階層強化、case ID よりも顧客名 + action verb を hero に</p>
+  <p class="p"><strong>③ 画面レイアウト</strong> — 等価重み 3 column → 1 hero + accordion へ、status group header で scan を支援、kanban / wizard で動線を visual に</p>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R1 Dashboard</span><span class="meta">3 variants</span></div>
+  <div class="grid c3">
+    <a class="thumb" href="dashboard/v1-todays-action.html" target="_blank">
+      <span class="thumb-tag">V1 · Today's Action</span>
+      <span class="thumb-t">優先案件 1 件 + 候補 4 件</span>
+      <span class="thumb-d">最も SLA 経過した 1 件を hero に大型表示、即「開く」CTA。残りは候補 list、cockpit 集計は底に圧縮。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ レイアウト 簡素化</span></div>
+    </a>
+    <a class="thumb" href="dashboard/v2-status-pulse.html" target="_blank">
+      <span class="thumb-tag">V2 · Status Pulse</span>
+      <span class="thumb-t">状態別 6 tile + 7 日推移</span>
+      <span class="thumb-d">状態別 (受付/AI処理/入力者確認/再処理/承認者承認/反映) を 6 tile に分け、SLA 超過は banner で警告。tile click で Inbox filter。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ status-first 構成</span></div>
+    </a>
+    <a class="thumb" href="dashboard/v3-personal-workspace.html" target="_blank">
+      <span class="thumb-tag">V3 · Personal Workspace</span>
+      <span class="thumb-t">tab + 自分タスク 5 件</span>
+      <span class="thumb-d">「今やる/全体状況/トレンド」tab + 自分/全担当 filter。自分 default で hero 1 + 候補 4。team は footer に集約。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ tab で context 分離</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R2 Inbox</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="inbox/v1-critical-first.html" target="_blank">
+      <span class="thumb-tag">V1 · Critical-first</span>
+      <span class="thumb-t">3 段グループ + 折りたたみ</span>
+      <span class="thumb-d">SLA 超過 1 件 hero + 注意あり 5 件 + 通常 7 件 (折りたたみ)。filter 「すべて」chip 削除、優先度ソート default。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ priority グループ</span></div>
+    </a>
+    <a class="thumb" href="inbox/v2-status-kanban.html" target="_blank">
+      <span class="thumb-tag">V2 · Status Kanban</span>
+      <span class="thumb-t">5 列 kanban</span>
+      <span class="thumb-d">AI処理/入力者確認/再処理/承認者承認/反映 を 5 column kanban で。SLA 超過 case は赤左枠で強調。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt">② 次 ↑</span><span class="pt active">③ workflow flow 可視</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R3 CaseReview</span><span class="meta">3 variants</span></div>
+  <div class="grid c3">
+    <a class="thumb" href="case-review/v1-decision-focused.html" target="_blank">
+      <span class="thumb-tag">V1 · Decision-focused</span>
+      <span class="thumb-t">hero summary + 4 accordion</span>
+      <span class="thumb-d">変更内容を hero に大型 diff、信頼度 + 注意 + 引用根拠は strip に集約、残り 4 セクションは accordion で折りたたみ。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ 単一 hero 構成</span></div>
+    </a>
+    <a class="thumb" href="case-review/v2-source-vs-output.html" target="_blank">
+      <span class="thumb-tag">V2 · Source vs Output</span>
+      <span class="thumb-t">原本 PDF / AI 出力 並置</span>
+      <span class="thumb-d">3 column → 2 column。左 = 原本 PDF mock + warning ハイライト、右 = AI 抽出結果 + confidence bar per field。並置で diff を user 自身が認識。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ 比較構図</span></div>
+    </a>
+    <a class="thumb" href="case-review/v3-single-question.html" target="_blank">
+      <span class="thumb-tag">V3 · Single Question</span>
+      <span class="thumb-t">「変更してよろしいですか?」</span>
+      <span class="thumb-d">question framing。diff card 1 つ + 信頼度/注意/承認済 3 数値 + 大型 2 CTA。詳細 (証跡・引用根拠) は status bar から drawer で。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓↓</span><span class="pt active">② 次 ↑↑↑</span><span class="pt active">③ 中央集約</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R4 SendBackComment</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="sendback-comment/v1-ai-suggested.html" target="_blank">
+      <span class="thumb-tag">V1 · AI-suggested chips</span>
+      <span class="thumb-t">AI 推測 + 5 chip 横並び</span>
+      <span class="thumb-d">5 radio (縦) → 5 chip (横)、AI 事前推測 banner で「誤読」を pre-select。textarea に AI 改善提案 generate ボタン。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ AI 補助動線</span></div>
+    </a>
+    <a class="thumb" href="sendback-comment/v2-3step-wizard.html" target="_blank">
+      <span class="thumb-tag">V2 · 3-step Wizard</span>
+      <span class="thumb-t">理由 → 補足 → 確認</span>
+      <span class="thumb-d">step indicator + 1 step 1 page。「誤読」等 enum を action 言語に reframe (例: 「AI が文書を読み間違えた」)。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ wizard 動線</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R5 ProposalReview</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="proposal-review/v1-diff-hero.html" target="_blank">
+      <span class="thumb-tag">V1 · Diff-hero</span>
+      <span class="thumb-t">提案 hero + diff + accordion</span>
+      <span class="thumb-d">3 column → 1 hero (提案要旨 + 4 数値) + diff card + 2 accordion (元案件 / RACI)。「業務責任者へ送付」filled CTA。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ 単一 hero</span></div>
+    </a>
+    <a class="thumb" href="proposal-review/v2-single-question.html" target="_blank">
+      <span class="thumb-tag">V2 · Single Question</span>
+      <span class="thumb-t">「更新してよろしいですか?」</span>
+      <span class="thumb-d">question framing。diff card + 4 数値 meta + 大型 2 CTA。詳細は status bar の link から drawer 想定。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓↓</span><span class="pt active">② 次 ↑↑↑</span><span class="pt active">③ 中央集約</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R6 AgentSettings</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="agent-settings/v1-progress-roadmap.html" target="_blank">
+      <span class="thumb-tag">V1 · Progress Roadmap</span>
+      <span class="thumb-t">4 KPI bar + KRI alert</span>
+      <span class="thumb-d">Trust Level Progression を「目標達成率 progress bar 4 本」で可視化。disabled 「引き上げ申請」に未達理由 (2/4) を併記。KRI 警戒 1 件を sidebar に。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑↑</span><span class="pt active">③ progress bar 中心</span></div>
+    </a>
+    <a class="thumb" href="agent-settings/v2-tabbed-workspace.html" target="_blank">
+      <span class="thumb-tag">V2 · Tabbed Workspace</span>
+      <span class="thumb-t">サイドタブ + サマリ default</span>
+      <span class="thumb-d">6 tab (サマリ/Trust/Model/Tool/権限/履歴)、サマリ default に Trust card + 4 KPI + 5 領域。引き上げ申請は header right に sticky。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ tab で分割</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R7 AuditTrail</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="audit-trail/v1-search-grouped.html" target="_blank">
+      <span class="thumb-tag">V1 · Search + Date-grouped</span>
+      <span class="thumb-t">facet filter + 日付 group</span>
+      <span class="thumb-d">sidebar に検索 + facet (event type / 業務 / actor) chip + count。timeline 本体は日付 group header で scan 補助。Export CSV/PDF top right。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ facet で絞り込み</span></div>
+    </a>
+    <a class="thumb" href="audit-trail/v2-case-grouped.html" target="_blank">
+      <span class="thumb-tag">V2 · Case-grouped accordion</span>
+      <span class="thumb-t">案件 ID で集約 expand</span>
+      <span class="thumb-d">時系列 / 案件別 toggle。案件別 mode で case ID を accordion header に、event 詳細は expand で表示。1 case = 1 lifecycle view。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ case 単位構成</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R8 Metrics</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="metrics/v1-goal-progress.html" target="_blank">
+      <span class="thumb-tag">V1 · Goal-progress</span>
+      <span class="thumb-t">4 KPI bar + KRI alert</span>
+      <span class="thumb-d">4 KPI を progress bar で目標達成率を直感的に。補助 KPI は右 panel、KRI 警戒 1 件を red banner で。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ progress bar 中心</span></div>
+    </a>
+    <a class="thumb" href="metrics/v2-trend-focused.html" target="_blank">
+      <span class="thumb-tag">V2 · Trend-focused</span>
+      <span class="thumb-t">sparkline 4 KPI + 9 KRI sidebar</span>
+      <span class="thumb-d">4 KPI を sparkline で可視化 (7 日 trend)、各 KRI を state-band で sidebar に並置。説明文 minimize、scan 重視。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt">② 次 → (observation)</span><span class="pt active">③ trend 視覚化</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-h"><span class="title">R9 KnowledgeBrowser</span><span class="meta">2 variants</span></div>
+  <div class="grid c2">
+    <a class="thumb" href="knowledge-browser/v1-3stage-kanban.html" target="_blank">
+      <span class="thumb-tag">V1 · 3-stage Kanban</span>
+      <span class="thumb-t">未承認 → 確認済 → 承認済</span>
+      <span class="thumb-d">3 stage を 3 column kanban で stage flow を視覚化。NEW tag で新規 staging を強調。各 card 2 行に圧縮。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓</span><span class="pt active">② 次 ↑</span><span class="pt active">③ flow 可視</span></div>
+    </a>
+    <a class="thumb" href="knowledge-browser/v2-compiled-library.html" target="_blank">
+      <span class="thumb-tag">V2 · Compiled Library</span>
+      <span class="thumb-t">承認済のみ + reading style</span>
+      <span class="thumb-d">承認済 5 件のみ default 表示 (未承認込み toggle あり)。各 card に large ✓ + 業務責任者名。読み物 style で reference として使いやすく。</span>
+      <div class="problem-tags"><span class="pt active">① 文字 ↓↓</span><span class="pt">② 次 → (reference)</span><span class="pt active">③ reading 優先</span></div>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

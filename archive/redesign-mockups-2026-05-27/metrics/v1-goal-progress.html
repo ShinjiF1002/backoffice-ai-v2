@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Metrics v1 — Goal-progress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.body { padding: 28px 40px; display: flex; flex-direction: column; gap: 24px; overflow: auto; height: calc(100% - 0px); }
+.hero { background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 12px; padding: 24px 32px; display: flex; flex-direction: column; gap: 14px; }
+.h-row { display: flex; justify-content: space-between; align-items: end; }
+.h-lab { font-size: 11px; font-weight: 700; color: var(--color-fg-muted); letter-spacing: 1.5px; }
+.h-t { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.kb { background: var(--color-canvas); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.kb-h { display: flex; justify-content: space-between; align-items: center; }
+.kb-h-l { display: flex; gap: 6px; align-items: end; }
+.kb-h-r { display: flex; gap: 8px; align-items: end; }
+.kb-k { font-family: var(--font-mono); font-size: 10px; font-weight: 700; }
+.kb-n { font-size: 12px; font-weight: 500; color: var(--color-fg-muted); }
+.kb-c { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+.kb-tg { font-family: var(--font-mono); font-size: 10px; color: var(--color-fg-muted); }
+.kb-d { font-family: var(--font-mono); font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px; }
+.kb-pb { width: 100%; height: 8px; background: var(--color-panel-inset); border-radius: 4px; overflow: hidden; }
+.kb-pb .fill { height: 100%; border-radius: 4px; }
+.ext { display: flex; gap: 14px; }
+.aux { flex: 1; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+.kri { flex: 1; background: var(--color-error-soft); border-left: 4px solid var(--color-error); border-radius: 10px; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+.aux-r { display: flex; justify-content: space-between; padding: 6px 0; }
+.aux-k { font-size: 11px; }
+.aux-v { font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+.kri-t { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--color-error); letter-spacing: 1.5px; }
+.kri-h { font-size: 13px; font-weight: 700; }
+.kri-d { font-size: 11px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">B</div><div class="brand-text"><div class="brand-name">Backoffice AI</div><div class="brand-sub">v2 prototype</div></div></div>
+  <nav class="nav">
+    <a class="nav-item" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item active" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user"><div class="user-avatar"></div><div class="user-text"><div class="user-name">山田 太郎</div><div class="user-role">入力者</div></div></div>
+</aside>
+
+<header class="topbar">
+  <div class="search"><span class="ic">⌕</span><span> </span></div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill"><span class="ic">ⓘ</span><span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span></div>
+  </div>
+</header>
+
+<main class="main" style="display: flex; flex-direction: column;">
+<div class="variant-label">V1 · Goal-progress</div>
+
+<div class="body">
+
+  <div class="hero">
+    <div class="h-row">
+      <div>
+        <div class="h-lab">Checkpoint 進化 ロードマップ</div>
+        <div class="h-t">Supervised → Checkpoint で 3 ヶ月以上連続達成</div>
+      </div>
+      <span class="chip alert">2 / 4 KPI 達成</span>
+    </div>
+
+    <div class="kb">
+      <div class="kb-h">
+        <div class="kb-h-l"><span class="kb-k" style="color: var(--color-alert-soft-fg);">K1</span><span class="kb-n">AI 入力承認率</span></div>
+        <div class="kb-h-r"><span class="kb-c" style="color: var(--color-alert-soft-fg);">98.4</span><span class="kb-tg">/ target ≥ 99 %</span><span class="kb-d" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">-0.6pp</span></div>
+      </div>
+      <div class="kb-pb"><div class="fill" style="width: 98%; background: var(--color-alert);"></div></div>
+    </div>
+    <div class="kb">
+      <div class="kb-h">
+        <div class="kb-h-l"><span class="kb-k" style="color: var(--color-alert-soft-fg);">K2</span><span class="kb-n">人手上書き率</span></div>
+        <div class="kb-h-r"><span class="kb-c" style="color: var(--color-alert-soft-fg);">1.2</span><span class="kb-tg">/ target ≤ 1 % 以下</span><span class="kb-d" style="background: var(--color-alert-soft); color: var(--color-alert-soft-fg);">+0.2pp</span></div>
+      </div>
+      <div class="kb-pb"><div class="fill" style="width: 83%; background: var(--color-alert);"></div></div>
+    </div>
+    <div class="kb">
+      <div class="kb-h">
+        <div class="kb-h-l"><span class="kb-k" style="color: var(--color-success-soft-fg);">K3</span><span class="kb-n">Alert 発生率</span></div>
+        <div class="kb-h-r"><span class="kb-c" style="color: var(--color-success-soft-fg);">4.7</span><span class="kb-tg">/ target ≤ 5 % 以下</span><span class="kb-d" style="background: var(--color-success-soft); color: var(--color-success-soft-fg);">-0.5pp</span></div>
+      </div>
+      <div class="kb-pb"><div class="fill" style="width: 100%; background: var(--color-success);"></div></div>
+    </div>
+    <div class="kb">
+      <div class="kb-h">
+        <div class="kb-h-l"><span class="kb-k" style="color: var(--color-success-soft-fg);">K4</span><span class="kb-n">承認者差戻率</span></div>
+        <div class="kb-h-r"><span class="kb-c" style="color: var(--color-success-soft-fg);">0.8</span><span class="kb-tg">/ target ≤ 1 % 以下</span><span class="kb-d" style="background: var(--color-success-soft); color: var(--color-success-soft-fg);">-0.3pp</span></div>
+      </div>
+      <div class="kb-pb"><div class="fill" style="width: 100%; background: var(--color-success);"></div></div>
+    </div>
+  </div>
+
+  <div class="ext">
+    <div class="aux">
+      <span class="h-lab">補助 KPI</span>
+      <div class="aux-r"><span class="aux-k">K5 案件平均処理時間</span><span class="aux-v">2 時間 24 分</span></div>
+      <div class="aux-r"><span class="aux-k">K6 手順承認 昇格成功率</span><span class="aux-v">68%</span></div>
+      <div class="aux-r"><span class="aux-k">K7 未承認ナレッジ整理時間</span><span class="aux-v">8 時間</span></div>
+    </div>
+    <div class="kri">
+      <span class="kri-t">KRI アラート</span>
+      <span class="kri-h">R7 staging 矛盾検知 — 警戒 1 件</span>
+      <span class="kri-d">差戻しコメントから生成された staging が、既存 compiled ナレッジと矛盾しています。手順管理者の確認が必要です。</span>
+      <button class="btn primary" style="background: var(--color-error); align-self: start;">詳細を見る →</button>
+    </div>
+  </div>
+
+  <div style="text-align: center; font-size: 9px; color: var(--color-fg-muted);">全数値 [仮説 / 要検証] · Phase 1 で測定・再設定する検証仮説。本画面は本番導入可否を判定する gate ではありません。</div>
+
+</div>
+</main>
+
+</body>
+</html>

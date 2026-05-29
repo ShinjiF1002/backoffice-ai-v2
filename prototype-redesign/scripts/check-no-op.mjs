@@ -38,6 +38,7 @@ const REPO_ROOT = resolve(__dirname, '../..')
 /** Recursively collect .tsx files under dir. */
 function walkTsx(dir, out = []) {
   for (const entry of readdirSync(dir)) {
+    if (entry === '__tests__') continue // test fixtures は no-op gate 対象外 (Phase 0)
     const full = join(dir, entry)
     const stat = statSync(full)
     if (stat.isDirectory()) walkTsx(full, out)

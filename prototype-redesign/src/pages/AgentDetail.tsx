@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon, XIcon } from 'lucide-react'
-import { AGENT_CORP_ADDRESS } from '@/data/mock-agent-detail'
+import { Link, useParams } from 'react-router-dom'
+import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon } from 'lucide-react'
+import { AGENT_DETAILS } from '@/data/mock-agent-detail'
+import { useAgent, useStoreDispatch } from '@/store/hooks'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
+import { Modal } from '@/components/shared/Modal'
 import { cn } from '@/lib/cn'
 
 /**
@@ -13,11 +15,34 @@ import { cn } from '@/lib/cn'
  * A 4 KPI 全件 (集約値を捨てる) / B 裏付け sample + 設定 / C 申請 1 ボタン (単一決定面)。
  * Trust は業務語 (全件確認 / 要所確認) を主表示、Tier 名 (Supervised) は補助 chip。
  */
-const a = AGENT_CORP_ADDRESS
+/** 未知 id の not-found (業務語、token-clean inline)。 */
+function AgentNotFound() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+      <p className="text-sm text-[var(--color-fg-muted)]">指定のエージェントが見つかりません。</p>
+      <Link to="/agents" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+        エージェント一覧へ戻る
+      </Link>
+    </div>
+  )
+}
 
 export function AgentDetail() {
+  const { id } = useParams()
+  const a = id ? AGENT_DETAILS[id] : undefined
+  const agentEntity = useAgent(id)
+  const dispatch = useStoreDispatch()
   const [applyOpen, setApplyOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
+  const [prevId, setPrevId] = useState(id)
+  if (id !== prevId) {
+    setPrevId(id)
+    setApplyOpen(false)
+    setToast(null)
+  }
+
+  if (!a) return <AgentNotFound />
 
   const showToast = (m: string) => {
     setToast(m)
@@ -25,6 +50,7 @@ export function AgentDetail() {
   }
 
   const hasUnmet = a.metrics.some((m) => !m.achieved)
+  const requested = agentEntity?.promotionRequested ?? false
 
   return (
     <div className="flex h-full flex-col">
@@ -128,7 +154,12 @@ export function AgentDetail() {
       {/* Footer: 申請 1 ボタン (原則 C)、未達時は disabled + 理由明示 */}
       <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
         <div className="flex items-center gap-1.5 text-xs">
-          {hasUnmet ? (
+          {requested ? (
+            <>
+              <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
+              <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
+            </>
+          ) : hasUnmet ? (
             <>
               <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
               <span className="font-medium text-[var(--color-alert-soft-fg)]">承認率が基準 (95%) に未達のため、現時点では昇格を申請できません</span>
@@ -142,71 +173,55 @@ export function AgentDetail() {
         </div>
         <button
           type="button"
-          disabled={hasUnmet}
-          title={hasUnmet ? '承認率が基準に未達です' : undefined}
+          disabled={hasUnmet || requested}
+          title={hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
           onClick={() => setApplyOpen(true)}
           className={cn(
             'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-            hasUnmet
+            hasUnmet || requested
               ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
               : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
           )}
         >
           <BotIcon className="h-4 w-4" />
-          設定変更を申請
+          {requested ? '申請済み' : '設定変更を申請'}
         </button>
       </footer>
 
-      {/* 申請 confirm dialog */}
-      {applyOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="設定変更を申請"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-overlay)] p-6"
-          onClick={() => setApplyOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="flex w-[480px] max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl"
-          >
-            <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
-              <h2 className="text-sm font-semibold text-[var(--color-fg)]">設定変更を申請</h2>
-              <button
-                type="button"
-                onClick={() => setApplyOpen(false)}
-                aria-label="閉じる"
-                className="rounded p-1 text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]"
-              >
-                <XIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="p-5 text-sm leading-relaxed text-[var(--color-fg)]">
-              全件確認 → 要所確認 への昇格を申請します。承認後、人レビューが減り自動入力が増えます (帰結を参照)。
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[var(--color-border)] bg-[var(--color-panel-inset)] px-5 py-3">
-              <button
-                type="button"
-                onClick={() => setApplyOpen(false)}
-                className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setApplyOpen(false)
-                  showToast('昇格を申請しました')
-                }}
-                className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
-              >
-                <CheckIcon className="h-4 w-4" />
-                申請する
-              </button>
-            </div>
-          </div>
+      {/* 申請 confirm dialog (共通 Modal、Phase 2) */}
+      <Modal
+        open={applyOpen}
+        onClose={() => setApplyOpen(false)}
+        title="設定変更を申請"
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setApplyOpen(false)}
+              className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setApplyOpen(false)
+                if (id) dispatch({ type: 'agent/requestPromotion', id })
+                showToast('昇格を申請しました')
+              }}
+              className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+            >
+              <CheckIcon className="h-4 w-4" />
+              申請する
+            </button>
+          </>
+        }
+      >
+        <div className="text-sm leading-relaxed text-[var(--color-fg)]">
+          全件確認 → 要所確認 への昇格を申請します。承認後、人レビューが減り自動入力が増えます (帰結を参照)。
         </div>
-      )}
+      </Modal>
 
       {toast && (
         <div

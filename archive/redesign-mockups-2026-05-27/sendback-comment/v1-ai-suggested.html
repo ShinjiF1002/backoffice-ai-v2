@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>SendBack v1 — AI-suggested chips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../_shared/tokens.css">
+<link rel="stylesheet" href="../_shared/shell.css">
+<style>
+.ph { background: var(--color-panel); border-bottom: 1px solid var(--color-border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+.body { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 18px; height: calc(100% - 50px - 60px); overflow: auto; }
+.form { width: 820px; max-width: 100%; display: flex; flex-direction: column; gap: 18px; }
+.ai-banner { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: var(--color-primary-soft); border-left: 3px solid var(--color-primary); border-radius: 8px; }
+.ai-banner .icon { font-size: 14px; color: var(--color-primary); }
+.ai-banner .text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.ai-banner .t { font-size: 10px; font-weight: 600; color: var(--color-primary-deep); }
+.ai-banner .sub { font-size: 11px; }
+.step-h { display: flex; gap: 8px; align-items: center; }
+.step-n { width: 24px; height: 24px; background: var(--color-primary); color: var(--color-fg-invert); border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+.step-t { font-size: 14px; font-weight: 600; }
+.chips-row { display: flex; gap: 8px; }
+.cat-chip { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 8px; }
+.cat-chip.selected { background: var(--color-primary-soft); border: 2px solid var(--color-primary); padding: 9px 11px; }
+.cat-t { font-size: 13px; font-weight: 700; }
+.cat-chip.selected .cat-t { color: var(--color-primary-deep); }
+.cat-d { font-size: 10px; color: var(--color-fg-muted); }
+.cat-tag { font-size: 8px; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: var(--color-panel-inset); color: var(--color-fg-muted); width: fit-content; }
+.cat-chip.selected .cat-tag { background: var(--color-panel); color: var(--color-primary-deep); }
+.textarea-card { width: 100%; height: 100px; background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 8px; padding: 12px 14px; font-size: 11px; line-height: 1.55; }
+.ta-foot { display: flex; justify-content: space-between; align-items: center; padding: 0 2px; }
+.foot { background: var(--color-panel); border-top: 1px solid var(--color-border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">B</div><div class="brand-text"><div class="brand-name">Backoffice AI</div><div class="brand-sub">v2 prototype</div></div></div>
+  <nav class="nav">
+    <a class="nav-item" href="#"><span class="ic">◫</span> ダッシュボード</a>
+    <a class="nav-item" href="#"><span class="ic">✉</span> 受信トレイ</a>
+    <a class="nav-item active" href="#"><span class="ic">📄</span> 案件処理</a>
+    <a class="nav-item" href="#"><span class="ic">✦</span> AI 提案レビュー</a>
+    <a class="nav-item" href="#"><span class="ic">⚙</span> Agent 設定</a>
+    <a class="nav-item" href="#"><span class="ic">◊</span> 監査証跡</a>
+    <a class="nav-item" href="#"><span class="ic">◐</span> メトリクス</a>
+    <a class="nav-item" href="#"><span class="ic">◉</span> ナレッジ</a>
+  </nav>
+  <div class="user"><div class="user-avatar"></div><div class="user-text"><div class="user-name">山田 太郎</div><div class="user-role">入力者</div></div></div>
+</aside>
+
+<header class="topbar">
+  <div class="search"><span class="ic">⌕</span><span> </span></div>
+  <div class="topbar-right">
+    <span class="bell">🔔</span>
+    <div class="proto-pill"><span class="ic">ⓘ</span><span>プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span></div>
+  </div>
+</header>
+
+<main class="main" style="display: flex; flex-direction: column;">
+<div class="variant-label">V1 · AI-suggested chips</div>
+
+<div class="ph">
+  <div style="display: flex; gap: 8px; align-items: end;">
+    <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 600;">CASE-2026-0142</span>
+    <span style="font-size: 13px; font-weight: 700;">差戻しコメント</span>
+  </div>
+  <a style="font-size: 10px; font-weight: 500; color: var(--color-primary-deep);" href="#">案件レビューに戻る ›</a>
+</div>
+
+<div class="body">
+  <div class="form">
+    <div class="ai-banner">
+      <span class="icon">✦</span>
+      <div class="text">
+        <span class="t">AI による事前推測</span>
+        <span class="sub">新住所の番地表記が原本と一致しません。「誤読」の可能性が高そうです。</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="step-h">
+        <div class="step-n">1</div>
+        <span class="step-t">差戻し理由を 1 つ選択</span>
+      </div>
+      <div class="chips-row">
+        <div class="cat-chip selected"><div class="cat-t">誤読</div><div class="cat-d">AI が解釈ミス</div><div class="cat-tag">✦ AI 推測</div></div>
+        <div class="cat-chip"><div class="cat-t">UI 差異</div><div class="cat-d">業務 UI 変更</div></div>
+        <div class="cat-chip"><div class="cat-t">境界条件</div><div class="cat-d">想定外パターン</div></div>
+        <div class="cat-chip"><div class="cat-t">判断境界</div><div class="cat-d">ルール不足</div></div>
+        <div class="cat-chip"><div class="cat-t">入力誤り</div><div class="cat-d">原本ミス</div><div class="cat-tag">別経路</div></div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="step-h">
+          <div class="step-n">2</div>
+          <span class="step-t">具体的に何が間違いか説明</span>
+        </div>
+        <span style="font-size: 10px; color: var(--color-fg-muted);">任意 · 同種ケース改善に活用</span>
+      </div>
+      <div class="textarea-card">住所マスタに存在しない丁目番地の場合、AI は raw 値で書き込まれていました。マスタ未登録時は alert + 手動確認に振るルールを追加してください。</div>
+      <div class="ta-foot">
+        <span style="display: inline-flex; gap: 5px; padding: 3px 8px; border-radius: 4px; background: var(--color-panel-inset); font-size: 10px; font-weight: 500; color: var(--color-primary-deep);">✦ AI による改善提案を生成</span>
+        <span style="font-family: var(--font-mono); font-size: 9px; color: var(--color-fg-muted);">117 / 300</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  <a style="font-size: 11px; font-weight: 500; color: var(--color-fg-muted);" href="#">キャンセル</a>
+  <div style="display: flex; gap: 14px; align-items: center;">
+    <span style="font-size: 10px; color: var(--color-fg-muted);">差戻し後 · 案件は AI 再処理キューへ移動</span>
+    <button class="btn primary">差戻しを記録 →</button>
+  </div>
+</footer>
+</main>
+
+</body>
+</html>

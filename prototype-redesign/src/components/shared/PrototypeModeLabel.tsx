@@ -37,9 +37,9 @@ export function PrototypeModeLabel() {
           hovered ? 'visible opacity-100' : 'invisible opacity-0'
         )}
       >
-        本プロトタイプはメモリ上のモック状態です。
+        本プロトタイプは表示確認用で、操作内容は実システムに反映されません。
         <br />
-        ・永続化なし
+        ・表示状態はこの端末内のみに保存 (外部システム未保存)
         <br />
         ・外部システム未接続
         <br />

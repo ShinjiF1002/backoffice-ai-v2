@@ -1,4 +1,7 @@
-import type { FieldReview, CaseLifecycleStep } from './types'
+import type { FieldReview, CaseLifecycleStep, CaseStatus } from './types'
+import { CASE_LIST } from './mock-case-list'
+import type { CaseListRow } from './mock-case-list'
+import { caseStatusLabel } from '@/lib/status-tones'
 
 /**
  * CaseDetail (CASE-2026-0142) mock model — P2B-2 CaseDetail pilot の data 契約
@@ -122,4 +125,137 @@ export const CASE_2026_0142: CaseDetailModel = {
     { title: '番地表記正規化ルール', id: 'KB-RULE-008', version: 'v1.4', date: '2026-03-08' },
     { title: '効力発生日設定基準', id: 'KB-RULE-014', version: 'v2.0', date: '2026-05-02' },
   ],
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Phase 4a — id-keyed detail dict (X-10 解消)
+// CASE_LIST の全行に対し status / flags / change と整合した detail を量産する軽量 factory。
+// 手書き canonical (CASE_2026_0142) は温存し、dict 登録時に factory 出力を上書きする。
+// rich data (fields/document/lifecycle/citations) は store ではなく本 dict 側に置く (S8 / 4b 境界)。
+// ──────────────────────────────────────────────────────────────────────────
+
+/** owner と別人の承認者を返す (SoD 表示の整合: 入力者 ≠ 承認者)。 */
+function approverFor(inputter: string): string {
+  return inputter === '鈴木課長' ? '田中部長' : '鈴木課長'
+}
+
+/** 既定 5 項目 (全 matched)。change がある field は申請後の新値を反映。 */
+function baseFields(change?: CaseListRow['change']): FieldReview[] {
+  const newAddr = change?.field === '新住所' ? change.to : '東京都千代田区丸の内 2 丁目 3 番 5 号'
+  const corpName = change?.field === '法人名' ? change.to : '株式会社サンプル商事'
+  return [
+    { fieldLabel: '法人名', aiValue: corpName, ocrRawValue: corpName, masterValue: corpName, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '法人名欄' } },
+    { fieldLabel: '新住所', aiValue: newAddr, ocrRawValue: newAddr, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
+    { fieldLabel: 'ビル名', aiValue: 'サンプルビル', ocrRawValue: 'サンプルビル', masterValue: 'サンプルビル', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
+    { fieldLabel: '支店コード', aiValue: '042', ocrRawValue: '042', masterValue: '042', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '支店コード欄' } },
+    { fieldLabel: '効力発生日', aiValue: '2026-06-15', ocrRawValue: '2026-06-15', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '効力日欄' } },
+  ]
+}
+
+/** status → 現在の lifecycle step index (reflected は全 done = current なし)。 */
+const CASE_CURRENT_STEP: Record<CaseStatus, number> = {
+  pending: 1, // AI処理
+  ready: 2, // 入力者確認
+  'sent-back': 1, // AI処理 (差戻し後の再処理)
+  'business-approval-waiting': 3, // 承認者承認
+  reflected: 5, // 全 done (current なし)
+}
+
+function buildLifecycle(status: CaseStatus, inputter: string, approver: string): CaseLifecycleEvent[] {
+  const steps: { step: CaseLifecycleStep; actor: string; detail: string }[] = [
+    { step: '受付', actor: 'システム', detail: '申請書類を受け付けました。' },
+    { step: 'AI処理', actor: 'AI 担当 Agent', detail: '読み取り + 登録情報照合 + 値生成。' },
+    { step: '入力者確認', actor: inputter, detail: 'AI 入力と申請書類を照合して確認。' },
+    { step: '承認者承認', actor: approver, detail: '最終承認。' },
+    { step: '反映', actor: 'システム', detail: '登録情報を更新。' },
+  ]
+  const current = CASE_CURRENT_STEP[status]
+  return steps.map((s, i): CaseLifecycleEvent => ({
+    ...s,
+    time: i < current ? '完了' : i === current ? '進行中' : '—',
+    done: i < current,
+    current: i === current,
+  }))
+}
+
+function buildDocRows(fields: FieldReview[]): DocumentRow[] {
+  const rows: DocumentRow[] = fields.map((f) => ({
+    label: f.fieldLabel,
+    value: f.ocrRawValue ?? f.aiValue,
+    fieldLabel: f.fieldLabel,
+    highlight: f.reconcileState === 'needs_review',
+  }))
+  rows.push({ label: '押印 / 署名欄', value: '(押印済)' })
+  return rows
+}
+
+/** list row 1 行 → CaseDetailModel。status/flags/change を整合させて量産。 */
+function buildCaseDetail(row: CaseListRow): CaseDetailModel {
+  const fileName = `${row.id}.pdf`
+  const inputter = row.owner === '—' ? '未割当' : row.owner
+  const approver = approverFor(inputter)
+
+  const change = row.change
+  let fields = baseFields(change)
+  // change.field を先頭へ (要確認の先頭割当 + 申請書類強調の先頭化、gate 3)
+  if (change) {
+    const idx = fields.findIndex((f) => f.fieldLabel === change.field)
+    if (idx > 0) {
+      const [moved] = fields.splice(idx, 1)
+      fields.unshift(moved)
+    }
+  }
+  // status × flags → reconcileState
+  if (row.status === 'pending') {
+    // AI 未処理 → 未取得 (要確認数 = 申請書類は表示するが値は未抽出)
+    fields = fields.map((f): FieldReview => ({ ...f, reconcileState: 'not_extracted', aiValue: '—' }))
+  } else if (row.status === 'ready' && row.flags > 0) {
+    // 先頭 flags 件を要確認に (change.field を先頭化済 → reviewFields[0] = change.field)
+    fields = fields.map((f, i): FieldReview => (i < row.flags ? { ...f, reconcileState: 'needs_review' } : f))
+  } else if (row.status === 'business-approval-waiting' || row.status === 'reflected') {
+    // 入力者確認を通過済 → 確認済
+    fields = fields.map((f): FieldReview => ({ ...f, reconcileState: 'manually_confirmed' }))
+  }
+  // sent-back / ready(flags=0) は matched のまま
+  // 申請書類名を sourceLocator に注入
+  fields = fields.map((f): FieldReview => ({
+    ...f,
+    sourceLocator: f.sourceLocator ? { ...f.sourceLocator, doc: fileName } : f.sourceLocator,
+  }))
+
+  return {
+    id: row.id,
+    workflowName: row.workflow,
+    statusLabel: caseStatusLabel(row.status),
+    inputter,
+    approver,
+    fields,
+    document: {
+      fileName,
+      page: 'P.2',
+      pageCount: 3,
+      title: `${row.workflow}届`,
+      rows: buildDocRows(fields),
+    },
+    lifecycle: buildLifecycle(row.status, inputter, approver),
+    citations: CASE_2026_0142.citations,
+  }
+}
+
+/** id-keyed dict。全 CASE_LIST id を網羅し、canonical 0142 は手書き版で上書き (温存)。 */
+export const CASE_DETAILS: Record<string, CaseDetailModel> = Object.fromEntries(
+  CASE_LIST.map((row): [string, CaseDetailModel] => [row.id, buildCaseDetail(row)]),
+)
+CASE_DETAILS['CASE-2026-0142'] = CASE_2026_0142
+
+// 提案の根拠 (PROP-2026-031 sourceCases) として参照される過去案件 = 参照専用 historical detail。
+// CASE_LIST には載せない (store/list 非対象 = seed されない)。CASE_DETAILS にのみ登録し
+// 「元の案件を開く」リンクの NotFound を防ぐ (CR P1)。store entity が無いため detail は参照専用で描画される。
+const HISTORICAL_CASE_ROWS: CaseListRow[] = [
+  { id: 'CASE-2026-0098', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-22 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビルディング' } },
+  { id: 'CASE-2026-0087', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-18 処理済', owner: '山田太郎', flags: 0, change: { field: '新住所', from: '東京都千代田区丸の内 2 丁目 3', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
+  { id: 'CASE-2026-0079', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-14 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビル' } },
+]
+for (const row of HISTORICAL_CASE_ROWS) {
+  CASE_DETAILS[row.id] = buildCaseDetail(row)
 }

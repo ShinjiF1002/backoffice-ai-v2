@@ -27,5 +27,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/legacy"]
+  "exclude": ["src/legacy", "src/__tests__"]
 }

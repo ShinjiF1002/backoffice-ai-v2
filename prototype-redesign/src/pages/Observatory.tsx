@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon } from 'lucide-react'
+import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import {
   OBS_CASE_ID,
@@ -14,6 +14,8 @@ import type { LifecycleEvent, KnowledgeGroup } from '@/data/mock-observatory'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { MetaChip } from '@/components/shared/MetaChip'
 import type { MetaTone } from '@/components/shared/MetaChip'
+import { useStoreDispatch } from '@/store/hooks'
+import { clearPersisted } from '@/store/persist'
 import { cn } from '@/lib/cn'
 
 /**
@@ -44,6 +46,7 @@ const TABS = [
 type TabKey = (typeof TABS)[number]['k']
 
 export function Observatory() {
+  const dispatch = useStoreDispatch()
   const [tab, setTab] = useState<TabKey>('audit')
   const [auditView, setAuditView] = useState<'lifecycle' | 'ledger'>('lifecycle')
   const [toast, setToast] = useState<string | null>(null)
@@ -53,6 +56,13 @@ export function Observatory() {
     window.setTimeout(() => setToast(null), 2600)
   }
 
+  // 「表示データを初期化」: この端末の操作状態 (承認・差戻し・申請・上書き) を seed に戻す + 永続消去。
+  const handleReset = () => {
+    dispatch({ type: 'store/reset' })
+    clearPersisted()
+    showToast('表示データを初期化しました（この端末の操作状態をリセット）')
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Header + tab nav */}
@@ -60,9 +70,20 @@ export function Observatory() {
         data-page-header
         className="sticky top-0 z-30 flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 pt-3"
       >
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-xl font-semibold text-[var(--color-fg)]">モニタリング</h1>
-          <span className="text-xs text-[var(--color-fg-muted)]">監査者向けの参照画面。Process 別に証跡・AI 精度・ナレッジを確認します。</span>
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h1 className="text-xl font-semibold text-[var(--color-fg)]">モニタリング</h1>
+            <span className="text-xs text-[var(--color-fg-muted)]">監査者向けの参照画面。Process 別に証跡・AI 精度・ナレッジを確認します。</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleReset}
+            title="この端末の操作状態 (承認・差戻し・申請など) を初期化します"
+            className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)] hover:text-[var(--color-fg)]"
+          >
+            <RotateCcwIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            表示データを初期化
+          </button>
         </div>
         <div className="flex gap-1">
           {TABS.map((t) => (
@@ -156,7 +177,7 @@ export function Observatory() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => showToast('証跡台帳をエクスポートしました（プロトタイプのためモックです）')}
+                      onClick={() => showToast('証跡台帳の控えを出力しました（参考表示・外部システム未保存）')}
                       className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-xs font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
                     >
                       <DownloadIcon className="h-3.5 w-3.5" aria-hidden="true" />

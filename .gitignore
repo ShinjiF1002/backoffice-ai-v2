@@ -17,3 +17,6 @@ coverage/
 # (ad-hoc review artifact、commit 対象外)
 # 過去の review 版は archive/ に退避済 (archive/ 配下は git 管理対象)
 /docs-review*.html
+
+# handoff-redesign/ の一時 zip export (中身は handoff-redesign/ で tracked、zip は追跡しない)
+/handoff-redesign.zip

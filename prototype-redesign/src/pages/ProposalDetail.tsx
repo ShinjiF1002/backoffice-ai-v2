@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, XIcon, CornerUpLeftIcon, ArrowRightIcon } from 'lucide-react'
-import { PROP_2026_031 } from '@/data/mock-proposal-detail'
+import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
+import type { ProposalStatus } from '@/data/types'
+import { useStoreDispatch } from '@/store/hooks'
 import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
@@ -16,16 +18,58 @@ import { cn } from '@/lib/cn'
  * A 手順全体 before/after (diff だけでなく全 step) / B 根拠 差戻し case 原文 / C mode で決定 1 セット。
  * collapse は canonical token の inline 実装 (継承 Disclosure は off-token のため P2B-4 tokenize 待ち)。
  */
-const p = PROP_2026_031
 const STEPPER = ['生成', 'Manual 確認', '上長承認', '反映']
-const STEPPER_CURRENT = 1
+
+/** ProposalStatus → 4-step stepper の現在 index。 */
+function proposalStepperCurrent(status: ProposalStatus): number {
+  switch (status) {
+    case 'pending-triage':
+      return 1 // Manual 確認
+    case 'forwarded':
+      return 2 // 上長承認
+    case 'approved':
+      return 3 // 反映
+    case 'rejected':
+      return 1
+  }
+}
+
+/** 未知 id の not-found (業務語、token-clean inline)。 */
+function ProposalNotFound() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+      <p className="text-sm text-[var(--color-fg-muted)]">指定の提案が見つかりません。</p>
+      <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+        提案一覧へ戻る
+      </Link>
+    </div>
+  )
+}
 
 export function ProposalDetail() {
+  const { id } = useParams()
+  const p = id ? PROPOSAL_DETAILS[id] : undefined
+  const dispatch = useStoreDispatch()
   const [mode, setMode] = useState<'manual' | 'owner'>('manual')
   const [dialog, setDialog] = useState<'reject' | 'sendback' | null>(null)
-  const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({ [p.sourceCases[0].id]: true })
+  const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>(() =>
+    p && p.sourceCases.length ? { [p.sourceCases[0].id]: true } : {},
+  )
   const [hintOpen, setHintOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
+  const [prevId, setPrevId] = useState(id)
+  if (id !== prevId) {
+    setPrevId(id)
+    setMode('manual')
+    setDialog(null)
+    setOpenEvidence(p && p.sourceCases.length ? { [p.sourceCases[0].id]: true } : {})
+    setHintOpen(false)
+    setToast(null)
+  }
+
+  if (!p) return <ProposalNotFound />
+  const stepperCurrent = proposalStepperCurrent(p.status)
 
   const showToast = (m: string) => {
     setToast(m)
@@ -74,8 +118,8 @@ export function ProposalDetail() {
         {/* 4-step stepper (time なし、CaseDetail LifecycleStepper と視覚言語を共有) */}
         <ol className="flex items-center gap-0" aria-label="提案の進行状況">
           {STEPPER.map((step, i) => {
-            const done = i < STEPPER_CURRENT
-            const current = i === STEPPER_CURRENT
+            const done = i < stepperCurrent
+            const current = i === stepperCurrent
             const last = i === STEPPER.length - 1
             return (
               <li key={step} className={cn('flex items-center', !last && 'flex-1')}>
@@ -265,7 +309,10 @@ export function ProposalDetail() {
             </button>
             <button
               type="button"
-              onClick={() => showToast('上長へ送付しました — 業務責任者の承認待ちへ')}
+              onClick={() => {
+                if (id) dispatch({ type: 'proposal/forward', id })
+                showToast('上長へ送付しました — 業務責任者の承認待ちへ')
+              }}
               className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
             >
               上長へ送付
@@ -284,7 +331,10 @@ export function ProposalDetail() {
             </button>
             <button
               type="button"
-              onClick={() => showToast('提案を承認しました — 反映に進みます')}
+              onClick={() => {
+                if (id) dispatch({ type: 'proposal/approve', id })
+                showToast('提案を承認しました — 反映に進みます')
+              }}
               className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
             >
               <CheckIcon className="h-4 w-4" />
@@ -302,7 +352,10 @@ export function ProposalDetail() {
         submitLabel="却下する"
         outcome="却下すると、この提案は反映されません。"
         onClose={() => setDialog(null)}
-        onSubmit={() => showToast('提案を却下しました')}
+        onSubmit={() => {
+          if (id) dispatch({ type: 'proposal/reject', id })
+          showToast('提案を却下しました')
+        }}
       />
       <ReasonDialog
         open={dialog === 'sendback'}

@@ -45,6 +45,15 @@ export function TopBar() {
             className="h-full w-full rounded-md border border-[var(--color-border)] bg-[var(--color-panel-inset)] pl-9 pr-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-tertiary)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
           />
         </form>
+        {/* 狭幅 (lg 未満) は検索 icon → /search ページの自前 input で入力 (mobile 到達性) */}
+        <button
+          type="button"
+          onClick={() => navigate('/search')}
+          aria-label="検索"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)] lg:hidden"
+        >
+          <SearchIcon className="h-4 w-4" aria-hidden="true" />
+        </button>
       </div>
 
       {/* Right: 通知ベル (/inbox) + persona switcher (demo) + prototype label */}
@@ -54,7 +63,7 @@ export function TopBar() {
           aria-label={unread > 0 ? `通知 (未読 ${unread} 件)` : '通知'}
           className={({ isActive }) =>
             cn(
-              'relative hidden h-8 w-8 items-center justify-center rounded-md sm:flex',
+              'relative flex h-8 w-8 items-center justify-center rounded-md',
               isActive
                 ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
                 : 'text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]',

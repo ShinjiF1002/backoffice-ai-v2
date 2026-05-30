@@ -47,7 +47,7 @@ export function PrototypeModeLabel() {
         <br />
         ・実規制の引用なし
         <br />
-        ・検索 / 通知 / 一括操作 / フィルタ等の機能は次の実装段階で対応
+        ・AI の入力・分析・自動化は模擬 (実 LLM / 実行系・送金・台帳更新には未接続)
       </div>
     </div>
   )

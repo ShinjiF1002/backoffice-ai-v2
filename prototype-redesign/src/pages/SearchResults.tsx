@@ -1,3 +1,4 @@
+import { SearchIcon } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn } from '@/components/shared/DataTable'
 import { MetaChip } from '@/components/shared/MetaChip'
@@ -28,7 +29,7 @@ const columns: DataTableColumn<SearchResultItem>[] = [
 ]
 
 export function SearchResults() {
-  const { searchQuery } = useView()
+  const { searchQuery, setSearchQuery } = useView()
   const q = searchQuery.trim()
   const results = useSearchResults(searchQuery)
   return (
@@ -41,6 +42,21 @@ export function SearchResults() {
         <p className="mt-1 text-xs text-[var(--color-fg-muted)]">
           {q ? `「${q}」の検索結果 ${results.length} 件` : '案件 ID・業務名・担当者・Agent を横断検索します'}
         </p>
+        {/* ページ自前の検索 input — 狭幅 (TopBar input が出ない lg 未満) でも /search が自己完結する */}
+        <div className="relative mt-3 max-w-md">
+          <SearchIcon
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-fg-subtle)]"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="案件 ID・業務名・担当者・Agent 名"
+            aria-label="横断検索"
+            className="h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-panel-inset)] pl-9 pr-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-tertiary)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+          />
+        </div>
       </header>
 
       <div className="p-4">

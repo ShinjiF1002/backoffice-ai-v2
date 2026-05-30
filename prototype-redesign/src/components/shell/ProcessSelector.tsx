@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDownIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { useView } from '@/context/view-context'
 
 /**
  * ProcessSelector — TopBar の業務 (Process) 切替 (Process-First IA の中核)
@@ -16,9 +17,10 @@ const PROCESSES = [
 ] as const
 
 export function ProcessSelector() {
-  const [selected, setSelected] = useState<string>('UC-BO-01')
+  // P1-1: 業務選択は ViewContext SSOT (localStorage 永続)。local useState は廃止し全画面の list filter と同期。
+  const { process, setProcess } = useView()
   const [open, setOpen] = useState(false)
-  const current = PROCESSES.find((p) => p.id === selected) ?? PROCESSES[0]
+  const current = PROCESSES.find((p) => p.id === process) ?? PROCESSES[0]
 
   return (
     <div className="relative">
@@ -43,14 +45,14 @@ export function ProcessSelector() {
               <button
                 type="button"
                 role="option"
-                aria-selected={p.id === selected}
+                aria-selected={p.id === process}
                 onClick={() => {
-                  setSelected(p.id)
+                  setProcess(p.id)
                   setOpen(false)
                 }}
                 className={cn(
                   'flex w-full items-center px-3 py-1.5 text-left text-sm hover:bg-[var(--color-panel-inset)]',
-                  p.id === selected
+                  p.id === process
                     ? 'font-medium text-[var(--color-primary)]'
                     : 'text-[var(--color-fg)]'
                 )}

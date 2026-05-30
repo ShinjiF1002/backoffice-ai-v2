@@ -6,6 +6,7 @@ import { MiniTrend } from '@/components/shared/MiniTrend'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 import { useAgents } from '@/store/hooks'
+import { useView } from '@/context/view-context'
 
 /**
  * エージェント一覧 (Agents, /agents) — B 型 queue / AI 管理者
@@ -91,7 +92,8 @@ const filters: DataTableFilter<AgentViewRow>[] = [
 const AGENT_BY_ID = Object.fromEntries(AGENT_LIST.map((r) => [r.id, r]))
 
 export function Agents() {
-  const agents = useAgents()
+  const { process } = useView()
+  const agents = useAgents(process)
   // store entity → list row view-model (trust / 昇格申請は store-truth で reactive)
   const rows: AgentViewRow[] = agents.flatMap((e) => {
     const base = AGENT_BY_ID[e.id]

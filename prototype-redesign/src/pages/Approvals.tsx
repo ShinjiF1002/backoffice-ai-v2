@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon } from 'lucide-react'
 import { useApprovals, useStoreDispatch, useCurrentActor } from '@/store/hooks'
+import { useView } from '@/context/view-context'
 import { CASE_DETAILS } from '@/data/mock-case-detail'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
@@ -56,7 +57,8 @@ const columns: DataTableColumn<ApprovalViewRow>[] = [
 ]
 
 export function Approvals() {
-  const approvals = useApprovals()
+  const { process } = useView()
+  const approvals = useApprovals(process)
   const dispatch = useStoreDispatch()
   const actor = useCurrentActor()
   const [toast, setToast] = useState<string | null>(null)

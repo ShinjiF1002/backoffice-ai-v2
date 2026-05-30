@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 import { useProposals } from '@/store/hooks'
+import { useView } from '@/context/view-context'
 
 /**
  * 提案一覧 (Proposals, /proposals) — B 型 queue / Manual 管理者
@@ -45,7 +46,8 @@ const filters: DataTableFilter<ProposalListRow>[] = [
 const PROPOSAL_BY_ID = Object.fromEntries(PROPOSAL_LIST.map((r) => [r.id, r]))
 
 export function Proposals() {
-  const proposals = useProposals()
+  const { process } = useView()
+  const proposals = useProposals(process)
   // store entity → list row view-model (status は store-truth、表示列は list mock を join)
   const rows: ProposalListRow[] = proposals.flatMap((e) => {
     const base = PROPOSAL_BY_ID[e.id]

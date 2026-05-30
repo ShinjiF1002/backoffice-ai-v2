@@ -7,6 +7,8 @@ import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 import { useCases } from '@/store/hooks'
+import { useView } from '@/context/view-context'
+import { KPI_PROCESS_LABEL } from '@/data/mock-kpi'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
@@ -60,7 +62,9 @@ const filters: DataTableFilter<CaseListRow>[] = [
 ]
 
 export function Cases() {
-  const cases = useCases()
+  const { process } = useView()
+  const cases = useCases(process)
+  const processLabel = process === 'all' ? '全業務' : (KPI_PROCESS_LABEL[process] ?? '全業務')
   // store entity → list row view-model (status/flags/assignee は store-truth で reactive)
   const rows: CaseListRow[] = cases.map((e) => ({
     id: e.id,
@@ -77,7 +81,7 @@ export function Cases() {
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
         <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">全業務 · {rows.length} 件 ／ 行を選んで案件を確認</p>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">{processLabel} · {rows.length} 件 ／ 行を選んで案件を確認</p>
       </header>
 
       <div className="p-4">

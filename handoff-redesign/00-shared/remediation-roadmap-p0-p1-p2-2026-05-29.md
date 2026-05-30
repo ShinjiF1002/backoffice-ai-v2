@@ -50,6 +50,8 @@
 > - check:all green (**test 153** / build) + 本番 boot smoke。commit `d02fbdf`。
 >
 > **W2c-2 / P1-8 完了 (2026-05-30、before/after)**: `FieldReview.previousValue` 新設 (masterValue=突合参照と意味論分離)。`mock-case-detail` の change.from → previousValue (baseFields 変更系 field + canonical 0142 新住所 = 旧住所手書き、口座開設 = 新規登録ゆえ省略)。ReconcilePanel 要確認カード + 確認済行に「現在の登録値 → 確定値」(右辺 = humanValue ?? aiValue で B1 整合、ArrowRightIcon + fg-tertiary)。test: before-after.test (0142 新住所 previousValue / 0112 口座開設 持たない + render before/after)。check:all green (**test 156** / build)。**残り W2c-2 / P1-7** (Observatory drill + 横断台帳)。
+>
+> **W2c-2a micro-cleanup (2026-05-30、外部 CR Major)**: AgentDetail の `approved` terminal false-success 是正。manual (申請) footer の disabled が `hasUnmet||requested||paused` のみで `approved` 未考慮 → 全 KPI 達成 agent が承認済でも入力者 view に「設定変更を申請」が活性表示 (reducer は no-op ゆえ false-success)。`approved` を disabled/label/status に追加 (「設定変更は承認済みです（再申請は不要）」+ button「承認済み」disabled)。regression test 追加 (approved→入力者 view で申請 button 非表示・承認済 disabled、fix 前 fail)。check:all green (**test 157**)。commit `remediation/w2-screens`。
 
 ---
 

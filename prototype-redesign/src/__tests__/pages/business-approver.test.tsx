@@ -105,4 +105,17 @@ describe('AgentDetail 承認者 mode (W2c/P1-3、F3 regression)', () => {
     expect(screen.getByRole('button', { name: '差戻し' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '設定変更を申請' })).not.toBeInTheDocument()
   })
+
+  it('approved 後、入力者 (manual) view で再申請ボタンを出さない = terminal false-success 防止 (W2c-2a regression)', () => {
+    const dispatch = renderAgentDetail('agent-account-opening') // 全 KPI 達成 = 本来なら申請活性 variant
+    // 入力者申請 → 業務責任者承認 → 入力者へ戻る
+    act(() => dispatch({ type: 'agent/requestPromotion', id: 'agent-account-opening' }))
+    act(() => dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+    act(() => dispatch({ type: 'agent/approvePromotion', id: 'agent-account-opening' }))
+    act(() => dispatch({ type: 'session/switchActor', actorId: 'actor-inputter' }))
+    // approved は terminal → 「設定変更を申請」は出さず、disabled な「承認済み」+ 承認済 status のみ
+    expect(screen.queryByRole('button', { name: '設定変更を申請' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '承認済み' })).toBeDisabled()
+    expect(screen.getByText('設定変更は承認済みです（再申請は不要）')).toBeInTheDocument()
+  })
 })

@@ -75,6 +75,8 @@ export function AgentDetail() {
   const promotionRequestedBy = agentEntity?.promotionRequestedBy
   const isSelfPromotionApproval = promotionRequestedBy !== undefined && promotionRequestedBy === actor?.id
   const showOwnerPromotionControls = mode === 'owner' && requested
+  // 設定承認済 = terminal。manual (申請) footer は approved を再申請可に見せない (reducer も no-op、false-success 防止)。
+  const approved = agentEntity?.promotionStatus === 'approved'
 
   return (
     <div className="flex h-full flex-col">
@@ -280,6 +282,11 @@ export function AgentDetail() {
                 <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
                 <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
               </>
+            ) : approved ? (
+              <>
+                <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-success-soft-fg)]" />
+                <span className="font-medium text-[var(--color-success-soft-fg)]">設定変更は承認済みです（再申請は不要）</span>
+              </>
             ) : promotionSendbackReason ? (
               <>
                 <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
@@ -299,18 +306,18 @@ export function AgentDetail() {
           </div>
           <button
             type="button"
-            disabled={hasUnmet || requested || paused}
-            title={paused ? '緊急停止中は申請できません' : hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
+            disabled={hasUnmet || requested || paused || approved}
+            title={paused ? '緊急停止中は申請できません' : hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : approved ? '設定変更は承認済みです' : undefined}
             onClick={() => setApplyOpen(true)}
             className={cn(
               'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-              hasUnmet || requested || paused
+              hasUnmet || requested || paused || approved
                 ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
                 : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
             )}
           >
             <BotIcon className="h-4 w-4" />
-            {requested ? '申請済み' : '設定変更を申請'}
+            {requested ? '申請済み' : approved ? '承認済み' : '設定変更を申請'}
           </button>
         </footer>
       )}

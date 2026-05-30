@@ -74,10 +74,25 @@ export function DocumentViewer({ document, activeFieldLabel, onRowSelect }: Docu
               {document.rows.map((row) => {
                 const active = row.fieldLabel && row.fieldLabel === activeFieldLabel
                 const clickable = !!row.fieldLabel
+                // P1-6: clickable row を keyboard 操作可能化 (role=button + Enter/Space)。非 clickable は role を付けない。
+                const handleSelect = clickable && onRowSelect ? () => onRowSelect(row.fieldLabel!) : undefined
                 return (
                   <div
                     key={row.label}
-                    onClick={clickable && onRowSelect ? () => onRowSelect(row.fieldLabel!) : undefined}
+                    role={clickable ? 'button' : undefined}
+                    tabIndex={clickable ? 0 : undefined}
+                    aria-pressed={clickable ? !!active : undefined}
+                    onClick={handleSelect}
+                    onKeyDown={
+                      handleSelect
+                        ? (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              handleSelect()
+                            }
+                          }
+                        : undefined
+                    }
                     className={cn(
                       'rounded px-2 py-1',
                       clickable && 'cursor-pointer',

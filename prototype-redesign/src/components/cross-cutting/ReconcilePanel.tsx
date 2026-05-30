@@ -46,9 +46,19 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
           {open.map((f) => (
             <div
               key={f.fieldLabel}
+              role="button"
+              tabIndex={0}
+              aria-pressed={activeFieldLabel === f.fieldLabel}
               onClick={() => onSelectField?.(f.fieldLabel)}
+              onKeyDown={(e) => {
+                // P1-6: 内側「対応」button の Enter/Space と二重発火しないよう card 自身 focus 時のみ
+                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  onSelectField?.(f.fieldLabel)
+                }
+              }}
               className={cn(
-                'cursor-pointer rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3',
+                'cursor-pointer rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-alert)]',
                 activeFieldLabel === f.fieldLabel && 'ring-2 ring-[var(--color-alert)]'
               )}
             >

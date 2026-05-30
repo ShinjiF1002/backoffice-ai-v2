@@ -54,6 +54,10 @@
 > **W2c-2a micro-cleanup (2026-05-30、外部 CR Major)**: AgentDetail の `approved` terminal false-success 是正。manual (申請) footer の disabled が `hasUnmet||requested||paused` のみで `approved` 未考慮 → 全 KPI 達成 agent が承認済でも入力者 view に「設定変更を申請」が活性表示 (reducer は no-op ゆえ false-success)。`approved` を disabled/label/status に追加 (「設定変更は承認済みです（再申請は不要）」+ button「承認済み」disabled)。regression test 追加 (approved→入力者 view で申請 button 非表示・承認済 disabled、fix 前 fail)。check:all green (**test 157**)。commit `06e8bd6`。
 >
 > **W2c-2 / P1-7a 完了 (2026-05-30、Observatory drill 導線)**: monitoring dead-end (§3.7 根本原因#1) を解消。Observatory 監査 tab の対象 case ID → `/cases/:id` Link / MetricVsThreshold に optional `agentHref` (tone/severity と別軸) 追加 + OBS_METRICS の未達 KPI のみ該当 Agent へ drill (達成 KPI は非リンク)。observatory-drill.test (case ID→case / 未達 KPI→agent の link 検証)。check:all green (**test 159** / build)。**残り P1-7b** (横断台帳 = OBS_CASE_ID 単一 → CROSS_LEDGER + DataTable 案件選択/検索/期間、§3.7 根本原因#2)。
+>
+> **W2c-2 / P1-7b 完了 (2026-05-30、横断台帳) → W2c 完遂**: §3.7 根本原因#2 (監査台帳が単一 case 固定) を解消。`LedgerEvent` に caseId/workflowName 追加 + **CROSS_LEDGER** (13 業務 case を flatten、JG-1 (a)-lite: 代表 0142 rich 5 event / 他 12 case は 4-event 雛形 deterministic、未来日回避 2026-05-01..28)。Observatory 証跡台帳 view を横断化: 案件/業務 列 (caseId→/cases/:id drill) + workflow filter chip + free-text 検索 (Observatory ローカル、JG-2=b、DataTable 不変) + 「直近30日」固定ラベル (JG-4=b、期間 selector は別 carve) + 空状態。observatory-drill.test に横断 (複数 case + filter + 検索 + drill) 追加。check:all green (**test 161** / build) + boot smoke。
+>
+> **★ W2 (W2a+W2b+W2c) 完遂 (2026-05-30)**: 9→**14 画面** + 全 enhancement (検索/通知/a11y/業務責任者 3 画面/before-after/Observatory drill+横断台帳)。`remediation/w2-screens` 全 wave gated (check:all green test 161 / 本番 boot smoke) + 外部 CR 6 round (doc-drift 3 + behavioral 2 + converge 1) で SSOT 整合・実挙動 bug 全閉鎖。**残り W3** (production polish: §4.0 必須昇格群 = reversal/manual-entry/modal-hardening/14画面 axe/@media print/multi-tab)。PR は 14 画面 + enhancement 状態で提示可能。
 
 ---
 

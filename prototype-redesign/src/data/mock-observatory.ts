@@ -1,5 +1,6 @@
 import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
 import { KPI_ROWS } from './mock-kpi'
+import { CASE_LIST } from './mock-case-list'
 
 /**
  * Observatory (/observatory) data — Process-First v2, typology A, 監査者 view (read-only)
@@ -34,6 +35,9 @@ export interface LedgerEvent {
   approvalId: string
   /** 監査記録としてのみ保持。業務 view (LifecycleEvent) には型として存在しない。 */
   confidence: string
+  /** P1-7: 横断台帳 (CROSS_LEDGER) の案件キー。row→/cases/:caseId drill + 案件/業務 filter の母集合。 */
+  caseId: string
+  workflowName: string
 }
 
 export interface KnowledgeGroup {
@@ -80,13 +84,44 @@ export const OBS_LIFECYCLE: LifecycleEvent[] = [
   { time: '2026-05-31 11:31', actor: 'システム', role: 'システム', tone: 'inset', title: '反映', body: '登録情報を更新しました。' },
 ]
 
-// §9: raw event ledger (監査 export schema、confidence は本 view のみ)
+// §9: raw event ledger (監査 export schema、confidence は本 view のみ)。代表 0142 = rich 5 event。
+const C0142 = { caseId: OBS_CASE_ID, workflowName: '法人住所変更' }
 export const OBS_LEDGER: LedgerEvent[] = [
-  { ts: '2026-05-31 09:00:04', actor: 'system', role: 'system', action: 'intake', beforeAfter: '—', doc: 'CASE-2026-0142.pdf', policy: '—', approvalId: '—', confidence: '—' },
-  { ts: '2026-05-31 09:02:11', actor: 'agent-corp-addr', role: 'AI', action: 'ai_input', beforeAfter: '(値生成) 法人名 / 新住所 / 支店 / 効力日 / ビル名', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '法人名 0.98 / 住所 0.95 / ビル名 0.84' },
-  { ts: '2026-05-31 10:15:42', actor: '山田太郎', role: 'inputter', action: 'field_override', beforeAfter: 'ビル名: サンプルビル → サンプルビルディング', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '—' },
-  { ts: '2026-05-31 11:30:08', actor: '鈴木課長', role: 'approver', action: 'business_approve', beforeAfter: 'status: 確認済 → 承認済', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—' },
-  { ts: '2026-05-31 11:31:00', actor: 'system', role: 'system', action: 'reflect', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—' },
+  { ts: '2026-05-31 09:00:04', actor: 'system', role: 'system', action: 'intake', beforeAfter: '—', doc: 'CASE-2026-0142.pdf', policy: '—', approvalId: '—', confidence: '—', ...C0142 },
+  { ts: '2026-05-31 09:02:11', actor: 'agent-corp-addr', role: 'AI', action: 'ai_input', beforeAfter: '(値生成) 法人名 / 新住所 / 支店 / 効力日 / ビル名', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '法人名 0.98 / 住所 0.95 / ビル名 0.84', ...C0142 },
+  { ts: '2026-05-31 10:15:42', actor: '山田太郎', role: 'inputter', action: 'field_override', beforeAfter: 'ビル名: サンプルビル → サンプルビルディング', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '—', ...C0142 },
+  { ts: '2026-05-31 11:30:08', actor: '鈴木課長', role: 'approver', action: 'business_approve', beforeAfter: 'status: 確認済 → 承認済', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
+  { ts: '2026-05-31 11:31:00', actor: 'system', role: 'system', action: 'reflect', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
+]
+
+// P1-7: 横断台帳 (CROSS_LEDGER) = 13 業務 case を flatten (JG-1 (a)-lite)。代表 0142 は上記 rich event、
+// 他 case は 4-event 雛形 (受付/AI入力/入力者確認/承認者承認) を deterministic 生成 (未来日回避: 2026-05-01..28、Date parse 不使用)。
+const LEDGER_TEMPLATE: { action: string; role: string; beforeAfter: string; hasApproval: boolean }[] = [
+  { action: 'intake', role: 'system', beforeAfter: '申請書類を受付', hasApproval: false },
+  { action: 'ai_input', role: 'AI', beforeAfter: '(値生成) 申請項目を読み取り照合', hasApproval: false },
+  { action: 'field_confirm', role: 'inputter', beforeAfter: '入力者が確認', hasApproval: false },
+  { action: 'business_approve', role: 'approver', beforeAfter: 'status: 確認済 → 承認済', hasApproval: true },
+]
+function templateLedger(caseId: string, workflowName: string, owner: string, idx: number): LedgerEvent[] {
+  const inputter = owner === '—' ? '(未割当)' : owner
+  const day = String(((idx * 3) % 28) + 1).padStart(2, '0')
+  return LEDGER_TEMPLATE.map((t, j) => ({
+    ts: `2026-05-${day} ${String(9 + j).padStart(2, '0')}:${String((idx * 7 + j * 11) % 60).padStart(2, '0')}:00`,
+    actor: t.role === 'system' ? 'system' : t.role === 'AI' ? 'agent' : t.role === 'inputter' ? inputter : '鈴木課長',
+    role: t.role,
+    action: t.action,
+    beforeAfter: t.beforeAfter,
+    doc: `${caseId}.pdf`,
+    policy: 'v3.1',
+    approvalId: t.hasApproval ? `A-${7100 + idx}` : '—',
+    confidence: t.role === 'AI' ? '一括 0.9x' : '—',
+    caseId,
+    workflowName,
+  }))
+}
+export const CROSS_LEDGER: LedgerEvent[] = [
+  ...OBS_LEDGER,
+  ...CASE_LIST.filter((c) => c.id !== OBS_CASE_ID).flatMap((c, i) => templateLedger(c.id, c.workflow, c.owner, i)),
 ]
 
 // §5: Process 別 KPI — KPI SSOT (mock-kpi.ts) を唯一 source に (手書き denom drift を解消、B3)。

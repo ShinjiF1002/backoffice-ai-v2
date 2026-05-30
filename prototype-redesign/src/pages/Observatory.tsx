@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon } from 'lucide-react'
+import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon, SearchIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import {
   OBS_CASE_ID,
   OBS_SOD,
   OBS_LIFECYCLE,
-  OBS_LEDGER,
+  CROSS_LEDGER,
   OBS_METRICS,
   OBS_KNOWLEDGE,
   FLYWHEEL_STAGES,
@@ -38,7 +38,8 @@ const TL_DOT: Record<LifecycleEvent['tone'], string> = {
   alert: 'border-[var(--color-alert)]',
   success: 'border-[var(--color-success)]',
 }
-const LEDGER_HEADERS = ['時刻', 'actor', 'role', 'action', 'before → after', '参照文書', 'policy', 'approval id', 'confidence (監査用)']
+const LEDGER_HEADERS = ['時刻', '案件', '業務', 'actor', 'role', 'action', 'before → after', '参照文書', 'policy', 'approval id', 'confidence (監査用)']
+const LEDGER_WORKFLOWS = ['all', '法人住所変更', '口座開設書類完備'] as const
 
 const TABS = [
   { k: 'audit', label: '監査' },
@@ -52,6 +53,14 @@ export function Observatory() {
   const lineage = useFlywheelLineage()
   const [tab, setTab] = useState<TabKey>('audit')
   const [auditView, setAuditView] = useState<'lifecycle' | 'ledger'>('lifecycle')
+  // P1-7: 横断台帳の 案件選択 (workflow) + free-text 検索 (Observatory ローカル、JG-2=b)。期間は「直近30日」固定 (JG-4=b)。
+  const [ledgerWorkflow, setLedgerWorkflow] = useState<string>('all')
+  const [ledgerSearch, setLedgerSearch] = useState('')
+  const ledgerRows = CROSS_LEDGER.filter((e) => {
+    if (ledgerWorkflow !== 'all' && e.workflowName !== ledgerWorkflow) return false
+    const q = ledgerSearch.trim().toLowerCase()
+    return !q || [e.caseId, e.actor, e.action, e.beforeAfter].some((v) => v.toLowerCase().includes(q))
+  })
   // ナレッジ tab の view (承認済 知識 ⇄ 改善の流れ lineage、Gate 5ii)。lineage は P1-7 監査台帳 drill とは別 seat (監査 tab)。
   const [knowledgeView, setKnowledgeView] = useState<'approved' | 'lineage'>('approved')
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
@@ -183,8 +192,8 @@ export function Observatory() {
                 <section className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
                   <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
                     <div>
-                      <h2 className="text-sm font-semibold text-[var(--color-fg)]">証跡台帳</h2>
-                      <p className="mt-0.5 text-[11px] text-[var(--color-fg-muted)]">監査用の詳細記録。出力 (エクスポート) 可能な形式です。</p>
+                      <h2 className="text-sm font-semibold text-[var(--color-fg)]">証跡台帳（全案件横断）</h2>
+                      <p className="mt-0.5 text-[11px] text-[var(--color-fg-muted)]">監査用の詳細記録 · 直近 30 日 · 出力 (エクスポート) 可能な形式です。</p>
                     </div>
                     <button
                       type="button"
@@ -195,33 +204,74 @@ export function Observatory() {
                       エクスポート
                     </button>
                   </div>
+                  {/* P1-7: 案件選択 (workflow filter) + free-text 検索 (Observatory ローカル、JG-2=b) */}
+                  <div className="flex flex-wrap items-center gap-2 border-b border-[var(--color-border)] px-4 py-2.5">
+                    <div className="flex gap-1">
+                      {LEDGER_WORKFLOWS.map((w) => (
+                        <button
+                          key={w}
+                          type="button"
+                          onClick={() => setLedgerWorkflow(w)}
+                          className={cn(
+                            'rounded-[var(--radius-control)] border px-2.5 py-1 text-xs font-medium transition-colors',
+                            ledgerWorkflow === w
+                              ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                              : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]'
+                          )}
+                        >
+                          {w === 'all' ? '全業務' : w}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="relative ml-auto">
+                      <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-fg-subtle)]" aria-hidden="true" />
+                      <input
+                        type="search"
+                        value={ledgerSearch}
+                        onChange={(e) => setLedgerSearch(e.target.value)}
+                        placeholder="案件 ID・actor・操作で検索"
+                        aria-label="証跡台帳を検索"
+                        className="h-8 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-panel-inset)] pl-8 pr-3 text-xs text-[var(--color-fg)] placeholder:text-[var(--color-fg-tertiary)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+                    <span className="text-[11px] text-[var(--color-fg-muted)]">{ledgerRows.length} 件</span>
+                  </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[980px] border-collapse text-[11.5px]">
-                      <thead>
-                        <tr className="bg-[var(--color-panel-inset)]">
-                          {LEDGER_HEADERS.map((h) => (
-                            <th key={h} className="whitespace-nowrap border-b border-[var(--color-border)] px-2.5 py-2 text-left text-[10.5px] font-semibold text-[var(--color-fg-muted)]">
-                              {h}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {OBS_LEDGER.map((r, i) => (
-                          <tr key={i} className="border-b border-[var(--color-border)] last:border-b-0">
-                            <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.ts}</td>
-                            <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.actor}</td>
-                            <td className="px-2.5 py-2 text-[var(--color-fg-muted)]">{r.role}</td>
-                            <td className="px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.action}</td>
-                            <td className="px-2.5 py-2 text-[var(--color-fg)]">{r.beforeAfter}</td>
-                            <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.doc}</td>
-                            <td className="px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.policy}</td>
-                            <td className="px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.approvalId}</td>
-                            <td className="px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.confidence}</td>
+                    {ledgerRows.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-xs text-[var(--color-fg-muted)]">該当する証跡がありません。</div>
+                    ) : (
+                      <table className="w-full min-w-[1100px] border-collapse text-[11.5px]">
+                        <thead>
+                          <tr className="bg-[var(--color-panel-inset)]">
+                            {LEDGER_HEADERS.map((h) => (
+                              <th key={h} className="whitespace-nowrap border-b border-[var(--color-border)] px-2.5 py-2 text-left text-[10.5px] font-semibold text-[var(--color-fg-muted)]">
+                                {h}
+                              </th>
+                            ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {ledgerRows.map((r, i) => (
+                            <tr key={`${r.caseId}-${i}`} className="border-b border-[var(--color-border)] last:border-b-0">
+                              <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.ts}</td>
+                              <td className="whitespace-nowrap px-2.5 py-2">
+                                {/* P1-7: 台帳行 → 該当 case detail へ drill。 */}
+                                <Link to={`/cases/${r.caseId}`} className="font-mono text-[var(--color-primary)] hover:underline">{r.caseId}</Link>
+                              </td>
+                              <td className="whitespace-nowrap px-2.5 py-2 text-[var(--color-fg-muted)]">{r.workflowName}</td>
+                              <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.actor}</td>
+                              <td className="px-2.5 py-2 text-[var(--color-fg-muted)]">{r.role}</td>
+                              <td className="px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.action}</td>
+                              <td className="px-2.5 py-2 text-[var(--color-fg)]">{r.beforeAfter}</td>
+                              <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.doc}</td>
+                              <td className="px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.policy}</td>
+                              <td className="px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.approvalId}</td>
+                              <td className="px-2.5 py-2 font-mono text-[var(--color-fg-muted)]">{r.confidence}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                   <div className="border-t border-[var(--color-border)] px-4 py-2">
                     <span className="text-[11px] text-[var(--color-fg-muted)]">confidence は監査記録としてこの台帳にのみ残し、業務画面には表示しません。</span>

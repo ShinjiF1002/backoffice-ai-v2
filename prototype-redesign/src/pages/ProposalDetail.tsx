@@ -8,6 +8,7 @@ import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { ReasonDialog } from '@/components/shared/ReasonDialog'
 import { cn } from '@/lib/cn'
@@ -32,18 +33,6 @@ function proposalStepperCurrent(status: ProposalStatus): number {
     case 'rejected':
       return 1
   }
-}
-
-/** 未知 id の not-found (業務語、token-clean inline)。 */
-function ProposalNotFound() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-      <p className="text-sm text-[var(--color-fg-muted)]">指定の提案が見つかりません。</p>
-      <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
-        提案一覧へ戻る
-      </Link>
-    </div>
-  )
 }
 
 export function ProposalDetail() {
@@ -71,7 +60,20 @@ export function ProposalDetail() {
     setToast(null)
   }
 
-  if (!p) return <ProposalNotFound />
+  if (!p)
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <EmptyState
+          subState="truly-empty"
+          title="指定の提案が見つかりません。"
+          action={
+            <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+              提案一覧へ戻る
+            </Link>
+          }
+        />
+      </div>
+    )
   // live status (store-truth)。badge/stepper/footer の可否は entity 由来 (操作後 reactive)。decision は却下/差戻し理由の再表示用。
   const liveStatus: ProposalStatus = entity?.status ?? p.status
   const decision = entity?.decision

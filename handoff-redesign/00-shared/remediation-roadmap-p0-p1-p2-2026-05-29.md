@@ -6,15 +6,15 @@
 >
 > **SSOT 単一化 (2026-05-30)**: 本 roadmap が **唯一の実行 SSOT**。screen 軸の overlay (`~/.claude/plans/generic-noodling-lampson.md`、repo 外) と next-session handoff prompt (`next-session-handoff-full-rebuild-2026-05-30.md`、in-repo) は本 roadmap §1/§1b に吸収済 → **以後 historical / prompt-only** として扱い、実行判断に用いない。
 >
-> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (= P1-W4 strict Stage2 [`c7276a8`] + P1-1 ProcessSelector→ViewContext [`56d6dfa`] + P1-5 Loading/Error CORE) 実装完了 (§1.0 の closure 状態参照)。**P1-W5 CORE 完了 = W1-A CORE 完了 (P1-5-remainder [下記] は carry-forward、P1-W5 の full close ではない)**。次アクションは **P1-W6/W7 (6/12 後送り維持、master plan rebaseline 承認が前提)** または P1-5-remainder (下記)。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
+> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (= P1-W4 strict Stage2 [`c7276a8`] + P1-1 ProcessSelector→ViewContext [`56d6dfa`] + P1-5 Loading/Error CORE) 実装完了 (§1.0 の closure 状態参照)。**P1-W5 完了 (W1-A CORE + P1-5-remainder [下記] 実装済 = full close、2026-05-30)**。次アクションは **P1-W6/W7 (6/12 後送り維持、master plan rebaseline 承認が前提)**。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
 >
-> **P1-5 closure (CORE 完了)**: loading/error を **hidden QA seam** (`useListData` + URL query) で到達可能化。**再現手順**: 任意 list route に `?demo=loading` (skeleton) / `?demo=error` (ErrorState + 再試行で ready 回復) を付与 (例 `/cases?demo=loading`、`/cases?demo=error`)。default OFF で demo chrome 非汚染、visible DevControls 不採用 (TopBar 混雑回避、CR)。DataTable は loading/error 中 filter chips + 一括操作 bar を非表示 (CR)。検証: behavioral test (`loading-error.test.tsx` 3) + browser proof (skeleton / ErrorState 両状態、filter 非表示確認)。**P1-5-remainder (carry-forward)**: detail 3 画面 not-found → `EmptyState(truly-empty, role=status)` 統一 + `EmptyState` permission-empty dead branch 除去 (state-coverage polish、CR 条件外、W3 or P1-5-cont)。
+> **P1-5 closure (CORE + remainder 完了)**: loading/error を **hidden QA seam** (`useListData` + URL query) で到達可能化。**再現手順**: 任意 list route に `?demo=loading` (skeleton) / `?demo=error` (ErrorState + 再試行で ready 回復) を付与 (例 `/cases?demo=loading`、`/cases?demo=error`)。default OFF で demo chrome 非汚染、visible DevControls 不採用 (TopBar 混雑回避、CR)。DataTable は loading/error 中 filter chips + 一括操作 bar を非表示 (CR)。検証: behavioral test (`loading-error.test.tsx` 3) + browser proof (skeleton / ErrorState 両状態、filter 非表示確認)。**P1-5-remainder (実装済 2026-05-30)**: detail 3 画面 (CaseDetail/ProposalDetail/AgentDetail) の bespoke not-found → `EmptyState(truly-empty, role=status, Link action, 文言維持)` 統一 + `EmptyState` permission-empty dead branch 除去 (type/iconMap/LockIcon import、active caller 0)。検証: check:all green (119 test、not-found 3 route 文言 assert 維持) + 3 not-found route browser proof。not-found icon は truly-empty の Inbox を許容 (variant 不要、as-built)。
 
 > **読み方**: P0 は `p0-remediation-plan-2026-05-29.md` で詳細計画済。本 roadmap は §2 で wave 名 + 1 行 recap に留め、本体は §3 (P1 deep-plan) と §4 (P2 batched backlog)。§5 で master plan supersession、§6 で gate / risk / 工数。
 >
 > **timeline 注記**: 本 roadmap は frame C (production-ready lens、9→11→12 画面化・業務責任者 surface 新設を許容) を前提とする。これは locked master plan (`~/.claude/plans/ai-backoffice-ai-virtual-muffin.md`、Day 1-22 → **Session 4 = 2026-06-12 Fri**) を rebaseline する (§5)。**Session 4 までに現実的に入る範囲と 6/12 後送りの線引きは §6 末**。SCHEMA_VERSION bump を含む wave のデプロイは 6/12 demo 当日と別日に置く。
 
-> **本 roadmap は一部実装済 + 残り forward-looking の実装計画である** (2026-05-30 更新)。**実装済**: P0 (SCHEMA_VERSION=4、`proposal/sendback`・`session/switchActor` action、口座開設 case、route 9) + W0 + W1-A = **P1-W5 CORE** (= P1-W4 strict Stage1+Stage2/icon/contrast/tone + P1-1 ProcessSelector→ViewContext + P1-5 CORE Loading/Error)。**未実装 (forward-looking)**: P1-5-remainder (detail not-found→EmptyState + permission-empty dead branch 除去、carry-forward)、W2 (P1-2/3/6dropdown/7、新 3 画面)、W3 (P2)。未実装 wave のコードが記述どおりでないのは **正常であり defect ではない**。批判レビューは「未実装 wave の計画 (設計・順序・gate) が妥当か」+「実装済 wave の現物が gate green か」を評価すること (round-2 CR が前者を誤評価したため明記)。
+> **本 roadmap は一部実装済 + 残り forward-looking の実装計画である** (2026-05-30 更新)。**実装済**: P0 (SCHEMA_VERSION=4、`proposal/sendback`・`session/switchActor` action、口座開設 case、route 9) + W0 + W1-A = **P1-W5** (= P1-W4 strict Stage1+Stage2/icon/contrast/tone + P1-1 ProcessSelector→ViewContext + P1-5 Loading/Error CORE + P1-5-remainder detail not-found→EmptyState + permission-empty dead branch 除去)。**未実装 (forward-looking)**: W2 (P1-2/3/6dropdown/7、新 3 画面)、W3 (P2)。未実装 wave のコードが記述どおりでないのは **正常であり defect ではない**。批判レビューは「未実装 wave の計画 (設計・順序・gate) が妥当か」+「実装済 wave の現物が gate green か」を評価すること (round-2 CR が前者を誤評価したため明記)。
 
 ---
 
@@ -92,7 +92,7 @@ frame C で P0 + P1 + P2 を 8 wave に直列/部分並行配置する。
 | **ProposalDetail /proposals/:id** | C | 2-pane 保全、A1 forward leg、footer 正直化、MetricVsThreshold overflow、AR1、toast tone | A1, A4/A5/R3 (保全), MetricVsThr, AR1 |
 | **Agents /agents** | B | T3、**trustTone resolver**、process carry、MiniTrend a11y、AR1、pageSize | A1, A3, trust, AR1, pageSize |
 | **AgentDetail /agents/:id** | C | 2-pane 保全、A1 reverse (RelatedProposalsBlock)、A2 拡張、R4 harden、promotion cancel、AR1、toast | A1, A2/A3/R4 (保全+harden), MetricVsThr, AR1, 降格 |
-| **Loading/Error (= P1-5)** | — | 4 list に status/onRetry 配線 + useListData + mock toggle、detail NotFound→EmptyState | SC state-coverage |
+| **Loading/Error (= P1-5) ✓** | — | 4 list status/onRetry + useListData + `?demo` seam (CORE)、detail NotFound→EmptyState 統一 (remainder ✓ 2026-05-30) | SC state-coverage |
 
 ### W2 — 新 3 画面 完成定義 (9→12、deep-plan = §3.2/§3.3/§3.7)
 
@@ -258,8 +258,8 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 | `ViewProvider.tsx:9-23` / `view-context.ts` | mockLatencyMs/mockFailNext + setter (in-memory、persist しない) |
 | `hooks/useListData.ts` (新規) | 4 list 共通の store selector → {status, rows, onRetry}。default (latency=0) は同期 'ready' で既存挙動保持。onRetry が failNext 消費 |
 | `Cases/Approvals/Proposals/Agents.tsx` | useListData 経由で status/onRetry 配線 (caller 変更最小化、selection prop 不変) |
-| `EmptyState.tsx:16,29` | permission-empty を type/iconMap から削除 (dead branch 解消、YAGNI) |
-| `CaseDetail/ProposalDetail/AgentDetail.tsx` | bespoke NotFound 削除 → EmptyState(truly-empty, 文言維持, Link action) に統一 (role=status 付与) |
+| `EmptyState.tsx` ✓ | permission-empty を type/iconMap + LockIcon import から削除 (dead branch 解消、active caller 0、as-built 2026-05-30) |
+| `CaseDetail/ProposalDetail/AgentDetail.tsx` ✓ | bespoke NotFound 削除 → EmptyState(truly-empty, 文言維持, Link action) に統一 (role=status 付与、中央寄せ wrapper)、as-built 2026-05-30 |
 | `TopBar 近傍` (DevControls 新規) | 遅延/失敗トグル UI を PrototypeModeLabel 近傍に。**P0 persona switcher chrome 確定後に余白配置** |
 | `datatable.test.tsx` / detail not-found test | loading/error reachability (role=status/alert + onRetry 発火) / 未知 id で role=status |
 | `DataTable.tsx:194-219,222-246` | **filter chips / selection bar を `effectiveStatus !== 'loading'/'error'` で gate** (批判レビュー: risk ではなく実コード確定欠陥、loading/error 時に bar が残る) |
@@ -269,7 +269,7 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 - **判断 gate**:
   - **トグル UI 配置 [as-built P1-5: (c) 採用]**: (a) TopBar DevControls / (b) PrototypeModeLabel tooltip 畳み / (c) **URL query (hidden seam、`useListData`、採用)**。**visible DevControls (a) は不採用** (TopBar 混雑回避、CR)。**本 §3.5 中の DevControls (TopBar 配置) 記述 (file:line 表 / p0Dependency / 検証行) は未採用 plan として読み替える** — 実装は §1.0 の P1-5 closure 注記 (`?demo` seam) が SSOT。
   - **error cause 文言**: 'タイムアウト (mock)' / '接続エラー'。JP-only + disclaimer 整合。
-  - **not-found icon**: truly-empty の Inbox icon が not-found で誤誘導 → variant 追加 / 許容。
+  - **not-found icon [as-built: 許容]**: truly-empty の Inbox icon を not-found でも使用 (variant 追加せず)。3 route browser proof で誤誘導なしを確認。
   - **mock default**: **OFF 推奨** (現 demo 体験不変、toggle 時のみ可視) / 軽 latency default (本物っぽさ、ただし demo もたつき)。
 - **検証**: check:all green (DevControls/ErrorState 再試行 button が check:no-op pass、**ただし新 input/div は behavioral test が wiring gate**) / datatable.test loading/error reachability / detail not-found role=status + bespoke div 不在 / negative grep (NotFound 関数 0 / permission-empty 0) / Playwright (遅延 ON→skeleton / 失敗 ON→ErrorState+再試行 / 未知 id→role=status、**loading/error 時に filter chips・一括操作 bar 非表示**) / P2B-4 / P0 B3 後 regression (rows が UC-BO-02 5 件反映)。
 - **dependsOnP1**: なし。**effort**: AI=M / review=S / judgement=med。
@@ -420,7 +420,7 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 |---|---|---|---|---|---|
 | **G1** | lucide Icon-suffix + emoji ✓ 除去 (2) | 4 component の非 suffix import を alias 化 + Observatory:163 ✓ 除去 + §8 grep gate 追加 | **identifier 単位 grep** (multi-line 閉じ括弧の false positive 回避、批判レビュー) | P0 W3 後に最終実行 | S |
 | **G2** | Trust tone + toast 色 + §4 spec 矛盾 (4) | TrustLevelBadge resolver + 共有 Toast tone 引数化 + §4 honest update | tone='primary' literal 0 / toast neutral-alert | P1-4 同 sprint、Toast は G6 共有 | M |
-| **G3** | state 網羅 (Loading/Error 配線 + EmptyState 死蔵 + 共有 not-found) (6) | dev-state seam + 4 list status/onRetry + detail を EmptyState へ + Observatory 空状態 | status= ≥4 / NotFound 0 / 空配列分岐 | **P1-5 を seam に melt-in**、permission-empty は P0 Gate4 後 | M |
+| **G3** | state 網羅 (Loading/Error 配線 + EmptyState 死蔵 + 共有 not-found) (6) | dev-state seam + 4 list status/onRetry + detail を EmptyState へ + Observatory 空状態 | status= ≥4 / NotFound 0 / 空配列分岐 | **P1-5 melt-in ✓** (detail→EmptyState・permission-empty 除去 done 2026-05-30)、Observatory 空状態は W3 | M |
 | **G4** | 読めない/clip される data surface (5) | truncate 全文化 + MetricVsThreshold 横スクロール + CaseDetail 2-pane overflow + breakpoint | 360/768/1024px で clip 0 | **P1-8 と ReconcilePanel 同 sprint** | M |
 | **G5** | Modal hardening (背景 inert/scroll-lock + unsaved guard) (2) | Modal.tsx に body lock + inert + confirmOnDismiss | scroll-lock + dirty-dismiss block test | P0 reset-confirm/FieldActionModal 後 | S |
 | **G6** | 共有 Toast 集約 + 永続 aria-live + MiniTrend SR + tab semantic (3) | 永続 aria-live region + role=tablist/tab + aria-pressed | inline toast 0 / role=tab present | Toast は G2 共有、tab は P0 Gate5ii 後 | M |
@@ -485,7 +485,7 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 | P0-W2 | 証拠アンカー整合 / 手書き分母 0 grep | 口座開設 5 件 + KPI 同一分母 (3 画面) |
 | P0-W3 | check:no-op (新 button) / P2B-4 full + **R7 (P1-4 後) を含めるか W3 前に確定** | B1-status の 8 項目 + persona 切替 demo-script |
 | P1-W4 | strict+NUIA app 39→0 / fg-subtle negative grep 0 / R7 green | 4 画面で tertiary 視認 + hierarchy 維持 |
-| P1-W5 | useView 0→5+ / UC-BO-02 で 5 件 | selector 切替で 4 list 連動 + **`?demo` hidden seam で loading/error 到達** (DevControls 不採用、as-built) |
+| P1-W5 | useView 0→5+ / UC-BO-02 で 5 件 / detail NotFound 0 | selector 切替で 4 list 連動 + **`?demo` hidden seam で loading/error 到達** (DevControls 不採用、as-built) + detail not-found→EmptyState 統一 (P1-5-remainder ✓ 2026-05-30) |
 | P1-W6 | 契約 3 doc 11 画面 count gate / keyboard axe 0 | 検索→/search→zero-result / 差戻し→赤ドット→通知 / keyboard roving / **既存 9 画面 chrome regression** (TopBar 検索 input・ベル追加後に 9 routes 無崩れ render) |
 | P1-W7 | store.test (SoD no-op/escalate) / typology 12 画面 | persona 切替で業務責任者 queue / 台帳 drill / before-after / demo-script 2 journey / **既存 9 画面 chrome regression** (persona switcher 追加後の余白・list 密度劣化なし) |
 

@@ -14,8 +14,9 @@
   --color-border-strong: #cbd5e1;
 
   --color-fg: #0f172a;
-  --color-fg-muted: #64748b;
-  --color-fg-subtle: #94a3b8;
+  --color-fg-muted: #64748b;          /* AA on panel/canvas。panel-inset 上は AA 未達 → inset 上は fg-tertiary/fg を使う */
+  --color-fg-tertiary: #475569;       /* P1-4/AR1 (W0): 意味テキストの最弱コントラスト。panel/canvas/panel-inset 全背景で AA pass (~7.6/7.4/7.1:1) */
+  --color-fg-subtle: #94a3b8;          /* 装飾/disabled/icon 専用に降格 (panel 2.56:1)。意味テキストには使わない = R7 gate (AR1) */
 
   --color-primary: #635bff;
   --color-primary-hover: #4f46e5;
@@ -96,4 +97,17 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: var(--radius-control);
+}
+
+/* motion budget (W0、canonical-design-spec §10): prefers-reduced-motion で全 animation/transition を抑制 (a11y mandatory)。
+ * elevation/type-scale/density の visual token は §10 を SSOT とし、per-screen 適用は W1 (functional-first ゆえ W0 では定義のみ)。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

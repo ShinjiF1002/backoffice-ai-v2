@@ -74,7 +74,7 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
               </p>
               <div className="mt-2 flex items-center justify-between">
                 {f.sourceLocator && (
-                  <span className="font-mono text-[10px] text-[var(--color-fg-subtle)]">
+                  <span className="font-mono text-[10px] text-[var(--color-fg-tertiary)]">
                     {f.sourceLocator.page} {f.sourceLocator.region}
                   </span>
                 )}
@@ -136,7 +136,7 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
             </div>
           ))}
           {resolved.some((f) => f.normalizationNote) && (
-            <p className="px-1 pt-1.5 text-[10px] text-[var(--color-fg-subtle)]">一部の項目は表記を自動補正しています。</p>
+            <p className="px-1 pt-1.5 text-[10px] text-[var(--color-fg-tertiary)]">一部の項目は表記を自動補正しています。</p>
           )}
         </div>
       )}

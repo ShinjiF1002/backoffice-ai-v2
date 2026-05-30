@@ -436,7 +436,7 @@ export function DataTable<Row>({
         </>
       )}
 
-      {caption && <p className="px-1 text-[10px] text-[var(--color-fg-subtle)]">{caption}</p>}
+      {caption && <p className="px-1 text-[10px] text-[var(--color-fg-tertiary)]">{caption}</p>}
     </div>
   )
 }

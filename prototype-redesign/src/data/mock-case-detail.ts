@@ -236,7 +236,7 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
     const idx = fields.findIndex((f) => f.fieldLabel === change.field)
     if (idx > 0) {
       const [moved] = fields.splice(idx, 1)
-      fields.unshift(moved)
+      if (moved) fields.unshift(moved)
     }
   }
   // status × flags → reconcileState

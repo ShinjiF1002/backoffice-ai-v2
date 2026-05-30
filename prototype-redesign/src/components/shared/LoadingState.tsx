@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2Icon } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 /**
@@ -38,7 +38,7 @@ export function LoadingState(props: LoadingStateProps) {
           className
         )}
       >
-        <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
+        <Loader2Icon className="h-3.5 w-3.5 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
         <span>{message ?? '読み込み中...'}</span>
       </div>
     )

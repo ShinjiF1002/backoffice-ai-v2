@@ -26,7 +26,7 @@ function firstReviewLabel(c: CaseDetailModel | undefined, resolvedIds: string[] 
   if (!c || c.fields.length === 0) return undefined
   const resolved = new Set(resolvedIds)
   const review = c.fields.find((f) => !resolved.has(f.fieldLabel) && !isResolved(f.reconcileState))
-  return (review ?? c.fields[0]).fieldLabel
+  return (review ?? c.fields[0])?.fieldLabel
 }
 
 /** 未知 id の not-found (業務語、token-clean inline)。 */

@@ -15,8 +15,8 @@ import { useCases } from '@/store/hooks'
  * 状態 + 担当 filter / 列 sort / pagination / 要確認上部固定 (recommended)。
  */
 function AttentionCell({ status, flags }: { status: string; flags: number }) {
-  if (status === 'pending') return <span className="text-xs text-[var(--color-fg-subtle)]">AI 処理待ち</span>
-  if (status === 'sent-back') return <span className="text-xs text-[var(--color-fg-subtle)]">AI 再処理中</span>
+  if (status === 'pending') return <span className="text-xs text-[var(--color-fg-tertiary)]">AI 処理待ち</span>
+  if (status === 'sent-back') return <span className="text-xs text-[var(--color-fg-tertiary)]">AI 再処理中</span>
   if (status === 'reflected') return <span className="text-xs text-[var(--color-success-soft-fg)]">完了</span>
   if (flags > 0) return <MetaChip tone="alert" label={`要確認 ${flags} 項目`} />
   return <MetaChip tone="success" label="全項目一致" />
@@ -39,7 +39,7 @@ const columns: DataTableColumn<CaseListRow>[] = [
     key: 'owner',
     header: '担当',
     className: 'text-[var(--color-fg)]',
-    cell: (r) => (r.owner === '—' ? <span className="text-[var(--color-fg-subtle)]">未割当</span> : r.owner),
+    cell: (r) => (r.owner === '—' ? <span className="text-[var(--color-fg-tertiary)]">未割当</span> : r.owner),
   },
   { key: 'attention', header: '確認', cell: (r) => <AttentionCell status={r.status} flags={r.flags} /> },
 ]

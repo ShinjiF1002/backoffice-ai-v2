@@ -59,16 +59,17 @@ const ACCOUNT_OPENING_CASES: CaseListRow[] = [
  * remediation B3 (gate 3=案A): 業務 case (CASE_LIST) とは別 export に分離し seed/Hub/KPI 母数に混ぜない。
  *   検証は test-only 注入で確保する (DataTable pagination test)。Math.random は使わず index 由来で再現性確保。
  */
-const STATUSES: CaseStatus[] = ['pending', 'ready', 'sent-back', 'business-approval-waiting', 'reflected']
-const OWNERS = ['山田太郎', '鈴木課長', '佐藤花子']
+const STATUSES = ['pending', 'ready', 'sent-back', 'business-approval-waiting', 'reflected'] as const satisfies readonly CaseStatus[]
+const OWNERS = ['山田太郎', '鈴木課長', '佐藤花子'] as const
 export const VERIFICATION_EXTRA_CASES: CaseListRow[] = Array.from({ length: 20 }, (_, i) => {
-  const status = STATUSES[i % STATUSES.length]
+  // i % length は常に範囲内 → ?? fallback は NUIA narrow 用の unreachable (STATUSES[0]/OWNERS[0] は tuple ゆえ non-undefined)
+  const status: CaseStatus = STATUSES[i % STATUSES.length] ?? STATUSES[0]
   return {
     id: `CASE-VRF-${String(i + 1).padStart(4, '0')}`,
     workflow: '法人住所変更',
     status,
     elapsed: `${(i % 6) + 1}時間${((i * 7) % 60).toString().padStart(2, '0')}分`,
-    owner: status === 'pending' ? '—' : OWNERS[i % OWNERS.length],
+    owner: status === 'pending' ? '—' : (OWNERS[i % OWNERS.length] ?? OWNERS[0]),
     flags: status === 'ready' ? i % 3 : 0,
   }
 })

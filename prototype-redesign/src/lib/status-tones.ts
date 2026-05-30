@@ -1,5 +1,5 @@
 import type { Tone } from '@/components/shared/StatusBadge'
-import type { CaseStatus, ProposalStatus } from '@/data/types'
+import type { CaseStatus, ProposalStatus, TrustLevel } from '@/data/types'
 
 /**
  * Domain status → Tone semantic resolver (Day 14 P1.5 C3、Plan B-lite v2.6 / Review #1 F-01)
@@ -59,6 +59,24 @@ export function proposalStatusToTone(status: ProposalStatus): Tone {
       return 'success'
     case 'rejected':
       return 'inset'
+  }
+}
+
+/**
+ * TrustLevel → Tone resolver (W0、literal tone 撲滅の SSOT)。
+ * 信頼度の段階を tone semantic v2 に写像する: 全件確認=慎重(inset) / 要所確認=進行(primary) / 自律=良好(success)。
+ * trust chip の画面ローカル `tone="primary"` 固定 (Agents/Hub/AgentDetail) を本 resolver に寄せるのは W1 per-screen refine。
+ */
+export function trustTone(level: TrustLevel): Tone {
+  switch (level) {
+    case 'supervised':
+      return 'inset'
+    case 'checkpoint':
+      return 'primary'
+    case 'autonomous':
+      return 'success'
+    case 'n/a':
+      return 'neutral'
   }
 }
 

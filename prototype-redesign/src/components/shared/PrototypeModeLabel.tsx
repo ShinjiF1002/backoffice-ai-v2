@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react'
+import { InfoIcon } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/cn'
 
@@ -26,7 +26,7 @@ export function PrototypeModeLabel() {
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
-      <Info className="h-3.5 w-3.5" aria-hidden="true" />
+      <InfoIcon className="h-3.5 w-3.5" aria-hidden="true" />
       <span className="whitespace-nowrap">プロトタイプ表示 — 外部システム未接続 / 証跡はモック</span>
 
       <div

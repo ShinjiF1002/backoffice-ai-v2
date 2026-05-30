@@ -1,4 +1,4 @@
-import { Inbox, Filter, Lock } from 'lucide-react'
+import { InboxIcon, FilterIcon, LockIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
@@ -23,10 +23,10 @@ interface EmptyStateProps {
   className?: string
 }
 
-const iconMap: Record<EmptySubState, typeof Inbox> = {
-  'truly-empty': Inbox,
-  'filtered-empty': Filter,
-  'permission-empty': Lock,
+const iconMap: Record<EmptySubState, typeof InboxIcon> = {
+  'truly-empty': InboxIcon,
+  'filtered-empty': FilterIcon,
+  'permission-empty': LockIcon,
 }
 
 export function EmptyState({ subState, title, description, action, className }: EmptyStateProps) {

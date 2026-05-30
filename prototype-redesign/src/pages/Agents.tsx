@@ -37,7 +37,7 @@ const columns: DataTableColumn<AgentViewRow>[] = [
     cell: (r) => (
       <span className="inline-flex items-baseline gap-1.5">
         <MetaChip tone="primary" label={TRUST_LABEL[r.trust]} />
-        <span className="font-mono text-[10px] text-[var(--color-fg-subtle)]">{TRUST_EN[r.trust]}</span>
+        <span className="font-mono text-[10px] text-[var(--color-fg-tertiary)]">{TRUST_EN[r.trust]}</span>
         {r.paused && <MetaChip tone="alert" label="緊急停止中" />}
       </span>
     ),
@@ -49,7 +49,7 @@ const columns: DataTableColumn<AgentViewRow>[] = [
       <span className="flex items-center gap-2">
         <MiniTrend values={r.trend} tone={r.promotable ? 'success' : 'primary'} />
         <span className="font-mono text-xs text-[var(--color-fg)]">{r.approvalRate}</span>
-        <span className="text-[10px] text-[var(--color-fg-subtle)]">[仮説/要検証]</span>
+        <span className="text-[10px] text-[var(--color-fg-tertiary)]">[仮説/要検証]</span>
       </span>
     ),
   },
@@ -93,12 +93,11 @@ const AGENT_BY_ID = Object.fromEntries(AGENT_LIST.map((r) => [r.id, r]))
 export function Agents() {
   const agents = useAgents()
   // store entity → list row view-model (trust / 昇格申請は store-truth で reactive)
-  const rows: AgentViewRow[] = agents.map((e) => ({
-    ...AGENT_BY_ID[e.id],
-    trust: e.trust,
-    promotionRequested: e.promotionRequested,
-    paused: e.paused,
-  }))
+  const rows: AgentViewRow[] = agents.flatMap((e) => {
+    const base = AGENT_BY_ID[e.id]
+    if (!base) return []
+    return [{ ...base, trust: e.trust, promotionRequested: e.promotionRequested, paused: e.paused }]
+  })
   return (
     <div className="flex flex-col">
       <header

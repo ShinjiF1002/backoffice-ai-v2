@@ -47,7 +47,10 @@ const PROPOSAL_BY_ID = Object.fromEntries(PROPOSAL_LIST.map((r) => [r.id, r]))
 export function Proposals() {
   const proposals = useProposals()
   // store entity → list row view-model (status は store-truth、表示列は list mock を join)
-  const rows: ProposalListRow[] = proposals.map((e) => ({ ...PROPOSAL_BY_ID[e.id], status: e.status }))
+  const rows: ProposalListRow[] = proposals.flatMap((e) => {
+    const base = PROPOSAL_BY_ID[e.id]
+    return base ? [{ ...base, status: e.status }] : []
+  })
   return (
     <div className="flex flex-col">
       <header

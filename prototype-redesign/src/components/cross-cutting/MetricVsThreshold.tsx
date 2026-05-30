@@ -47,9 +47,9 @@ export function MetricVsThreshold({
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-[var(--color-fg)]">{title}</h3>
           {subtitle && <p className="mt-0.5 text-[11px] leading-snug text-[var(--color-fg-muted)]">{subtitle}</p>}
-          {owner && <p className="mt-0.5 text-[11px] text-[var(--color-fg-subtle)]">対象: {owner}</p>}
+          {owner && <p className="mt-0.5 text-[11px] text-[var(--color-fg-tertiary)]">対象: {owner}</p>}
         </div>
-        <span className="flex-shrink-0 text-[10px] text-[var(--color-fg-subtle)]">{hypothesisLabel}</span>
+        <span className="flex-shrink-0 text-[10px] text-[var(--color-fg-tertiary)]">{hypothesisLabel}</span>
       </div>
       <table className="w-full text-sm">
         <thead>
@@ -76,7 +76,7 @@ export function MetricVsThreshold({
               </td>
               <td className="px-4 py-2 text-[11px] text-[var(--color-fg-muted)]">
                 {r.period} / {r.denominator}
-                {r.exclusions && <span className="mt-0.5 block text-[var(--color-fg-subtle)]">除外: {r.exclusions}</span>}
+                {r.exclusions && <span className="mt-0.5 block text-[var(--color-fg-tertiary)]">除外: {r.exclusions}</span>}
               </td>
               <td className="px-4 py-2 text-[11px] text-[var(--color-fg-muted)]">{r.previousDelta ?? '—'}</td>
             </tr>

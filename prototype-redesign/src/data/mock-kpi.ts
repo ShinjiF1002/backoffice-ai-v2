@@ -9,7 +9,10 @@ import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
  * gate 2 決定: UC-BO-02 承認率 96% の分母は 980 に統一 (agent-level metric を canonical)。
  * 全 KPI 値は synthetic。閾値比較は表示用 ([仮説/要検証] は画面側 label 規律で担保)。
  */
-export const KPI_ROWS: Record<string, MetricRow[]> = {
+/** KPI SSOT の process key (literal union、NUIA で literal-key access を non-undefined 化、W0)。 */
+export type KpiProcessKey = 'UC-BO-01' | 'UC-BO-02'
+
+export const KPI_ROWS: Record<KpiProcessKey, MetricRow[]> = {
   'UC-BO-01': [
     { metricLabel: 'AI 入力承認率', actualValue: '92%', threshold: '≥ 95%', judgment: '未達 (-3pt)', achieved: false, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 +2pt', exclusions: 'エスカレーション案件を除く' },
     { metricLabel: '人手上書き率', actualValue: '0.12', threshold: '≤ 0.15', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 -0.01' },

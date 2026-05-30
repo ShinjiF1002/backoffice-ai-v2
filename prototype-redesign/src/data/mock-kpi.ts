@@ -24,6 +24,13 @@ export const KPI_ROWS: Record<string, MetricRow[]> = {
   ],
 }
 
+// 共有 mutable 参照の偶発 mutation を防ぐ (consumer は read-only、B3 SSOT 不変条件)。
+Object.values(KPI_ROWS).forEach((rows) => {
+  rows.forEach((r) => Object.freeze(r))
+  Object.freeze(rows)
+})
+Object.freeze(KPI_ROWS)
+
 /** workflowId → process 表示名 (KPI consumer の整合用)。 */
 export const KPI_PROCESS_LABEL: Record<string, string> = {
   'UC-BO-01': '法人住所変更',

@@ -5,6 +5,7 @@
  *   ★ state 型 (types.ts StoreState) を変えたら必ず SCHEMA_VERSION を上げること。
  */
 import type { StoreState } from './types'
+import { actorById } from './actors'
 
 const STORAGE_KEY = 'bo-ai-v2:store'
 // 2→3: remediation P0-W1 で CaseEntity.overrides + StoreState.currentActorId 追加 (B1/B4)。旧 v2 は version 不一致で seed fallback。
@@ -33,6 +34,8 @@ function isStoreStateShape(s: unknown): s is StoreState {
   ) {
     return false
   }
+  // currentActorId は実在 actor であること (B4 SoD の主キー、tampered localStorage の不正値化を防ぐ)。
+  if (!actorById(o.currentActorId as string)) return false
   // v3 深掘り: 各 case は overlay 前提の resolvedFieldIds 配列 + overrides dict を持つこと (B1)。欠落は seed fallback。
   const casesValid = Object.values(o.cases as Record<string, unknown>).every((c) => {
     if (!isDict(c)) return false

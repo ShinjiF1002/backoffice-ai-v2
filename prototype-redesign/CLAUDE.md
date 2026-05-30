@@ -7,7 +7,7 @@
 
 > **正準 (SSOT)**:
 > - design = `../handoff-redesign/00-shared/canonical-design-spec.md` (token / lucide / status-tones / chip taxonomy 継承 + soft-tint -200 + tone v2 + C 型 contract)
-> - IA / chrome = `../handoff-redesign/00-shared/ia-overview-v2.md` §2 (9 画面 / 6-nav grouped)
+> - base IA (historical 9 画面) = `../handoff-redesign/00-shared/ia-overview-v2.md` §2 (9 画面 / 6-nav grouped、typology は expansion note 参照) ／ **現行 route・chrome (remediation 11→14) の SSOT = roadmap §1b ledger**
 > - 画面契約 = `../handoff-redesign/00-shared/screen-contracts-v2.md`
 > - 操作・状態遷移 = `../handoff-redesign/00-shared/allowed-actions-and-state-transitions.md`
 > - pixel-parity reference = `../handoff-redesign/screens-v2/0N-*/canonical-export.md`

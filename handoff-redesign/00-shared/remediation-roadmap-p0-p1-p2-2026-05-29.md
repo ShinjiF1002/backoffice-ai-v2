@@ -31,7 +31,9 @@
 > - **F2 (Major) PrototypeModeLabel copy**: `:50` の「検索/通知/一括操作/フィルタ は次の実装段階」(全て実装済 = demo-facing 虚偽) を「AI の入力・分析・自動化は模擬 (実 LLM/実行系未接続)」へ (G7 前倒し)。
 > - **F3 (Major) mobile 到達性**: bell を全幅可視化 (/inbox)、lg 未満に検索 icon→/search、SearchResults ページに自前 search input (TopBar input が出ない狭幅でも自己完結)。nav=TopBar 単独方針は維持 (Sidebar 不肥大)。
 > - **F4 (Medium) `?q=` 契約**: 実装は ViewContext searchQuery (ViewProvider が router 上位ゆえ result→detail→back で query 保持 = back-nav 担保済)。ledger を `?q=` URL param 不採用 + ViewContext 永続機構に reconcile (deep-link は scope-out)。
-> - check:all green (test 143 / build) + 本番 boot smoke (/、/cases、/search、/inbox、/observatory HTTP 200)。commit `remediation/w2-screens`。
+> - check:all green (test 143 / build) + 本番 boot smoke (/、/cases、/search、/inbox、/observatory HTTP 200)。commit `2d8e26d`。
+>
+> **W2c-0b cleanup 完了 (2026-05-30、外部 CR 残)**: W2c-0 後に残った drift を是正。§3.2 deep-plan の `/notifications` 3 箇所→`/inbox` (route 名統一を §3.2 にも適用) + axe 残存 9/12画面 (§4.0 G7・§4.2 G9・§4.3 G11・§3.6 reconcile)→14画面/14 route + `prototype-redesign/CLAUDE.md` 9→14 正規化 (base IA を historical 明示、現行 route SSOT = §1b) + SearchResults 空状態 copy 修正 + ページ input UI test 追加。check:all green (**test 144** / build)。**SSOT 14 drift 全閉鎖**。commit `1520135`。
 
 ---
 

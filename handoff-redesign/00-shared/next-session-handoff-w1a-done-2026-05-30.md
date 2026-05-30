@@ -1,6 +1,6 @@
 # 次セッション handoff prompt — backoffice-ai-v2 remediation (W0 + W1-A CORE 完了後)
 
-> **⚠ SUPERSEDED / 消化済 (2026-05-30)**: 本 prompt は当該セッションで消化完了。**option A (P1-5-remainder) を `07b4073` で実装・検証・commit 済** (detail 3 画面 not-found → `EmptyState(truly-empty, role=status)` 統一 + permission-empty dead branch 除去)。現 HEAD = `07b4073` (`cf8df94..HEAD` = 11 commit)。下記「現状」の `@b323553` / 全 9 commit は **本 prompt 作成時点 (W1-A-done) の historical snapshot** であり現状ではない。下記「次アクション」表は **A = 完了済**として読むこと (B/C/D のみ live)。**次の実行 = merge preflight** (本 prompt 廃止/historical 確定 → PR #14 [P0] merge → `remediation/p1` を main 再統合 → `check:all`)。実行 SSOT は roadmap §1.0/§1b。
+> **⚠ SUPERSEDED / 消化済 (2026-05-30)**: 本 prompt は当該セッションで消化完了。**option A (P1-5-remainder) 実装・検証・commit 済** (detail 3 画面 not-found → `EmptyState(truly-empty, role=status)` 統一 + permission-empty dead branch 除去)。その後 **`remediation/p1` を `origin/main` (PR #14 = P0 squash-merge 済 = `30d6a2b`) に rebase** し、重複 P0 を解消。現状は **W0 + W1-A + P1-5-remainder の 12 commit が integration-ready** (origin/main から fast-forward 可・`check:all` green)。本文中の特定 hash (`@b323553` / 全 9 commit 等) は **本 prompt 作成時点 (W1-A-done) の historical snapshot** であり現状ではない — **live な統合状態は git / PR を直接参照**すること (volatile hash は本 doc に pin しない)。下記「次アクション」表は **A = 完了済**として読む (B/C/D のみ live)。**次の実行 = PR で main 統合** (human ship gate、最終 squash-merge は人手 click)。実行 SSOT は roadmap §1.0/§1b。
 >
 > このファイルがそのまま次セッションへの prompt。先頭から読ませること。作成 2026-05-30。
 > **唯一の実行 SSOT は `remediation-roadmap-p0-p1-p2-2026-05-29.md`**。本 prompt は起動 context、矛盾時は roadmap が正。

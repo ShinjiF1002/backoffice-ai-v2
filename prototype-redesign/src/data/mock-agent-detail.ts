@@ -1,6 +1,8 @@
 import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
 import type { ConsequenceImpact } from '@/components/cross-cutting/ConsequencePanel'
 import { KPI_ROWS } from './mock-kpi'
+import { CASE_LIST } from './mock-case-list'
+import { caseResultTone } from '@/lib/status-tones'
 
 /**
  * エージェント詳細 (agent-corporate-address-change) detail 専用 model
@@ -11,11 +13,30 @@ import { KPI_ROWS } from './mock-kpi'
 export interface AgentSampleCase {
   id: string
   outcome: string
-  /** 結果の tone (MetaChip): 要確認/差戻し=alert、自動入力=success */
+  /** 結果の tone (MetaChip): 要確認/差戻し=alert、自動入力=success。remediation B2: 手書きせず caseResultTone で導出。 */
   tone: 'success' | 'alert'
   note: string
   /** 紐づく KPI (参照用、画面非表示) */
   kpi: string
+}
+
+/** 裏付け sample の authored 部分 (tone は持たない = caseResultTone で導出するため)。 */
+interface AgentSampleSpec {
+  id: string
+  outcome: string
+  note: string
+  kpi: string
+}
+
+/** id → 業務 case row。sample tone を case の status/flags から導出するための lookup (B2 tone drift 防止)。 */
+const CASE_BY_ID = Object.fromEntries(CASE_LIST.map((r) => [r.id, r]))
+
+/** sample spec に caseResultTone(status, flags) 由来の tone を付与 (手書き個別 tone を排し status-tones SSOT で一元化)。 */
+function buildSamples(specs: AgentSampleSpec[]): AgentSampleCase[] {
+  return specs.map((s): AgentSampleCase => {
+    const row = CASE_BY_ID[s.id]
+    return { ...s, tone: row ? caseResultTone(row.status, row.flags) : 'alert' }
+  })
 }
 
 export interface AgentConfigItem {
@@ -35,6 +56,8 @@ export interface AgentDetailModel {
   consequence: { before: string; after: string; scope: string; impacts: ConsequenceImpact[] }
   samples: AgentSampleCase[]
   config: AgentConfigItem[]
+  /** この Agent を改定対象とする提案 (remediation B2: agent→proposal 双方向 link、PROPOSAL_DETAILS.agentId と対称)。 */
+  relatedProposals: string[]
 }
 
 export const AGENT_CORP_ADDRESS: AgentDetailModel = {
@@ -56,19 +79,20 @@ export const AGENT_CORP_ADDRESS: AgentDetailModel = {
       { direction: 'guard', label: '承認率が 7 日連続で基準割れ → 全件確認に自動降格' },
     ],
   },
-  // 原則 B: 各 KPI の裏付け sample (outcome tone 付き)
-  samples: [
-    { id: 'CASE-2026-0142', outcome: '要確認', tone: 'alert', note: 'ビル名が申請書類と不一致 → 入力者が確認', kpi: '承認率' },
-    { id: 'CASE-2026-0139', outcome: '自動入力', tone: 'success', note: '全項目一致、人の修正なし', kpi: '上書き率' },
-    { id: 'CASE-2026-0131', outcome: '差戻し', tone: 'alert', note: '法人名の旧商号を誤入力 → 入力者が差戻し', kpi: '承認率' },
-    { id: 'CASE-2026-0120', outcome: '自動入力', tone: 'success', note: '住所変更を正しく入力、承認済', kpi: '上書き率' },
-  ],
+  // 原則 B: 各 KPI の裏付け sample (tone は caseResultTone で導出、手書きしない)
+  samples: buildSamples([
+    { id: 'CASE-2026-0142', outcome: '要確認', note: 'ビル名が申請書類と不一致 → 入力者が確認', kpi: '承認率' },
+    { id: 'CASE-2026-0139', outcome: '自動入力', note: '全項目一致、人の修正なし', kpi: '上書き率' },
+    { id: 'CASE-2026-0131', outcome: '差戻し', note: '法人名の旧商号を誤入力 → 入力者が差戻し', kpi: '承認率' },
+    { id: 'CASE-2026-0120', outcome: '自動入力', note: '住所変更を正しく入力、承認済', kpi: '上書き率' },
+  ]),
   // 設定 (reference §CONFIG): モデル / 権限 / ツール
   config: [
     { k: 'モデル', v: '書類読み取り + 値生成モデル', meta: '法人住所変更 専用' },
     { k: '権限', v: '住所・支店コード・効力発生日の自動入力', meta: '要確認は入力者へ' },
     { k: 'ツール', v: '書類の文字読み取り / 登録情報の照合', meta: '読み取り結果を判定基準で振り分け' },
   ],
+  relatedProposals: ['PROP-2026-031', 'PROP-2026-028'],
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -95,16 +119,17 @@ export const AGENT_ACCOUNT_OPENING: AgentDetailModel = {
       { direction: 'guard', label: '承認率が 7 日連続で基準割れ → 全件確認に自動降格' },
     ],
   },
-  samples: [
-    { id: 'CASE-2026-0112', outcome: '自動入力', tone: 'success', note: '本人確認書類が完備、人の修正なし', kpi: '上書き率' },
-    { id: 'CASE-2026-0104', outcome: '要確認', tone: 'alert', note: '在留カードの期限が間近 → 入力者が確認', kpi: '承認率' },
-    { id: 'CASE-2026-0101', outcome: '自動入力', tone: 'success', note: '全項目一致、承認済', kpi: '上書き率' },
-  ],
+  samples: buildSamples([
+    { id: 'CASE-2026-0112', outcome: '自動入力', note: '本人確認書類が完備、人の修正なし', kpi: '上書き率' },
+    { id: 'CASE-2026-0104', outcome: '要確認', note: '在留カードの期限が間近 → 入力者が確認', kpi: '承認率' },
+    { id: 'CASE-2026-0101', outcome: '自動入力', note: '全項目一致、承認済', kpi: '上書き率' },
+  ]),
   config: [
     { k: 'モデル', v: '書類読み取り + 完備判定モデル', meta: '口座開設書類完備 専用' },
     { k: '権限', v: '記載事項の完備判定と要確認の振り分け', meta: '不備は入力者へ' },
     { k: 'ツール', v: '書類の文字読み取り / 記載項目チェック', meta: '有効期限の残存も確認' },
   ],
+  relatedProposals: ['PROP-2026-024'],
 }
 
 /** id-keyed dict。AGENT_LIST 全 id を網羅。 */

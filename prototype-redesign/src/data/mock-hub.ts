@@ -1,5 +1,3 @@
-import type { CaseStatus } from './types'
-
 /**
  * Hub (/) data — Process-First v2, typology A (全体俯瞰、単一決定面なし)
  * SSOT: mock-fixture §3 (status 分布) + §5 (metric)、reference: screens-v2/01-hub/hub.jsx。
@@ -14,9 +12,6 @@ export interface HubProcess {
   trustEn: string // Tier 補助 chip (Supervised)
   approvalRate: number | null
   approvalRateOk: boolean | null
-  /** CaseStatus 別件数。表示ラベル/tone は status-tones resolver 経由 */
-  dist: Partial<Record<CaseStatus, number>>
-  total: number
   /** drill: Agent 設定 (/agents または /agents/:id) */
   agentTo: string
 }
@@ -57,8 +52,6 @@ export const HUB_PROCESSES: HubProcess[] = [
     trustEn: 'Supervised',
     approvalRate: 92,
     approvalRateOk: false,
-    dist: { pending: 2, ready: 3, 'sent-back': 1, 'business-approval-waiting': 1, reflected: 1 },
-    total: 8,
     agentTo: '/agents/agent-corporate-address-change',
   },
   {
@@ -69,8 +62,6 @@ export const HUB_PROCESSES: HubProcess[] = [
     trustEn: 'Supervised',
     approvalRate: null,
     approvalRateOk: null,
-    dist: { pending: 1, ready: 2, 'business-approval-waiting': 1, reflected: 1 },
-    total: 5,
     agentTo: '/agents',
   },
 ]

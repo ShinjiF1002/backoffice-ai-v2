@@ -77,7 +77,7 @@ export function Cases() {
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
         <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">法人住所変更 · {rows.length} 件 ／ 行を選んで案件を確認</p>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">全業務 · {rows.length} 件 ／ 行を選んで案件を確認</p>
       </header>
 
       <div className="p-4">

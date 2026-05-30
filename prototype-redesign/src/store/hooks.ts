@@ -87,11 +87,19 @@ export function useCurrentActor(): DemoActor | undefined {
   return actorById(s.currentActorId)
 }
 
-// ── Hub 派生 model (Phase 4b、R1) ──────────────────────────────────────────
+// ── Hub 派生 model (Phase 4b、R1 / remediation B3) ─────────────────────────
 // process total/dist・attention(要対応)・承認待ち・primary action を store から都度算出 (操作後 stale なし)。
 // SLA KPI は text elapsed 由来で datetime 化未整備のため static 仮説値のまま (R1、派生 scope 外)。
+// total/dist は HUB_PROCESSES (static) から物理削除済 → useHubModel が唯一の算出 source (型で強制、drift 不能)。
+export interface HubProcessModel extends HubProcess {
+  /** CaseStatus 別件数 (store 由来)。表示ラベル/tone は status-tones resolver 経由 */
+  dist: Partial<Record<CaseStatus, number>>
+  /** 業務 case 件数 (store 由来)。 */
+  total: number
+}
+
 export interface HubModel {
-  processes: HubProcess[]
+  processes: HubProcessModel[]
   headline: HubHeadlineKpi[]
   primaryAction: HubPrimaryAction
 }
@@ -103,7 +111,7 @@ export function useHubModel(): HubModel {
     const countBy = (pid: string, statuses: CaseStatus[]) =>
       allCases.filter((c) => c.workflowId === pid && statuses.includes(c.status)).length
 
-    const processes: HubProcess[] = HUB_PROCESSES.map((p) => {
+    const processes: HubProcessModel[] = HUB_PROCESSES.map((p) => {
       const cases = allCases.filter((c) => c.workflowId === p.id)
       const dist: Partial<Record<CaseStatus, number>> = {}
       for (const c of cases) dist[c.status] = (dist[c.status] ?? 0) + 1

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, CornerUpLeftIcon } from 'lucide-react'
-import { CASE_DETAILS } from '@/data/mock-case-detail'
+import { CASE_DETAILS, buildLifecycle } from '@/data/mock-case-detail'
 import type { CaseDetailModel } from '@/data/mock-case-detail'
 import type { FieldReview } from '@/data/types'
 import { isResolved } from '@/lib/reconcile-display'
+import { caseStatusToTone, caseStatusLabel } from '@/lib/status-tones'
 import { useCase, useStoreDispatch } from '@/store/hooks'
 import { DocumentViewer } from '@/components/case/DocumentViewer'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
@@ -75,6 +76,12 @@ export function CaseDetail() {
 
   if (!c) return <CaseNotFound />
 
+  // status-badge-resolver (remediation 2b): header badge / stepper を store entity.status 由来で resolve。
+  // liveStatus = 操作後の store 真値 (無ければ detail model の baseline)。badge tone は固定 'primary' を廃し resolver 経由。
+  // lifecycle は live≠baseline (= 操作で前進) のとき再計算、一致時は model 既定 (canonical 0142 の bespoke time を温存)。
+  const liveStatus = entity?.status ?? c.status
+  const lifecycle = liveStatus === c.status ? c.lifecycle : buildLifecycle(liveStatus, c.inputter, c.approver)
+
   const showToast = (m: string) => {
     setToast(m)
     window.setTimeout(() => setToast(null), 2400)
@@ -113,7 +120,7 @@ export function CaseDetail() {
               <span className="font-mono text-base">{c.id}</span>
               <span>{c.workflowName}</span>
             </h1>
-            <StatusBadge tone="primary" label={c.statusLabel} />
+            <StatusBadge tone={caseStatusToTone(liveStatus)} label={caseStatusLabel(liveStatus)} />
           </div>
           {/* mode 切替 */}
           <div className="flex rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] p-0.5">
@@ -132,7 +139,7 @@ export function CaseDetail() {
             ))}
           </div>
         </div>
-        <LifecycleStepper steps={c.lifecycle} />
+        <LifecycleStepper steps={lifecycle} />
       </header>
 
       {/* Body: 文書アンカー 2-pane */}

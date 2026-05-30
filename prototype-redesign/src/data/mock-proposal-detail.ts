@@ -28,6 +28,8 @@ export interface SourceCase {
 export interface ProposalDetailModel {
   id: string
   workflow: string
+  /** この提案が改定対象とする Agent (remediation B2: proposal→agent 双方向 link の片側、AGENT_DETAILS.relatedProposals と対称)。 */
+  agentId: string
   changeTitle: string
   status: ProposalStatus
   criteria: MetricRow[]
@@ -42,6 +44,7 @@ export interface ProposalDetailModel {
 export const PROP_2026_031: ProposalDetailModel = {
   id: 'PROP-2026-031',
   workflow: '法人住所変更',
+  agentId: 'agent-corporate-address-change',
   changeTitle: '住所読み取りの判定基準を厳しめに調整',
   status: 'pending-triage',
   // 判定基準 vs 実測 (mock-fixture §6 / reference METRIC_ROWS)
@@ -92,6 +95,7 @@ export const PROP_2026_031: ProposalDetailModel = {
 export const PROP_2026_028: ProposalDetailModel = {
   id: 'PROP-2026-028',
   workflow: '法人住所変更',
+  agentId: 'agent-corporate-address-change',
   changeTitle: '法人名の表記ゆれ補正ルールを追加',
   status: 'forwarded',
   criteria: [
@@ -134,6 +138,7 @@ export const PROP_2026_028: ProposalDetailModel = {
 export const PROP_2026_024: ProposalDetailModel = {
   id: 'PROP-2026-024',
   workflow: '口座開設書類完備',
+  agentId: 'agent-account-opening',
   changeTitle: '本人確認書類の有効期限チェックを追加',
   status: 'approved',
   criteria: [

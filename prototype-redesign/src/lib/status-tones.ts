@@ -35,6 +35,19 @@ export function caseStatusToTone(status: CaseStatus): Tone {
   }
 }
 
+/**
+ * 案件の実行結果 tone (裏付け sample / 実績行の MetaChip 用、success|alert の 2 値 projection)。
+ * caseStatusToTone の業務語意味論を踏襲し「AI が人手介在なく確定 = success / 人手介在・未完 = alert」に圧縮する。
+ *   - reflected (反映済) ・ ready かつ要確認0 (自動入力で確定) → success
+ *   - sent-back (差戻し) ・ ready かつ要確認あり ・ pending ・ business-approval-waiting → alert (人手の確認/介在)
+ * remediation B2: 各 sample の手書き個別 tone を排し、status-tones SSOT で一元導出して tone drift を封じる。
+ */
+export function caseResultTone(status: CaseStatus, flags: number): Extract<Tone, 'success' | 'alert'> {
+  if (status === 'reflected') return 'success'
+  if (status === 'ready' && flags === 0) return 'success'
+  return 'alert'
+}
+
 /** ProposalStatus → Tone resolver (4 状態、v2) */
 export function proposalStatusToTone(status: ProposalStatus): Tone {
   switch (status) {

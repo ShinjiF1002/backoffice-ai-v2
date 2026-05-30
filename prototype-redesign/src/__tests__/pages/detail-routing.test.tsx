@@ -3,13 +3,13 @@ import { MemoryRouter } from 'react-router-dom'
 import { StoreProvider } from '@/store/StoreProvider'
 import { ViewProvider } from '@/context/ViewProvider'
 import App from '@/App'
-import { CASE_LIST } from '@/data/mock-case-list'
+import { CASE_LIST, VERIFICATION_EXTRA_CASES } from '@/data/mock-case-list'
 import { PROPOSAL_LIST } from '@/data/mock-proposal-list'
 import { AGENT_LIST } from '@/data/mock-agent-list'
 import { CASE_DETAILS } from '@/data/mock-case-detail'
 import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
 import { AGENT_DETAILS } from '@/data/mock-agent-detail'
-import { caseStatusLabel } from '@/lib/status-tones'
+import { caseStatusLabel, caseResultTone } from '@/lib/status-tones'
 
 // Phase 4a — detail が :id に連動 (X-10 解消) / 未知 id は not-found / factory が list と整合。
 // routes.test と同じ構造 (Router > Store > View > App) で実 route を踏む jsdom smoke。
@@ -116,6 +116,92 @@ describe('Phase 4a gate: dict coverage (gate 1 — 全 list id が detail を持
   })
   it('AGENT_LIST 全 id が AGENT_DETAILS に存在', () => {
     for (const row of AGENT_LIST) expect(AGENT_DETAILS[row.id]).toBeDefined()
+  })
+})
+
+describe('P0-W2 B2: 証拠アンカー内容整合 (「別明細なのに同じデータ」の解消)', () => {
+  it('全 proposal sourceCases の link 先 detail が proposal と同 workflow', () => {
+    // 口座開設提案 (PROP-024) の sourceCase 0112/0104/0101 を開くと口座開設 detail が出る (法人住所変更 detail ではない)。
+    for (const p of Object.values(PROPOSAL_DETAILS)) {
+      for (const sc of p.sourceCases) {
+        expect(CASE_DETAILS[sc.id]).toBeDefined()
+        expect(CASE_DETAILS[sc.id].workflowName).toBe(p.workflow)
+      }
+    }
+  })
+
+  it('全 agent samples の link 先 detail が agent と同 workflow', () => {
+    for (const a of Object.values(AGENT_DETAILS)) {
+      for (const s of a.samples) {
+        expect(CASE_DETAILS[s.id]).toBeDefined()
+        expect(CASE_DETAILS[s.id].workflowName).toBe(a.workflow)
+      }
+    }
+  })
+
+  it('proposal ↔ agent 双方向 link が対称 (agentId ↔ relatedProposals)', () => {
+    for (const p of Object.values(PROPOSAL_DETAILS)) {
+      const agent = AGENT_DETAILS[p.agentId]
+      expect(agent).toBeDefined()
+      expect(agent.relatedProposals).toContain(p.id)
+    }
+    for (const a of Object.values(AGENT_DETAILS)) {
+      for (const pid of a.relatedProposals) {
+        expect(PROPOSAL_DETAILS[pid]).toBeDefined()
+        expect(PROPOSAL_DETAILS[pid].agentId).toBe(a.id)
+      }
+    }
+  })
+
+  it('agent sample.tone は caseResultTone(status, flags) で導出される (手書き個別 tone の禁止)', () => {
+    const byId = Object.fromEntries(CASE_LIST.map((r) => [r.id, r]))
+    for (const a of Object.values(AGENT_DETAILS)) {
+      for (const s of a.samples) {
+        const row = byId[s.id]
+        expect(row).toBeDefined()
+        expect(s.tone).toBe(caseResultTone(row.status, row.flags))
+      }
+    }
+  })
+
+  it('口座開設 case (0112/0104/0101) は口座開設業務として実体化 (HISTORICAL 二重登録なし)', () => {
+    for (const id of ['CASE-2026-0112', 'CASE-2026-0104', 'CASE-2026-0101']) {
+      expect(CASE_LIST.some((r) => r.id === id)).toBe(true)
+      expect(CASE_DETAILS[id].workflowName).toBe('口座開設書類完備')
+    }
+  })
+
+  it('口座開設 case の detail は口座開設書類 (法人住所変更届を表示しない)', () => {
+    renderAt('/cases/CASE-2026-0112')
+    // detail header は口座開設業務 (breadcrumb + h1)
+    expect(screen.getAllByText('口座開設書類完備').length).toBeGreaterThan(0)
+    // 申請書類ビューアは口座開設申込書 = 法人住所変更届データではない (B2 別明細整合)。
+    // 注: TopBar ProcessSelector は既定業務名 '法人住所変更' を表示するため、detail 固有の文書名で判定する。
+    expect(screen.getByText('口座開設申込書')).toBeInTheDocument()
+    expect(screen.queryByText('法人住所変更届')).toBeNull()
+  })
+})
+
+describe('P0-W2 2b: status-badge resolver (tone="primary" 固定の廃止)', () => {
+  it('reflected 案件の header status badge は success tone (resolver 由来)', () => {
+    renderAt('/cases/CASE-2026-0112') // 口座開設 reflected
+    const badges = screen.getAllByText('反映済')
+    expect(badges.some((b) => b.className.includes('success'))).toBe(true)
+  })
+})
+
+describe('P0-W2 B3 (gate 3=案A): 検証 fixture は業務 case と分離', () => {
+  it('VERIFICATION_EXTRA_CASES は CASE-VRF- 別 id 空間で CASE_LIST に含まれない', () => {
+    const caseIds = new Set(CASE_LIST.map((r) => r.id))
+    expect(VERIFICATION_EXTRA_CASES).toHaveLength(20)
+    for (const v of VERIFICATION_EXTRA_CASES) {
+      expect(v.id.startsWith('CASE-VRF-')).toBe(true)
+      expect(caseIds.has(v.id)).toBe(false) // 業務母数 (Hub/KPI) に検証 noise を混ぜない
+    }
+  })
+  it('業務 CASE_LIST は法人住所変更 8 + 口座開設 5 = 13 件', () => {
+    expect(CASE_LIST).toHaveLength(13)
+    expect(CASE_LIST.filter((r) => r.workflow === '口座開設書類完備')).toHaveLength(5)
   })
 })
 

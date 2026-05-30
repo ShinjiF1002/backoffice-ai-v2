@@ -58,11 +58,20 @@ export function seed(): StoreState {
       workflowId: workflowIdOf(row.workflow),
       workflowName: row.workflow,
       trust: row.trust,
-      promotionRequested: false,
+      promotionStatus: 'none',
       paused: false,
     }
     agentOrder.push(row.id)
   }
 
-  return { cases, caseOrder, proposals, proposalOrder, agents, agentOrder, currentActorId: DEFAULT_ACTOR_ID }
+  return {
+    cases,
+    caseOrder,
+    proposals,
+    proposalOrder,
+    agents,
+    agentOrder,
+    currentActorId: DEFAULT_ACTOR_ID,
+    readNotificationIds: [],
+  }
 }

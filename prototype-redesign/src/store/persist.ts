@@ -10,8 +10,10 @@ import { actorById } from './actors'
 const STORAGE_KEY = 'bo-ai-v2:store'
 // 2→3: remediation P0-W1 で CaseEntity.overrides + StoreState.currentActorId 追加 (B1/B4)。
 // 3→4: remediation P0-W3 で AgentEntity.pausedReason 追加 (flywheel kill-switch、togglePause→emergencyStop/resume)。
+// 4→5: remediation W2a で StoreState.readNotificationIds + CaseEntity.escalation +
+//      AgentEntity.promotionStatus/promotionRequestedBy/promotionSendbackReason (旧 promotionRequested boolean を統合) 追加 (P1-2/P1-3)。
 // 旧 version は不一致で seed fallback (白画面化を防ぐ)。
-const SCHEMA_VERSION = 4
+const SCHEMA_VERSION = 5
 
 interface Persisted {
   v: number
@@ -31,7 +33,8 @@ function isStoreStateShape(s: unknown): s is StoreState {
       Array.isArray(o.proposalOrder) &&
       isDict(o.agents) &&
       Array.isArray(o.agentOrder) &&
-      typeof o.currentActorId === 'string'
+      typeof o.currentActorId === 'string' &&
+      Array.isArray(o.readNotificationIds)
     )
   ) {
     return false

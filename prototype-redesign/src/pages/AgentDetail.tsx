@@ -59,7 +59,7 @@ export function AgentDetail() {
   }
 
   const hasUnmet = a.metrics.some((m) => !m.achieved)
-  const requested = agentEntity?.promotionRequested ?? false
+  const requested = agentEntity?.promotionStatus === 'requested'
   // 緊急停止 (kill-switch) 状態 (flywheel 観測化)。paused は header「緊急コントロール」で可視化 + 再開可能。
   const paused = agentEntity?.paused ?? false
   const pausedReason = agentEntity?.pausedReason

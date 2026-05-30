@@ -9,6 +9,13 @@
  */
 import type { CaseStatus, ProposalStatus, TrustLevel } from '@/data/types'
 
+/**
+ * Agent 設定変更 (昇格) 申請の承認状態 (remediation P1-3、旧 promotionRequested boolean を統合)。
+ * none → (requestPromotion) → requested → (approvePromotion) → approved / (sendbackPromotion) → none (理由保持)。
+ * sent-back は none + promotionSendbackReason で表現し再申請を許す (C1「昇格が永久停止」解消)。
+ */
+export type PromotionStatus = 'none' | 'requested' | 'approved'
+
 /** 案件 (操作対象 = status / assignee / 要確認数)。rich data は mock-case-detail dict 側。 */
 export interface CaseEntity {
   id: string
@@ -27,6 +34,12 @@ export interface CaseEntity {
   inputApprovedBy?: string
   /** 直近の差戻し理由 (remediation sendback-guard、受領入力者が参照)。 */
   sendback?: { reason: string; category: string }
+  /**
+   * 業務責任者へのエスカレーション (remediation P1-3、難案件の裁定依頼)。
+   * 受信 queue (/escalations) の母集合判定 = この field が存在する case。
+   * 裁定の帰結 (JG-3=a) は既存 case/sendback (差戻し) を再利用し、本 field は依頼記録に徹する (status は変えない)。
+   */
+  escalation?: { reason: string; category: string; to: string }
   elapsedLabel: string
 }
 
@@ -46,8 +59,12 @@ export interface AgentEntity {
   workflowId: string
   workflowName: string
   trust: TrustLevel
-  /** 設定変更 (昇格) 申請済みか */
-  promotionRequested: boolean
+  /** 設定変更 (昇格) 申請の承認状態 (remediation P1-3、旧 promotionRequested boolean を統合)。 */
+  promotionStatus: PromotionStatus
+  /** 昇格を申請した actorId (remediation P1-3 SoD: 同一 actor の設定承認を block する判定材料、案件 B4 と同型)。 */
+  promotionRequestedBy?: string
+  /** 直近の設定承認差戻し理由 (remediation P1-3、申請者が参照し再申請に活かす。理由を捨てない)。 */
+  promotionSendbackReason?: string
   /** 緊急停止 (kill-switch) で全件確認へ降格された状態 (remediation flywheel、AgentDetail/Agents で可視化)。 */
   paused: boolean
   /** 緊急停止の理由 (kill-switch 操作時に保持、resume で解除)。理由を捨てない。 */
@@ -63,6 +80,12 @@ export interface StoreState {
   agentOrder: string[]
   /** 現在の操作 actor (remediation B4 SoD、persona switcher で切替)。reducer が承認の四眼原則判定に使う。 */
   currentActorId: string
+  /**
+   * 既読化した通知 id 群 (remediation P1-2、/inbox 未読バッジの算出材料)。
+   * 通知自体は store entity ではなく派生 selector で都度算出する (S8 境界)。本 field は既読 fact のみ保持し、
+   * 通知 id = 由来 entity から決定的に導く安定文字列 (例 `sendback:${caseId}`)。未読数 = 派生通知数 − 既読集合。
+   */
+  readNotificationIds: string[]
 }
 
 /**
@@ -80,11 +103,18 @@ export interface StoreState {
  *   category は case/sendback は必須、proposal は任意 (ReasonDialog が category を持たないため)。
  * agent/emergencyStop / agent/resume (remediation flywheel、旧 togglePause を分割): kill-switch で全件確認へ降格 / 復帰。
  *   emergencyStop は停止理由を必須で pausedReason に保持 (AI 停止の根拠を捨てない、理由必須 modal が保証)。
+ * agent/approvePromotion / sendbackPromotion (remediation P1-3、設定承認): requested → approved / none。
+ *   SoD (四眼原則を設定層へ拡張): 申請 actor (promotionRequestedBy) と承認 actor (state.currentActorId) が同一なら no-op block。
+ *   案件 B4 と同一 helper (isSelfApproval) を再利用し SoD を 案件/設定 で統一する (再発明しない)。承認 actor は store の現 actor を用いる。
+ * case/escalate (remediation P1-3): 難案件を業務責任者へ裁定依頼。escalation 記録のみ (status は変えない、裁定の帰結は別途 case/sendback)。
+ * notification/markRead / markAllRead (remediation P1-2): /inbox の既読化。冪等。markAllRead は現 selector が算出した通知 id 群を ids で受ける
+ *   (通知 universe の算出責務を selector 側に閉じ、reducer は既読 fact の追記に徹する)。
  */
 export type StoreAction =
   | { type: 'case/approve'; id: string; by: 'input' | 'checker' }
   | { type: 'case/override'; id: string; fieldLabel: string; value: string }
   | { type: 'case/sendback'; id: string; reason: string; category: string }
+  | { type: 'case/escalate'; id: string; reason: string; category: string; to: string }
   | { type: 'case/assign'; id: string; assignee: string }
   | { type: 'case/bulkApprove'; ids: string[]; by: 'input' | 'checker' }
   | { type: 'proposal/forward'; id: string }
@@ -92,7 +122,11 @@ export type StoreAction =
   | { type: 'proposal/reject'; id: string; reason: string; category?: string }
   | { type: 'proposal/sendback'; id: string; reason: string; category?: string }
   | { type: 'agent/requestPromotion'; id: string }
+  | { type: 'agent/approvePromotion'; id: string }
+  | { type: 'agent/sendbackPromotion'; id: string; reason: string }
   | { type: 'agent/emergencyStop'; id: string; reason: string }
   | { type: 'agent/resume'; id: string }
+  | { type: 'notification/markRead'; id: string }
+  | { type: 'notification/markAllRead'; ids: string[] }
   | { type: 'session/switchActor'; actorId: string }
   | { type: 'store/reset' }

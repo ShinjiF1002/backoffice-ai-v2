@@ -7,6 +7,7 @@
 CLAUDE.md non-negotiable (Tech Debt 回避 / clean architecture) と可逆性に基づき、以下 4 gate は既定で確定する:
 
 - **Gate 1 (B1 action 設計)** → **(b) `case/confirm` + `case/override` 2 action 分離**。accept/override の意味論を型で表現、Tech Debt 回避。
+  - **[実装整合 2026-05-30]**: 実装は単一 `case/override` に統合 (accept/override は reducer 挙動が同一で label 差のみ、`prototype-redesign/src/store/types.ts:73-77` で deferred を明文化)。action 数を増やさず Tech Debt を回避する判断で、P0 要件 (訂正値の capture/persist) は単一 action で充足。2-action 分割は accept/override を別監査イベントに分ける要件が出た時点で再導入する。
 - **Gate 2 (B3 承認率分母)** → **980 に統一** (agent-level metric を SSOT 化し Observatory は集約)。synthetic ゆえ 1 値変更で可逆。
 - **Gate 3 (B3 検証 fixture 分離)** → **案A: seed 除外**。B1/B4/sendback の CaseEntity 衝突面を増やさない。pagination 検証は test-only 注入で確保。
 - **Gate 6 (B2 実体化範囲)** → **(B) B3 統合で口座開設 case を正規 CASE_LIST 入り**。B3 が当該 case 追加を必須とするため一貫。historical 二重登録を回避。
@@ -75,7 +76,7 @@ CLAUDE.md non-negotiable (Tech Debt 回避 / clean architecture) と可逆性に
 
 ### Wave 3 — UI 配線 + 観測可能化
 - **含む**: B1/B4/sendback の UI 配線、flywheel-observability、reset-confirm。
-- **共通基盤変更**: なし (Wave 1/2 の基盤の上に画面を載せる)。flywheel は store 派生 selector (`useFlywheelLineage`) を hooks に追加 (新 static fixture を増やさない)。
+- **共通基盤変更**: ~~なし (Wave 1/2 の基盤の上に画面を載せる)~~ → **[実装整合 2026-05-30] W3 で store/schema 変更あり**: kill-switch 実装のため `AgentEntity.paused`/`pausedReason` + `agent/emergencyStop`/`agent/resume` action を追加し `SCHEMA_VERSION` を 3→4 に bump (`prototype-redesign/src/store/persist.ts`)。Gate 5(B) variant 1 を Wave 1 union で集約する §5 line 207 方針は実際には W3 で実施。flywheel は store 派生 selector (`useFlywheelLineage`) を hooks に追加 (新 static fixture を増やさない)。
 - **必須 / P1 分離 (critical-review should-fix 反映)**: P0 を閉じる**必須分**は B1 値入力欄+humanValue 表示 / B4 mode→persona switcher 分離+SoD disabled+理由 / sendback 理由再表示 / flywheel kill-switch UI (A3) + proposal approve lineage (A2) / reset confirm Modal。**P1 carve 候補** (Wave 0 判断次第): B2/flywheel の proposal↔agent 双方向 link section、Observatory knowledge tab の lineage view IA 再設計 (Gate A-ii)、status-badge の before/after 併記。必須分だけで 8 P0 が閉じることを Wave 3 gate で確認。
 - **並行可否**: 部分並行可 (B1/B4/sendback/reset は別 file 中心)。flywheel は B4 (Wave1) + B2 (Wave2) 依存のため最後。
 - **Gate**: §6 の画面 evidence 全項目 + `npm run check:all` green + P2B-4 full active-source gate (off-token hex 0 / lucide のみ / JP-only) clean + Session 4 demo-script 実走で詰まらないこと。
@@ -158,7 +159,7 @@ CLAUDE.md non-negotiable (Tech Debt 回避 / clean architecture) と可逆性に
 
 | # | 決めるべき問い | 選択肢 | 推奨 |
 |---|---|---|---|
-| 1 | **B1 action 設計** | (a) `case/override` 1 本に value 追加 (最小) / (b) `case/confirm` (申請書類値確定) と `case/override` (手入力) を 2 action 分離 (契約 §4.1 の accept/override を型で表現) | **(b)** 意味論が正確で Tech Debt 回避。B4 統合の signature 調整が +1 action 分だが加法的で衝突小 |
+| 1 | **B1 action 設計** | (a) `case/override` 1 本に value 追加 (最小) / (b) `case/confirm` (申請書類値確定) と `case/override` (手入力) を 2 action 分離 (契約 §4.1 の accept/override を型で表現) | **(b)** 意味論が正確で Tech Debt 回避。B4 統合の signature 調整が +1 action 分だが加法的で衝突小（実装整合 2026-05-30: 最終実装は単一 `case/override` に統合、§監査者 gate 既定 Gate 1 注参照） |
 | 2 | **B3 UC-BO-02 承認率の分母** | 820 (Observatory 現値) / 980 (AgentDetail 現値)。mock-fixture §5 未定義、どちらも synthetic | **要 user 確定** (業務 anchor が無いため推奨を出せない。1 つ選べば SSOT 化で grep gate が drift を封じる) |
 | 3 | **B3 検証 fixture 分離方式** | (A) seed 除外 = 業務母数 13、type 不変 / (B) CaseEntity に isVerification = 母数 28 維持、Cases pagination 検証残る | **(A)** B1/B4/sendback との CaseEntity 衝突面を増やさない。ただし pagination 検証は test-only 注入で別途確保 (案B 選択時は Wave 1 に field 繰り上げ) |
 | 4 | **B4 SoD 強制度 + mode toggle** | 強制: (a) reducer hard-block + persona switcher / (b) UI disabled-only / (c) **scope-0** (表示のみ、R1-3 に全 carve)。toggle: (a) 完全廃止 role 固定 / (b) demo-only persona switcher 分離 / (c) toggle 残置 | **強制 (a) + toggle (b)**。契約忠実かつ demo 性両立。ただし IA に persona switcher (新 chrome) を足すため ia-overview-v2 影響を許容するか確認 |

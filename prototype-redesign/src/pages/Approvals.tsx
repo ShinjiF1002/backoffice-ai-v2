@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon } from 'lucide-react'
-import { useApprovals, useStoreDispatch } from '@/store/hooks'
+import { useApprovals, useStoreDispatch, useCurrentActor } from '@/store/hooks'
 import { CASE_DETAILS } from '@/data/mock-case-detail'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
@@ -21,6 +22,8 @@ interface ApprovalViewRow {
   modifiedCount: number
   /** 残要確認 (business-approval-waiting は通常 0、一括承認 gate 用) */
   flags: number
+  /** 入力者承認した actorId (B4 SoD: 一括承認で自己承認案件を skip する判定材料)。 */
+  inputApprovedBy?: string
   elapsed: string
 }
 
@@ -55,6 +58,12 @@ const columns: DataTableColumn<ApprovalViewRow>[] = [
 export function Approvals() {
   const approvals = useApprovals()
   const dispatch = useStoreDispatch()
+  const actor = useCurrentActor()
+  const [toast, setToast] = useState<string | null>(null)
+  const showToast = (m: string) => {
+    setToast(m)
+    window.setTimeout(() => setToast(null), 2800)
+  }
   // store entity → view row。inputter/approver は detail dict から join、修正件数は resolvedFieldIds 由来 (R3)。
   const rows: ApprovalViewRow[] = approvals.map((e) => ({
     id: e.id,
@@ -63,6 +72,7 @@ export function Approvals() {
     approver: CASE_DETAILS[e.id]?.approver ?? '—',
     modifiedCount: e.resolvedFieldIds.length,
     flags: e.flags,
+    inputApprovedBy: e.inputApprovedBy,
     elapsed: e.elapsedLabel,
   }))
   const inputters = [...new Set(rows.map((r) => r.inputter))]
@@ -89,12 +99,23 @@ export function Approvals() {
           ariaLabel="承認待ち"
           filters={filters}
           // 一括承認 = case/bulkApprove(by:checker)。要確認残 (flags>0) があれば一括不可。
+          // SoD: 自分が入力者承認した案件は reducer が四眼原則で skip → 承認/スキップ件数を toast で可視化 (B4)。
           selection={{
             actions: [
               {
                 label: '一括承認',
                 icon: <CheckIcon className="h-3 w-3" aria-hidden="true" />,
-                onRun: (ids) => dispatch({ type: 'case/bulkApprove', ids, by: 'checker' }),
+                onRun: (ids) => {
+                  const selected = rows.filter((r) => ids.includes(r.id))
+                  const skipped = selected.filter((r) => r.inputApprovedBy !== undefined && r.inputApprovedBy === actor?.id).length
+                  dispatch({ type: 'case/bulkApprove', ids, by: 'checker' })
+                  const approved = selected.length - skipped
+                  showToast(
+                    skipped > 0
+                      ? `${approved} 件を最終承認しました（自己承認 ${skipped} 件は四眼原則によりスキップ — 承認者に切替えてください）`
+                      : `${approved} 件を最終承認しました`,
+                  )
+                },
                 disabled: (selectedRows) => selectedRows.some((r) => r.flags > 0),
               },
             ],
@@ -107,6 +128,15 @@ export function Approvals() {
           }
         />
       </div>
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 z-[80] -translate-x-1/2 rounded-[var(--radius-card)] border border-[var(--color-success)] bg-[var(--color-success-soft)] px-4 py-2 text-sm font-medium text-[var(--color-success-soft-fg)] shadow-lg"
+        >
+          {toast}
+        </div>
+      )}
     </div>
   )
 }

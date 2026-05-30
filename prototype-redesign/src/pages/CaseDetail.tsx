@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react'
-import { useParams, useSearchParams, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, CornerUpLeftIcon } from 'lucide-react'
-import { CASE_DETAILS } from '@/data/mock-case-detail'
+import { CASE_DETAILS, buildLifecycle } from '@/data/mock-case-detail'
 import type { CaseDetailModel } from '@/data/mock-case-detail'
 import type { FieldReview } from '@/data/types'
 import { isResolved } from '@/lib/reconcile-display'
-import { useCase, useStoreDispatch } from '@/store/hooks'
+import { caseStatusToTone, caseStatusLabel } from '@/lib/status-tones'
+import { useCase, useStoreDispatch, useCurrentActor, useCanApprove } from '@/store/hooks'
+import { actorById } from '@/store/actors'
 import { DocumentViewer } from '@/components/case/DocumentViewer'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 import { FieldActionModal } from '@/components/case/FieldActionModal'
+import type { ActionKind } from '@/components/case/FieldActionModal'
 import { ReconcilePanel } from '@/components/cross-cutting/ReconcilePanel'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { cn } from '@/lib/cn'
@@ -43,9 +46,10 @@ export function CaseDetail() {
   const c = id ? CASE_DETAILS[id] : undefined
   const entity = useCase(id)
   const dispatch = useStoreDispatch()
-  // Approvals (承認待ち) からは ?view=checker で承認者ビュー初期化 (screen-contract: row → checker)
-  const [params] = useSearchParams()
-  const [mode, setMode] = useState<'input' | 'checker'>(params.get('view') === 'checker' ? 'checker' : 'input')
+  // 操作ビュー (入力者/承認者) は操作者 persona の role から導出 (remediation B4: 自己切替を廃し SoD を honest 化)。
+  // 切替は TopBar の操作者 switcher (session/switchActor)。inputter は入力者ビュー、承認者/業務責任者は承認者ビュー。
+  const actor = useCurrentActor()
+  const mode: 'input' | 'checker' = actor?.role === 'inputter' ? 'input' : 'checker'
   const [activeFieldLabel, setActiveFieldLabel] = useState<string | undefined>(() => firstReviewLabel(c, entity?.resolvedFieldIds))
   const [modalField, setModalField] = useState<FieldReview | null>(null)
   const [caseSendbackOpen, setCaseSendbackOpen] = useState(false)
@@ -60,33 +64,51 @@ export function CaseDetail() {
     setToast(null)
   }
 
-  // overlay: dict の rich fields に store の resolvedFieldIds を被せ、解決済を確認済表示にする (store-truth)。
+  // overlay: dict の rich fields に store の resolvedFieldIds + overrides を被せる (store-truth)。
+  // resolved は確認済表示に、override 済 field は humanValue (訂正値) を被せ確認済行/modal で訂正値を出す (B1)。
   const fields = useMemo(() => {
     const resolved = new Set(entity?.resolvedFieldIds ?? [])
-    return (c?.fields ?? []).map((f): FieldReview => (resolved.has(f.fieldLabel) ? { ...f, reconcileState: 'manually_confirmed' } : f))
-  }, [c, entity?.resolvedFieldIds])
+    const overrides = entity?.overrides ?? {}
+    return (c?.fields ?? []).map((f): FieldReview => {
+      const ov = overrides[f.fieldLabel]
+      const withHuman = ov !== undefined ? { ...f, humanValue: ov } : f
+      return resolved.has(f.fieldLabel) ? { ...withHuman, reconcileState: 'manually_confirmed' } : withHuman
+    })
+  }, [c, entity?.resolvedFieldIds, entity?.overrides])
   const openCount = useMemo(() => fields.filter((f) => !isResolved(f.reconcileState)).length, [fields])
-  // 承認可否を reducer precondition と一致させる (false success 防止、Phase 4b CR P1):
-  // input は ready かつ要確認0、checker は business-approval-waiting のみ。それ以外は dispatch が no-op。
-  const canApprove =
-    mode === 'checker' ? entity?.status === 'business-approval-waiting' : entity?.status === 'ready' && openCount === 0
   // store に無い = 参照専用 (提案根拠の過去案件など)。全操作を抑止し false success を防ぐ。
   const readOnly = !entity
+  // 承認可否 + disabled 理由を SoD + status precondition で 1 selector に集約 (B4)。自己承認は reducer + ここで block。
+  const approveGate = useCanApprove(id, mode)
 
   if (!c) return <CaseNotFound />
+
+  // status-badge-resolver (remediation 2b): header badge / stepper を store entity.status 由来で resolve。
+  // liveStatus = 操作後の store 真値 (無ければ detail model の baseline)。badge tone は固定 'primary' を廃し resolver 経由。
+  // lifecycle は live≠baseline (= 操作で前進) のとき再計算、一致時は model 既定 (canonical 0142 の bespoke time を温存)。
+  const liveStatus = entity?.status ?? c.status
+  const lifecycle = liveStatus === c.status ? c.lifecycle : buildLifecycle(liveStatus, c.inputter, c.approver)
+  // 差戻し可否を precondition と一致 (false-action 防止、sendback-guard): ready / business-approval-waiting からのみ。
+  const canSendback = !readOnly && (liveStatus === 'ready' || liveStatus === 'business-approval-waiting')
+  // SoD 表示の入力者は「実際に入力者承認した actor」(store の inputApprovedBy) を解決する。
+  // 一覧 owner (c.inputter) は assignee であり承認 actor とは限らない (例 0128 は owner=鈴木課長 だが入力者承認は山田太郎)。
+  // これを混同すると承認者 persona と同名になり「X ≠ X」の不正直な SoD 表示になるため、actor 解決名を使う。
+  const inputApproverName = actorById(entity?.inputApprovedBy ?? '')?.name ?? c.inputter
 
   const showToast = (m: string) => {
     setToast(m)
     window.setTimeout(() => setToast(null), 2400)
   }
 
-  const handleAct = (fieldLabel: string, kind: 'accept' | 'override' | 'sendback' | 'escalate') => {
+  const handleAct = (fieldLabel: string, kind: ActionKind, detail: { reason?: string; category?: string; value?: string }) => {
     if (!id || readOnly) return
     if (kind === 'accept' || kind === 'override') {
-      dispatch({ type: 'case/override', id, fieldLabel })
+      // B1: 確定値 (accept=申請書類値 / override=訂正値) を store の overrides に保存。確認済行に反映される。
+      dispatch({ type: 'case/override', id, fieldLabel, value: detail.value ?? '' })
       showToast(`${fieldLabel} を確定しました`)
     } else if (kind === 'sendback') {
-      dispatch({ type: 'case/sendback', id })
+      // sendback-guard: 差戻し理由/カテゴリを store に保持 (理由を捨てない)。
+      dispatch({ type: 'case/sendback', id, reason: detail.reason ?? '', category: detail.category ?? '' })
       showToast(`${fieldLabel} を差戻しました — 再処理後に確認待ちへ`)
     } else {
       showToast(`${fieldLabel} をエスカレーションしました`)
@@ -113,26 +135,18 @@ export function CaseDetail() {
               <span className="font-mono text-base">{c.id}</span>
               <span>{c.workflowName}</span>
             </h1>
-            <StatusBadge tone="primary" label={c.statusLabel} />
+            <StatusBadge tone={caseStatusToTone(liveStatus)} label={caseStatusLabel(liveStatus)} />
           </div>
-          {/* mode 切替 */}
-          <div className="flex rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] p-0.5">
-            {(['input', 'checker'] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                className={cn(
-                  'rounded-[4px] px-3 py-1 text-xs font-medium transition-colors',
-                  mode === m ? 'bg-[var(--color-fg)] text-white' : 'text-[var(--color-fg-muted)]'
-                )}
-              >
-                {m === 'input' ? '入力者ビュー' : '承認者ビュー'}
-              </button>
-            ))}
-          </div>
+          {/* 操作ビュー (read-only): 操作者 persona の role 由来。切替は TopBar の操作者 switcher (自己切替 block、SoD honest 化)。 */}
+          <span
+            title="操作ビューは操作者 (右上) の役割で切替わります"
+            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-muted)]"
+          >
+            <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-muted)]" aria-hidden="true" />
+            {mode === 'input' ? '入力者ビュー' : '承認者ビュー'}
+          </span>
         </div>
-        <LifecycleStepper steps={c.lifecycle} />
+        <LifecycleStepper steps={lifecycle} />
       </header>
 
       {/* Body: 文書アンカー 2-pane */}
@@ -140,11 +154,23 @@ export function CaseDetail() {
         <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-[52fr_48fr]">
           <DocumentViewer document={c.document} activeFieldLabel={activeFieldLabel} onRowSelect={setActiveFieldLabel} />
           <div className="overflow-auto">
+            {/* sendback-guard: 差戻し済みの案件は理由を read-only で再表示 (理由を捨てない)。 */}
+            {entity?.sendback && (
+              <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3 text-xs">
+                <CornerUpLeftIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-alert)]" aria-hidden="true" />
+                <div>
+                  <div className="font-medium text-[var(--color-fg)]">
+                    この案件は差戻し済みです{entity.sendback.category ? `（${entity.sendback.category}）` : ''}
+                  </div>
+                  <p className="mt-0.5 text-[var(--color-fg-muted)]">差戻し理由: {entity.sendback.reason}</p>
+                </div>
+              </div>
+            )}
             {mode === 'checker' && (
               <div className="mb-3 flex items-center gap-2 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3 text-xs">
                 <ShieldCheckIcon className="h-4 w-4 text-[var(--color-primary-hover)]" aria-hidden="true" />
                 <span className="text-[var(--color-fg)]">
-                  承認者ビュー — 入力者 <strong>{c.inputter}</strong> の確認結果を最終承認 (別担当者による確認: 承認者 ≠ 入力者)
+                  承認者ビュー — 入力者 <strong>{inputApproverName}</strong> の確認結果を最終承認 (別担当者による確認: 承認者 ≠ 入力者)
                 </span>
               </div>
             )}
@@ -164,31 +190,37 @@ export function CaseDetail() {
         <div className="text-xs">
           {readOnly ? (
             <span className="text-[var(--color-fg-muted)]">過去の案件 — 参照専用です（この画面では操作できません）</span>
-          ) : mode === 'checker' ? (
-            entity?.status === 'business-approval-waiting' ? (
-              <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
-                <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
-                入力者 <strong className="text-[var(--color-fg)]">{c.inputter}</strong> ≠ 承認者 <strong className="text-[var(--color-fg)]">{c.approver}</strong>
+          ) : approveGate.allowed ? (
+            mode === 'checker' ? (
+              <span className="flex items-center gap-1.5 text-[var(--color-success-soft-fg)]">
+                <ShieldCheckIcon className="h-3.5 w-3.5" />
+                入力者 <strong className="text-[var(--color-fg)]">{inputApproverName}</strong> ≠ 承認者{' '}
+                <strong className="text-[var(--color-fg)]">{actor?.name ?? c.approver}</strong> — 最終承認できます
               </span>
             ) : (
-              <span className="text-[var(--color-fg-muted)]">この案件は承認者の最終承認の段階ではありません</span>
+              <span className="text-[var(--color-success-soft-fg)]">全項目確認済 — 承認できます</span>
             )
-          ) : entity?.status !== 'ready' ? (
-            <span className="text-[var(--color-fg-muted)]">この案件は入力者確認の段階ではありません</span>
-          ) : openCount > 0 ? (
-            <span className="text-[var(--color-alert-soft-fg)]">要確認 {openCount} 項目を解消してください</span>
           ) : (
-            <span className="text-[var(--color-success-soft-fg)]">全項目確認済 — 承認できます</span>
+            // SoD block / status precondition の理由を 1 source (approveGate.reason) で表示。要確認残のみ alert tone。
+            <span
+              className={cn(
+                'flex items-center gap-1.5',
+                mode === 'input' && openCount > 0 ? 'text-[var(--color-alert-soft-fg)]' : 'text-[var(--color-fg-muted)]'
+              )}
+            >
+              {approveGate.reason}
+            </span>
           )}
         </div>
         <div className="flex gap-2">
           <button
             type="button"
-            disabled={readOnly}
+            disabled={!canSendback}
+            title={!canSendback && !readOnly ? 'この段階では差戻しできません' : undefined}
             onClick={() => setCaseSendbackOpen(true)}
             className={cn(
               'flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]',
-              readOnly && 'cursor-not-allowed opacity-50 hover:bg-[var(--color-panel)]'
+              !canSendback && 'cursor-not-allowed opacity-50 hover:bg-[var(--color-panel)]'
             )}
           >
             <CornerUpLeftIcon className="h-4 w-4" />
@@ -196,21 +228,15 @@ export function CaseDetail() {
           </button>
           <button
             type="button"
-            disabled={!canApprove}
-            title={
-              !canApprove
-                ? mode === 'input' && entity?.status === 'ready'
-                  ? `要確認 ${openCount} 項目を解消してください`
-                  : 'この段階ではこの操作はできません'
-                : undefined
-            }
+            disabled={!approveGate.allowed}
+            title={approveGate.allowed ? undefined : approveGate.reason}
             onClick={() => {
               if (id) dispatch({ type: 'case/approve', id, by: mode === 'checker' ? 'checker' : 'input' })
               showToast(mode === 'checker' ? '最終承認しました' : '承認しました — 承認者待ちへ')
             }}
             className={cn(
               'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-              !canApprove
+              !approveGate.allowed
                 ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
                 : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
             )}
@@ -227,8 +253,9 @@ export function CaseDetail() {
         caseLevel={caseSendbackOpen}
         caseId={c.id}
         onClose={() => setCaseSendbackOpen(false)}
-        onSubmit={() => {
-          if (id) dispatch({ type: 'case/sendback', id })
+        onSubmit={(_target, _kind, detail) => {
+          // sendback-guard: 案件全体の差戻し理由/カテゴリを store に保持 (理由を捨てない)。
+          if (id) dispatch({ type: 'case/sendback', id, reason: detail.reason ?? '', category: detail.category ?? '' })
           showToast('案件を差戻しました — 再処理後に確認待ちへ')
         }}
       />

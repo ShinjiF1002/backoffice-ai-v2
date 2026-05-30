@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon } from 'lucide-react'
+import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon, PauseIcon, PlayIcon } from 'lucide-react'
 import { AGENT_DETAILS } from '@/data/mock-agent-detail'
-import { useAgent, useStoreDispatch } from '@/store/hooks'
+import { useAgent, useStoreDispatch, useAgentAdoptedProposals } from '@/store/hooks'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
@@ -31,14 +31,21 @@ export function AgentDetail() {
   const { id } = useParams()
   const a = id ? AGENT_DETAILS[id] : undefined
   const agentEntity = useAgent(id)
+  const adopted = useAgentAdoptedProposals(id)
   const dispatch = useStoreDispatch()
   const [applyOpen, setApplyOpen] = useState(false)
+  const [emergencyOpen, setEmergencyOpen] = useState(false)
+  const [emergencyReason, setEmergencyReason] = useState('')
+  const [emergencyError, setEmergencyError] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
   const [prevId, setPrevId] = useState(id)
   if (id !== prevId) {
     setPrevId(id)
     setApplyOpen(false)
+    setEmergencyOpen(false)
+    setEmergencyReason('')
+    setEmergencyError(false)
     setToast(null)
   }
 
@@ -51,6 +58,9 @@ export function AgentDetail() {
 
   const hasUnmet = a.metrics.some((m) => !m.achieved)
   const requested = agentEntity?.promotionRequested ?? false
+  // 緊急停止 (kill-switch) 状態 (flywheel 観測化)。paused は header「緊急コントロール」で可視化 + 再開可能。
+  const paused = agentEntity?.paused ?? false
+  const pausedReason = agentEntity?.pausedReason
 
   return (
     <div className="flex h-full flex-col">
@@ -76,9 +86,46 @@ export function AgentDetail() {
               <span className="inline-flex items-center gap-1.5">
                 <MetaChip tone="primary" label={`現在 ${a.trustLabel}`} />
                 <MetaChip tone="inset" label={a.trustEn} />
+                {paused && <MetaChip tone="alert" label="緊急停止中" />}
               </span>
             </h1>
-            <p className="mt-0.5 text-xs text-[var(--color-fg-muted)]">自動化レベルの昇格を判断します</p>
+            <p className="mt-0.5 text-xs text-[var(--color-fg-muted)]">
+              自動化レベルの昇格を判断します{adopted.length > 0 ? ` · この Agent に反映された改善 ${adopted.length} 件` : ''}
+            </p>
+          </div>
+          {/* 緊急コントロール (kill-switch、header 配置 / footer 第2 cluster にしない)。緊急停止→全件確認に降格、再開で復帰。 */}
+          <div className="flex flex-shrink-0 flex-col items-end gap-1">
+            {paused ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (id) dispatch({ type: 'agent/resume', id })
+                  showToast('Agent を再開しました（緊急停止を解除）')
+                }}
+                className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+              >
+                <PlayIcon className="h-4 w-4" />
+                再開
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setEmergencyReason('')
+                  setEmergencyError(false)
+                  setEmergencyOpen(true)
+                }}
+                className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-error)] bg-[var(--color-error-soft)] px-3 py-1.5 text-sm font-medium text-[var(--color-error-soft-fg)] hover:opacity-90"
+              >
+                <PauseIcon className="h-4 w-4" />
+                緊急停止
+              </button>
+            )}
+            {paused && pausedReason && (
+              <span className="max-w-[12rem] truncate text-[10px] text-[var(--color-fg-muted)]" title={pausedReason}>
+                停止理由: {pausedReason}
+              </span>
+            )}
           </div>
         </div>
       </header>
@@ -154,7 +201,12 @@ export function AgentDetail() {
       {/* Footer: 申請 1 ボタン (原則 C)、未達時は disabled + 理由明示 */}
       <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
         <div className="flex items-center gap-1.5 text-xs">
-          {requested ? (
+          {paused ? (
+            <>
+              <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
+              <span className="font-medium text-[var(--color-alert-soft-fg)]">緊急停止中は昇格を申請できません（再開後に申請可能）</span>
+            </>
+          ) : requested ? (
             <>
               <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
               <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
@@ -173,12 +225,12 @@ export function AgentDetail() {
         </div>
         <button
           type="button"
-          disabled={hasUnmet || requested}
-          title={hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
+          disabled={hasUnmet || requested || paused}
+          title={paused ? '緊急停止中は申請できません' : hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
           onClick={() => setApplyOpen(true)}
           className={cn(
             'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-            hasUnmet || requested
+            hasUnmet || requested || paused
               ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
               : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
           )}
@@ -220,6 +272,76 @@ export function AgentDetail() {
       >
         <div className="text-sm leading-relaxed text-[var(--color-fg)]">
           全件確認 → 要所確認 への昇格を申請します。承認後、人レビューが減り自動入力が増えます (帰結を参照)。
+        </div>
+      </Modal>
+
+      {/* 緊急停止 confirm dialog (kill-switch、理由は任意で pausedReason に保持)。 */}
+      <Modal
+        open={emergencyOpen}
+        onClose={() => setEmergencyOpen(false)}
+        title="Agent を緊急停止"
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setEmergencyOpen(false)}
+              className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const r = emergencyReason.trim()
+                if (!r) {
+                  setEmergencyError(true)
+                  return
+                }
+                if (id) dispatch({ type: 'agent/emergencyStop', id, reason: r })
+                setEmergencyOpen(false)
+                showToast('Agent を緊急停止しました（全件確認に降格）')
+              }}
+              className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-error)] bg-[var(--color-error-soft)] px-3 py-1.5 text-sm font-medium text-[var(--color-error-soft-fg)] hover:opacity-90"
+            >
+              <PauseIcon className="h-4 w-4" />
+              緊急停止する
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm leading-relaxed text-[var(--color-fg)]">
+            この Agent を緊急停止し、全件確認（人による全件レビュー）に降格します。自動入力は止まり、一覧にも「緊急停止中」と表示されます。
+          </p>
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <label htmlFor="emergency-reason" className="text-xs font-medium text-[var(--color-fg)]">停止理由（必須）</label>
+              {emergencyError && (
+                <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+                  <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
+                  入力してください
+                </span>
+              )}
+            </div>
+            <textarea
+              id="emergency-reason"
+              value={emergencyReason}
+              onChange={(e) => {
+                setEmergencyReason(e.target.value)
+                if (emergencyError && e.target.value.trim()) setEmergencyError(false)
+              }}
+              rows={2}
+              aria-invalid={emergencyError}
+              className={cn(
+                'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
+                emergencyError
+                  ? 'border-[var(--color-error)] bg-[var(--color-error-soft)]'
+                  : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] focus:border-[var(--color-primary)]'
+              )}
+              placeholder="例: 誤入力が急増したため一時停止"
+            />
+          </div>
         </div>
       </Modal>
 

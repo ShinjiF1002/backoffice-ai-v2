@@ -25,8 +25,8 @@ const TRUST_EN: Record<TrustLevel, string> = {
   'n/a': '',
 }
 
-/** list mock + store の昇格申請状態を join した view row。 */
-type AgentViewRow = AgentListRow & { promotionRequested: boolean }
+/** list mock + store の昇格申請状態 / 緊急停止状態を join した view row。 */
+type AgentViewRow = AgentListRow & { promotionRequested: boolean; paused: boolean }
 
 const columns: DataTableColumn<AgentViewRow>[] = [
   { key: 'name', header: 'Agent', className: 'text-[var(--color-fg)]', cell: (r) => r.name, sortValue: (r) => r.name },
@@ -38,6 +38,7 @@ const columns: DataTableColumn<AgentViewRow>[] = [
       <span className="inline-flex items-baseline gap-1.5">
         <MetaChip tone="primary" label={TRUST_LABEL[r.trust]} />
         <span className="font-mono text-[10px] text-[var(--color-fg-subtle)]">{TRUST_EN[r.trust]}</span>
+        {r.paused && <MetaChip tone="alert" label="緊急停止中" />}
       </span>
     ),
   },
@@ -96,6 +97,7 @@ export function Agents() {
     ...AGENT_BY_ID[e.id],
     trust: e.trust,
     promotionRequested: e.promotionRequested,
+    paused: e.paused,
   }))
   return (
     <div className="flex flex-col">

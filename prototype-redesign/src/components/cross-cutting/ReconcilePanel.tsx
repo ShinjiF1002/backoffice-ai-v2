@@ -106,19 +106,34 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
         <div className="flex flex-col">
           <div className="px-1 pb-1 pt-2 text-xs font-medium text-[var(--color-fg-muted)]">確認済 ({resolved.length})</div>
           {resolved.map((f) => (
-            <button
+            <div
               key={f.fieldLabel}
-              type="button"
-              onClick={() => onSelectField?.(f.fieldLabel)}
               className={cn(
-                'flex items-center justify-between gap-3 border-t border-[var(--color-border)] px-1 py-2 text-left text-sm first:border-t-0',
+                'flex items-center gap-2 border-t border-[var(--color-border)] px-1 py-2 first:border-t-0',
                 activeFieldLabel === f.fieldLabel && 'bg-[var(--color-primary-soft)]'
               )}
             >
-              <span className="w-24 flex-shrink-0 text-[var(--color-fg-muted)]">{f.fieldLabel}</span>
-              <span className={cn('flex-1 truncate text-[var(--color-fg)]', f.mono && 'font-mono')}>{f.aiValue}</span>
-              <StatusBadge tone={reconcileStateTone(f.reconcileState)} label={reconcileStateLabel(f.reconcileState)} />
-            </button>
+              <button
+                type="button"
+                onClick={() => onSelectField?.(f.fieldLabel)}
+                className="flex flex-1 items-center justify-between gap-3 text-left text-sm"
+              >
+                <span className="w-24 flex-shrink-0 text-[var(--color-fg-muted)]">{f.fieldLabel}</span>
+                {/* B1: 確認済行は訂正値 (humanValue) を優先表示、未上書きは AI 値据え置き。 */}
+                <span className={cn('flex-1 truncate text-[var(--color-fg)]', f.mono && 'font-mono')}>{f.humanValue ?? f.aiValue}</span>
+                <StatusBadge tone={reconcileStateTone(f.reconcileState)} label={reconcileStateLabel(f.reconcileState)} />
+              </button>
+              {/* B1: 手入力で上書きした項目は「確認」で訂正値を read-only 再表示 (modal 再 open で訂正値が出る)。 */}
+              {!readOnly && f.humanValue !== undefined && onActOnField && (
+                <button
+                  type="button"
+                  onClick={() => onActOnField(f.fieldLabel)}
+                  className="flex-shrink-0 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)] hover:text-[var(--color-fg)]"
+                >
+                  確認
+                </button>
+              )}
+            </div>
           ))}
           {resolved.some((f) => f.normalizationNote) && (
             <p className="px-1 pt-1.5 text-[10px] text-[var(--color-fg-subtle)]">一部の項目は表記を自動補正しています。</p>

@@ -30,6 +30,8 @@ export interface DocumentRow {
 export interface CaseDetailModel {
   id: string
   workflowName: string
+  /** 案件 status (remediation status-badge-resolver / 2b)。header badge・stepper の tone/label を resolver で導出する source。 */
+  status: CaseStatus
   statusLabel: string
   inputter: string
   approver: string
@@ -48,6 +50,7 @@ export interface CaseDetailModel {
 export const CASE_2026_0142: CaseDetailModel = {
   id: 'CASE-2026-0142',
   workflowName: '法人住所変更',
+  status: 'ready', // 確認待ち (入力者確認段階)。badge/stepper は CaseDetail で liveStatus 経由 resolve。
   statusLabel: '入力者確認待ち',
   inputter: '山田太郎',
   approver: '鈴木課長',
@@ -152,6 +155,35 @@ function baseFields(change?: CaseListRow['change']): FieldReview[] {
   ]
 }
 
+/**
+ * 口座開設書類完備 (UC-BO-02) 用 5 項目 (全 matched)。法人住所変更とは別 field 集合 = 証拠アンカー整合 (B2)。
+ * 汎用化せず口座開設専用に固定 (mock-fixture: 本人確認書類 / 氏名 / 生年月日 / 有効期限 / 住所)。
+ * change がある field (例 有効期限) は申請書類の読み取り値で上書き。
+ */
+function accountOpeningFields(change?: CaseListRow['change']): FieldReview[] {
+  const fields: FieldReview[] = [
+    { fieldLabel: '本人確認書類', aiValue: '運転免許証', ocrRawValue: '運転免許証', masterValue: '運転免許証', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '本人確認書類欄' } },
+    { fieldLabel: '氏名', aiValue: '佐藤花子', ocrRawValue: '佐藤花子', masterValue: '佐藤花子', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '氏名欄' } },
+    { fieldLabel: '生年月日', aiValue: '1988-04-12', ocrRawValue: '1988-04-12', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '生年月日欄' } },
+    { fieldLabel: '有効期限', aiValue: '2029-04-11', ocrRawValue: '2029-04-11', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '有効期限欄' } },
+    { fieldLabel: '住所', aiValue: '東京都新宿区西新宿 2-8-1', ocrRawValue: '東京都新宿区西新宿 2-8-1', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
+  ]
+  if (change) {
+    const f = fields.find((x) => x.fieldLabel === change.field)
+    if (f) {
+      f.aiValue = change.to
+      f.ocrRawValue = change.to
+      if (f.masterValue !== undefined) f.masterValue = change.to
+    }
+  }
+  return fields
+}
+
+/** workflow に応じた field 集合を返す (口座開設は法人住所変更と別 detail = B2 証拠アンカー整合)。 */
+function fieldsForWorkflow(workflow: string, change?: CaseListRow['change']): FieldReview[] {
+  return workflow === '口座開設書類完備' ? accountOpeningFields(change) : baseFields(change)
+}
+
 /** status → 現在の lifecycle step index (reflected は全 done = current なし)。 */
 const CASE_CURRENT_STEP: Record<CaseStatus, number> = {
   pending: 1, // AI処理
@@ -161,7 +193,8 @@ const CASE_CURRENT_STEP: Record<CaseStatus, number> = {
   reflected: 5, // 全 done (current なし)
 }
 
-function buildLifecycle(status: CaseStatus, inputter: string, approver: string): CaseLifecycleEvent[] {
+/** status × 担当者 → lifecycle 段 (remediation status-badge-resolver: CaseDetail が liveStatus で再計算するため export)。 */
+export function buildLifecycle(status: CaseStatus, inputter: string, approver: string): CaseLifecycleEvent[] {
   const steps: { step: CaseLifecycleStep; actor: string; detail: string }[] = [
     { step: '受付', actor: 'システム', detail: '申請書類を受け付けました。' },
     { step: 'AI処理', actor: 'AI 担当 Agent', detail: '読み取り + 登録情報照合 + 値生成。' },
@@ -196,7 +229,8 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
   const approver = approverFor(inputter)
 
   const change = row.change
-  let fields = baseFields(change)
+  const isAccountOpening = row.workflow === '口座開設書類完備'
+  let fields = fieldsForWorkflow(row.workflow, change)
   // change.field を先頭へ (要確認の先頭割当 + 申請書類強調の先頭化、gate 3)
   if (change) {
     const idx = fields.findIndex((f) => f.fieldLabel === change.field)
@@ -226,6 +260,7 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
   return {
     id: row.id,
     workflowName: row.workflow,
+    status: row.status,
     statusLabel: caseStatusLabel(row.status),
     inputter,
     approver,
@@ -234,7 +269,7 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
       fileName,
       page: 'P.2',
       pageCount: 3,
-      title: `${row.workflow}届`,
+      title: isAccountOpening ? '口座開設申込書' : `${row.workflow}届`,
       rows: buildDocRows(fields),
     },
     lifecycle: buildLifecycle(row.status, inputter, approver),
@@ -252,9 +287,13 @@ CASE_DETAILS['CASE-2026-0142'] = CASE_2026_0142
 // CASE_LIST には載せない (store/list 非対象 = seed されない)。CASE_DETAILS にのみ登録し
 // 「元の案件を開く」リンクの NotFound を防ぐ (CR P1)。store entity が無いため detail は参照専用で描画される。
 const HISTORICAL_CASE_ROWS: CaseListRow[] = [
+  // PROP-2026-031 sourceCases (住所読み取り基準) — ビル名 / 新住所
   { id: 'CASE-2026-0098', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-22 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビルディング' } },
   { id: 'CASE-2026-0087', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-18 処理済', owner: '山田太郎', flags: 0, change: { field: '新住所', from: '東京都千代田区丸の内 2 丁目 3', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
   { id: 'CASE-2026-0079', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-14 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビル' } },
+  // PROP-2026-028 sourceCases (法人名の表記ゆれ補正) — 法人名 (B2: 0118/0106 を法人名 historical に実体化、id 空間衝突回避)
+  { id: 'CASE-2026-0118', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-15 処理済', owner: '山田太郎', flags: 0, change: { field: '法人名', from: '株式会社髙橋商店', to: '株式会社高橋商店' } },
+  { id: 'CASE-2026-0106', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-11 処理済', owner: '山田太郎', flags: 0, change: { field: '法人名', from: 'サンプル株式会社', to: '株式会社サンプル' } },
 ]
 for (const row of HISTORICAL_CASE_ROWS) {
   CASE_DETAILS[row.id] = buildCaseDetail(row)

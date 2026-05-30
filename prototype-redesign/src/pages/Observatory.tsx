@@ -9,12 +9,14 @@ import {
   OBS_LEDGER,
   OBS_METRICS,
   OBS_KNOWLEDGE,
+  FLYWHEEL_STAGES,
 } from '@/data/mock-observatory'
 import type { LifecycleEvent, KnowledgeGroup } from '@/data/mock-observatory'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { MetaChip } from '@/components/shared/MetaChip'
 import type { MetaTone } from '@/components/shared/MetaChip'
-import { useStoreDispatch } from '@/store/hooks'
+import { Modal } from '@/components/shared/Modal'
+import { useStoreDispatch, useFlywheelLineage } from '@/store/hooks'
 import { clearPersisted } from '@/store/persist'
 import { cn } from '@/lib/cn'
 
@@ -47,8 +49,12 @@ type TabKey = (typeof TABS)[number]['k']
 
 export function Observatory() {
   const dispatch = useStoreDispatch()
+  const lineage = useFlywheelLineage()
   const [tab, setTab] = useState<TabKey>('audit')
   const [auditView, setAuditView] = useState<'lifecycle' | 'ledger'>('lifecycle')
+  // ナレッジ tab の view (承認済 知識 ⇄ 改善の流れ lineage、Gate 5ii)。lineage は P1-7 監査台帳 drill とは別 seat (監査 tab)。
+  const [knowledgeView, setKnowledgeView] = useState<'approved' | 'lineage'>('approved')
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   const showToast = (m: string) => {
@@ -56,10 +62,11 @@ export function Observatory() {
     window.setTimeout(() => setToast(null), 2600)
   }
 
-  // 「表示データを初期化」: この端末の操作状態 (承認・差戻し・申請・上書き) を seed に戻す + 永続消去。
+  // 「表示データを初期化」: この端末の操作状態 (承認・差戻し・申請・上書き) を seed に戻す + 永続消去。confirm Modal 経由で実行。
   const handleReset = () => {
     dispatch({ type: 'store/reset' })
     clearPersisted()
+    setResetConfirmOpen(false)
     showToast('表示データを初期化しました（この端末の操作状態をリセット）')
   }
 
@@ -73,11 +80,11 @@ export function Observatory() {
         <div className="flex items-baseline justify-between gap-3">
           <div className="flex items-baseline gap-3">
             <h1 className="text-xl font-semibold text-[var(--color-fg)]">モニタリング</h1>
-            <span className="text-xs text-[var(--color-fg-muted)]">監査者向けの参照画面。Process 別に証跡・AI 精度・ナレッジを確認します。</span>
+            <span className="text-xs text-[var(--color-fg-muted)]">監査者向けの参照画面。業務別に証跡・AI 精度・ナレッジを確認します。</span>
           </div>
           <button
             type="button"
-            onClick={handleReset}
+            onClick={() => setResetConfirmOpen(true)}
             title="この端末の操作状態 (承認・差戻し・申請など) を初期化します"
             className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)] hover:text-[var(--color-fg)]"
           >
@@ -239,40 +246,155 @@ export function Observatory() {
 
           {tab === 'knowledge' && (
             <div className="flex flex-col gap-4">
-              {/* 日次提案分析 banner (token-clean、#C7D2FE 不使用) */}
-              <div className="flex items-center gap-2.5 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3">
-                <SparklesIcon className="h-4 w-4 flex-shrink-0 text-[var(--color-primary-hover)]" aria-hidden="true" />
-                <span className="text-xs text-[var(--color-fg)]">
-                  日次提案分析が差戻しパターンから手順改定の提案を生成しています。提案は{' '}
-                  <Link to="/proposals" className="font-medium text-[var(--color-primary)] hover:underline">AI 提案レビュー</Link>
-                  {' '}で確認できます。
-                </span>
+              {/* view 切替: 承認済 知識 ⇄ 改善の流れ (Flywheel lineage、Gate 5ii)。P1-7 監査台帳 drill は別 seat (監査 tab)。 */}
+              <div className="flex rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] p-0.5">
+                {(['approved', 'lineage'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setKnowledgeView(v)}
+                    className={cn(
+                      'rounded-[4px] px-3 py-1 text-xs font-medium transition-colors',
+                      knowledgeView === v ? 'bg-[var(--color-fg)] text-white' : 'text-[var(--color-fg-muted)]'
+                    )}
+                  >
+                    {v === 'approved' ? '承認済' : '改善の流れ'}
+                  </button>
+                ))}
               </div>
-              {OBS_KNOWLEDGE.map((g) => {
-                const Icon = PROCESS_ICON[g.icon]
-                return (
-                  <section key={g.process} className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
-                    <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-4 py-3">
-                      <Icon className="h-4 w-4 text-[var(--color-fg-muted)]" aria-hidden="true" />
-                      <h2 className="text-sm font-semibold text-[var(--color-fg)]">{g.process}</h2>
-                      <MetaChip label={`承認済 ${g.items.length} 件`} className="ml-auto" />
+
+              {knowledgeView === 'approved' ? (
+                <>
+                  {/* 日次提案分析 banner (token-clean、#C7D2FE 不使用) */}
+                  <div className="flex items-center gap-2.5 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3">
+                    <SparklesIcon className="h-4 w-4 flex-shrink-0 text-[var(--color-primary-hover)]" aria-hidden="true" />
+                    <span className="text-xs text-[var(--color-fg)]">
+                      日次提案分析が差戻しパターンから手順改定の提案を生成しています。提案は{' '}
+                      <Link to="/proposals" className="font-medium text-[var(--color-primary)] hover:underline">AI 提案レビュー</Link>
+                      {' '}で確認できます。
+                    </span>
+                  </div>
+                  {OBS_KNOWLEDGE.map((g) => {
+                    const Icon = PROCESS_ICON[g.icon]
+                    return (
+                      <section key={g.process} className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
+                        <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-4 py-3">
+                          <Icon className="h-4 w-4 text-[var(--color-fg-muted)]" aria-hidden="true" />
+                          <h2 className="text-sm font-semibold text-[var(--color-fg)]">{g.process}</h2>
+                          <MetaChip label={`承認済 ${g.items.length} 件`} className="ml-auto" />
+                        </div>
+                        {g.items.map((it, i) => (
+                          <div key={it.id} className={cn('flex items-center gap-2.5 px-4 py-2.5', i > 0 && 'border-t border-[var(--color-border)]')}>
+                            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-[var(--color-success-soft)] text-[var(--color-success-soft-fg)]">
+                              <CheckIcon className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden="true" />
+                            </span>
+                            <span className="flex-1 text-sm font-medium text-[var(--color-fg)]">{it.title}</span>
+                            <span className="font-mono text-[11px] text-[var(--color-fg-subtle)]">{it.id} · {it.version}</span>
+                          </div>
+                        ))}
+                      </section>
+                    )
+                  })}
+                </>
+              ) : (
+                /* 改善の流れ (Flywheel lineage、staging disclaimer 付き)。差戻し→改善ヒント(未承認)→手順承認→設定承認。 */
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start gap-2.5 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3">
+                    <SparklesIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-primary-hover)]" aria-hidden="true" />
+                    <div className="text-xs text-[var(--color-fg)]">
+                      <div className="font-medium">差戻しが、次の正解手順に変わる流れ</div>
+                      <p className="mt-0.5 leading-relaxed text-[var(--color-fg-muted)]">
+                        {FLYWHEEL_STAGES.map((s) => s.label).join(' → ')} の順で改善が進みます。
+                        <strong className="text-[var(--color-fg)]">改善ヒント（未承認）は AI が自動実行する根拠にはなりません。</strong>
+                        承認された手順だけが AI に反映されます。
+                      </p>
                     </div>
-                    {g.items.map((it, i) => (
-                      <div key={it.id} className={cn('flex items-center gap-2.5 px-4 py-2.5', i > 0 && 'border-t border-[var(--color-border)]')}>
-                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-[var(--color-success-soft)] text-[var(--color-success-soft-fg)]">
-                          <CheckIcon className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden="true" />
-                        </span>
-                        <span className="flex-1 text-sm font-medium text-[var(--color-fg)]">{it.title}</span>
-                        <span className="font-mono text-[11px] text-[var(--color-fg-subtle)]">{it.id} · {it.version}</span>
-                      </div>
-                    ))}
-                  </section>
-                )
-              })}
+                  </div>
+
+                  {lineage.length === 0 ? (
+                    <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] p-5 text-center text-sm text-[var(--color-fg-muted)]">
+                      まだ承認段階に入った改善はありません。提案が上長へ送付されると、ここに流れが現れます。
+                    </div>
+                  ) : (
+                    lineage.map((l) => (
+                      <section key={l.proposalId} className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
+                        <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-4 py-3">
+                          <SparklesIcon className="h-4 w-4 flex-shrink-0 text-[var(--color-primary-hover)]" aria-hidden="true" />
+                          <div className="min-w-0 flex-1">
+                            <Link to={`/proposals/${l.proposalId}`} className="truncate text-sm font-medium text-[var(--color-fg)] hover:text-[var(--color-primary)]">
+                              {l.title}
+                            </Link>
+                            <div className="text-[11px] text-[var(--color-fg-muted)]">{l.workflow} · <span className="font-mono">{l.proposalId}</span></div>
+                          </div>
+                          <MetaChip tone={l.adopted ? 'success' : 'primary'} label={l.adopted ? '承認済' : '手順承認待ち'} />
+                        </div>
+                        {/* 4 段の流れ。reached: 差戻し/改善ヒント/手順承認 は到達済、設定承認 は adopted のみ。 */}
+                        <ol className="flex items-center px-4 py-3">
+                          {FLYWHEEL_STAGES.map((stage, i) => {
+                            const reached = stage.key !== 'config' || l.adopted
+                            const last = i === FLYWHEEL_STAGES.length - 1
+                            return (
+                              <li key={stage.key} className={cn('flex items-center', !last && 'flex-1')}>
+                                <span className="flex flex-shrink-0 items-center gap-1.5">
+                                  <span className={cn('h-2 w-2 rounded-full', reached ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border-strong)]')} />
+                                  <span className={cn('text-[11px]', reached ? 'font-medium text-[var(--color-fg)]' : 'text-[var(--color-fg-subtle)]')}>{stage.label}</span>
+                                </span>
+                                {!last && <span className={cn('mx-2 h-px flex-1', reached ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]')} />}
+                              </li>
+                            )
+                          })}
+                        </ol>
+                        {l.sourceCaseIds.length > 0 && (
+                          <div className="border-t border-[var(--color-border)] px-4 py-2.5 text-[11px] text-[var(--color-fg-muted)]">
+                            起点の差戻し {l.sourceCaseIds.length} 件:{' '}
+                            {l.sourceCaseIds.map((cid, idx) => (
+                              <span key={cid}>
+                                {idx > 0 && ' / '}
+                                <Link to={`/cases/${cid}`} className="font-mono text-[var(--color-primary)] hover:underline">{cid}</Link>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </section>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
+
+      {/* reset confirm Modal: handleReset 直結を廃し confirm 経由に (誤操作防止、既存 Modal primitive 流用)。 */}
+      <Modal
+        open={resetConfirmOpen}
+        onClose={() => setResetConfirmOpen(false)}
+        title="表示データを初期化"
+        size="sm"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setResetConfirmOpen(false)}
+              className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+            >
+              <RotateCcwIcon className="h-4 w-4" />
+              初期化する
+            </button>
+          </>
+        }
+      >
+        <div className="text-sm leading-relaxed text-[var(--color-fg)]">
+          この端末の操作状態（承認・差戻し・申請・上書き）をすべて初期状態に戻します。元に戻せません。
+        </div>
+      </Modal>
 
       {toast && (
         <div

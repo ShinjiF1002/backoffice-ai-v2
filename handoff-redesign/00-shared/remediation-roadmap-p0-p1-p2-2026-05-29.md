@@ -51,7 +51,9 @@
 >
 > **W2c-2 / P1-8 完了 (2026-05-30、before/after)**: `FieldReview.previousValue` 新設 (masterValue=突合参照と意味論分離)。`mock-case-detail` の change.from → previousValue (baseFields 変更系 field + canonical 0142 新住所 = 旧住所手書き、口座開設 = 新規登録ゆえ省略)。ReconcilePanel 要確認カード + 確認済行に「現在の登録値 → 確定値」(右辺 = humanValue ?? aiValue で B1 整合、ArrowRightIcon + fg-tertiary)。test: before-after.test (0142 新住所 previousValue / 0112 口座開設 持たない + render before/after)。check:all green (**test 156** / build)。**残り W2c-2 / P1-7** (Observatory drill + 横断台帳)。
 >
-> **W2c-2a micro-cleanup (2026-05-30、外部 CR Major)**: AgentDetail の `approved` terminal false-success 是正。manual (申請) footer の disabled が `hasUnmet||requested||paused` のみで `approved` 未考慮 → 全 KPI 達成 agent が承認済でも入力者 view に「設定変更を申請」が活性表示 (reducer は no-op ゆえ false-success)。`approved` を disabled/label/status に追加 (「設定変更は承認済みです（再申請は不要）」+ button「承認済み」disabled)。regression test 追加 (approved→入力者 view で申請 button 非表示・承認済 disabled、fix 前 fail)。check:all green (**test 157**)。commit `remediation/w2-screens`。
+> **W2c-2a micro-cleanup (2026-05-30、外部 CR Major)**: AgentDetail の `approved` terminal false-success 是正。manual (申請) footer の disabled が `hasUnmet||requested||paused` のみで `approved` 未考慮 → 全 KPI 達成 agent が承認済でも入力者 view に「設定変更を申請」が活性表示 (reducer は no-op ゆえ false-success)。`approved` を disabled/label/status に追加 (「設定変更は承認済みです（再申請は不要）」+ button「承認済み」disabled)。regression test 追加 (approved→入力者 view で申請 button 非表示・承認済 disabled、fix 前 fail)。check:all green (**test 157**)。commit `06e8bd6`。
+>
+> **W2c-2 / P1-7a 完了 (2026-05-30、Observatory drill 導線)**: monitoring dead-end (§3.7 根本原因#1) を解消。Observatory 監査 tab の対象 case ID → `/cases/:id` Link / MetricVsThreshold に optional `agentHref` (tone/severity と別軸) 追加 + OBS_METRICS の未達 KPI のみ該当 Agent へ drill (達成 KPI は非リンク)。observatory-drill.test (case ID→case / 未達 KPI→agent の link 検証)。check:all green (**test 159** / build)。**残り P1-7b** (横断台帳 = OBS_CASE_ID 単一 → CROSS_LEDGER + DataTable 案件選択/検索/期間、§3.7 根本原因#2)。
 
 ---
 

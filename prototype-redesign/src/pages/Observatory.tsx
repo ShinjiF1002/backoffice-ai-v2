@@ -134,7 +134,11 @@ export function Observatory() {
                   ))}
                 </div>
                 <div className="text-xs text-[var(--color-fg-muted)]">
-                  <span className="font-mono text-[var(--color-fg)]">{OBS_CASE_ID}</span> 法人住所変更
+                  {/* P1-7: monitoring dead-end 解消 — case ID を detail へ drill。 */}
+                  <Link to={`/cases/${OBS_CASE_ID}`} className="font-mono text-[var(--color-primary)] hover:underline">
+                    {OBS_CASE_ID}
+                  </Link>{' '}
+                  法人住所変更
                 </div>
               </div>
 

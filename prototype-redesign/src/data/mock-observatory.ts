@@ -90,9 +90,13 @@ export const OBS_LEDGER: LedgerEvent[] = [
 ]
 
 // §5: Process 別 KPI — KPI SSOT (mock-kpi.ts) を唯一 source に (手書き denom drift を解消、B3)。
+// P1-7: 未達 KPI のみ該当 Agent へ drill 先を付与 (調査導線、monitoring dead-end 解消)。frozen KPI_ROWS は複製して付与。
+function withAgentDrill(rows: MetricRow[], agentId: string): MetricRow[] {
+  return rows.map((r) => (r.achieved ? r : { ...r, agentHref: `/agents/${agentId}` }))
+}
 export const OBS_METRICS: ObservatoryProcessMetrics[] = [
-  { process: '法人住所変更', icon: 'building', rows: KPI_ROWS['UC-BO-01'] },
-  { process: '口座開設書類完備', icon: 'wallet', rows: KPI_ROWS['UC-BO-02'] },
+  { process: '法人住所変更', icon: 'building', rows: withAgentDrill(KPI_ROWS['UC-BO-01'], 'agent-corporate-address-change') },
+  { process: '口座開設書類完備', icon: 'wallet', rows: withAgentDrill(KPI_ROWS['UC-BO-02'], 'agent-account-opening') },
 ]
 
 // ナレッジ (Process 別 grouping)。'番地表記正規化ルール' は KB 規定の正式名 (status enum の内部語ではなく domain 用語)。

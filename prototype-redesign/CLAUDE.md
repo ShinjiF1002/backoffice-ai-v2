@@ -2,6 +2,9 @@
 
 `backoffice-ai-v2` の UI prototype を **Process-First v2 で React 再構築**する project (`prototype/` と並走、port 5174)。`prototype/` の成熟デザイン層を継承し、9 画面 Process-First IA + rev.3 doc-anchored + 監査 drift 解消を載せる。
 
+> **⚠ REBASELINE (2026-05-29、frame C 承認) — remediation 実装 baseline へ移行**
+> 本番 Readiness 監査を受け remediation を開始。**P0/P1 の実装 baseline = `../handoff-redesign/00-shared/remediation-roadmap-p0-p1-p2-2026-05-29.md`** が以下の本 doc lock を supersede する: 「exactly 9 画面」は P1 で **9→12** に拡張 (検索 / 通知 / 業務責任者面) / KPI 分母は `mock-kpi.ts` SSOT で **980** 統一 / **口座開設 case を CASE_LIST に追加** / store に SoD actor・override 訂正値・sendback 理由を拡張 (P0-W1 実装済、commit ba2f2ba)。**継承デザイン規律 (token / lucide icon / chip taxonomy / tone v2 / status-tones SSOT / JP-only) は不変**で remediation も遵守する。
+
 > **正準 (SSOT)**:
 > - design = `../handoff-redesign/00-shared/canonical-design-spec.md` (token / lucide / status-tones / chip taxonomy 継承 + soft-tint -200 + tone v2 + C 型 contract)
 > - IA / chrome = `../handoff-redesign/00-shared/ia-overview-v2.md` §2 (9 画面 / 6-nav grouped)

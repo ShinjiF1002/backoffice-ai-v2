@@ -6,7 +6,7 @@
 >
 > **SSOT 単一化 (2026-05-30)**: 本 roadmap が **唯一の実行 SSOT**。screen 軸の overlay (`~/.claude/plans/generic-noodling-lampson.md`、repo 外) と next-session handoff prompt (`next-session-handoff-full-rebuild-2026-05-30.md`、in-repo) は本 roadmap §1/§1b に吸収済 → **以後 historical / prompt-only** として扱い、実行判断に用いない。
 >
-> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (= P1-W4 strict Stage2 [`c7276a8`] + P1-1 ProcessSelector→ViewContext [`56d6dfa`] + P1-5 Loading/Error CORE) 実装完了 (§1.0 の closure 状態参照)。P1-W5 完了 = W1-A 完了**。次アクションは **P1-W6/W7 (6/12 後送り維持、master plan rebaseline 承認が前提)** または P1-5-remainder (下記)。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
+> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (= P1-W4 strict Stage2 [`c7276a8`] + P1-1 ProcessSelector→ViewContext [`56d6dfa`] + P1-5 Loading/Error CORE) 実装完了 (§1.0 の closure 状態参照)。**P1-W5 CORE 完了 = W1-A CORE 完了 (P1-5-remainder [下記] は carry-forward、P1-W5 の full close ではない)**。次アクションは **P1-W6/W7 (6/12 後送り維持、master plan rebaseline 承認が前提)** または P1-5-remainder (下記)。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
 >
 > **P1-5 closure (CORE 完了)**: loading/error を **hidden QA seam** (`useListData` + URL query) で到達可能化。**再現手順**: 任意 list route に `?demo=loading` (skeleton) / `?demo=error` (ErrorState + 再試行で ready 回復) を付与 (例 `/cases?demo=loading`、`/cases?demo=error`)。default OFF で demo chrome 非汚染、visible DevControls 不採用 (TopBar 混雑回避、CR)。DataTable は loading/error 中 filter chips + 一括操作 bar を非表示 (CR)。検証: behavioral test (`loading-error.test.tsx` 3) + browser proof (skeleton / ErrorState 両状態、filter 非表示確認)。**P1-5-remainder (carry-forward)**: detail 3 画面 not-found → `EmptyState(truly-empty, role=status)` 統一 + `EmptyState` permission-empty dead branch 除去 (state-coverage polish、CR 条件外、W3 or P1-5-cont)。
 
@@ -267,7 +267,7 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 - **p0Dependency**: persona switcher chrome 配置のみ (DevControls を同 PrototypeModeLabel 近傍に置くため P0 chrome 確定後)。store substrate 非依存 (非同期を store 外に閉じ P0 reducer/persist と衝突しない)。P0 B3 後の口座開設 5 件は rows が useCases() 由来で自動追従。
 - **store contract**: **変更ゼロ** (本設計の中核)。loading/error は store domain state ではなくデータ取得の非同期性。ViewProvider の in-memory flag + useListData hook に閉じ S8 境界 + P0 SCHEMA_VERSION bump と直交。
 - **判断 gate**:
-  - **トグル UI 配置**: (a) TopBar DevControls / (b) PrototypeModeLabel tooltip 畳み / (c) URL query のみ。demo で見せるなら (a)、QA のみなら (c)。
+  - **トグル UI 配置 [as-built P1-5: (c) 採用]**: (a) TopBar DevControls / (b) PrototypeModeLabel tooltip 畳み / (c) **URL query (hidden seam、`useListData`、採用)**。**visible DevControls (a) は不採用** (TopBar 混雑回避、CR)。**本 §3.5 中の DevControls (TopBar 配置) 記述 (file:line 表 / p0Dependency / 検証行) は未採用 plan として読み替える** — 実装は §1.0 の P1-5 closure 注記 (`?demo` seam) が SSOT。
   - **error cause 文言**: 'タイムアウト (mock)' / '接続エラー'。JP-only + disclaimer 整合。
   - **not-found icon**: truly-empty の Inbox icon が not-found で誤誘導 → variant 追加 / 許容。
   - **mock default**: **OFF 推奨** (現 demo 体験不変、toggle 時のみ可視) / 軽 latency default (本物っぽさ、ただし demo もたつき)。
@@ -485,7 +485,7 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 | P0-W2 | 証拠アンカー整合 / 手書き分母 0 grep | 口座開設 5 件 + KPI 同一分母 (3 画面) |
 | P0-W3 | check:no-op (新 button) / P2B-4 full + **R7 (P1-4 後) を含めるか W3 前に確定** | B1-status の 8 項目 + persona 切替 demo-script |
 | P1-W4 | strict+NUIA app 39→0 / fg-subtle negative grep 0 / R7 green | 4 画面で tertiary 視認 + hierarchy 維持 |
-| P1-W5 | useView 0→5+ / UC-BO-02 で 5 件 | selector 切替で 4 list 連動 + DevControls で loading/error 到達 |
+| P1-W5 | useView 0→5+ / UC-BO-02 で 5 件 | selector 切替で 4 list 連動 + **`?demo` hidden seam で loading/error 到達** (DevControls 不採用、as-built) |
 | P1-W6 | 契約 3 doc 11 画面 count gate / keyboard axe 0 | 検索→/search→zero-result / 差戻し→赤ドット→通知 / keyboard roving / **既存 9 画面 chrome regression** (TopBar 検索 input・ベル追加後に 9 routes 無崩れ render) |
 | P1-W7 | store.test (SoD no-op/escalate) / typology 12 画面 | persona 切替で業務責任者 queue / 台帳 drill / before-after / demo-script 2 journey / **既存 9 画面 chrome regression** (persona switcher 追加後の余白・list 密度劣化なし) |
 
@@ -500,7 +500,7 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 5. **judgement gate 集中で demo 詰み**: P1-2/P1-3/P1-7 に judgement-high 集中。**着手前 articulate + persona switcher 挙動と pair 決定**。
 6. **9→11→12 画面化が polish 規律と衝突**: 新 5 画面の polish tier を P0-W0 で確定 + typology lock 同時更新 + count gate。
 7. **未来日 fixture (2026-05-31 > 2026-05-29)**: P1-7 期間 filter は固定日時で data shape 不足。**P1-7 から期間 carve ('直近30日' 固定ラベル)、実時系列は P2 G7/G8 が基準日へ統一**。
-8. **TopBar chrome 混雑**: persona switcher (right) + DevControls + ProcessSelector (left) + 検索 input/ベル。**P0 W3 chrome 確定後に P1-5 DevControls を余白配置、left/right 分離**。→ chrome 変更 wave (W6/W7) は §6.1 で既存 9 画面 visual regression を gate 化。
+8. **TopBar chrome 混雑**: persona switcher (right) + ProcessSelector (left) + 検索 input/ベル (W2)。**P1-5 DevControls は as-built で不採用** (hidden `?demo` seam ゆえ chrome に dev affordance を追加せず、混雑要因から除外)。→ chrome 変更 wave (W6/W7) は §6.1 で既存 9 画面 visual regression を gate 化。
 
 ### 6.3 工数感 (AI coding agent 基準、AI work / human review / judgement)
 

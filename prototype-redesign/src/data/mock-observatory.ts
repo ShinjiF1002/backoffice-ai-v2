@@ -1,4 +1,5 @@
 import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
+import { KPI_ROWS } from './mock-kpi'
 
 /**
  * Observatory (/observatory) data — Process-First v2, typology A, 監査者 view (read-only)
@@ -70,26 +71,10 @@ export const OBS_LEDGER: LedgerEvent[] = [
   { ts: '2026-05-31 11:31:00', actor: 'system', role: 'system', action: 'reflect', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—' },
 ]
 
-// §5: Process 別 KPI (MetricVsThreshold reuse)
+// §5: Process 別 KPI — KPI SSOT (mock-kpi.ts) を唯一 source に (手書き denom drift を解消、B3)。
 export const OBS_METRICS: ObservatoryProcessMetrics[] = [
-  {
-    process: '法人住所変更',
-    icon: 'building',
-    rows: [
-      { metricLabel: 'AI 入力承認率', actualValue: '92%', threshold: '≥ 95%', judgment: '未達 (-3pt)', achieved: false, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 +2pt' },
-      { metricLabel: '人手上書き率', actualValue: '0.12', threshold: '≤ 0.15', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 -0.01' },
-      { metricLabel: 'Alert 発生率', actualValue: '0.08', threshold: '≤ 0.10', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 ±0' },
-      { metricLabel: '承認者差戻し率', actualValue: '0.05', threshold: '≤ 0.07', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,140 件', previousDelta: '前月 -0.01' },
-    ],
-  },
-  {
-    process: '口座開設書類完備',
-    icon: 'wallet',
-    rows: [
-      { metricLabel: 'AI 入力承認率', actualValue: '96%', threshold: '≥ 95%', judgment: '達成 (+1pt)', achieved: true, period: '直近 30 日', denominator: '820 件', previousDelta: '前月 +1pt' },
-      { metricLabel: '人手上書き率', actualValue: '0.09', threshold: '≤ 0.15', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '820 件', previousDelta: '前月 ±0' },
-    ],
-  },
+  { process: '法人住所変更', icon: 'building', rows: KPI_ROWS['UC-BO-01'] },
+  { process: '口座開設書類完備', icon: 'wallet', rows: KPI_ROWS['UC-BO-02'] },
 ]
 
 // ナレッジ (Process 別 grouping)。'番地表記正規化ルール' は KB 規定の正式名 (status enum の内部語ではなく domain 用語)。

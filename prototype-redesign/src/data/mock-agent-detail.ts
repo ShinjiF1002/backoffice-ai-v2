@@ -1,5 +1,6 @@
 import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
 import type { ConsequenceImpact } from '@/components/cross-cutting/ConsequencePanel'
+import { KPI_ROWS } from './mock-kpi'
 
 /**
  * エージェント詳細 (agent-corporate-address-change) detail 専用 model
@@ -42,13 +43,8 @@ export const AGENT_CORP_ADDRESS: AgentDetailModel = {
   workflow: '法人住所変更',
   trustLabel: '全件確認',
   trustEn: 'Supervised',
-  // mock-fixture §5: 承認率のみ未達
-  metrics: [
-    { metricLabel: 'AI 入力承認率', actualValue: '92%', threshold: '≥ 95%', judgment: '未達 (-3pt)', achieved: false, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 +2pt', exclusions: 'エスカレーション案件を除く' },
-    { metricLabel: '人手上書き率', actualValue: '0.12', threshold: '≤ 0.15', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 -0.01' },
-    { metricLabel: 'Alert 発生率', actualValue: '0.08', threshold: '≤ 0.10', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,240 件', previousDelta: '前月 ±0' },
-    { metricLabel: '承認者差戻し率', actualValue: '0.05', threshold: '≤ 0.07', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '1,140 件', previousDelta: '前月 -0.01' },
-  ],
+  // KPI は mock-kpi.ts SSOT を参照 (observatory との手書き drift を解消、B3)。
+  metrics: KPI_ROWS['UC-BO-01'],
   // mock-fixture §7: 全件確認 → 要所確認 (業務語主、Tier 名は画面で補助 chip)
   consequence: {
     before: '全件確認',
@@ -87,12 +83,8 @@ export const AGENT_ACCOUNT_OPENING: AgentDetailModel = {
   workflow: '口座開設書類完備',
   trustLabel: '全件確認',
   trustEn: 'Supervised',
-  metrics: [
-    { metricLabel: 'AI 入力承認率', actualValue: '96%', threshold: '≥ 95%', judgment: '達成 (+1pt)', achieved: true, period: '直近 30 日', denominator: '980 件', previousDelta: '前月 +2pt', exclusions: 'エスカレーション案件を除く' },
-    { metricLabel: '人手上書き率', actualValue: '0.10', threshold: '≤ 0.15', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '980 件', previousDelta: '前月 -0.02' },
-    { metricLabel: 'Alert 発生率', actualValue: '0.06', threshold: '≤ 0.10', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '980 件', previousDelta: '前月 ±0' },
-    { metricLabel: '承認者差戻し率', actualValue: '0.04', threshold: '≤ 0.07', judgment: '達成', achieved: true, period: '直近 30 日', denominator: '910 件', previousDelta: '前月 -0.01' },
-  ],
+  // KPI は mock-kpi.ts SSOT を参照 (UC-BO-02 分母 980 統一、observatory との drift 解消、B3)。
+  metrics: KPI_ROWS['UC-BO-02'],
   consequence: {
     before: '全件確認',
     after: '要所確認',

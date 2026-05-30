@@ -6,7 +6,7 @@
 >
 > **SSOT 単一化 (2026-05-30)**: 本 roadmap が **唯一の実行 SSOT**。screen 軸の overlay (`~/.claude/plans/generic-noodling-lampson.md`、repo 外) と next-session handoff prompt (`next-session-handoff-full-rebuild-2026-05-30.md`、in-repo) は本 roadmap §1/§1b に吸収済 → **以後 historical / prompt-only** として扱い、実行判断に用いない。
 >
-> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (P1-W4 = strict Stage2: test 68→0 + `check:types:test` を check:all へ) 実装完了 (§1.0 の closure 状態参照)。次アクションは P1-W5 (P1-1 ProcessSelector + P1-5 Loading/Error)。P1-W6/W7 は 6/12 後送り維持**。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
+> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (P1-W4 strict Stage2 [commit `c7276a8`] + P1-1 ProcessSelector→ViewContext 配線 [commit `56d6dfa`]) 実装完了 (§1.0 の closure 状態参照)。次アクションは P1-5 (Loading/Error 到達可能化) = P1-W5 残り。P1-W6/W7 は 6/12 後送り維持**。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
 
 > **読み方**: P0 は `p0-remediation-plan-2026-05-29.md` で詳細計画済。本 roadmap は §2 で wave 名 + 1 行 recap に留め、本体は §3 (P1 deep-plan) と §4 (P2 batched backlog)。§5 で master plan supersession、§6 で gate / risk / 工数。
 >

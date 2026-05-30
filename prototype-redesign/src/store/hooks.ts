@@ -332,3 +332,39 @@ export function useUnreadCount(): number {
   const notifications = useNotifications()
   return useMemo(() => notifications.filter((n) => !n.read).length, [notifications])
 }
+
+// ── 業務責任者 (business-approver) の 3 受け口 (P1-3、IA scope=(a)) ─────────────
+// 手順承認 (forwarded 提案) / 設定承認 (Agent 昇格申請) / escalation 裁定。派生 selector のみ (store contract 不変、S8)。
+/** 手順承認待ち = forwarded 提案 (業務責任者が承認/差戻しする対象)。 */
+export function useForwardedProposals(): ProposalEntity[] {
+  const s = useStoreState()
+  return useMemo(() => resolveOrder(s.proposalOrder, s.proposals).filter((p) => p.status === 'forwarded'), [s])
+}
+
+/** 設定承認待ち = 昇格申請中 (promotionStatus==='requested') の Agent。 */
+export function usePendingPromotions(): AgentEntity[] {
+  const s = useStoreState()
+  return useMemo(() => resolveOrder(s.agentOrder, s.agents).filter((a) => a.promotionStatus === 'requested'), [s])
+}
+
+/** escalation 受信 = case/escalate された案件 (業務責任者が裁定 = case/sendback 再利用)。 */
+export function useEscalations(): CaseEntity[] {
+  const s = useStoreState()
+  return useMemo(() => resolveOrder(s.caseOrder, s.cases).filter((c) => c.escalation !== undefined), [s])
+}
+
+/** 業務責任者 landing の 3 受け口集約 (件数 + drill)。 */
+export interface BusinessApproverInbox {
+  forwardedProposals: ProposalEntity[]
+  pendingPromotions: AgentEntity[]
+  escalations: CaseEntity[]
+}
+export function useBusinessApproverInbox(): BusinessApproverInbox {
+  const forwardedProposals = useForwardedProposals()
+  const pendingPromotions = usePendingPromotions()
+  const escalations = useEscalations()
+  return useMemo(
+    () => ({ forwardedProposals, pendingPromotions, escalations }),
+    [forwardedProposals, pendingPromotions, escalations],
+  )
+}

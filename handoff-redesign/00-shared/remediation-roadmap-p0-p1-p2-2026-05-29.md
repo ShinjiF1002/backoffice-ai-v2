@@ -34,6 +34,13 @@
 > - check:all green (test 143 / build) + 本番 boot smoke (/、/cases、/search、/inbox、/observatory HTTP 200)。commit `2d8e26d`。
 >
 > **W2c-0b cleanup 完了 (2026-05-30、外部 CR 残)**: W2c-0 後に残った drift を是正。§3.2 deep-plan の `/notifications` 3 箇所→`/inbox` (route 名統一を §3.2 にも適用) + axe 残存 9/12画面 (§4.0 G7・§4.2 G9・§4.3 G11・§3.6 reconcile)→14画面/14 route + `prototype-redesign/CLAUDE.md` 9→14 正規化 (base IA を historical 明示、現行 route SSOT = §1b) + SearchResults 空状態 copy 修正 + ページ input UI test 追加。check:all green (**test 144** / build)。**SSOT 14 drift 全閉鎖**。commit `1520135`。
+>
+> **W2c-1 実装完了 (2026-05-30、業務責任者 3 画面)**: IA scope=(a) で **11→14 画面**到達 (typology relock **A×3/B×8/C×3**)。
+> - **3 新画面**: `BusinessApproverHub`(A landing、useBusinessApproverInbox で 3 受け口集約 drill) / `ConfigApprovals`(B、手順承認=forwarded 提案 + 設定承認=昇格申請を 1 queue、row→各 owner-mode detail) / `Escalations`(B、case/escalate 受信、row→CaseDetail で裁定)。
+> - **AgentDetail 承認者 mode**: ProposalDetail と同型 (`actor.role==='business-approver' ? owner : manual`)。owner + promotionStatus==='requested' で 設定承認 (approvePromotion) / 差戻し (sendbackPromotion、ReasonDialog) footer。**SoD**: isSelfPromotionApproval (申請者=現 actor) で承認 button disabled + 四眼原則文言 (reducer も hard-block)。manual footer に promotionSendbackReason 再表示 (理由を捨てない、再申請可)。
+> - **CaseDetail escalate 配線**: showToast のみ → `case/escalate` dispatch (宛先 actor-approver)。
+> - **派生 selector**: useForwardedProposals / usePendingPromotions / useEscalations / useBusinessApproverInbox (store-truth、S8 不変)。Sidebar に ─承認─ group (3 nav) + App 3 route + routes.test 14-route render gate。
+> - check:all green (**test 151** / build) + 本番 boot smoke (/、3 新 route HTTP 200)。**coverage 注記**: approvePromotion SoD no-op + cross-actor approve + sendbackPromotion + escalate 格納 は store.test (W2a) 検証済、3 受け口 selector + escalate flow は business-approver.test 検証済。AgentDetail 承認者 mode の **owner-mode UI screen test (SoD disabled の DOM 検証) は jsdom の store 事前 seed コストが高く W3 (axe 網羅) へ defer** — logic は store-tested + UI は render-gated。commit `remediation/w2-screens`。**残り W2c-2** (Observatory drill/横断台帳 P1-7 + before/after P1-8)。
 
 ---
 

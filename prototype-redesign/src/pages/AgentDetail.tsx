@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon, PauseIcon, PlayIcon } from 'lucide-react'
 import { AGENT_DETAILS } from '@/data/mock-agent-detail'
-import { useAgent, useStoreDispatch, useAgentAdoptedProposals } from '@/store/hooks'
+import { useAgent, useStoreDispatch, useAgentAdoptedProposals, useCurrentActor } from '@/store/hooks'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { Modal } from '@/components/shared/Modal'
+import { ReasonDialog } from '@/components/shared/ReasonDialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/cn'
 
@@ -22,10 +23,13 @@ export function AgentDetail() {
   const agentEntity = useAgent(id)
   const adopted = useAgentAdoptedProposals(id)
   const dispatch = useStoreDispatch()
+  const actor = useCurrentActor()
   const [applyOpen, setApplyOpen] = useState(false)
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [emergencyReason, setEmergencyReason] = useState('')
   const [emergencyError, setEmergencyError] = useState(false)
+  // P1-3 承認者 mode: 設定承認の差戻し理由入力 dialog (理由 state は ReasonDialog 内で管理)。
+  const [configSendbackOpen, setConfigSendbackOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
   const [prevId, setPrevId] = useState(id)
@@ -35,6 +39,7 @@ export function AgentDetail() {
     setEmergencyOpen(false)
     setEmergencyReason('')
     setEmergencyError(false)
+    setConfigSendbackOpen(false)
     setToast(null)
   }
 
@@ -63,6 +68,13 @@ export function AgentDetail() {
   // 緊急停止 (kill-switch) 状態 (flywheel 観測化)。paused は header「緊急コントロール」で可視化 + 再開可能。
   const paused = agentEntity?.paused ?? false
   const pausedReason = agentEntity?.pausedReason
+  // P1-3 承認者 mode (ProposalDetail と同型): 業務責任者 persona は owner = 設定承認/差戻し、それ以外は manual = 申請。
+  const mode: 'manual' | 'owner' = actor?.role === 'business-approver' ? 'owner' : 'manual'
+  const promotionSendbackReason = agentEntity?.promotionSendbackReason
+  // SoD (案件 B4 と同一思想): 申請した actor 自身は設定承認できない (reducer も hard-block、UI でも disabled + 理由)。
+  const promotionRequestedBy = agentEntity?.promotionRequestedBy
+  const isSelfPromotionApproval = promotionRequestedBy !== undefined && promotionRequestedBy === actor?.id
+  const showOwnerPromotionControls = mode === 'owner' && requested
 
   return (
     <div className="flex h-full flex-col">
@@ -89,6 +101,7 @@ export function AgentDetail() {
                 <MetaChip tone="primary" label={`現在 ${a.trustLabel}`} />
                 <MetaChip tone="inset" label={a.trustEn} />
                 {paused && <MetaChip tone="alert" label="緊急停止中" />}
+                {mode === 'owner' && <MetaChip tone="inset" label="業務責任者ビュー" />}
               </span>
             </h1>
             <p className="mt-0.5 text-xs text-[var(--color-fg-muted)]">
@@ -200,47 +213,97 @@ export function AgentDetail() {
         </div>
       </div>
 
-      {/* Footer: 申請 1 ボタン (原則 C)、未達時は disabled + 理由明示 */}
-      <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
-        <div className="flex items-center gap-1.5 text-xs">
-          {paused ? (
-            <>
-              <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
-              <span className="font-medium text-[var(--color-alert-soft-fg)]">緊急停止中は昇格を申請できません（再開後に申請可能）</span>
-            </>
-          ) : requested ? (
-            <>
-              <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
-              <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
-            </>
-          ) : hasUnmet ? (
-            <>
-              <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
-              <span className="font-medium text-[var(--color-alert-soft-fg)]">承認率が基準 (95%) に未達のため、現時点では昇格を申請できません</span>
-            </>
-          ) : (
-            <>
-              <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-success-soft-fg)]" />
-              <span className="font-medium text-[var(--color-success-soft-fg)]">全指標が基準達成 — 昇格を申請できます</span>
-            </>
-          )}
-        </div>
-        <button
-          type="button"
-          disabled={hasUnmet || requested || paused}
-          title={paused ? '緊急停止中は申請できません' : hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
-          onClick={() => setApplyOpen(true)}
-          className={cn(
-            'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
-            hasUnmet || requested || paused
-              ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
-              : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
-          )}
-        >
-          <BotIcon className="h-4 w-4" />
-          {requested ? '申請済み' : '設定変更を申請'}
-        </button>
-      </footer>
+      {/* Footer (原則 C 単一決定面、mode 出し分け): 業務責任者 owner = 設定承認/差戻し、それ以外 = 申請 */}
+      {showOwnerPromotionControls ? (
+        <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
+          <div className="flex items-center gap-1.5 text-xs">
+            {isSelfPromotionApproval ? (
+              <>
+                <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
+                <span className="font-medium text-[var(--color-alert-soft-fg)]">申請者として承認できません — 別の業務責任者に切替えてください（四眼原則）</span>
+              </>
+            ) : (
+              <>
+                <BotIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
+                <span className="font-medium text-[var(--color-primary)]">設定変更 (昇格) の申請を承認 / 差戻しできます</span>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setConfigSendbackOpen(true)}
+              className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              差戻し
+            </button>
+            <button
+              type="button"
+              disabled={isSelfPromotionApproval}
+              title={isSelfPromotionApproval ? '申請者は承認できません（四眼原則）' : undefined}
+              onClick={() => {
+                if (id) dispatch({ type: 'agent/approvePromotion', id })
+                showToast('設定変更を承認しました — 昇格を反映します')
+              }}
+              className={cn(
+                'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
+                isSelfPromotionApproval
+                  ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
+                  : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
+              )}
+            >
+              <CheckIcon className="h-4 w-4" />
+              設定承認
+            </button>
+          </div>
+        </footer>
+      ) : (
+        <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
+          <div className="flex items-center gap-1.5 text-xs">
+            {paused ? (
+              <>
+                <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
+                <span className="font-medium text-[var(--color-alert-soft-fg)]">緊急停止中は昇格を申請できません（再開後に申請可能）</span>
+              </>
+            ) : requested ? (
+              <>
+                <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
+                <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
+              </>
+            ) : promotionSendbackReason ? (
+              <>
+                <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
+                <span className="font-medium text-[var(--color-alert-soft-fg)]">前回の設定承認で差戻し: {promotionSendbackReason} — 修正後に再申請できます</span>
+              </>
+            ) : hasUnmet ? (
+              <>
+                <AlertTriangleIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-alert-soft-fg)]" />
+                <span className="font-medium text-[var(--color-alert-soft-fg)]">承認率が基準 (95%) に未達のため、現時点では昇格を申請できません</span>
+              </>
+            ) : (
+              <>
+                <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-success-soft-fg)]" />
+                <span className="font-medium text-[var(--color-success-soft-fg)]">全指標が基準達成 — 昇格を申請できます</span>
+              </>
+            )}
+          </div>
+          <button
+            type="button"
+            disabled={hasUnmet || requested || paused}
+            title={paused ? '緊急停止中は申請できません' : hasUnmet ? '承認率が基準に未達です' : requested ? '申請済みです' : undefined}
+            onClick={() => setApplyOpen(true)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium',
+              hasUnmet || requested || paused
+                ? 'cursor-not-allowed bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
+                : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
+            )}
+          >
+            <BotIcon className="h-4 w-4" />
+            {requested ? '申請済み' : '設定変更を申請'}
+          </button>
+        </footer>
+      )}
 
       {/* 申請 confirm dialog (共通 Modal、Phase 2) */}
       <Modal
@@ -346,6 +409,21 @@ export function AgentDetail() {
           </div>
         </div>
       </Modal>
+
+      {/* P1-3 設定承認の差戻し dialog (理由必須、approvePromotion と SoD 対。閉じは ReasonDialog 内で自動) */}
+      <ReasonDialog
+        open={configSendbackOpen}
+        title="設定変更を差戻し"
+        label="差戻しの理由 (必須)"
+        placeholder="申請者が再検討できるよう、何を直してほしいか具体的に。例: 直近の承認率が基準ぎりぎりなので、もう 1 週間 supervised で様子を見たい。"
+        submitLabel="差戻す"
+        outcome="差戻すと申請は取り下げられ、申請者が修正後に再申請できます。"
+        onClose={() => setConfigSendbackOpen(false)}
+        onSubmit={(reason) => {
+          if (id) dispatch({ type: 'agent/sendbackPromotion', id, reason })
+          showToast('設定変更を差戻しました — 申請者の再検討に戻ります')
+        }}
+      />
 
       {toast && (
         <div

@@ -6,6 +6,9 @@ import {
   SparklesIcon,
   BotIcon,
   ActivityIcon,
+  ShieldCheckIcon,
+  SlidersHorizontalIcon,
+  AlertTriangleIcon,
 } from 'lucide-react'
 import { useCurrentActor } from '@/store/hooks'
 import { roleLabel } from '@/store/actors'
@@ -50,6 +53,14 @@ const navGroups: NavGroup[] = [
   {
     group: '監視',
     items: [{ to: '/observatory', label: 'モニタリング', icon: ActivityIcon, activePrefix: '/observatory' }],
+  },
+  {
+    group: '承認',
+    items: [
+      { to: '/business-approver', label: '業務責任者ハブ', icon: ShieldCheckIcon, activePrefix: '/business-approver' },
+      { to: '/config-approvals', label: '設定承認', icon: SlidersHorizontalIcon, activePrefix: '/config-approvals' },
+      { to: '/escalations', label: 'エスカレーション', icon: AlertTriangleIcon, activePrefix: '/escalations' },
+    ],
   },
 ]
 

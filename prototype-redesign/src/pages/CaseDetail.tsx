@@ -113,7 +113,10 @@ export function CaseDetail() {
       dispatch({ type: 'case/sendback', id, reason: detail.reason ?? '', category: detail.category ?? '' })
       showToast(`${fieldLabel} を差戻しました — 再処理後に確認待ちへ`)
     } else {
-      showToast(`${fieldLabel} をエスカレーションしました`)
+      // P1-3: エスカレーションを store 化 (showToast のみ → case/escalate)。受信 queue (/escalations) の母集合になる。
+      // 宛先 = 業務責任者 (actor-approver)。裁定の帰結は業務責任者が case/sendback で行う (JG-3=a)。
+      dispatch({ type: 'case/escalate', id, reason: detail.reason ?? '', category: detail.category ?? '', to: 'actor-approver' })
+      showToast(`${fieldLabel} を業務責任者へエスカレーションしました`)
     }
   }
 

@@ -4,7 +4,7 @@ import { StoreProvider } from '@/store/StoreProvider'
 import { ViewProvider } from '@/context/ViewProvider'
 import App from '@/App'
 
-// Phase 1 — provider (StoreProvider / ViewProvider) 挿入後、11 routes (W2b: +/search +/inbox) が white screen せず render するか。
+// Phase 1 — provider (StoreProvider / ViewProvider) 挿入後、14 routes (W2b: +/search +/inbox、W2c: +業務責任者面 3) が white screen せず render するか。
 // main.tsx と同じ構造 (Router > Store > View > App) を MemoryRouter で再現。jsdom render レベルの smoke
 // (pixel/visual ではない)。R0 Gate の coverage matrix の起点にもなる。
 const ROUTES: string[] = [
@@ -19,6 +19,9 @@ const ROUTES: string[] = [
   '/observatory',
   '/search', // W2b/P1-2
   '/inbox', // W2b/P1-2
+  '/business-approver', // W2c/P1-3
+  '/config-approvals', // W2c/P1-3
+  '/escalations', // W2c/P1-3
 ]
 
 function renderAt(path: string) {
@@ -33,7 +36,7 @@ function renderAt(path: string) {
   )
 }
 
-describe('11 routes smoke (Phase 1 + W2b: provider 挿入後の no-white-screen)', () => {
+describe('14 routes smoke (Phase 1 + W2b/W2c: provider 挿入後の no-white-screen)', () => {
   it.each(ROUTES)('%s が AppShell ごと render する (PrototypeModeLabel 表示)', (path) => {
     renderAt(path)
     // 全 route が AppShell 配下 → TopBar の prototype 表示が必ず出る = white screen でない証左

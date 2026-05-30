@@ -7,6 +7,9 @@ import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 import { useCases } from '@/store/hooks'
+import { useView } from '@/context/view-context'
+import { KPI_PROCESS_LABEL } from '@/data/mock-kpi'
+import { useListData } from '@/hooks/useListData'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
@@ -15,8 +18,8 @@ import { useCases } from '@/store/hooks'
  * 状態 + 担当 filter / 列 sort / pagination / 要確認上部固定 (recommended)。
  */
 function AttentionCell({ status, flags }: { status: string; flags: number }) {
-  if (status === 'pending') return <span className="text-xs text-[var(--color-fg-subtle)]">AI 処理待ち</span>
-  if (status === 'sent-back') return <span className="text-xs text-[var(--color-fg-subtle)]">AI 再処理中</span>
+  if (status === 'pending') return <span className="text-xs text-[var(--color-fg-tertiary)]">AI 処理待ち</span>
+  if (status === 'sent-back') return <span className="text-xs text-[var(--color-fg-tertiary)]">AI 再処理中</span>
   if (status === 'reflected') return <span className="text-xs text-[var(--color-success-soft-fg)]">完了</span>
   if (flags > 0) return <MetaChip tone="alert" label={`要確認 ${flags} 項目`} />
   return <MetaChip tone="success" label="全項目一致" />
@@ -39,7 +42,7 @@ const columns: DataTableColumn<CaseListRow>[] = [
     key: 'owner',
     header: '担当',
     className: 'text-[var(--color-fg)]',
-    cell: (r) => (r.owner === '—' ? <span className="text-[var(--color-fg-subtle)]">未割当</span> : r.owner),
+    cell: (r) => (r.owner === '—' ? <span className="text-[var(--color-fg-tertiary)]">未割当</span> : r.owner),
   },
   { key: 'attention', header: '確認', cell: (r) => <AttentionCell status={r.status} flags={r.flags} /> },
 ]
@@ -60,7 +63,9 @@ const filters: DataTableFilter<CaseListRow>[] = [
 ]
 
 export function Cases() {
-  const cases = useCases()
+  const { process } = useView()
+  const cases = useCases(process)
+  const processLabel = process === 'all' ? '全業務' : (KPI_PROCESS_LABEL[process] ?? '全業務')
   // store entity → list row view-model (status/flags/assignee は store-truth で reactive)
   const rows: CaseListRow[] = cases.map((e) => ({
     id: e.id,
@@ -70,6 +75,7 @@ export function Cases() {
     owner: e.assignee ?? '—',
     flags: e.flags,
   }))
+  const list = useListData(rows)
   return (
     <div className="flex flex-col">
       <header
@@ -77,12 +83,14 @@ export function Cases() {
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
         <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">全業務 · {rows.length} 件 ／ 行を選んで案件を確認</p>
+        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">{processLabel} · {rows.length} 件 ／ 行を選んで案件を確認</p>
       </header>
 
       <div className="p-4">
         <DataTable
-          rows={rows}
+          rows={list.rows}
+          status={list.status}
+          onRetry={list.onRetry}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}`}

@@ -144,7 +144,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
               <div><span className="text-[var(--color-fg-muted)]">申請書類</span><div className="text-[var(--color-fg)]">{field.ocrRawValue ?? '—'}</div></div>
             </div>
             {field.sourceLocator && (
-              <div className="mt-2 font-mono text-[10px] text-[var(--color-fg-subtle)]">
+              <div className="mt-2 font-mono text-[10px] text-[var(--color-fg-tertiary)]">
                 {field.sourceLocator.doc} · {field.sourceLocator.page} · {field.sourceLocator.region}
               </div>
             )}

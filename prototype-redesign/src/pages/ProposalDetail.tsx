@@ -8,6 +8,7 @@ import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { ReasonDialog } from '@/components/shared/ReasonDialog'
 import { cn } from '@/lib/cn'
@@ -34,18 +35,6 @@ function proposalStepperCurrent(status: ProposalStatus): number {
   }
 }
 
-/** 未知 id の not-found (業務語、token-clean inline)。 */
-function ProposalNotFound() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-      <p className="text-sm text-[var(--color-fg-muted)]">指定の提案が見つかりません。</p>
-      <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
-        提案一覧へ戻る
-      </Link>
-    </div>
-  )
-}
-
 export function ProposalDetail() {
   const { id } = useParams()
   const p = id ? PROPOSAL_DETAILS[id] : undefined
@@ -57,7 +46,7 @@ export function ProposalDetail() {
   const mode: 'manual' | 'owner' = actor?.role === 'business-approver' ? 'owner' : 'manual'
   const [dialog, setDialog] = useState<'reject' | 'sendback' | null>(null)
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>(() =>
-    p && p.sourceCases.length ? { [p.sourceCases[0].id]: true } : {},
+    p && p.sourceCases[0] ? { [p.sourceCases[0].id]: true } : {},
   )
   const [hintOpen, setHintOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -66,12 +55,25 @@ export function ProposalDetail() {
   if (id !== prevId) {
     setPrevId(id)
     setDialog(null)
-    setOpenEvidence(p && p.sourceCases.length ? { [p.sourceCases[0].id]: true } : {})
+    setOpenEvidence(p && p.sourceCases[0] ? { [p.sourceCases[0].id]: true } : {})
     setHintOpen(false)
     setToast(null)
   }
 
-  if (!p) return <ProposalNotFound />
+  if (!p)
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <EmptyState
+          subState="truly-empty"
+          title="指定の提案が見つかりません。"
+          action={
+            <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+              提案一覧へ戻る
+            </Link>
+          }
+        />
+      </div>
+    )
   // live status (store-truth)。badge/stepper/footer の可否は entity 由来 (操作後 reactive)。decision は却下/差戻し理由の再表示用。
   const liveStatus: ProposalStatus = entity?.status ?? p.status
   const decision = entity?.decision
@@ -209,7 +211,7 @@ export function ProposalDetail() {
                   <li key={s.n} className={s.changed ? 'px-2 py-1' : 'px-4 py-2'}>
                     {!s.changed ? (
                       <div className="flex gap-3 text-sm text-[var(--color-fg-muted)]">
-                        <span className="font-mono text-[var(--color-fg-subtle)]">{s.n}.</span>
+                        <span className="font-mono text-[var(--color-fg-tertiary)]">{s.n}.</span>
                         <span>{s.text}</span>
                       </div>
                     ) : (
@@ -258,7 +260,7 @@ export function ProposalDetail() {
                         />
                         <span className="font-mono text-xs font-medium text-[var(--color-fg)]">{sc.id}</span>
                         <MetaChip tone="alert" label={sc.field} />
-                        <span className="ml-auto font-mono text-[11px] text-[var(--color-fg-subtle)]">{sc.date}</span>
+                        <span className="ml-auto font-mono text-[11px] text-[var(--color-fg-tertiary)]">{sc.date}</span>
                       </button>
                       {isOpen && (
                         <div className="px-4 pb-3 pl-9">
@@ -290,7 +292,7 @@ export function ProposalDetail() {
               >
                 <ChevronRightIcon className={cn('h-3 w-3 flex-shrink-0 transition-transform', hintOpen && 'rotate-90')} aria-hidden="true" />
                 <span className="text-[var(--color-fg)]">参考: AI の補足</span>
-                <span className="ml-auto text-[11px] text-[var(--color-fg-subtle)]">承認の根拠にはなりません</span>
+                <span className="ml-auto text-[11px] text-[var(--color-fg-tertiary)]">承認の根拠にはなりません</span>
               </button>
               {hintOpen && (
                 <div className="pt-2 text-xs leading-relaxed text-[var(--color-fg-muted)]">

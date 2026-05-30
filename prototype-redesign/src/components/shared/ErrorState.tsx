@@ -1,4 +1,4 @@
-import { AlertOctagon, RefreshCcw, ExternalLink } from 'lucide-react'
+import { AlertOctagonIcon, RefreshCcwIcon, ExternalLinkIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
@@ -28,7 +28,7 @@ export function ErrorState({ title, cause, onRetry, escalation, description, cla
       )}
     >
       <div className="flex items-start gap-2.5">
-        <AlertOctagon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-error-soft-fg)]" aria-hidden="true" />
+        <AlertOctagonIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-error-soft-fg)]" aria-hidden="true" />
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-sm font-medium text-[var(--color-error-soft-fg)]">{title}</p>
           {cause && <p className="font-mono text-[11px] text-[var(--color-error-soft-fg)] tabular">原因: {cause}</p>}
@@ -43,7 +43,7 @@ export function ErrorState({ title, cause, onRetry, escalation, description, cla
               onClick={onRetry}
               className="inline-flex items-center gap-1 rounded-md border border-[var(--color-error-soft-border)] bg-[var(--color-panel)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-error-soft-fg)] transition-colors hover:bg-[var(--color-error-soft)]"
             >
-              <RefreshCcw className="h-3 w-3" aria-hidden="true" />
+              <RefreshCcwIcon className="h-3 w-3" aria-hidden="true" />
               再試行
             </button>
           )}
@@ -52,7 +52,7 @@ export function ErrorState({ title, cause, onRetry, escalation, description, cla
               href={escalation.href}
               className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium text-[var(--color-fg-muted)] transition-colors hover:bg-[var(--color-panel-inset)]"
             >
-              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              <ExternalLinkIcon className="h-3 w-3" aria-hidden="true" />
               {escalation.label}
             </a>
           )}

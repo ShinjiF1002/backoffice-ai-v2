@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon } from 'lucide-react'
 import { useApprovals, useStoreDispatch, useCurrentActor } from '@/store/hooks'
+import { useView } from '@/context/view-context'
+import { useListData } from '@/hooks/useListData'
 import { CASE_DETAILS } from '@/data/mock-case-detail'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
@@ -56,7 +58,8 @@ const columns: DataTableColumn<ApprovalViewRow>[] = [
 ]
 
 export function Approvals() {
-  const approvals = useApprovals()
+  const { process } = useView()
+  const approvals = useApprovals(process)
   const dispatch = useStoreDispatch()
   const actor = useCurrentActor()
   const [toast, setToast] = useState<string | null>(null)
@@ -75,6 +78,7 @@ export function Approvals() {
     inputApprovedBy: e.inputApprovedBy,
     elapsed: e.elapsedLabel,
   }))
+  const list = useListData(rows)
   const inputters = [...new Set(rows.map((r) => r.inputter))]
   const filters: DataTableFilter<ApprovalViewRow>[] = [
     { id: 'inputter', label: '入力者', options: inputters.map((i) => ({ value: i, label: i })), predicate: (r, v) => v.includes(r.inputter) },
@@ -92,7 +96,9 @@ export function Approvals() {
 
       <div className="p-4">
         <DataTable
-          rows={rows}
+          rows={list.rows}
+          status={list.status}
+          onRetry={list.onRetry}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}?view=checker`}

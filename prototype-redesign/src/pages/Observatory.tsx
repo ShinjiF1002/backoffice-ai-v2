@@ -167,7 +167,7 @@ export function Observatory() {
                     })}
                   </ol>
                   <div className="mt-3 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
-                    <MetaChip tone="success" label="職務分離 ✓" />
+                    <MetaChip tone="success" label="職務分離" />
                     <span className="text-xs text-[var(--color-fg-muted)]">
                       入力者 <strong className="font-medium text-[var(--color-fg)]">{OBS_SOD.inputter}</strong> と承認者{' '}
                       <strong className="font-medium text-[var(--color-fg)]">{OBS_SOD.approver}</strong> は別人です。
@@ -289,7 +289,7 @@ export function Observatory() {
                               <CheckIcon className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden="true" />
                             </span>
                             <span className="flex-1 text-sm font-medium text-[var(--color-fg)]">{it.title}</span>
-                            <span className="font-mono text-[11px] text-[var(--color-fg-subtle)]">{it.id} · {it.version}</span>
+                            <span className="font-mono text-[11px] text-[var(--color-fg-tertiary)]">{it.id} · {it.version}</span>
                           </div>
                         ))}
                       </section>
@@ -337,7 +337,7 @@ export function Observatory() {
                               <li key={stage.key} className={cn('flex items-center', !last && 'flex-1')}>
                                 <span className="flex flex-shrink-0 items-center gap-1.5">
                                   <span className={cn('h-2 w-2 rounded-full', reached ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border-strong)]')} />
-                                  <span className={cn('text-[11px]', reached ? 'font-medium text-[var(--color-fg)]' : 'text-[var(--color-fg-subtle)]')}>{stage.label}</span>
+                                  <span className={cn('text-[11px]', reached ? 'font-medium text-[var(--color-fg)]' : 'text-[var(--color-fg-tertiary)]')}>{stage.label}</span>
                                 </span>
                                 {!last && <span className={cn('mx-2 h-px flex-1', reached ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]')} />}
                               </li>

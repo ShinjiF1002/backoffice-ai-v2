@@ -31,10 +31,22 @@ function matchesWorkflow(workflowId: string, filter?: string): boolean {
   return !filter || filter === 'all' || workflowId === filter
 }
 
+/**
+ * order 配列 → entity 配列 (dict 欠落 id は drop)。
+ * NUIA narrow: persist drift で order に dict 不在 id が混じっても undefined を後段に渡さず白画面化を防ぐ
+ * (reducer の早期 return guard と同一思想、`!` non-null は使わない)。
+ */
+function resolveOrder<T>(order: readonly string[], dict: Record<string, T>): T[] {
+  return order.flatMap((id) => {
+    const e = dict[id]
+    return e ? [e] : []
+  })
+}
+
 export function useCases(workflowId?: string): CaseEntity[] {
   const s = useStoreState()
   return useMemo(
-    () => s.caseOrder.map((id) => s.cases[id]).filter((c) => matchesWorkflow(c.workflowId, workflowId)),
+    () => resolveOrder(s.caseOrder, s.cases).filter((c) => matchesWorkflow(c.workflowId, workflowId)),
     [s, workflowId],
   )
 }
@@ -49,8 +61,7 @@ export function useApprovals(workflowId?: string): CaseEntity[] {
   const s = useStoreState()
   return useMemo(
     () =>
-      s.caseOrder
-        .map((id) => s.cases[id])
+      resolveOrder(s.caseOrder, s.cases)
         .filter((c) => c.status === 'business-approval-waiting' && matchesWorkflow(c.workflowId, workflowId)),
     [s, workflowId],
   )
@@ -59,7 +70,7 @@ export function useApprovals(workflowId?: string): CaseEntity[] {
 export function useProposals(workflowId?: string): ProposalEntity[] {
   const s = useStoreState()
   return useMemo(
-    () => s.proposalOrder.map((id) => s.proposals[id]).filter((p) => matchesWorkflow(p.workflowId, workflowId)),
+    () => resolveOrder(s.proposalOrder, s.proposals).filter((p) => matchesWorkflow(p.workflowId, workflowId)),
     [s, workflowId],
   )
 }
@@ -72,7 +83,7 @@ export function useProposal(id: string | undefined): ProposalEntity | undefined 
 export function useAgents(workflowId?: string): AgentEntity[] {
   const s = useStoreState()
   return useMemo(
-    () => s.agentOrder.map((id) => s.agents[id]).filter((a) => matchesWorkflow(a.workflowId, workflowId)),
+    () => resolveOrder(s.agentOrder, s.agents).filter((a) => matchesWorkflow(a.workflowId, workflowId)),
     [s, workflowId],
   )
 }
@@ -138,8 +149,7 @@ export function useFlywheelLineage(): FlywheelLineage[] {
   const s = useStoreState()
   return useMemo(
     () =>
-      s.proposalOrder
-        .map((id) => s.proposals[id])
+      resolveOrder(s.proposalOrder, s.proposals)
         .filter((p) => p.status === 'forwarded' || p.status === 'approved')
         .map((p): FlywheelLineage => {
           const d = PROPOSAL_DETAILS[p.id]
@@ -162,8 +172,7 @@ export function useAgentAdoptedProposals(agentId: string | undefined): string[] 
   const s = useStoreState()
   return useMemo(() => {
     if (!agentId) return []
-    return s.proposalOrder
-      .map((id) => s.proposals[id])
+    return resolveOrder(s.proposalOrder, s.proposals)
       .filter((p) => p.status === 'approved' && PROPOSAL_DETAILS[p.id]?.agentId === agentId)
       .map((p) => p.id)
   }, [s, agentId])
@@ -189,7 +198,7 @@ export interface HubModel {
 export function useHubModel(): HubModel {
   const s = useStoreState()
   return useMemo(() => {
-    const allCases = s.caseOrder.map((id) => s.cases[id])
+    const allCases = resolveOrder(s.caseOrder, s.cases)
     const countBy = (pid: string, statuses: CaseStatus[]) =>
       allCases.filter((c) => c.workflowId === pid && statuses.includes(c.status)).length
 

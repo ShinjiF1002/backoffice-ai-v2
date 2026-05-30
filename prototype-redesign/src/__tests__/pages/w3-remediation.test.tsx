@@ -160,6 +160,10 @@ describe('P0-W3 flywheel: AgentDetail 緊急停止 → 一覧反映', () => {
     const user = userEvent.setup()
     renderAt('/agents/agent-account-opening')
 
+    // P1-1: account-opening は UC-BO-02。Process-First filter (既定 UC-BO-01) で一覧に出すため業務を全業務に切替。
+    await user.click(screen.getByRole('button', { name: '法人住所変更' }))
+    await user.click(screen.getByRole('option', { name: '全業務' }))
+
     await user.click(screen.getByRole('button', { name: '緊急停止' }))
     await user.type(screen.getByLabelText('停止理由（必須）'), '誤入力が急増したため')
     await user.click(screen.getByRole('button', { name: '緊急停止する' }))

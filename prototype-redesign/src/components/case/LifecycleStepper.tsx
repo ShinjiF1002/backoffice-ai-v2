@@ -41,7 +41,7 @@ export function LifecycleStepper({ steps }: { steps: CaseLifecycleEvent[] }) {
                 >
                   {s.step}
                 </span>
-                <span className="font-mono text-[10px] text-[var(--color-fg-subtle)]">{s.time}</span>
+                <span className="font-mono text-[10px] text-[var(--color-fg-tertiary)]">{s.time}</span>
               </div>
             </div>
             {!last && (

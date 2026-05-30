@@ -14,6 +14,7 @@ import { FieldActionModal } from '@/components/case/FieldActionModal'
 import type { ActionKind } from '@/components/case/FieldActionModal'
 import { ReconcilePanel } from '@/components/cross-cutting/ReconcilePanel'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/cn'
 
 /**
@@ -26,19 +27,7 @@ function firstReviewLabel(c: CaseDetailModel | undefined, resolvedIds: string[] 
   if (!c || c.fields.length === 0) return undefined
   const resolved = new Set(resolvedIds)
   const review = c.fields.find((f) => !resolved.has(f.fieldLabel) && !isResolved(f.reconcileState))
-  return (review ?? c.fields[0]).fieldLabel
-}
-
-/** 未知 id の not-found (業務語、token-clean inline)。 */
-function CaseNotFound() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-      <p className="text-sm text-[var(--color-fg-muted)]">指定の案件が見つかりません。</p>
-      <Link to="/cases" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
-        案件一覧へ戻る
-      </Link>
-    </div>
-  )
+  return (review ?? c.fields[0])?.fieldLabel
 }
 
 export function CaseDetail() {
@@ -81,7 +70,20 @@ export function CaseDetail() {
   // 承認可否 + disabled 理由を SoD + status precondition で 1 selector に集約 (B4)。自己承認は reducer + ここで block。
   const approveGate = useCanApprove(id, mode)
 
-  if (!c) return <CaseNotFound />
+  if (!c)
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <EmptyState
+          subState="truly-empty"
+          title="指定の案件が見つかりません。"
+          action={
+            <Link to="/cases" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+              案件一覧へ戻る
+            </Link>
+          }
+        />
+      </div>
+    )
 
   // status-badge-resolver (remediation 2b): header badge / stepper を store entity.status 由来で resolve。
   // liveStatus = 操作後の store 真値 (無ければ detail model の baseline)。badge tone は固定 'primary' を廃し resolver 経由。

@@ -75,7 +75,7 @@ export function Sidebar() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-[var(--color-fg)]">Backoffice AI</span>
-              <span className="font-mono text-[10px] text-[var(--color-fg-subtle)]">v2 prototype</span>
+              <span className="font-mono text-[10px] text-[var(--color-fg-tertiary)]">v2 prototype</span>
             </div>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function Sidebar() {
           {navGroups.map((g, gi) => (
             <div key={g.group ?? 'top'} className={cn(gi > 0 && 'mt-3')}>
               {g.group && (
-                <div className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-fg-subtle)]">
+                <div className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-fg-tertiary)]">
                   {g.group}
                 </div>
               )}
@@ -123,7 +123,7 @@ export function Sidebar() {
             </div>
             <div className="flex min-w-0 flex-1 flex-col items-start">
               <span className="truncate text-xs font-medium text-[var(--color-fg)]">{actor?.name ?? '未選択'}</span>
-              <span className="text-[10px] text-[var(--color-fg-subtle)]">{actor ? roleLabel(actor.role) : ''}</span>
+              <span className="text-[10px] text-[var(--color-fg-tertiary)]">{actor ? roleLabel(actor.role) : ''}</span>
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ export function Sidebar() {
                     'flex h-11 items-center justify-center rounded-md transition-colors',
                     active
                       ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-                      : 'text-[var(--color-fg-subtle)] hover:bg-[var(--color-panel-inset)]'
+                      : 'text-[var(--color-fg-tertiary)] hover:bg-[var(--color-panel-inset)]'
                   )}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />

@@ -7,6 +7,7 @@ import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { Modal } from '@/components/shared/Modal'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/cn'
 
 /**
@@ -15,18 +16,6 @@ import { cn } from '@/lib/cn'
  * A 4 KPI 全件 (集約値を捨てる) / B 裏付け sample + 設定 / C 申請 1 ボタン (単一決定面)。
  * Trust は業務語 (全件確認 / 要所確認) を主表示、Tier 名 (Supervised) は補助 chip。
  */
-/** 未知 id の not-found (業務語、token-clean inline)。 */
-function AgentNotFound() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-      <p className="text-sm text-[var(--color-fg-muted)]">指定のエージェントが見つかりません。</p>
-      <Link to="/agents" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
-        エージェント一覧へ戻る
-      </Link>
-    </div>
-  )
-}
-
 export function AgentDetail() {
   const { id } = useParams()
   const a = id ? AGENT_DETAILS[id] : undefined
@@ -49,7 +38,20 @@ export function AgentDetail() {
     setToast(null)
   }
 
-  if (!a) return <AgentNotFound />
+  if (!a)
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <EmptyState
+          subState="truly-empty"
+          title="指定のエージェントが見つかりません。"
+          action={
+            <Link to="/agents" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+              エージェント一覧へ戻る
+            </Link>
+          }
+        />
+      </div>
+    )
 
   const showToast = (m: string) => {
     setToast(m)

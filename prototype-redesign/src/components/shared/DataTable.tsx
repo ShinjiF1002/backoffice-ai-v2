@@ -190,8 +190,8 @@ export function DataTable<Row>({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* filter chips */}
-      {filters && filters.length > 0 && (
+      {/* filter chips — loading/error 中は非表示 (取得状態に操作 UI を残さない、P1-5 CR) */}
+      {filters && filters.length > 0 && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
         <div className="flex flex-wrap items-center gap-3">
           {filters.map((f) => (
             <div key={f.id} className="flex flex-wrap items-center gap-1.5">
@@ -218,8 +218,8 @@ export function DataTable<Row>({
         </div>
       )}
 
-      {/* 一括操作バー (選択中、in-scope のみ集計) */}
-      {selection && selectedInScope.length > 0 && (
+      {/* 一括操作バー (選択中、in-scope のみ集計) — loading/error 中は非表示 (P1-5 CR) */}
+      {selection && selectedInScope.length > 0 && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
         <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius-control)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] px-3 py-2 text-xs">
           <span className="font-medium text-[var(--color-primary)]">{selectedInScope.length} 件選択中</span>
           {selection.actions.map((a) => {
@@ -436,7 +436,7 @@ export function DataTable<Row>({
         </>
       )}
 
-      {caption && <p className="px-1 text-[10px] text-[var(--color-fg-subtle)]">{caption}</p>}
+      {caption && <p className="px-1 text-[10px] text-[var(--color-fg-tertiary)]">{caption}</p>}
     </div>
   )
 }

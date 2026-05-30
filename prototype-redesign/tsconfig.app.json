@@ -20,6 +20,10 @@
       "@/*": ["./src/*"]
     },
 
+    /* Type safety (P1-9 Stage1、2026-05-30 W0) */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,

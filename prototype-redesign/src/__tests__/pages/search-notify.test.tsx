@@ -1,5 +1,9 @@
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { StoreProvider } from '@/store/StoreProvider'
+import { ViewProvider } from '@/context/ViewProvider'
+import { SearchResults } from '@/pages/SearchResults'
 import { useSearchResults, useNotifications, useUnreadCount, useStoreDispatch } from '@/store/hooks'
 
 // W2b/P1-2 — 横断検索 + 通知/inbox の wiring gate。
@@ -68,5 +72,32 @@ describe('W2b/P1-2 横断検索 + 通知', () => {
       act(() => result.current.dispatch({ type: 'notification/markAllRead', ids }))
       expect(result.current.unread).toBe(0)
     })
+  })
+})
+
+describe('SearchResults page (自前 input UI、狭幅自己完結)', () => {
+  function renderSearch() {
+    return render(
+      <MemoryRouter initialEntries={['/search']}>
+        <StoreProvider>
+          <ViewProvider>
+            <SearchResults />
+          </ViewProvider>
+        </StoreProvider>
+      </MemoryRouter>,
+    )
+  }
+
+  it('空クエリは prompt、ページ自前 input への入力で結果が出る (TopBar 非依存)', async () => {
+    const user = userEvent.setup()
+    renderSearch()
+    // 空クエリ: prompt (structurally-empty を分離した専用文言)
+    expect(screen.getByText('検索語を入力してください')).toBeInTheDocument()
+    // ページ自前の searchbox に入力 → 結果が live 更新 (TopBar input が無い狭幅でも /search 自己完結)
+    await user.type(screen.getByRole('searchbox', { name: '横断検索' }), 'CASE-2026-0142')
+    // 結果 header (一意) で hit を確認。行 ID は table + mobile card の 2 箇所に出るため findAllByText で件数 confirm
+    expect(await screen.findByText('「CASE-2026-0142」の検索結果 1 件')).toBeInTheDocument()
+    expect(screen.getAllByText('CASE-2026-0142').length).toBeGreaterThan(0)
+    expect(screen.queryByText('検索語を入力してください')).not.toBeInTheDocument()
   })
 })

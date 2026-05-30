@@ -12,7 +12,7 @@ import { useView } from '@/context/view-context'
  * 横断検索結果 (SearchResults, /search) — B 型 / 全 persona
  * SSOT: handoff-redesign/00-shared/remediation-roadmap §3.2 (P1-2)
  *
- * TopBar 検索 input (ViewContext searchQuery) を消費し、store-truth から案件/提案/Agent を横断検索。
+ * TopBar / ページ自前の検索 input (ViewContext searchQuery) を消費し、store-truth から案件/提案/Agent を横断検索。
  * 種別 chip + mono ID + row→各 detail。空クエリ (prompt) と zero-result (専用文言) を分離。
  */
 const KIND_TONE: Record<SearchResultItem['kind'], MetaTone> = {
@@ -64,7 +64,7 @@ export function SearchResults() {
           <EmptyState
             subState="truly-empty"
             title="検索語を入力してください"
-            description="TopBar の検索ボックスに案件 ID・業務名・担当者名・Agent 名を入力すると、ここに結果が表示されます。"
+            description="上の検索ボックスに案件 ID・業務名・担当者名・Agent 名を入力すると、ここに結果が表示されます。"
           />
         ) : (
           <DataTable

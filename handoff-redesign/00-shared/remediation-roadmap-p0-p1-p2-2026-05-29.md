@@ -14,7 +14,7 @@
 >
 > **timeline 注記**: 本 roadmap は frame C (production-ready lens、9→11→12 画面化・業務責任者 surface 新設を許容) を前提とする。これは locked master plan (`~/.claude/plans/ai-backoffice-ai-virtual-muffin.md`、Day 1-22 → **Session 4 = 2026-06-12 Fri**) を rebaseline する (§5)。**Session 4 までに現実的に入る範囲と 6/12 後送りの線引きは §6 末**。SCHEMA_VERSION bump を含む wave のデプロイは 6/12 demo 当日と別日に置く。
 
-> **本 roadmap は一部実装済 + 残り forward-looking の実装計画である** (2026-05-30 更新)。**実装済**: P0 (SCHEMA_VERSION=4、`proposal/sendback`・`session/switchActor` action、口座開設 case、route 9) + W0 + W1-A=P1-W4 (contrast/tone/strict Stage1+Stage2/icon)。**未実装 (forward-looking)**: P1-W5 (P1-1/5)、W2 (P1-2/3/6dropdown/7、新 3 画面)、W3 (P2)。未実装 wave のコードが記述どおりでないのは **正常であり defect ではない**。批判レビューは「未実装 wave の計画 (設計・順序・gate) が妥当か」+「実装済 wave の現物が gate green か」を評価すること (round-2 CR が前者を誤評価したため明記)。
+> **本 roadmap は一部実装済 + 残り forward-looking の実装計画である** (2026-05-30 更新)。**実装済**: P0 (SCHEMA_VERSION=4、`proposal/sendback`・`session/switchActor` action、口座開設 case、route 9) + W0 + W1-A = **P1-W5 CORE** (= P1-W4 strict Stage1+Stage2/icon/contrast/tone + P1-1 ProcessSelector→ViewContext + P1-5 CORE Loading/Error)。**未実装 (forward-looking)**: P1-5-remainder (detail not-found→EmptyState + permission-empty dead branch 除去、carry-forward)、W2 (P1-2/3/6dropdown/7、新 3 画面)、W3 (P2)。未実装 wave のコードが記述どおりでないのは **正常であり defect ではない**。批判レビューは「未実装 wave の計画 (設計・順序・gate) が妥当か」+「実装済 wave の現物が gate green か」を評価すること (round-2 CR が前者を誤評価したため明記)。
 
 ---
 

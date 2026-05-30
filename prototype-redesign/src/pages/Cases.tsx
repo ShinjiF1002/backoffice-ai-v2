@@ -9,6 +9,7 @@ import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataT
 import { useCases } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { KPI_PROCESS_LABEL } from '@/data/mock-kpi'
+import { useListData } from '@/hooks/useListData'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
@@ -74,6 +75,7 @@ export function Cases() {
     owner: e.assignee ?? '—',
     flags: e.flags,
   }))
+  const list = useListData(rows)
   return (
     <div className="flex flex-col">
       <header
@@ -86,7 +88,9 @@ export function Cases() {
 
       <div className="p-4">
         <DataTable
-          rows={rows}
+          rows={list.rows}
+          status={list.status}
+          onRetry={list.onRetry}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}`}

@@ -7,6 +7,7 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 import { useProposals } from '@/store/hooks'
 import { useView } from '@/context/view-context'
+import { useListData } from '@/hooks/useListData'
 
 /**
  * 提案一覧 (Proposals, /proposals) — B 型 queue / Manual 管理者
@@ -53,6 +54,7 @@ export function Proposals() {
     const base = PROPOSAL_BY_ID[e.id]
     return base ? [{ ...base, status: e.status }] : []
   })
+  const list = useListData(rows)
   return (
     <div className="flex flex-col">
       <header
@@ -65,7 +67,9 @@ export function Proposals() {
 
       <div className="p-4">
         <DataTable
-          rows={rows}
+          rows={list.rows}
+          status={list.status}
+          onRetry={list.onRetry}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/proposals/${r.id}`}

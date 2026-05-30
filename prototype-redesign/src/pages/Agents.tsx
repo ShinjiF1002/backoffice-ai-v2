@@ -7,6 +7,7 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
 import { useAgents } from '@/store/hooks'
 import { useView } from '@/context/view-context'
+import { useListData } from '@/hooks/useListData'
 
 /**
  * エージェント一覧 (Agents, /agents) — B 型 queue / AI 管理者
@@ -100,6 +101,7 @@ export function Agents() {
     if (!base) return []
     return [{ ...base, trust: e.trust, promotionRequested: e.promotionRequested, paused: e.paused }]
   })
+  const list = useListData(rows)
   return (
     <div className="flex flex-col">
       <header
@@ -112,7 +114,9 @@ export function Agents() {
 
       <div className="p-4">
         <DataTable
-          rows={rows}
+          rows={list.rows}
+          status={list.status}
+          onRetry={list.onRetry}
           columns={columns}
           rowKey={(r) => r.id}
           rowHref={(r) => `/agents/${r.id}`}

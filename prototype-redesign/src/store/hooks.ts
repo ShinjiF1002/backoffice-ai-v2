@@ -347,10 +347,20 @@ export function usePendingPromotions(): AgentEntity[] {
   return useMemo(() => resolveOrder(s.agentOrder, s.agents).filter((a) => a.promotionStatus === 'requested'), [s])
 }
 
-/** escalation 受信 = case/escalate された案件 (業務責任者が裁定 = case/sendback 再利用)。 */
+/**
+ * escalation 受信 = case/escalate された **未裁定** の案件 (業務責任者が裁定 = case/sendback 再利用)。
+ * 裁定済 (sent-back) / 完了 (reflected) は active queue から除外し queue closure を担保 (escalation 記録自体は
+ * 監査用に entity に残す = 履歴保持しつつ「裁定後も残り続ける」を防ぐ)。
+ */
 export function useEscalations(): CaseEntity[] {
   const s = useStoreState()
-  return useMemo(() => resolveOrder(s.caseOrder, s.cases).filter((c) => c.escalation !== undefined), [s])
+  return useMemo(
+    () =>
+      resolveOrder(s.caseOrder, s.cases).filter(
+        (c) => c.escalation !== undefined && c.status !== 'sent-back' && c.status !== 'reflected',
+      ),
+    [s],
+  )
 }
 
 /** 業務責任者 landing の 3 受け口集約 (件数 + drill)。 */

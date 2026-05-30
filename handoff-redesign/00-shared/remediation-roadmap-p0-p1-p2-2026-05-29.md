@@ -40,7 +40,14 @@
 > - **AgentDetail 承認者 mode**: ProposalDetail と同型 (`actor.role==='business-approver' ? owner : manual`)。owner + promotionStatus==='requested' で 設定承認 (approvePromotion) / 差戻し (sendbackPromotion、ReasonDialog) footer。**SoD**: isSelfPromotionApproval (申請者=現 actor) で承認 button disabled + 四眼原則文言 (reducer も hard-block)。manual footer に promotionSendbackReason 再表示 (理由を捨てない、再申請可)。
 > - **CaseDetail escalate 配線**: showToast のみ → `case/escalate` dispatch (宛先 actor-approver)。
 > - **派生 selector**: useForwardedProposals / usePendingPromotions / useEscalations / useBusinessApproverInbox (store-truth、S8 不変)。Sidebar に ─承認─ group (3 nav) + App 3 route + routes.test 14-route render gate。
-> - check:all green (**test 151** / build) + 本番 boot smoke (/、3 新 route HTTP 200)。**coverage 注記**: approvePromotion SoD no-op + cross-actor approve + sendbackPromotion + escalate 格納 は store.test (W2a) 検証済、3 受け口 selector + escalate flow は business-approver.test 検証済。AgentDetail 承認者 mode の **owner-mode UI screen test (SoD disabled の DOM 検証) は jsdom の store 事前 seed コストが高く W3 (axe 網羅) へ defer** — logic は store-tested + UI は render-gated。commit `remediation/w2-screens`。**残り W2c-2** (Observatory drill/横断台帳 P1-7 + before/after P1-8)。
+> - check:all green (**test 151** / build) + 本番 boot smoke (/、3 新 route HTTP 200)。**coverage 注記**: approvePromotion SoD no-op + cross-actor approve + sendbackPromotion + escalate 格納 は store.test (W2a) 検証済、3 受け口 selector + escalate flow は business-approver.test 検証済。AgentDetail 承認者 mode の **owner-mode UI screen test (SoD disabled の DOM 検証) は jsdom の store 事前 seed コストが高く W3 (axe 網羅) へ defer** — logic は store-tested + UI は render-gated。commit `260697f`。**残り W2c-2** (Observatory drill/横断台帳 P1-7 + before/after P1-8)。
+>
+> **W2c-1a cleanup 完了 (2026-05-30、外部 CR、blocking 是正)**: W2c-1 後に CR が検出した実挙動 bug を是正。
+> - **F1 (Blocker)**: master plan (`~/.claude/plans/ai-backoffice-ai-virtual-muffin.md`) の rebaseline notice 9→12 → **9→14 / IA scope=(a) 3 画面分離**明示。
+> - **F2 (Blocker) queue closure**: `useEscalations` が `escalation !== undefined` のみで裁定済も残存。filter に `status !== 'sent-back' && status !== 'reflected'` 追加 (escalation 記録は監査用に保持しつつ裁定後 queue から除外)。
+> - **F3 (Major) owner-mode 権限境界**: AgentDetail owner (業務責任者) が未申請時に「設定変更を申請」fallback footer を表示 (account-opening は全 KPI 達成で活性) = 業務責任者が申請可能になる role 越境。footer を `owner+requested → 設定承認/差戻し / owner → read-only status (申請 button なし) / manual → 申請` の 3-way に再構成。
+> - **F4 (test gap)**: F2/F3 を hook-only test が見逃した。business-approver.test に escalate→sendback→queue closure 検証 + AgentDetail owner-mode UI screen test (申請 button 非表示 / 設定承認 enabled、deferred を撤回し実装) を追加。これらは fix 前 fail。
+> - check:all green (**test 153** / build) + 本番 boot smoke。commit `remediation/w2-screens`。
 
 ---
 

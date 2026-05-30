@@ -257,6 +257,16 @@ export function AgentDetail() {
             </button>
           </div>
         </footer>
+      ) : mode === 'owner' ? (
+        /* owner だが昇格申請なし: 業務責任者は申請しない (申請 footer を出さない、F3)。read-only status のみ。 */
+        <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
+          <div className="flex items-center gap-1.5 text-xs">
+            <BotIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-fg-muted)]" aria-hidden="true" />
+            <span className="font-medium text-[var(--color-fg-muted)]">
+              {agentEntity?.promotionStatus === 'approved' ? '設定変更は承認済みです' : '承認待ちの設定変更はありません'}
+            </span>
+          </div>
+        </footer>
       ) : (
         <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
           <div className="flex items-center gap-1.5 text-xs">

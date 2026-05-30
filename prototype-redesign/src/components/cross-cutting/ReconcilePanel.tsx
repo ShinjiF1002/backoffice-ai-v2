@@ -1,4 +1,4 @@
-import { AlertTriangleIcon, CheckIcon, FileTextIcon } from 'lucide-react'
+import { AlertTriangleIcon, CheckIcon, FileTextIcon, ArrowRightIcon } from 'lucide-react'
 import type { FieldReview } from '@/data/types'
 import { reconcileStateLabel, reconcileStateTone, isResolved } from '@/lib/reconcile-display'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -79,6 +79,15 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
                   <div className="font-medium text-[var(--color-alert-soft-fg)]">{f.ocrRawValue ?? '未取得'}</div>
                 </div>
               </div>
+              {/* P1-8: 現行登録値 → 確定値 (変更系 field のみ)。右辺は B1 確定値 (humanValue) 優先。 */}
+              {f.previousValue && (
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+                  <span className="text-[var(--color-fg-muted)]">現在の登録値</span>
+                  <span className="text-[var(--color-fg-tertiary)] line-through">{f.previousValue}</span>
+                  <ArrowRightIcon className="h-3 w-3 flex-shrink-0 text-[var(--color-fg-tertiary)]" aria-hidden="true" />
+                  <span className="font-medium text-[var(--color-fg)]">{f.humanValue ?? f.aiValue}</span>
+                </div>
+              )}
               <p className="mt-1.5 text-[11px] text-[var(--color-fg-muted)]">
                 AI 入力と申請書類で値が違います。正しい方を確認してください。
               </p>
@@ -129,8 +138,16 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
                 className="flex flex-1 items-center justify-between gap-3 text-left text-sm"
               >
                 <span className="w-24 flex-shrink-0 text-[var(--color-fg-muted)]">{f.fieldLabel}</span>
-                {/* B1: 確認済行は訂正値 (humanValue) を優先表示、未上書きは AI 値据え置き。 */}
-                <span className={cn('flex-1 truncate text-[var(--color-fg)]', f.mono && 'font-mono')}>{f.humanValue ?? f.aiValue}</span>
+                {/* B1: 確認済行は訂正値 (humanValue) を優先表示、未上書きは AI 値据え置き。P1-8: previousValue 有る変更系 field は inline で現行登録値→確定値を併記。 */}
+                <span className="flex flex-1 items-center gap-1.5 truncate text-[var(--color-fg)]">
+                  {f.previousValue && (
+                    <>
+                      <span className="flex-shrink-0 text-[var(--color-fg-tertiary)] line-through">{f.previousValue}</span>
+                      <ArrowRightIcon className="h-3 w-3 flex-shrink-0 text-[var(--color-fg-tertiary)]" aria-hidden="true" />
+                    </>
+                  )}
+                  <span className={cn('truncate', f.mono && 'font-mono')}>{f.humanValue ?? f.aiValue}</span>
+                </span>
                 <StatusBadge tone={reconcileStateTone(f.reconcileState)} label={reconcileStateLabel(f.reconcileState)} />
               </button>
               {/* B1: 手入力で上書きした項目は「確認」で訂正値を read-only 再表示 (modal 再 open で訂正値が出る)。 */}

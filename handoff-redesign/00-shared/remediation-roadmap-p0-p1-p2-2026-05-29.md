@@ -47,7 +47,9 @@
 > - **F2 (Blocker) queue closure**: `useEscalations` が `escalation !== undefined` のみで裁定済も残存。filter に `status !== 'sent-back' && status !== 'reflected'` 追加 (escalation 記録は監査用に保持しつつ裁定後 queue から除外)。
 > - **F3 (Major) owner-mode 権限境界**: AgentDetail owner (業務責任者) が未申請時に「設定変更を申請」fallback footer を表示 (account-opening は全 KPI 達成で活性) = 業務責任者が申請可能になる role 越境。footer を `owner+requested → 設定承認/差戻し / owner → read-only status (申請 button なし) / manual → 申請` の 3-way に再構成。
 > - **F4 (test gap)**: F2/F3 を hook-only test が見逃した。business-approver.test に escalate→sendback→queue closure 検証 + AgentDetail owner-mode UI screen test (申請 button 非表示 / 設定承認 enabled、deferred を撤回し実装) を追加。これらは fix 前 fail。
-> - check:all green (**test 153** / build) + 本番 boot smoke。commit `remediation/w2-screens`。
+> - check:all green (**test 153** / build) + 本番 boot smoke。commit `d02fbdf`。
+>
+> **W2c-2 / P1-8 完了 (2026-05-30、before/after)**: `FieldReview.previousValue` 新設 (masterValue=突合参照と意味論分離)。`mock-case-detail` の change.from → previousValue (baseFields 変更系 field + canonical 0142 新住所 = 旧住所手書き、口座開設 = 新規登録ゆえ省略)。ReconcilePanel 要確認カード + 確認済行に「現在の登録値 → 確定値」(右辺 = humanValue ?? aiValue で B1 整合、ArrowRightIcon + fg-tertiary)。test: before-after.test (0142 新住所 previousValue / 0112 口座開設 持たない + render before/after)。check:all green (**test 156** / build)。**残り W2c-2 / P1-7** (Observatory drill + 横断台帳)。
 
 ---
 

@@ -1,5 +1,7 @@
 # 次セッション handoff prompt — backoffice-ai-v2 remediation (W0 + W1-A CORE 完了後)
 
+> **⚠ SUPERSEDED / 消化済 (2026-05-30)**: 本 prompt は当該セッションで消化完了。**option A (P1-5-remainder) を `07b4073` で実装・検証・commit 済** (detail 3 画面 not-found → `EmptyState(truly-empty, role=status)` 統一 + permission-empty dead branch 除去)。現 HEAD = `07b4073` (`cf8df94..HEAD` = 11 commit)。下記「現状」の `@b323553` / 全 9 commit は **本 prompt 作成時点 (W1-A-done) の historical snapshot** であり現状ではない。下記「次アクション」表は **A = 完了済**として読むこと (B/C/D のみ live)。**次の実行 = merge preflight** (本 prompt 廃止/historical 確定 → PR #14 [P0] merge → `remediation/p1` を main 再統合 → `check:all`)。実行 SSOT は roadmap §1.0/§1b。
+>
 > このファイルがそのまま次セッションへの prompt。先頭から読ませること。作成 2026-05-30。
 > **唯一の実行 SSOT は `remediation-roadmap-p0-p1-p2-2026-05-29.md`**。本 prompt は起動 context、矛盾時は roadmap が正。
 
@@ -53,7 +55,7 @@ gh pr view 14 --json state,mergeable            # PR #14 は time-varying、gate
 
 | 案 | 内容 | 前提 / 規模 |
 |---|---|---|
-| **A. P1-5-remainder** | detail 3 画面 not-found (`CaseDetail`/`ProposalDetail`/`AgentDetail` の bespoke `*NotFound`) → `EmptyState(truly-empty, role=status)` 統一 + `EmptyState` の permission-empty dead branch 除去 (caller 0)。state-coverage polish | 小・低 risk・前提なし。roadmap §1.0 P1-5 closure + §3.5 参照 |
+| **A. P1-5-remainder** ✅ **完了 (`07b4073`)** | detail 3 画面 not-found (`CaseDetail`/`ProposalDetail`/`AgentDetail` の bespoke `*NotFound`) → `EmptyState(truly-empty, role=status)` 統一 + `EmptyState` の permission-empty dead branch 除去 (caller 0)。state-coverage polish 【実装済 + check:all green + 3 route browser proof】 | 小・低 risk・前提なし。roadmap §1.0 P1-5 closure + §3.5 参照 |
 | **B. P1-W6 / W7** | 検索 `/search` + 通知 `/inbox` (P1-2) / 業務責任者面 `/oversight` (P1-3) / Observatory drill + 台帳 (P1-7)。9→12 画面 + store 拡張 (SCHEMA 4→5) | **大・master plan rebaseline 承認が前提 (§5)**、roadmap §6.4 で **6/12 demo 後送り**。着手前に rebaseline 承認 + JG (IA scope / polish tier) を確定 |
 | **C. merge 方針** | PR #14 (P0) + `remediation/p1` (W0+W1-A) の main merge / PR 化 | user 判断。time-varying な PR 状態を再確認してから |
 | **D. do-nothing** | 6/12 demo 準備を優先し remediation を一旦停止 | demo 中核は P0 で観測可能 (§6.4)。W1-A は品質底上げ済 |

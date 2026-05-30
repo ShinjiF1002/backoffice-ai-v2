@@ -27,3 +27,6 @@ dist-ssr
 audit-bundle/
 
 # NOTE: prototype/audit/ は ignore しない (audit prompt SSOT を含む、user 判断で track or rm)
+
+# P0-W3 browser-proof / review 生成物 (再生成可能、commit しない)
+output/

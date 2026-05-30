@@ -44,7 +44,7 @@ describe('store foundation (Phase 1)', () => {
       expect(s.cases['CASE-2026-0150'].status).toBe('pending')
     })
     it('差戻し: 任意 → sent-back / 担当割当', () => {
-      let s = storeReducer(seed(), { type: 'case/sendback', id: 'CASE-2026-0142' })
+      let s = storeReducer(seed(), { type: 'case/sendback', id: 'CASE-2026-0142', reason: 'ビル名不一致', category: 'edge_case' })
       expect(s.cases['CASE-2026-0142'].status).toBe('sent-back')
       s = storeReducer(s, { type: 'case/assign', id: 'CASE-2026-0150', assignee: '佐藤花子' })
       expect(s.cases['CASE-2026-0150'].assignee).toBe('佐藤花子')
@@ -60,15 +60,15 @@ describe('store foundation (Phase 1)', () => {
     })
     it('case/override: resolvedFieldIds 追加 + flags 減算 (冪等)', () => {
       // CASE-2026-0142 = flags1。override で flags0、再 override は無変更
-      let s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
+      let s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名', value: 'サンプルビルディング' })
       expect(s.cases['CASE-2026-0142'].resolvedFieldIds).toEqual(['ビル名'])
       expect(s.cases['CASE-2026-0142'].flags).toBe(0)
-      s = storeReducer(s, { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
+      s = storeReducer(s, { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名', value: 'サンプルビルディング' })
       expect(s.cases['CASE-2026-0142'].flags).toBe(0)
       expect(s.cases['CASE-2026-0142'].resolvedFieldIds).toHaveLength(1)
     })
     it('case/override で要確認解消 → 入力者承認が通る (D1 フロー)', () => {
-      let s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
+      let s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名', value: 'サンプルビルディング' })
       s = storeReducer(s, { type: 'case/approve', id: 'CASE-2026-0142', by: 'input' })
       expect(s.cases['CASE-2026-0142'].status).toBe('business-approval-waiting')
     })
@@ -80,14 +80,19 @@ describe('store foundation (Phase 1)', () => {
       expect(s.proposals['PROP-2026-031'].status).toBe('forwarded')
       s = storeReducer(s, { type: 'proposal/approve', id: 'PROP-2026-031' })
       expect(s.proposals['PROP-2026-031'].status).toBe('approved')
-      s = storeReducer(s, { type: 'proposal/reject', id: 'PROP-2026-028' })
+      s = storeReducer(s, { type: 'proposal/reject', id: 'PROP-2026-028', reason: '影響範囲が大きい' })
       expect(s.proposals['PROP-2026-028'].status).toBe('rejected')
     })
-    it('Agent: 昇格申請 / 緊急停止 toggle', () => {
+    it('Agent: 昇格申請 / 緊急停止 (emergencyStop) → 再開 (resume)', () => {
       let s = storeReducer(seed(), { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
       expect(s.agents['agent-corporate-address-change'].promotionRequested).toBe(true)
-      s = storeReducer(s, { type: 'agent/togglePause', id: 'agent-corporate-address-change' })
+      // kill-switch: 緊急停止で paused + 理由保持、再開で解除 (remediation flywheel、togglePause 分割)
+      s = storeReducer(s, { type: 'agent/emergencyStop', id: 'agent-corporate-address-change', reason: '誤入力が急増' })
       expect(s.agents['agent-corporate-address-change'].paused).toBe(true)
+      expect(s.agents['agent-corporate-address-change'].pausedReason).toBe('誤入力が急増')
+      s = storeReducer(s, { type: 'agent/resume', id: 'agent-corporate-address-change' })
+      expect(s.agents['agent-corporate-address-change'].paused).toBe(false)
+      expect(s.agents['agent-corporate-address-change'].pausedReason).toBeUndefined()
     })
   })
 
@@ -163,12 +168,6 @@ describe('store foundation (Phase 1)', () => {
       expect(fromPending.cases['CASE-2026-0150'].sendback).toBeUndefined()
     })
 
-    it('case/override: value 未指定なら overrides 据え置き (旧 dispatch 互換)', () => {
-      const s = storeReducer(seed(), { type: 'case/override', id: 'CASE-2026-0142', fieldLabel: 'ビル名' })
-      expect(s.cases['CASE-2026-0142'].overrides).toEqual({})
-      expect(s.cases['CASE-2026-0142'].resolvedFieldIds).toEqual(['ビル名'])
-    })
-
     it('session/switchActor: 未知 actorId は no-op (検証)', () => {
       const s = storeReducer(seed(), { type: 'session/switchActor', actorId: 'actor-nonexistent' })
       expect(s.currentActorId).toBe('actor-inputter')
@@ -178,11 +177,11 @@ describe('store foundation (Phase 1)', () => {
   describe('immutability / reset', () => {
     it('reducer は元 state を破壊しない', () => {
       const base = seed()
-      storeReducer(base, { type: 'case/sendback', id: 'CASE-2026-0142' })
+      storeReducer(base, { type: 'case/sendback', id: 'CASE-2026-0142', reason: 'x', category: 'edge_case' })
       expect(base.cases['CASE-2026-0142'].status).toBe('ready')
     })
     it('store/reset は seed に戻す', () => {
-      const mutated = storeReducer(seed(), { type: 'case/sendback', id: 'CASE-2026-0142' })
+      const mutated = storeReducer(seed(), { type: 'case/sendback', id: 'CASE-2026-0142', reason: 'x', category: 'edge_case' })
       const reset = storeReducer(mutated, { type: 'store/reset' })
       expect(reset.cases['CASE-2026-0142'].status).toBe('ready')
     })
@@ -206,10 +205,10 @@ describe('store foundation (Phase 1)', () => {
     it('schema version 不一致は fallback (旧 v1 localStorage → seed、R2)', () => {
       localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 1, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
-      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v3 と不一致 → seed fallback
+      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v4 と不一致 → seed fallback
     })
 
-    it('旧 v2 localStorage (overrides/currentActorId 欠落) は v3 不一致で安全に fallback (B1/B4 migration)', () => {
+    it('旧 v2 localStorage (overrides/currentActorId 欠落) は v4 不一致で安全に fallback (B1/B4 migration)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
@@ -231,17 +230,17 @@ describe('store foundation (Phase 1)', () => {
 
     it('同一 version でも形が壊れた state は fallback (shape guard: dict 欠落)', () => {
       // v は一致するが cases/proposals/agents 等を欠く → selector 白画面化を防ぐため seed に戻す
-      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 3, state: { caseOrder: [] } }))
+      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 4, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
       expect(restored.caseOrder).toHaveLength(CASE_LIST.length)
       expect(restored.cases['CASE-2026-0142']).toBeDefined()
     })
 
-    it('v3 だが case に resolvedFieldIds 欠落 → fallback (shape guard 深掘り、R2)', () => {
+    it('現 version だが case に resolvedFieldIds 欠落 → fallback (shape guard 深掘り、R2)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
-          v: 3,
+          v: 4,
           state: {
             cases: { 'CASE-X': { id: 'CASE-X', status: 'ready', flags: 0, overrides: {} } }, // resolvedFieldIds 欠落
             caseOrder: ['CASE-X'],
@@ -258,11 +257,11 @@ describe('store foundation (Phase 1)', () => {
       expect(restored.cases['CASE-X']).toBeUndefined()
     })
 
-    it('v3 だが currentActorId 欠落 → fallback (B4 shape guard)', () => {
+    it('現 version だが currentActorId 欠落 → fallback (B4 shape guard)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
-          v: 3,
+          v: 4,
           state: { cases: {}, caseOrder: [], proposals: {}, proposalOrder: [], agents: {}, agentOrder: [] }, // currentActorId 欠落
         }),
       )

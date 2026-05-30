@@ -10,7 +10,8 @@ import { StoreStateContext, StoreDispatchContext } from './context'
 import type { StoreState, StoreAction, CaseEntity, ProposalEntity, AgentEntity } from './types'
 import { HUB_PROCESSES, HUB_HEADLINE, HUB_PRIMARY_ACTION } from '@/data/mock-hub'
 import type { HubProcess, HubHeadlineKpi, HubPrimaryAction } from '@/data/mock-hub'
-import type { CaseStatus } from '@/data/types'
+import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
+import type { CaseStatus, ProposalStatus } from '@/data/types'
 import { actorById } from './actors'
 import type { DemoActor } from './actors'
 
@@ -85,6 +86,87 @@ export function useAgent(id: string | undefined): AgentEntity | undefined {
 export function useCurrentActor(): DemoActor | undefined {
   const s = useStoreState()
   return actorById(s.currentActorId)
+}
+
+/** 案件承認の可否 + disabled 理由 (footer / title 用)。allowed=true なら reason は undefined。 */
+export interface ApproveGate {
+  allowed: boolean
+  reason?: string
+}
+
+/**
+ * 案件の承認可否を status precondition + SoD (四眼原則) で 1 selector に集約 (remediation B4)。
+ * reducer の approveCase precondition と一致させ、false success と自己承認を UI 側でも封じる。
+ * - input: status=ready かつ要確認 (flags) 0。
+ * - checker: status=business-approval-waiting かつ「現在の actor が入力者承認していない」(currentActorId 照合)。
+ */
+export function useCanApprove(id: string | undefined, by: 'input' | 'checker'): ApproveGate {
+  const s = useStoreState()
+  const entity = id ? s.cases[id] : undefined
+  if (!entity) return { allowed: false, reason: '参照専用の案件です（この画面では操作できません）' }
+  if (by === 'input') {
+    if (entity.status !== 'ready') return { allowed: false, reason: 'この案件は入力者確認の段階ではありません' }
+    if (entity.flags > 0) return { allowed: false, reason: `要確認 ${entity.flags} 項目を解消してください` }
+    return { allowed: true }
+  }
+  if (entity.status !== 'business-approval-waiting') return { allowed: false, reason: 'この案件は承認者の最終承認の段階ではありません' }
+  if (entity.inputApprovedBy !== undefined && entity.inputApprovedBy === s.currentActorId) {
+    return { allowed: false, reason: '入力者として承認済みのため最終承認できません — 別の担当者（承認者）に切替えてください（四眼原則）' }
+  }
+  return { allowed: true }
+}
+
+// ── Flywheel 観測化 (remediation P0-W3、Gate 5ii) ─────────────────────────
+// 承認段階に入った提案 (forwarded / approved) を「差戻し → 改善 → 承認」の lineage に派生。
+// 新 static fixture は増やさず store (live status) + PROPOSAL_DETAILS (起点 case / 改定内容) から都度算出。
+export interface FlywheelLineage {
+  proposalId: string
+  /** 改定内容 (changeTitle)。 */
+  title: string
+  workflow: string
+  /** 改定対象 agent (agent→提案 link、B2)。 */
+  agentId: string
+  /** 起点となった差戻し case id 群 (Flywheel の入口)。 */
+  sourceCaseIds: string[]
+  /** live status (store-truth)。forwarded=手順承認待ち / approved=設定承認済。 */
+  status: ProposalStatus
+  /** 設定承認まで到達 (approved)。承認操作で true になり lineage に「承認済」が出現する。 */
+  adopted: boolean
+}
+
+export function useFlywheelLineage(): FlywheelLineage[] {
+  const s = useStoreState()
+  return useMemo(
+    () =>
+      s.proposalOrder
+        .map((id) => s.proposals[id])
+        .filter((p) => p.status === 'forwarded' || p.status === 'approved')
+        .map((p): FlywheelLineage => {
+          const d = PROPOSAL_DETAILS[p.id]
+          return {
+            proposalId: p.id,
+            title: d?.changeTitle ?? p.workflowName,
+            workflow: p.workflowName,
+            agentId: d?.agentId ?? '',
+            sourceCaseIds: d?.sourceCases.map((sc) => sc.id) ?? [],
+            status: p.status,
+            adopted: p.status === 'approved',
+          }
+        }),
+    [s],
+  )
+}
+
+/** 指定 agent に採用された (approved) 提案 id 群 (flywheel→agent link、AgentDetail で「反映された改善」表示)。 */
+export function useAgentAdoptedProposals(agentId: string | undefined): string[] {
+  const s = useStoreState()
+  return useMemo(() => {
+    if (!agentId) return []
+    return s.proposalOrder
+      .map((id) => s.proposals[id])
+      .filter((p) => p.status === 'approved' && PROPOSAL_DETAILS[p.id]?.agentId === agentId)
+      .map((p) => p.id)
+  }, [s, agentId])
 }
 
 // ── Hub 派生 model (Phase 4b、R1 / remediation B3) ─────────────────────────

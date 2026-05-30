@@ -8,8 +8,10 @@ import type { StoreState } from './types'
 import { actorById } from './actors'
 
 const STORAGE_KEY = 'bo-ai-v2:store'
-// 2→3: remediation P0-W1 で CaseEntity.overrides + StoreState.currentActorId 追加 (B1/B4)。旧 v2 は version 不一致で seed fallback。
-const SCHEMA_VERSION = 3
+// 2→3: remediation P0-W1 で CaseEntity.overrides + StoreState.currentActorId 追加 (B1/B4)。
+// 3→4: remediation P0-W3 で AgentEntity.pausedReason 追加 (flywheel kill-switch、togglePause→emergencyStop/resume)。
+// 旧 version は不一致で seed fallback (白画面化を防ぐ)。
+const SCHEMA_VERSION = 4
 
 interface Persisted {
   v: number

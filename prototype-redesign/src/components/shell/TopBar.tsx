@@ -1,4 +1,5 @@
 import { PrototypeModeLabel } from '@/components/shared/PrototypeModeLabel'
+import { PersonaSwitcher } from '@/components/shared/PersonaSwitcher'
 import { ProcessSelector } from './ProcessSelector'
 import { SearchIcon, BellIcon } from 'lucide-react'
 
@@ -6,8 +7,9 @@ import { SearchIcon, BellIcon } from 'lucide-react'
  * TopBar — sticky header (Process-First v2)
  * SSOT: handoff-redesign/00-shared/ia-overview-v2.md §2 + canonical-design-spec.md §2.3
  *
- * Layout: ProcessSelector + search silhouette (left) / notification + PrototypeModeLabel (right)。
+ * Layout: ProcessSelector + search silhouette (left) / notification + PersonaSwitcher + PrototypeModeLabel (right)。
  * ProcessSelector = Process-First IA の中核 (業務切替)。
+ * PersonaSwitcher = remediation B4 の demo 操作者切替 (新 chrome、SoD を単一端末で演じ分ける)。
  * search / notification は scope-out の static silhouette (aria-hidden、focus 不可、未実装説明は PrototypeModeLabel 経由)。
  */
 export function TopBar() {
@@ -27,7 +29,7 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* Right: notification static icon + prototype label */}
+      {/* Right: notification static icon + persona switcher (demo) + prototype label */}
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <span
           aria-hidden="true"
@@ -36,6 +38,7 @@ export function TopBar() {
           <BellIcon className="h-4 w-4" />
           <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-alert)]" />
         </span>
+        <PersonaSwitcher />
         <PrototypeModeLabel />
       </div>
     </header>

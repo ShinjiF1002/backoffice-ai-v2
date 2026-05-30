@@ -16,11 +16,12 @@ import { Modal } from '@/components/shared/Modal'
  */
 export type ActionKind = 'accept' | 'override' | 'sendback' | 'escalate'
 
-const FIELD_ACTIONS: { kind: ActionKind; label: string; needsReason: boolean; outcome: string }[] = [
-  { kind: 'accept', label: '申請書類の値で確定', needsReason: false, outcome: 'この案件内で確定し、承認へ進みます。' },
-  { kind: 'override', label: '手入力で上書き', needsReason: true, outcome: 'この案件内で確定し、承認へ進みます。' },
-  { kind: 'sendback', label: 'この項目で差戻し', needsReason: true, outcome: '案件全体を AI・申請者へ戻し、再処理後に確認待ちへ戻ります。' },
-  { kind: 'escalate', label: 'エスカレーション', needsReason: true, outcome: '業務責任者の判断先へ送ります。' },
+// needsValue (B1): 手入力で上書き は訂正値の入力を必須にする。accept は申請書類値を確定値に充てる (入力欄なし)。
+const FIELD_ACTIONS: { kind: ActionKind; label: string; needsReason: boolean; needsValue: boolean; outcome: string }[] = [
+  { kind: 'accept', label: '申請書類の値で確定', needsReason: false, needsValue: false, outcome: 'この案件内で確定し、承認へ進みます。' },
+  { kind: 'override', label: '手入力で上書き', needsReason: false, needsValue: true, outcome: 'この案件内で確定し、承認へ進みます。' },
+  { kind: 'sendback', label: 'この項目で差戻し', needsReason: true, needsValue: false, outcome: '案件全体を AI・申請者へ戻し、再処理後に確認待ちへ戻ります。' },
+  { kind: 'escalate', label: 'エスカレーション', needsReason: true, needsValue: false, outcome: '業務責任者の判断先へ送ります。' },
 ]
 
 const SENDBACK_CATEGORIES = ['申請書類不備', '読み取り不能', 'AI 入力誤り', '業務ルール抵触', 'その他']
@@ -31,15 +32,17 @@ interface FieldActionModalProps {
   caseLevel?: boolean
   caseId?: string
   onClose: () => void
-  /** detail: 理由/コメント payload (P2B-3 の監査/履歴表示に備え型を確保。実 data は scope-out) */
-  onSubmit: (target: string, kind: ActionKind, detail: { reason?: string; category?: string }) => void
+  /** detail: 確定値 (value、B1) + 理由/コメント payload (差戻し理由 store 保持に使用) */
+  onSubmit: (target: string, kind: ActionKind, detail: { reason?: string; category?: string; value?: string }) => void
 }
 
 export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }: FieldActionModalProps) {
   const [kind, setKind] = useState<ActionKind>(caseLevel ? 'sendback' : 'accept')
   const [reason, setReason] = useState('')
+  const [value, setValue] = useState('') // B1: 手入力で上書き の訂正値
   const [category, setCategory] = useState(SENDBACK_CATEGORIES[0])
   const [showError, setShowError] = useState(false)
+  const [showValueError, setShowValueError] = useState(false)
   const reasonRef = useRef<HTMLTextAreaElement>(null)
 
   const open = caseLevel || !!field
@@ -52,25 +55,44 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
     if (open) {
       setKind(caseLevel ? 'sendback' : 'accept')
       setReason('')
+      setValue('')
       setCategory(SENDBACK_CATEGORIES[0])
       setShowError(false)
+      setShowValueError(false)
     }
   }
 
+  // B1 再 open: 既に確定済み (manually_confirmed) の項目を開いた時は read-only の確認 view にする
+  // (確定済みを silent 再上書きさせない。値の変更は案件差戻しで)。確認済行から再 open すると訂正値が出る。
+  const isReview = !caseLevel && field?.reconcileState === 'manually_confirmed'
   const fieldAction = FIELD_ACTIONS.find((a) => a.kind === kind)!
-  const needsReason = caseLevel ? true : fieldAction.needsReason
+  const needsReason = !isReview && (caseLevel ? true : fieldAction.needsReason)
+  const needsValue = !isReview && !caseLevel && fieldAction.needsValue
   const outcome = caseLevel
     ? '案件全体を AI・申請者へ戻し、再処理後に確認待ちへ戻ります。'
     : fieldAction.outcome
 
   const handleSubmit = () => {
+    if (needsValue && !value.trim()) {
+      setShowValueError(true)
+      return
+    }
     if (needsReason && !reason.trim()) {
       setShowError(true)
       return
     }
-    onSubmit(caseLevel ? (caseId ?? '案件') : field!.fieldLabel, caseLevel ? 'sendback' : kind, {
+    const submitKind = caseLevel ? 'sendback' : kind
+    // 確定値 (B1): override は手入力の訂正値、accept は申請書類値 (ocrRawValue ?? aiValue) を確定値に充てる。
+    const submitValue =
+      submitKind === 'override'
+        ? value.trim()
+        : submitKind === 'accept'
+          ? field?.ocrRawValue ?? field?.aiValue
+          : undefined
+    onSubmit(caseLevel ? (caseId ?? '案件') : field!.fieldLabel, submitKind, {
       reason: reason.trim() || undefined,
       category: caseLevel || kind === 'sendback' ? category : undefined,
+      value: submitValue,
     })
     onClose()
   }
@@ -79,62 +101,114 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
     <Modal
       open={open}
       onClose={onClose}
-      title={caseLevel ? '案件の差戻し' : '項目の対応'}
+      title={caseLevel ? '案件の差戻し' : isReview ? '項目の確認' : '項目の対応'}
       size="md"
       initialFocusRef={reasonRef as RefObject<HTMLElement | null>}
       footer={
-        <>
+        isReview ? (
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
-          >
-            キャンセル
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
             className="rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
           >
-            {caseLevel ? '差戻しを送信' : '確定'}
+            閉じる
           </button>
-        </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+            >
+              {caseLevel ? '差戻しを送信' : '確定'}
+            </button>
+          </>
+        )
       }
     >
       <div className="flex flex-col gap-4">
-        {/* field-level: 対象 field 文脈 + 対応の選択 */}
+        {/* field-level: 対象 field 文脈 (review でも表示 = 確定済の訂正値を再確認できる) */}
         {!caseLevel && field && (
-          <>
-            <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] p-3 text-sm">
-              <div className="font-medium text-[var(--color-fg)]">{field.fieldLabel}</div>
-              <div className="mt-1 grid grid-cols-2 gap-2 text-xs">
-                <div><span className="text-[var(--color-fg-muted)]">AI 入力</span><div className="text-[var(--color-fg)]">{field.aiValue}</div></div>
-                <div><span className="text-[var(--color-fg-muted)]">申請書類</span><div className="text-[var(--color-fg)]">{field.ocrRawValue ?? '—'}</div></div>
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] p-3 text-sm">
+            <div className="font-medium text-[var(--color-fg)]">{field.fieldLabel}</div>
+            <div className="mt-1 grid grid-cols-2 gap-2 text-xs">
+              {/* B1: 既に上書き済 (humanValue) ならその訂正値を、未上書きなら AI 入力値を表示 (modal 再 open で訂正値が出る)。 */}
+              <div><span className="text-[var(--color-fg-muted)]">{field.humanValue !== undefined ? '現在値' : 'AI 入力'}</span><div className="text-[var(--color-fg)]">{field.humanValue ?? field.aiValue}</div></div>
+              <div><span className="text-[var(--color-fg-muted)]">申請書類</span><div className="text-[var(--color-fg)]">{field.ocrRawValue ?? '—'}</div></div>
+            </div>
+            {field.sourceLocator && (
+              <div className="mt-2 font-mono text-[10px] text-[var(--color-fg-subtle)]">
+                {field.sourceLocator.doc} · {field.sourceLocator.page} · {field.sourceLocator.region}
               </div>
-              {field.sourceLocator && (
-                <div className="mt-2 font-mono text-[10px] text-[var(--color-fg-subtle)]">
-                  {field.sourceLocator.doc} · {field.sourceLocator.page} · {field.sourceLocator.region}
-                </div>
+            )}
+          </div>
+        )}
+
+        {/* 確定済み項目の再 open は read-only 確認 (silent 再上書きを防ぐ。変更は案件差戻しで)。 */}
+        {isReview && (
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
+            この項目は確定済みです。値を変更する場合は、フッターの「差戻し」で案件を差戻してください。
+          </div>
+        )}
+
+        {/* 対応の選択 (確定/上書き/差戻し/エスカレーション) — 確定済の確認 view では非表示 */}
+        {!isReview && !caseLevel && field && (
+          <div className="grid grid-cols-2 gap-2">
+            {FIELD_ACTIONS.map((a) => (
+              <button
+                key={a.kind}
+                type="button"
+                onClick={() => setKind(a.kind)}
+                className={cn(
+                  'rounded-[var(--radius-control)] border px-3 py-2 text-left text-sm',
+                  kind === a.kind
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
+                    : 'border-[var(--color-border)] text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]'
+                )}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* B1: 手入力で上書き の訂正値 (必須)。確認済行・申請書類ビューアにこの値が反映される。 */}
+        {needsValue && (
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <label htmlFor="override-value" className="text-xs font-medium text-[var(--color-fg)]">訂正後の値 (必須)</label>
+              {showValueError && (
+                <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+                  <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
+                  入力してください
+                </span>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {FIELD_ACTIONS.map((a) => (
-                <button
-                  key={a.kind}
-                  type="button"
-                  onClick={() => setKind(a.kind)}
-                  className={cn(
-                    'rounded-[var(--radius-control)] border px-3 py-2 text-left text-sm',
-                    kind === a.kind
-                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
-                      : 'border-[var(--color-border)] text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]'
-                  )}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </>
+            <input
+              id="override-value"
+              type="text"
+              value={value}
+              onChange={(e) => {
+                setValue(e.target.value)
+                if (showValueError && e.target.value.trim()) setShowValueError(false)
+              }}
+              aria-invalid={showValueError}
+              className={cn(
+                'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
+                showValueError
+                  ? 'border-[var(--color-error)] bg-[var(--color-error-soft)]'
+                  : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] focus:border-[var(--color-primary)]'
+              )}
+              placeholder="正しい値を入力してください（例: サンプルビルディング）"
+            />
+          </div>
         )}
 
         {/* case-level / sendback: 理由カテゴリ */}
@@ -187,9 +261,11 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
           </div>
         )}
 
-        <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
-          {outcome}
-        </div>
+        {!isReview && (
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
+            {outcome}
+          </div>
+        )}
       </div>
     </Modal>
   )

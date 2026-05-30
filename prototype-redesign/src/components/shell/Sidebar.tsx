@@ -7,6 +7,8 @@ import {
   BotIcon,
   ActivityIcon,
 } from 'lucide-react'
+import { useCurrentActor } from '@/store/hooks'
+import { roleLabel } from '@/store/actors'
 import { cn } from '@/lib/cn'
 
 /**
@@ -61,6 +63,7 @@ function isItemActive(item: NavItem, pathname: string): boolean {
 
 export function Sidebar() {
   const location = useLocation()
+  const actor = useCurrentActor()
   return (
     <>
       <aside className="hidden h-full w-56 flex-col border-r border-[var(--color-border)] bg-[var(--color-panel)] md:flex">
@@ -112,15 +115,15 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* User menu */}
+        {/* 現在の操作者 (remediation B4: hardcode 廃止、persona switcher と同期した store-truth)。切替は TopBar の操作者 switcher。 */}
         <div className="border-t border-[var(--color-border)] p-2">
           <div className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-[var(--color-fg)]">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-panel-inset)] font-mono text-xs font-medium text-[var(--color-fg)]">
-              山田
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-panel-inset)] font-mono text-xs font-medium text-[var(--color-fg)]">
+              {actor ? actor.name.slice(0, 2) : '—'}
             </div>
-            <div className="flex flex-1 flex-col items-start">
-              <span className="text-xs font-medium text-[var(--color-fg)]">山田 太郎</span>
-              <span className="text-[10px] text-[var(--color-fg-subtle)]">入力者</span>
+            <div className="flex min-w-0 flex-1 flex-col items-start">
+              <span className="truncate text-xs font-medium text-[var(--color-fg)]">{actor?.name ?? '未選択'}</span>
+              <span className="text-[10px] text-[var(--color-fg-subtle)]">{actor ? roleLabel(actor.role) : ''}</span>
             </div>
           </div>
         </div>

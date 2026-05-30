@@ -53,21 +53,23 @@ export function storeReducer(state: StoreState, action: StoreAction): StoreState
       return approveCase(state, action.id, action.by)
     case 'case/override': {
       // field 確定/上書き: resolvedFieldIds に追加 (冪等) + flags 減算 (要確認解消) + 訂正値を overrides に格納 (B1)。
+      // value は required (FieldActionModal が確定/上書きの両方で値を供給、空は modal が弾く)。
       const cur = state.cases[action.id]
       if (!cur || cur.resolvedFieldIds.includes(action.fieldLabel)) return state
       return patchCase(state, action.id, {
         resolvedFieldIds: [...cur.resolvedFieldIds, action.fieldLabel],
-        overrides: action.value !== undefined ? { ...cur.overrides, [action.fieldLabel]: action.value } : cur.overrides,
+        overrides: { ...cur.overrides, [action.fieldLabel]: action.value },
         flags: Math.max(0, cur.flags - 1),
       })
     }
     case 'case/sendback': {
       // 差戻し precondition (remediation): ready / business-approval-waiting からのみ。終端 (reflected) / pending / sent-back は逆行させない。
+      // reason/category は required (差戻し理由必須 modal が保証)。
       const cur = state.cases[action.id]
       if (!cur || (cur.status !== 'ready' && cur.status !== 'business-approval-waiting')) return state
       return patchCase(state, action.id, {
         status: 'sent-back',
-        sendback: action.reason !== undefined ? { reason: action.reason, category: action.category ?? '' } : cur.sendback,
+        sendback: { reason: action.reason, category: action.category },
       })
     }
     case 'case/assign':
@@ -83,21 +85,21 @@ export function storeReducer(state: StoreState, action: StoreAction): StoreState
         ? patchProposal(state, action.id, { status: 'approved' })
         : state
     case 'proposal/reject': {
-      // 却下 precondition (remediation): pending-triage / forwarded のみ。理由を decision に保持 (理由を捨てない)。
+      // 却下 precondition (remediation): pending-triage / forwarded のみ。理由を decision に保持 (理由を捨てない、reason required)。
       const cur = state.proposals[action.id]
       if (!cur || (cur.status !== 'pending-triage' && cur.status !== 'forwarded')) return state
       return patchProposal(state, action.id, {
         status: 'rejected',
-        decision: action.reason !== undefined ? { kind: 'reject', reason: action.reason, category: action.category } : cur.decision,
+        decision: { kind: 'reject', reason: action.reason, category: action.category },
       })
     }
     case 'proposal/sendback': {
-      // 業務責任者の提案差戻し (remediation): forwarded → pending-triage (triage キューへ戻す) + 理由保持。
+      // 業務責任者の提案差戻し (remediation): forwarded → pending-triage (triage キューへ戻す) + 理由保持 (reason required)。
       const cur = state.proposals[action.id]
       if (!cur || cur.status !== 'forwarded') return state
       return patchProposal(state, action.id, {
         status: 'pending-triage',
-        decision: action.reason !== undefined ? { kind: 'sendback', reason: action.reason, category: action.category } : cur.decision,
+        decision: { kind: 'sendback', reason: action.reason, category: action.category },
       })
     }
     case 'session/switchActor':
@@ -105,9 +107,15 @@ export function storeReducer(state: StoreState, action: StoreAction): StoreState
       return actorById(action.actorId) ? { ...state, currentActorId: action.actorId } : state
     case 'agent/requestPromotion':
       return patchAgent(state, action.id, { promotionRequested: true })
-    case 'agent/togglePause': {
+    case 'agent/emergencyStop': {
+      // kill-switch: 全件確認へ降格 (paused) + 理由保持 (任意)。flywheel 観測化 (remediation)。
       const cur = state.agents[action.id]
-      return cur ? patchAgent(state, action.id, { paused: !cur.paused }) : state
+      return cur ? patchAgent(state, action.id, { paused: true, pausedReason: action.reason }) : state
+    }
+    case 'agent/resume': {
+      // 緊急停止からの復帰: paused 解除 + 理由クリア。
+      const cur = state.agents[action.id]
+      return cur ? patchAgent(state, action.id, { paused: false, pausedReason: undefined }) : state
     }
     case 'store/reset':
       return seed()

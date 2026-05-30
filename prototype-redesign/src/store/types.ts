@@ -48,8 +48,10 @@ export interface AgentEntity {
   trust: TrustLevel
   /** 設定変更 (昇格) 申請済みか */
   promotionRequested: boolean
-  /** 緊急停止 (kill-switch) で全件確認へ降格された状態 (Phase 7 で UI 接続) */
+  /** 緊急停止 (kill-switch) で全件確認へ降格された状態 (remediation flywheel、AgentDetail/Agents で可視化)。 */
   paused: boolean
+  /** 緊急停止の理由 (kill-switch 操作時に保持、resume で解除)。理由を捨てない。 */
+  pausedReason?: string
 }
 
 export interface StoreState {
@@ -69,24 +71,28 @@ export interface StoreState {
  *   reducer が `state.currentActorId` を参照して強制する (同一 actor の入力者→承認者承認を block、remediation B4)。
  * 要確認 (flags > 0) の案件は入力者承認で前進しない (reducer 不変条件)。
  * case/override (remediation B1): field 確定/上書きで resolvedFieldIds に追加 + flags 減算 + 訂正値 (value) を overrides に格納。
- *   value は optional (UI 配線=P0-W3 完了までは旧 dispatch 互換、配線後に required 化)。
- * case/sendback / proposal/reject / proposal/sendback (remediation sendback-guard): reason/category は optional
- *   (理由を捨てず store に保持。UI 配線後に required 化)。case/sendback は precondition (ready / business-approval-waiting のみ)。
- *   `agent/togglePause` の命名は暫定。kill-switch (trust 降格) の正確な意味論は flywheel 観測化 (P0-W3) で確定。
- * TODO(P0-W3): 全 dispatch 配線 (FieldActionModal value 入力 / ReasonDialog reason) 完了後、value/reason の `?` を外して
- *   required 化し本注記を削除する。`grep -n "value?: string\|reason?: string" types.ts` が 0 になることを W3 gate に含める。
+ *   value は「人が確定した値」を表す単一概念で、「申請書類の値で確定」(value=申請書類値) と「手入力で上書き」(value=手入力値) の
+ *   両方を 1 action で表現する (accept も confirmed 値の persist/表示が要るため、両者の reducer 挙動は同一)。
+ *   Gate 1 既定の case/confirm + case/override 2 action 分離は label のみの差で挙動同一のため deferred (W1 単一 action を踏襲)。
+ *   value は P0-W3 UI 配線 (FieldActionModal 訂正値入力欄) 完了で required 化済 (空で確定不可を modal が保証)。
+ * case/sendback / proposal/reject / proposal/sendback (remediation sendback-guard): reason は P0-W3 UI 配線後に
+ *   required 化済 (理由必須 modal が保証、理由を捨てず store に保持)。case/sendback は precondition (ready / business-approval-waiting のみ)。
+ *   category は case/sendback は必須、proposal は任意 (ReasonDialog が category を持たないため)。
+ * agent/emergencyStop / agent/resume (remediation flywheel、旧 togglePause を分割): kill-switch で全件確認へ降格 / 復帰。
+ *   emergencyStop は停止理由を必須で pausedReason に保持 (AI 停止の根拠を捨てない、理由必須 modal が保証)。
  */
 export type StoreAction =
   | { type: 'case/approve'; id: string; by: 'input' | 'checker' }
-  | { type: 'case/override'; id: string; fieldLabel: string; value?: string }
-  | { type: 'case/sendback'; id: string; reason?: string; category?: string }
+  | { type: 'case/override'; id: string; fieldLabel: string; value: string }
+  | { type: 'case/sendback'; id: string; reason: string; category: string }
   | { type: 'case/assign'; id: string; assignee: string }
   | { type: 'case/bulkApprove'; ids: string[]; by: 'input' | 'checker' }
   | { type: 'proposal/forward'; id: string }
   | { type: 'proposal/approve'; id: string }
-  | { type: 'proposal/reject'; id: string; reason?: string; category?: string }
-  | { type: 'proposal/sendback'; id: string; reason?: string; category?: string }
+  | { type: 'proposal/reject'; id: string; reason: string; category?: string }
+  | { type: 'proposal/sendback'; id: string; reason: string; category?: string }
   | { type: 'agent/requestPromotion'; id: string }
-  | { type: 'agent/togglePause'; id: string }
+  | { type: 'agent/emergencyStop'; id: string; reason: string }
+  | { type: 'agent/resume'; id: string }
   | { type: 'session/switchActor'; actorId: string }
   | { type: 'store/reset' }

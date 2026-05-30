@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, XIcon, CornerUpLeftIcon, ArrowRightIcon } from 'lucide-react'
 import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
 import type { ProposalStatus } from '@/data/types'
-import { useStoreDispatch } from '@/store/hooks'
+import { useStoreDispatch, useProposal, useCurrentActor } from '@/store/hooks'
 import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
@@ -18,13 +18,13 @@ import { cn } from '@/lib/cn'
  * A 手順全体 before/after (diff だけでなく全 step) / B 根拠 差戻し case 原文 / C mode で決定 1 セット。
  * collapse は canonical token の inline 実装 (継承 Disclosure は off-token のため P2B-4 tokenize 待ち)。
  */
-const STEPPER = ['生成', 'Manual 確認', '上長承認', '反映']
+const STEPPER = ['生成', '手順確認', '上長承認', '反映']
 
 /** ProposalStatus → 4-step stepper の現在 index。 */
 function proposalStepperCurrent(status: ProposalStatus): number {
   switch (status) {
     case 'pending-triage':
-      return 1 // Manual 確認
+      return 1 // 手順確認
     case 'forwarded':
       return 2 // 上長承認
     case 'approved':
@@ -49,8 +49,12 @@ function ProposalNotFound() {
 export function ProposalDetail() {
   const { id } = useParams()
   const p = id ? PROPOSAL_DETAILS[id] : undefined
+  const entity = useProposal(id)
   const dispatch = useStoreDispatch()
-  const [mode, setMode] = useState<'manual' | 'owner'>('manual')
+  // 操作ビュー (手順管理者/業務責任者) は操作者 persona の role 由来 (remediation B4)。業務責任者は owner、それ以外は manual。
+  // 切替は TopBar の操作者 switcher (自己切替 block)。
+  const actor = useCurrentActor()
+  const mode: 'manual' | 'owner' = actor?.role === 'business-approver' ? 'owner' : 'manual'
   const [dialog, setDialog] = useState<'reject' | 'sendback' | null>(null)
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>(() =>
     p && p.sourceCases.length ? { [p.sourceCases[0].id]: true } : {},
@@ -61,7 +65,6 @@ export function ProposalDetail() {
   const [prevId, setPrevId] = useState(id)
   if (id !== prevId) {
     setPrevId(id)
-    setMode('manual')
     setDialog(null)
     setOpenEvidence(p && p.sourceCases.length ? { [p.sourceCases[0].id]: true } : {})
     setHintOpen(false)
@@ -69,7 +72,13 @@ export function ProposalDetail() {
   }
 
   if (!p) return <ProposalNotFound />
-  const stepperCurrent = proposalStepperCurrent(p.status)
+  // live status (store-truth)。badge/stepper/footer の可否は entity 由来 (操作後 reactive)。decision は却下/差戻し理由の再表示用。
+  const liveStatus: ProposalStatus = entity?.status ?? p.status
+  const decision = entity?.decision
+  const stepperCurrent = proposalStepperCurrent(liveStatus)
+  // 操作可否 (precondition と一致): 手順管理者は pending-triage で送付/却下、業務責任者は forwarded で承認/差戻し。
+  const canManualAct = mode === 'manual' && liveStatus === 'pending-triage'
+  const canOwnerAct = mode === 'owner' && liveStatus === 'forwarded'
 
   const showToast = (m: string) => {
     setToast(m)
@@ -96,24 +105,16 @@ export function ProposalDetail() {
               <span className="flex-shrink-0 font-mono text-base">{p.id}</span>
               <span className="truncate">{p.changeTitle}</span>
             </h1>
-            <StatusBadge tone={proposalStatusToTone(p.status)} label={proposalStatusLabel(p.status)} />
+            <StatusBadge tone={proposalStatusToTone(liveStatus)} label={proposalStatusLabel(liveStatus)} />
           </div>
-          {/* mode 切替 */}
-          <div className="flex flex-shrink-0 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] p-0.5">
-            {(['manual', 'owner'] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                className={cn(
-                  'rounded-[4px] px-3 py-1 text-xs font-medium transition-colors',
-                  mode === m ? 'bg-[var(--color-fg)] text-white' : 'text-[var(--color-fg-muted)]'
-                )}
-              >
-                {m === 'manual' ? 'Manual 管理者' : '業務責任者'}
-              </button>
-            ))}
-          </div>
+          {/* 操作ビュー (read-only): 操作者 persona の role 由来。切替は TopBar の操作者 switcher (自己切替 block)。 */}
+          <span
+            title="操作ビューは操作者 (右上) の役割で切替わります"
+            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-muted)]"
+          >
+            <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-muted)]" aria-hidden="true" />
+            {mode === 'manual' ? '手順管理者ビュー' : '業務責任者ビュー'}
+          </span>
         </div>
         {/* 4-step stepper (time なし、CaseDetail LifecycleStepper と視覚言語を共有) */}
         <ol className="flex items-center gap-0" aria-label="提案の進行状況">
@@ -161,11 +162,23 @@ export function ProposalDetail() {
 
       {/* Body */}
       <div className="flex-1 overflow-auto p-4">
+        {/* sendback-guard: 却下/差戻し済みは理由を read-only で再表示 (理由を捨てない、useProposal 購読)。 */}
+        {decision && (
+          <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3 text-xs">
+            <CornerUpLeftIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-alert)]" aria-hidden="true" />
+            <div>
+              <div className="font-medium text-[var(--color-fg)]">
+                {decision.kind === 'reject' ? 'この提案は却下されました' : 'この提案は差戻されました（手順管理者の再確認へ）'}
+              </div>
+              <p className="mt-0.5 text-[var(--color-fg-muted)]">理由: {decision.reason}</p>
+            </div>
+          </div>
+        )}
         {mode === 'owner' && (
           <div className="mb-3 flex items-center gap-2 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3 text-xs">
             <ShieldCheckIcon className="h-4 w-4 flex-shrink-0 text-[var(--color-primary-hover)]" aria-hidden="true" />
             <span className="text-[var(--color-fg)]">
-              業務責任者の最終承認 — Manual 管理者 <strong>{p.queueOwner}</strong> が上長へ送付した提案です。実績値と帰結を確認してください。
+              業務責任者の最終承認 — 手順管理者 <strong>{p.queueOwner}</strong> が上長へ送付した提案です。実績値と帰結を確認してください。
             </span>
           </div>
         )}
@@ -291,13 +304,36 @@ export function ProposalDetail() {
         </div>
       </div>
 
-      {/* Footer: 単一決定面 (mode で 1 セットのみ、原則 C) */}
+      {/* Footer: 単一決定面 (操作者の役割 + live status で 1 セット、原則 C)。terminal / 段階外は read-only。 */}
       <footer className="sticky bottom-0 z-30 flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
-        <div className="flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)]">
-          <CheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
-          <span>判定基準は実測値で確認済 — {mode === 'manual' ? '上長へ送るか却下を選べます' : '承認または差戻しを選べます'}</span>
+        <div className="flex items-center gap-1.5 text-xs">
+          {liveStatus === 'approved' ? (
+            <span className="flex items-center gap-1.5 text-[var(--color-success-soft-fg)]">
+              <CheckIcon className="h-3.5 w-3.5" />
+              この提案は承認され、反映されました
+            </span>
+          ) : liveStatus === 'rejected' ? (
+            <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
+              <XIcon className="h-3.5 w-3.5" />
+              この提案は却下されました
+            </span>
+          ) : canManualAct ? (
+            <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
+              <CheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
+              判定基準は実測値で確認済 — 上長へ送るか却下を選べます
+            </span>
+          ) : canOwnerAct ? (
+            <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
+              <CheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
+              判定基準は実測値で確認済 — 承認または差戻しを選べます
+            </span>
+          ) : mode === 'owner' ? (
+            <span className="text-[var(--color-fg-muted)]">手順管理者の送付待ちです（業務責任者の承認段階ではありません）</span>
+          ) : (
+            <span className="text-[var(--color-fg-muted)]">業務責任者の承認待ちです</span>
+          )}
         </div>
-        {mode === 'manual' ? (
+        {canManualAct ? (
           <div className="flex gap-2">
             <button
               type="button"
@@ -319,7 +355,7 @@ export function ProposalDetail() {
               <ArrowRightIcon className="h-4 w-4" />
             </button>
           </div>
-        ) : (
+        ) : canOwnerAct ? (
           <div className="flex gap-2">
             <button
               type="button"
@@ -341,7 +377,7 @@ export function ProposalDetail() {
               承認
             </button>
           </div>
-        )}
+        ) : null}
       </footer>
 
       <ReasonDialog
@@ -352,8 +388,9 @@ export function ProposalDetail() {
         submitLabel="却下する"
         outcome="却下すると、この提案は反映されません。"
         onClose={() => setDialog(null)}
-        onSubmit={() => {
-          if (id) dispatch({ type: 'proposal/reject', id })
+        onSubmit={(reason) => {
+          // 却下理由を decision に保持 (理由を捨てない、reason required)。
+          if (id) dispatch({ type: 'proposal/reject', id, reason })
           showToast('提案を却下しました')
         }}
       />
@@ -361,11 +398,15 @@ export function ProposalDetail() {
         open={dialog === 'sendback'}
         title="提案を差戻し"
         label="差戻しの理由 (必須)"
-        placeholder="Manual 管理者が再検討できるよう、何を直してほしいか具体的に。例: 影響件数の試算根拠を追記してほしい。"
+        placeholder="手順管理者が再検討できるよう、何を直してほしいか具体的に。例: 影響件数の試算根拠を追記してほしい。"
         submitLabel="差戻す"
-        outcome="差戻すと Manual 管理者の確認に戻ります。"
+        outcome="差戻すと 手順管理者の確認に戻ります。"
         onClose={() => setDialog(null)}
-        onSubmit={() => showToast('提案を差戻しました — Manual 管理者の確認に戻ります')}
+        onSubmit={(reason) => {
+          // 欠落していた proposal/sendback dispatch を補完 (forwarded → pending-triage、理由を decision に保持)。
+          if (id) dispatch({ type: 'proposal/sendback', id, reason })
+          showToast('提案を差戻しました — 手順管理者の確認に戻ります')
+        }}
       />
 
       {toast && (

@@ -26,3 +26,14 @@ export const DEFAULT_ACTOR_ID = 'actor-inputter'
 export function actorById(id: string): DemoActor | undefined {
   return DEMO_ACTORS.find((a) => a.id === id)
 }
+
+/** role → 業務語ラベル (persona switcher / Sidebar / SoD 表示で共通利用、Tier 1 語彙)。 */
+const ROLE_LABEL: Record<ActorRole, string> = {
+  inputter: '入力者',
+  checker: '承認者',
+  'business-approver': '業務責任者',
+}
+
+export function roleLabel(role: ActorRole): string {
+  return ROLE_LABEL[role]
+}

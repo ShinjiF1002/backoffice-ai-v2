@@ -42,6 +42,24 @@ export interface KnowledgeGroup {
   items: { title: string; id: string; version: string }[]
 }
 
+/**
+ * Flywheel lineage の段階定義 (remediation P0-W3、Gate 5ii)。
+ * 「差戻し → 改善ヒント (未承認) → 手順承認 → 設定承認」の 4 段。表示用ラベルのみ (内部 schema 語は出さない)。
+ * staging 段は「未承認ヒント = AI 正式実行の根拠にはならない」を note で明示 (R0 非統制 disclaimer の継承)。
+ */
+export interface LineageStage {
+  key: 'sendback' | 'staging' | 'procedure' | 'config'
+  label: string
+  note: string
+}
+
+export const FLYWHEEL_STAGES: LineageStage[] = [
+  { key: 'sendback', label: '差戻し', note: '現場の差戻しが改善の起点になります。' },
+  { key: 'staging', label: '改善ヒント（未承認）', note: 'AI が差戻しから候補を整理。未承認のため、AI が自動実行する根拠にはなりません。' },
+  { key: 'procedure', label: '手順承認', note: '業務責任者が手順改定を承認します。' },
+  { key: 'config', label: '設定承認', note: 'AI の設定変更として正式に反映されます。' },
+]
+
 export interface ObservatoryProcessMetrics {
   process: string
   icon: 'building' | 'wallet'

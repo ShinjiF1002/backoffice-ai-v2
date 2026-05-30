@@ -6,6 +6,7 @@ import { CASE_LIST } from '@/data/mock-case-list'
 import { PROPOSAL_LIST } from '@/data/mock-proposal-list'
 import { AGENT_LIST } from '@/data/mock-agent-list'
 import type { CaseEntity, ProposalEntity, AgentEntity, StoreState } from './types'
+import { DEFAULT_ACTOR_ID } from './actors'
 
 /** workflow 名 → workflowId。Hub/ProcessSelector の id 体系と整合 (mock-hub: UC-BO-01/02)。 */
 const WORKFLOW_NAME_TO_ID: Record<string, string> = {
@@ -29,6 +30,9 @@ export function seed(): StoreState {
       assignee: row.owner === '—' ? undefined : row.owner,
       flags: row.flags,
       resolvedFieldIds: [],
+      overrides: {},
+      // 既に承認待ちの seed 案件は入力者承認済とみなし inputApprovedBy を埋める (B4 SoD を seeded baw にも普遍適用)。
+      inputApprovedBy: row.status === 'business-approval-waiting' ? DEFAULT_ACTOR_ID : undefined,
       elapsedLabel: row.elapsed,
     }
     caseOrder.push(row.id)
@@ -60,5 +64,5 @@ export function seed(): StoreState {
     agentOrder.push(row.id)
   }
 
-  return { cases, caseOrder, proposals, proposalOrder, agents, agentOrder }
+  return { cases, caseOrder, proposals, proposalOrder, agents, agentOrder, currentActorId: DEFAULT_ACTOR_ID }
 }

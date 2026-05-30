@@ -11,6 +11,8 @@ import type { StoreState, StoreAction, CaseEntity, ProposalEntity, AgentEntity }
 import { HUB_PROCESSES, HUB_HEADLINE, HUB_PRIMARY_ACTION } from '@/data/mock-hub'
 import type { HubProcess, HubHeadlineKpi, HubPrimaryAction } from '@/data/mock-hub'
 import type { CaseStatus } from '@/data/types'
+import { actorById } from './actors'
+import type { DemoActor } from './actors'
 
 function useStoreState(): StoreState {
   const s = useContext(StoreStateContext)
@@ -77,6 +79,12 @@ export function useAgents(workflowId?: string): AgentEntity[] {
 export function useAgent(id: string | undefined): AgentEntity | undefined {
   const s = useStoreState()
   return id ? s.agents[id] : undefined
+}
+
+/** 現在の操作 actor (remediation B4)。persona switcher / SoD 表示で使う。currentActorId 不明時は undefined。 */
+export function useCurrentActor(): DemoActor | undefined {
+  const s = useStoreState()
+  return actorById(s.currentActorId)
 }
 
 // ── Hub 派生 model (Phase 4b、R1) ──────────────────────────────────────────

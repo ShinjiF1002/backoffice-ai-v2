@@ -7,7 +7,8 @@
 import type { StoreState } from './types'
 
 const STORAGE_KEY = 'bo-ai-v2:store'
-const SCHEMA_VERSION = 2 // Phase 4b: CaseEntity に resolvedFieldIds 追加 (1→2)
+// 2→3: remediation P0-W1 で CaseEntity.overrides + StoreState.currentActorId 追加 (B1/B4)。旧 v2 は version 不一致で seed fallback。
+const SCHEMA_VERSION = 3
 
 interface Persisted {
   v: number
@@ -26,14 +27,27 @@ function isStoreStateShape(s: unknown): s is StoreState {
       isDict(o.proposals) &&
       Array.isArray(o.proposalOrder) &&
       isDict(o.agents) &&
-      Array.isArray(o.agentOrder)
+      Array.isArray(o.agentOrder) &&
+      typeof o.currentActorId === 'string'
     )
   ) {
     return false
   }
-  // v2 深掘り (R2): 各 case は overlay 前提の resolvedFieldIds 配列を持つこと。欠落は seed fallback。
-  return Object.values(o.cases as Record<string, unknown>).every(
-    (c) => isDict(c) && Array.isArray((c as Record<string, unknown>).resolvedFieldIds),
+  // v3 深掘り: 各 case は overlay 前提の resolvedFieldIds 配列 + overrides dict を持つこと (B1)。欠落は seed fallback。
+  const casesValid = Object.values(o.cases as Record<string, unknown>).every((c) => {
+    if (!isDict(c)) return false
+    const cc = c as Record<string, unknown>
+    return Array.isArray(cc.resolvedFieldIds) && isDict(cc.overrides)
+  })
+  if (!casesValid) return false
+  // order↔dict 整合: order の各 id が対応 dict に実在すること。不整合は selector の undefined 参照 (白画面化) を招くため fallback。
+  const cases = o.cases as Record<string, unknown>
+  const proposals = o.proposals as Record<string, unknown>
+  const agents = o.agents as Record<string, unknown>
+  return (
+    (o.caseOrder as unknown[]).every((id) => isDict(cases[id as string])) &&
+    (o.proposalOrder as unknown[]).every((id) => isDict(proposals[id as string])) &&
+    (o.agentOrder as unknown[]).every((id) => isDict(agents[id as string]))
   )
 }
 

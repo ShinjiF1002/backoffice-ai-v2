@@ -12,8 +12,9 @@
     "test:watch": "vitest",
     "check:no-op": "node scripts/check-no-op.mjs",
     "check:types": "tsc -p tsconfig.app.json --noEmit",
+    "check:types:test": "tsc -p tsconfig.test.json --noEmit",
     "check:design": "node scripts/check-design.mjs",
-    "check:all": "npm run lint && npm run check:no-op && npm run check:types && npm run check:design && npm run test && npm run build"
+    "check:all": "npm run lint && npm run check:no-op && npm run check:types && npm run check:types:test && npm run check:design && npm run test && npm run build"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",

@@ -14,9 +14,9 @@ describe('useHubModel (Phase 4b R1 / B3)', () => {
   it('approval KPI / process total を store から算出 (UC-BO-01/02 とも workflowId filter 数式)', () => {
     const { result } = renderHook(() => useHubModel(), { wrapper: StoreProvider })
     const s = seed()
-    const baw = s.caseOrder.filter((id) => s.cases[id].status === 'business-approval-waiting').length
-    const uc01 = s.caseOrder.filter((id) => s.cases[id].workflowId === 'UC-BO-01').length
-    const uc02 = s.caseOrder.filter((id) => s.cases[id].workflowId === 'UC-BO-02').length
+    const baw = s.caseOrder.filter((id) => s.cases[id]!.status === 'business-approval-waiting').length
+    const uc01 = s.caseOrder.filter((id) => s.cases[id]!.workflowId === 'UC-BO-01').length
+    const uc02 = s.caseOrder.filter((id) => s.cases[id]!.workflowId === 'UC-BO-02').length
 
     expect(result.current.headline.find((k) => k.key === 'approval')!.total).toBe(baw)
     // process total は workflowId 別の実数 (UC-BO-01 = 法人住所変更、UC-BO-02 = 口座開設 5 件)
@@ -34,7 +34,7 @@ describe('useHubModel (Phase 4b R1 / B3)', () => {
     const { result } = renderHook(() => useHubModel(), { wrapper: StoreProvider })
     const s = seed()
     const expected = s.caseOrder
-      .map((id) => s.cases[id])
+      .map((id) => s.cases[id]!)
       .filter((c) => c.status === 'ready' || c.status === 'sent-back').length
     expect(result.current.headline.find((k) => k.key === 'attention')!.total).toBe(expected)
   })

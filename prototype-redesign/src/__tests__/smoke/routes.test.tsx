@@ -17,6 +17,8 @@ const ROUTES: string[] = [
   '/agents',
   '/agents/agent-corporate-address-change',
   '/observatory',
+  '/search', // W2b/P1-2
+  '/inbox', // W2b/P1-2
 ]
 
 function renderAt(path: string) {

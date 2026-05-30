@@ -1,9 +1,8 @@
 /**
  * 横断 view filter 状態の context + hook + 永続化ヘルパ (Phase 1)。
  * Provider component (ViewProvider.tsx) と分離 = react-refresh/only-export-components 準拠。
- * - process: ProcessSelector の選択業務。localStorage に永続。
- * - searchQuery: TopBar 検索語。ephemeral。
- * 配線 (ProcessSelector / 検索 / list filter) は Phase 5。
+ * - process: ProcessSelector の選択業務。localStorage に永続 (P1-1 配線済、全画面 list filter と同期)。
+ * - searchQuery: TopBar 検索語。ephemeral (永続しない)。W2b/P1-2 で TopBar input → useSearchResults → /search に配線。
  */
 import { createContext, useContext } from 'react'
 

@@ -24,8 +24,8 @@ W2 (9→14 画面 + 全 enhancement) は **PR #17 (`remediation/w2-screens` → 
 
 ## 現状 (作成時点、実コマンドで再検証すること)
 
-- **W2 = PR #17** (`remediation/w2-screens` → `main`、14 commit、+1,787/−197、squash-merge 候補)。merge は **user judgement gate** (まだ未 merge の可能性)。
-- 作成時点: test **161** (16 files) / **14 画面** / `SCHEMA_VERSION` **5** / check:all green。
+- **W2 = PR #17** (`remediation/w2-screens` → `main`、squash-merge 候補)。**本 W3 handoff doc 自体も #17 に含まれる** (merge で main に載り、次セッションが読める)。commit 数 / diff は volatile ゆえ pin せず `gh pr view 17` / `git rev-list` で実測。merge は **user judgement gate** (まだ未 merge の可能性)。
+- 作成時点: test **161** (16 files) / **14 画面** / `SCHEMA_VERSION` **5** / check:all green。すべて実コマンドで再実測。
 - W3 は **画面追加を原則伴わない品質底上げ** (例外: manual entry の route 化を選ぶ場合のみ 14→15)。
 
 ---

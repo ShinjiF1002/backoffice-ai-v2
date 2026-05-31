@@ -142,13 +142,16 @@ export function Observatory() {
                     </button>
                   ))}
                 </div>
-                <div className="text-xs text-[var(--color-fg-muted)]">
-                  {/* P1-7: monitoring dead-end 解消 — case ID を detail へ drill。 */}
-                  <Link to={`/cases/${OBS_CASE_ID}`} className="font-mono text-[var(--color-primary)] hover:underline">
-                    {OBS_CASE_ID}
-                  </Link>{' '}
-                  法人住所変更
-                </div>
+                {/* 対象 case ラベルは lifecycle (単一 case の経過) のみ。ledger view は全案件横断ゆえ固定 case を出さない (誤誘導防止)。 */}
+                {auditView === 'lifecycle' && (
+                  <div className="text-xs text-[var(--color-fg-muted)]">
+                    {/* P1-7: monitoring dead-end 解消 — case ID を detail へ drill。 */}
+                    <Link to={`/cases/${OBS_CASE_ID}`} className="font-mono text-[var(--color-primary)] hover:underline">
+                      {OBS_CASE_ID}
+                    </Link>{' '}
+                    法人住所変更
+                  </div>
+                )}
               </div>
 
               {auditView === 'lifecycle' ? (

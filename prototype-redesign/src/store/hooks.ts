@@ -8,6 +8,7 @@ import { useContext, useMemo } from 'react'
 import type { Dispatch } from 'react'
 import { StoreStateContext, StoreDispatchContext } from './context'
 import type { StoreState, StoreAction, CaseEntity, ProposalEntity, AgentEntity } from './types'
+import { AGENT_LIST } from '@/data/mock-agent-list'
 import { HUB_PROCESSES, HUB_HEADLINE, HUB_PRIMARY_ACTION } from '@/data/mock-hub'
 import type { HubProcess, HubHeadlineKpi, HubPrimaryAction } from '@/data/mock-hub'
 import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
@@ -228,4 +229,152 @@ export function useHubModel(): HubModel {
 
     return { processes, headline, primaryAction }
   }, [s])
+}
+
+// ── 横断検索 (P1-2、store-truth から id/業務名/担当 部分一致) ─────────────────
+// 検索語は ViewProvider の ephemeral searchQuery を消費 (store state には載せない、S8 境界)。
+export interface SearchResultItem {
+  id: string
+  kind: 'case' | 'proposal' | 'agent'
+  /** 種別ラベル (案件 / 提案 / Agent)。chip 表示用。 */
+  kindLabel: string
+  title: string
+  subtitle: string
+  href: string
+}
+
+// Agent の表示名は list mock 由来 (store entity は workflowName のみ)。検索 title/match 用の id→name lookup。
+const AGENT_NAME_BY_ID: Record<string, string> = Object.fromEntries(AGENT_LIST.map((a) => [a.id, a.name]))
+
+/** 横断 free-text 検索。空クエリは空配列 (zero-result と structurally-empty を画面側で分離)。 */
+export function useSearchResults(query: string): SearchResultItem[] {
+  const s = useStoreState()
+  return useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+    const hit = (...vals: (string | undefined)[]) => vals.some((v) => v?.toLowerCase().includes(q))
+    const items: SearchResultItem[] = []
+    for (const c of resolveOrder(s.caseOrder, s.cases)) {
+      if (hit(c.id, c.workflowName, c.assignee)) {
+        items.push({
+          id: c.id,
+          kind: 'case',
+          kindLabel: '案件',
+          title: c.workflowName,
+          subtitle: c.assignee ? `担当 ${c.assignee}` : '未割当',
+          href: `/cases/${c.id}`,
+        })
+      }
+    }
+    for (const p of resolveOrder(s.proposalOrder, s.proposals)) {
+      if (hit(p.id, p.workflowName)) {
+        items.push({ id: p.id, kind: 'proposal', kindLabel: '提案', title: p.workflowName, subtitle: p.id, href: `/proposals/${p.id}` })
+      }
+    }
+    for (const a of resolveOrder(s.agentOrder, s.agents)) {
+      const name = AGENT_NAME_BY_ID[a.id]
+      if (hit(a.id, a.workflowName, name)) {
+        items.push({ id: a.id, kind: 'agent', kindLabel: 'Agent', title: name ?? a.workflowName, subtitle: a.workflowName, href: `/agents/${a.id}` })
+      }
+    }
+    return items
+  }, [s, query])
+}
+
+// ── 通知 / ワークインボックス (P1-2) ────────────────────────────────────────
+// 差戻し受領 + エスカレーションの 2 種のみ (SLA 警告は scope-0 = JG-b、datetime 化が範囲外で偽 SLA を作らない)。
+// store entity ではなく派生 selector で都度算出 (S8)。actor 厳密 (JG-a): currentActor 宛のみ。既読は readNotificationIds。
+// 通知 id は由来 entity から決定的に導く安定文字列 (`sendback:${caseId}` / `escalation:${caseId}`)。
+export type NotificationKind = 'sendback' | 'escalation'
+export interface NotificationItem {
+  id: string
+  kind: NotificationKind
+  caseId: string
+  title: string
+  detail: string
+  href: string
+  read: boolean
+}
+
+export function useNotifications(): NotificationItem[] {
+  const s = useStoreState()
+  return useMemo(() => {
+    const actor = actorById(s.currentActorId)
+    const isRead = (id: string) => s.readNotificationIds.includes(id)
+    const items: NotificationItem[] = []
+    for (const c of resolveOrder(s.caseOrder, s.cases)) {
+      // 差戻し受領: 担当 (入力者) 宛 — currentActor の氏名と一致する案件のみ。
+      // seed 由来の差戻し案件は理由未記録のため fallback 文言 (in-session の case/sendback は理由を保持)。
+      if (c.status === 'sent-back' && actor && c.assignee === actor.name) {
+        const id = `sendback:${c.id}`
+        items.push({
+          id,
+          kind: 'sendback',
+          caseId: c.id,
+          title: `${c.workflowName} ${c.id}`,
+          detail: c.sendback?.reason ?? '差し戻された案件です。内容を確認してください。',
+          href: `/cases/${c.id}`,
+          read: isRead(id),
+        })
+      }
+      // エスカレーション: 宛先 actor 宛 — escalation.to が currentActorId と一致するもの
+      if (c.escalation && c.escalation.to === s.currentActorId) {
+        const id = `escalation:${c.id}`
+        items.push({ id, kind: 'escalation', caseId: c.id, title: `${c.workflowName} ${c.id}`, detail: c.escalation.reason, href: `/cases/${c.id}`, read: isRead(id) })
+      }
+    }
+    return items
+  }, [s])
+}
+
+/** bell バッジ用の未読数 (>0 のみ赤ドット)。 */
+export function useUnreadCount(): number {
+  const notifications = useNotifications()
+  return useMemo(() => notifications.filter((n) => !n.read).length, [notifications])
+}
+
+// ── 業務責任者 (business-approver) の 3 受け口 (P1-3、IA scope=(a)) ─────────────
+// 手順承認 (forwarded 提案) / 設定承認 (Agent 昇格申請) / escalation 裁定。派生 selector のみ (store contract 不変、S8)。
+/** 手順承認待ち = forwarded 提案 (業務責任者が承認/差戻しする対象)。 */
+export function useForwardedProposals(): ProposalEntity[] {
+  const s = useStoreState()
+  return useMemo(() => resolveOrder(s.proposalOrder, s.proposals).filter((p) => p.status === 'forwarded'), [s])
+}
+
+/** 設定承認待ち = 昇格申請中 (promotionStatus==='requested') の Agent。 */
+export function usePendingPromotions(): AgentEntity[] {
+  const s = useStoreState()
+  return useMemo(() => resolveOrder(s.agentOrder, s.agents).filter((a) => a.promotionStatus === 'requested'), [s])
+}
+
+/**
+ * escalation 受信 = case/escalate された **未裁定** の案件 (業務責任者が裁定 = case/sendback 再利用)。
+ * 裁定済 (sent-back) / 完了 (reflected) は active queue から除外し queue closure を担保 (escalation 記録自体は
+ * 監査用に entity に残す = 履歴保持しつつ「裁定後も残り続ける」を防ぐ)。
+ */
+export function useEscalations(): CaseEntity[] {
+  const s = useStoreState()
+  return useMemo(
+    () =>
+      resolveOrder(s.caseOrder, s.cases).filter(
+        (c) => c.escalation !== undefined && c.status !== 'sent-back' && c.status !== 'reflected',
+      ),
+    [s],
+  )
+}
+
+/** 業務責任者 landing の 3 受け口集約 (件数 + drill)。 */
+export interface BusinessApproverInbox {
+  forwardedProposals: ProposalEntity[]
+  pendingPromotions: AgentEntity[]
+  escalations: CaseEntity[]
+}
+export function useBusinessApproverInbox(): BusinessApproverInbox {
+  const forwardedProposals = useForwardedProposals()
+  const pendingPromotions = usePendingPromotions()
+  const escalations = useEscalations()
+  return useMemo(
+    () => ({ forwardedProposals, pendingPromotions, escalations }),
+    [forwardedProposals, pendingPromotions, escalations],
+  )
 }

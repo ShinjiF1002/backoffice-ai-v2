@@ -9,18 +9,24 @@ import { Proposals } from './pages/Proposals' // P2B-3b
 import { Agents } from './pages/Agents' // P2B-3b
 import { ProposalDetail } from './pages/ProposalDetail' // P2B-3c-1 (C 型 doc-anchored)
 import { AgentDetail } from './pages/AgentDetail' // P2B-3c-2 (C 型、Trust 昇格)
+import { SearchResults } from './pages/SearchResults' // W2b/P1-2 (B 型、横断検索)
+import { Notifications } from './pages/Notifications' // W2b/P1-2 (B 型、通知/inbox)
+import { BusinessApproverHub } from './pages/BusinessApproverHub' // W2c/P1-3 (A 型、業務責任者 landing)
+import { ConfigApprovals } from './pages/ConfigApprovals' // W2c/P1-3 (B 型、設定承認 queue)
+import { Escalations } from './pages/Escalations' // W2c/P1-3 (B 型、escalation 受信)
 
 /**
  * Backoffice AI v2 (redesign) — App Router
  * SSOT: prototype-redesign/CLAUDE.md + handoff-redesign/00-shared/ia-overview-v2.md §2
  *
- * 9 画面 Process-First (旧 Dashboard/Inbox IA は廃止):
+ * Process-First (旧 Dashboard/Inbox IA は廃止)。remediation で 9→ 拡張中 (W2b: 11、W2c: 14):
  *   1. Hub `/`               2. Cases `/cases`        3. Approvals `/approvals`
  *   4. CaseDetail `/cases/:id` (入力者+承認者 mode)    5. Proposals `/proposals`
  *   6. ProposalDetail `/proposals/:id`                7. Agents `/agents`
  *   8. AgentDetail `/agents/:id`                      9. Observatory `/observatory` (モニタリング)
- *
- * P2B-1b: 各 route は placeholder。P2B-2/3 で screens-v2 pixel-parity 本実装に置換。
+ *   10. SearchResults `/search` (W2b/P1-2)            11. Notifications `/inbox` (W2b/P1-2)
+ *   12. BusinessApproverHub `/business-approver` (W2c) 13. ConfigApprovals `/config-approvals` (W2c)
+ *   14. Escalations `/escalations` (W2c/P1-3、IA scope=(a))
  */
 function App() {
   return (
@@ -35,6 +41,11 @@ function App() {
         <Route path="agents" element={<Agents />} />
         <Route path="agents/:id" element={<AgentDetail />} />
         <Route path="observatory" element={<Observatory />} />
+        <Route path="search" element={<SearchResults />} />
+        <Route path="inbox" element={<Notifications />} />
+        <Route path="business-approver" element={<BusinessApproverHub />} />
+        <Route path="config-approvals" element={<ConfigApprovals />} />
+        <Route path="escalations" element={<Escalations />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

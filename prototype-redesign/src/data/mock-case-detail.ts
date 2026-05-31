@@ -79,6 +79,8 @@ export const CASE_2026_0142: CaseDetailModel = {
       aiValue: '東京都千代田区丸の内 2 丁目 3 番 5 号',
       ocrRawValue: '千代田区丸の内２－３－５',
       ocrNormalizedValue: '東京都千代田区丸の内 2 丁目 3 番 5 号',
+      // P1-8: 法人住所変更の現行登録値 (変更前)。before/after で「現在の登録値 → 確定値」を表示。
+      previousValue: '東京都千代田区丸の内 1 丁目 1 番 1 号',
       reconcileState: 'normalized_match',
       normalizationNote: '丁目番地表記統一 + 都名補完',
       sourceLocator: { doc: 'CASE-2026-0142.pdf', page: 'P.2', region: '住所欄' },
@@ -146,9 +148,12 @@ function approverFor(inputter: string): string {
 function baseFields(change?: CaseListRow['change']): FieldReview[] {
   const newAddr = change?.field === '新住所' ? change.to : '東京都千代田区丸の内 2 丁目 3 番 5 号'
   const corpName = change?.field === '法人名' ? change.to : '株式会社サンプル商事'
+  // P1-8: 変更系 field は現行登録値 (change.from) を previousValue に保持し before/after 表示。変更対象でない field は省略。
+  const prevAddr = change?.field === '新住所' ? change.from : undefined
+  const prevCorp = change?.field === '法人名' ? change.from : undefined
   return [
-    { fieldLabel: '法人名', aiValue: corpName, ocrRawValue: corpName, masterValue: corpName, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '法人名欄' } },
-    { fieldLabel: '新住所', aiValue: newAddr, ocrRawValue: newAddr, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
+    { fieldLabel: '法人名', aiValue: corpName, ocrRawValue: corpName, masterValue: corpName, previousValue: prevCorp, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '法人名欄' } },
+    { fieldLabel: '新住所', aiValue: newAddr, ocrRawValue: newAddr, previousValue: prevAddr, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
     { fieldLabel: 'ビル名', aiValue: 'サンプルビル', ocrRawValue: 'サンプルビル', masterValue: 'サンプルビル', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
     { fieldLabel: '支店コード', aiValue: '042', ocrRawValue: '042', masterValue: '042', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '支店コード欄' } },
     { fieldLabel: '効力発生日', aiValue: '2026-06-15', ocrRawValue: '2026-06-15', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '効力日欄' } },

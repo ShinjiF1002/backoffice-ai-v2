@@ -85,7 +85,7 @@ describe('store foundation (Phase 1)', () => {
     })
     it('Agent: 昇格申請 / 緊急停止 (emergencyStop) → 再開 (resume)', () => {
       let s = storeReducer(seed(), { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
-      expect(s.agents['agent-corporate-address-change']!.promotionRequested).toBe(true)
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('requested')
       // kill-switch: 緊急停止で paused + 理由保持、再開で解除 (remediation flywheel、togglePause 分割)
       s = storeReducer(s, { type: 'agent/emergencyStop', id: 'agent-corporate-address-change', reason: '誤入力が急増' })
       expect(s.agents['agent-corporate-address-change']!.paused).toBe(true)
@@ -174,6 +174,72 @@ describe('store foundation (Phase 1)', () => {
     })
   })
 
+  describe('remediation W2a (P1-2/P1-3 新 action)', () => {
+    it('seed: promotionStatus=none + readNotificationIds 空 (W2a schema)', () => {
+      const s = seed()
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('none')
+      expect(s.readNotificationIds).toEqual([])
+    })
+
+    it('agent/requestPromotion: 申請 actor を保持 (P1-3 SoD 判定材料)', () => {
+      const s = storeReducer(seed(), { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('requested')
+      expect(s.agents['agent-corporate-address-change']!.promotionRequestedBy).toBe('actor-inputter')
+    })
+
+    it('agent/approvePromotion: 自己承認は no-op、別 actor で approved (設定層 SoD = 案件と共通 helper)', () => {
+      let s = storeReducer(seed(), { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
+      // 申請者 (入力者) のまま設定承認 → 自己承認で no-op
+      const self = storeReducer(s, { type: 'agent/approvePromotion', id: 'agent-corporate-address-change' })
+      expect(self.agents['agent-corporate-address-change']!.promotionStatus).toBe('requested')
+      // 業務責任者 persona に切替 → approved
+      s = storeReducer(s, { type: 'session/switchActor', actorId: 'actor-approver' })
+      s = storeReducer(s, { type: 'agent/approvePromotion', id: 'agent-corporate-address-change' })
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('approved')
+    })
+
+    it('agent/approvePromotion: requested 以外は no-op (precondition)', () => {
+      const s = storeReducer(seed(), { type: 'agent/approvePromotion', id: 'agent-corporate-address-change' })
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('none')
+    })
+
+    it('agent/sendbackPromotion: requested→none + 理由保持、再申請で理由クリア (C1 解消)', () => {
+      let s = storeReducer(seed(), { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
+      s = storeReducer(s, { type: 'agent/sendbackPromotion', id: 'agent-corporate-address-change', reason: 'サンプル不足' })
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('none')
+      expect(s.agents['agent-corporate-address-change']!.promotionSendbackReason).toBe('サンプル不足')
+      expect(s.agents['agent-corporate-address-change']!.promotionRequestedBy).toBeUndefined()
+      // 再申請 → requested に戻り sendbackReason はクリア
+      s = storeReducer(s, { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
+      expect(s.agents['agent-corporate-address-change']!.promotionStatus).toBe('requested')
+      expect(s.agents['agent-corporate-address-change']!.promotionSendbackReason).toBeUndefined()
+    })
+
+    it('case/escalate: escalation を記録し status は不変 (裁定の帰結は別 action、JG-3=a)', () => {
+      const s = storeReducer(seed(), {
+        type: 'case/escalate',
+        id: 'CASE-2026-0142',
+        reason: '判断困難',
+        category: 'judgment_gap',
+        to: 'actor-approver',
+      })
+      expect(s.cases['CASE-2026-0142']!.escalation).toEqual({ reason: '判断困難', category: 'judgment_gap', to: 'actor-approver' })
+      expect(s.cases['CASE-2026-0142']!.status).toBe('ready')
+    })
+
+    it('notification/markRead + markAllRead: 既読集合に冪等追記 (重複排除)', () => {
+      let s = storeReducer(seed(), { type: 'notification/markRead', id: 'sendback:CASE-2026-0142' })
+      expect(s.readNotificationIds).toEqual(['sendback:CASE-2026-0142'])
+      s = storeReducer(s, { type: 'notification/markRead', id: 'sendback:CASE-2026-0142' }) // 冪等
+      expect(s.readNotificationIds).toHaveLength(1)
+      s = storeReducer(s, {
+        type: 'notification/markAllRead',
+        ids: ['sendback:CASE-2026-0142', 'escalation:CASE-2026-0150'],
+      })
+      expect(s.readNotificationIds).toEqual(['sendback:CASE-2026-0142', 'escalation:CASE-2026-0150'])
+    })
+  })
+
   describe('immutability / reset', () => {
     it('reducer は元 state を破壊しない', () => {
       const base = seed()
@@ -205,10 +271,10 @@ describe('store foundation (Phase 1)', () => {
     it('schema version 不一致は fallback (旧 v1 localStorage → seed、R2)', () => {
       localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 1, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
-      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v4 と不一致 → seed fallback
+      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v5 と不一致 → seed fallback
     })
 
-    it('旧 v2 localStorage (overrides/currentActorId 欠落) は v4 不一致で安全に fallback (B1/B4 migration)', () => {
+    it('旧 v2 localStorage (overrides/currentActorId 欠落) は v5 不一致で安全に fallback (B1/B4 migration)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
@@ -228,9 +294,29 @@ describe('store foundation (Phase 1)', () => {
       expect(restored.cases['CASE-X']).toBeUndefined()
     })
 
+    it('旧 v4 localStorage (readNotificationIds 欠落) は v5 不一致で安全に fallback (W2a 4→5 migration)', () => {
+      localStorage.setItem(
+        'bo-ai-v2:store',
+        JSON.stringify({
+          v: 4,
+          state: {
+            cases: {},
+            caseOrder: [],
+            proposals: {},
+            proposalOrder: [],
+            agents: {},
+            agentOrder: [],
+            currentActorId: 'actor-inputter', // v4 は readNotificationIds/promotionStatus を持たない
+          },
+        }),
+      )
+      const restored = loadPersisted(seed())
+      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // v4 ≠ v5 → seed fallback (白画面化しない)
+    })
+
     it('同一 version でも形が壊れた state は fallback (shape guard: dict 欠落)', () => {
       // v は一致するが cases/proposals/agents 等を欠く → selector 白画面化を防ぐため seed に戻す
-      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 4, state: { caseOrder: [] } }))
+      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 5, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
       expect(restored.caseOrder).toHaveLength(CASE_LIST.length)
       expect(restored.cases['CASE-2026-0142']).toBeDefined()
@@ -240,7 +326,7 @@ describe('store foundation (Phase 1)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
-          v: 4,
+          v: 5,
           state: {
             cases: { 'CASE-X': { id: 'CASE-X', status: 'ready', flags: 0, overrides: {} } }, // resolvedFieldIds 欠落
             caseOrder: ['CASE-X'],
@@ -249,6 +335,7 @@ describe('store foundation (Phase 1)', () => {
             agents: {},
             agentOrder: [],
             currentActorId: 'actor-inputter',
+            readNotificationIds: [], // 他 field は揃え、欠落は resolvedFieldIds のみに絞る
           },
         }),
       )
@@ -261,8 +348,8 @@ describe('store foundation (Phase 1)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
-          v: 4,
-          state: { cases: {}, caseOrder: [], proposals: {}, proposalOrder: [], agents: {}, agentOrder: [] }, // currentActorId 欠落
+          v: 5,
+          state: { cases: {}, caseOrder: [], proposals: {}, proposalOrder: [], agents: {}, agentOrder: [], readNotificationIds: [] }, // currentActorId 欠落
         }),
       )
       const restored = loadPersisted(seed())

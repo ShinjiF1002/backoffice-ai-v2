@@ -311,6 +311,8 @@ export interface FieldReview {
   ocrRawValue?: string
   ocrNormalizedValue?: string
   masterValue?: string
+  /** 現行登録値 (変更前の値、before/after 表示用、P1-8)。「突合マスタ参照」masterValue とは意味論分離 (変更系 field のみ。新規登録は省略)。 */
+  previousValue?: string
   humanValue?: string
   reconcileState: ReconcileState
   /** 正規化補正の説明 (normalized_match 時、UI は控えめ注記) */

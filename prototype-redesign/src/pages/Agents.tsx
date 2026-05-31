@@ -99,7 +99,7 @@ export function Agents() {
   const rows: AgentViewRow[] = agents.flatMap((e) => {
     const base = AGENT_BY_ID[e.id]
     if (!base) return []
-    return [{ ...base, trust: e.trust, promotionRequested: e.promotionRequested, paused: e.paused }]
+    return [{ ...base, trust: e.trust, promotionRequested: e.promotionStatus === 'requested', paused: e.paused }]
   })
   const list = useListData(rows)
   return (

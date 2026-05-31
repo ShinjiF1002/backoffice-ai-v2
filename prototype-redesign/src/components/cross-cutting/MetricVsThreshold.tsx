@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { cn } from '@/lib/cn'
 
 /**
@@ -21,6 +22,8 @@ export interface MetricRow {
   previousDelta?: string
   /** 除外条件 (spec)。例: エスカレーション案件を除く */
   exclusions?: string
+  /** Agent drill 先 (P1-7、未達 KPI を該当 Agent へ)。持つ row のみ metricLabel が Link 化。tone/severity とは別軸 prop。 */
+  agentHref?: string
 }
 
 export interface MetricVsThresholdProps {
@@ -68,7 +71,15 @@ export function MetricVsThreshold({
               key={r.metricLabel}
               className={cn('border-b border-[var(--color-border)] last:border-b-0', !r.achieved && 'bg-[var(--color-alert-soft)]')}
             >
-              <td className="px-4 py-2 text-[var(--color-fg)]">{r.metricLabel}</td>
+              <td className="px-4 py-2 text-[var(--color-fg)]">
+                {r.agentHref ? (
+                  <Link to={r.agentHref} className="text-[var(--color-primary)] hover:underline">
+                    {r.metricLabel}
+                  </Link>
+                ) : (
+                  r.metricLabel
+                )}
+              </td>
               <td className="px-4 py-2 font-mono text-[var(--color-fg)]">{r.actualValue}</td>
               <td className="px-4 py-2 font-mono text-[var(--color-fg-muted)]">{r.threshold}</td>
               <td className={cn('px-4 py-2 font-medium', r.achieved ? 'text-[var(--color-success-soft-fg)]' : 'text-[var(--color-alert-soft-fg)]')}>

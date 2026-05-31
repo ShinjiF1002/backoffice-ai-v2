@@ -68,6 +68,8 @@ R-PROC-01 (Hub/全画面) / R-QUEUE-01/02 (02) / R-RECON-01/02 (04, 02) / R-VALI
 
 → **全 22 R-* が 9 画面のいずれかに mapping**。どの画面でも閉じない要件 = 0。
 
+> **remediation 画面拡張 (2026-05-30)**: 9 → 11 (W2b: `/search`・`/inbox`) → 14 (W2c: 業務責任者面)。R-* mapping は historical 9 画面基準。新画面 (検索/通知/業務責任者面) は監査由来 (audit §7 #9/#10) で R-* 体系外、完成定義は **remediation-roadmap §1b** が SSOT。最終 closure は roadmap §4末 3 軸 count gate。
+
 ## prompt × screen 対応 (bundle-v2/prompts/、各 wireframe + mockup)
 
 01-hub / 02-cases / 03-approvals / 04-case-detail (pilot) / 05-proposals / 06-proposal-detail / 07-agents / 08-agent-detail / 09-observatory

@@ -4,7 +4,7 @@
 
 ## 1. 案件 (Case)
 
-status: `pending` (AI処理中) / `ready` (入力者確認待ち) / `sent-back` (差戻し再処理) / `business-approval-waiting` (承認者待ち) / `reflected` (反映済)
+status: `pending` (AI処理中) / `ready` (入力者確認待ち) / `sent-back` (差戻し再処理) / `business-approval-waiting` (承認者待ち) / `reflected` (反映済、承認者/業務責任者の訂正・取消で可逆)
 
 | status | role | 許可操作 | enabled 条件 | 次 status | audit event |
 |---|---|---|---|---|---|
@@ -16,10 +16,13 @@ status: `pending` (AI処理中) / `ready` (入力者確認待ち) / `sent-back` 
 | business-approval-waiting | 承認者 | **最終承認** | 入力者承認済 + **SoD (承認者 ≠ 入力者)** | reflected | `business_approve` |
 | business-approval-waiting | 承認者 | 差戻し | コメント必須 | sent-back (入力者へ) | `human_sendback` |
 | sent-back | (なし) | AI 再処理 | — | ready | `ai_input` (retry) |
-| reflected | (なし) | 参照のみ | — | (終端) | — |
+| reflected | 承認者 / 業務責任者 | **訂正** (reversal) | 反映済の内容に誤り + **コメント必須** | ready (入力者の再確認へ) | `case_reverse` (訂正) |
+| reflected | 承認者 / 業務責任者 | **取消** (reversal) | 誤った反映 + **コメント必須** | sent-back (再処理へ) | `case_reverse` (取消) |
+| reflected | 入力者 / 参照専用 | 参照のみ | — | (操作不可) | — |
 
 **SoD**: 入力者 ≠ 承認者 を system 強制 (同一人物の self-approval 禁止)。
 **escalation**: reconcile エスカレーション or Alert 判断不能 → Matrix C escalation lane (業務責任者介入)。
+**reversal (W3 C3、前進のみ→可逆)**: 反映済 (reflected) は通常終端だが、承認者/業務責任者 が理由必須で **訂正** (→ready、再確認) / **取消** (→sent-back、再処理) できる。入力者は不可 (反映を最終確定した承認者の責務)。reversal 記録 (kind / 理由) を case に保持し、二重 reversal は block (不可逆 guard)。参照専用の過去案件 (store 非載) は操作不可。
 
 ## 2. 提案 (Proposal)
 

@@ -83,7 +83,7 @@ nav group 3 つ (処理 / 改善 / 監視) で role の mental model に整合:
 
 typology lock: **A 型 ×2 / B 型 ×4 / C 型 ×3** (v1 の 3-typology lock を継承)。
 
-> **remediation 画面拡張 (2026-05-30)**: 9 → **11** (W2b/P1-2 `/search`・`/inbox` = B ×2 → A×2/B×6/C×3、✓) → **14** (W2c/P1-3 ✓ 業務責任者面 3 画面 `/business-approver`=A landing・`/config-approvals`=B・`/escalations`=B) = **typology lock A×3 / B×8 / C×3 = 14**。新画面の inventory/完成定義/契約は **remediation-roadmap §1b ledger + §3.2/§3.3 が SSOT**。上表の 9 画面は historical baseline。count gate は roadmap §4末 3 軸 reconcile 参照。
+> **remediation 画面拡張 (2026-05-30)**: 9 → **11** (W2b/P1-2 `/search`・`/inbox` = B ×2 → A×2/B×6/C×3、✓) → **14** (W2c/P1-3 ✓ 業務責任者面 3 画面 `/business-approver`=A landing・`/config-approvals`=B・`/escalations`=B) → **15** (W3 C4 ✓ `/cases/new` = B 型手動起票) = **typology lock A×3 / B×9 / C×3 = 15**。新画面の inventory/完成定義/契約は **remediation-roadmap §1b ledger + §3.2/§3.3 が SSOT**。上表の 9 画面は historical baseline。count gate は roadmap §4末 3 軸 reconcile 参照。
 
 ---
 

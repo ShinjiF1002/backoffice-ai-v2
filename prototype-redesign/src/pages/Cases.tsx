@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import { FilePlusIcon } from 'lucide-react'
 import { CASE_LIST } from '@/data/mock-case-list'
 import type { CaseListRow } from '@/data/mock-case-list'
 import type { CaseStatus } from '@/data/types'
@@ -83,7 +85,17 @@ export function Cases() {
         data-page-header
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
-        <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
+          {/* W3 C4: AI 障害時の手動起票 (全項目手入力 form へ) */}
+          <Link
+            to="/cases/new"
+            className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+          >
+            <FilePlusIcon className="h-4 w-4" aria-hidden="true" />
+            新規案件作成
+          </Link>
+        </div>
         <p className="mt-1 text-xs text-[var(--color-fg-muted)]">{processLabel} · {rows.length} 件 ／ 行を選んで案件を確認</p>
       </header>
 

@@ -303,3 +303,51 @@ const HISTORICAL_CASE_ROWS: CaseListRow[] = [
 for (const row of HISTORICAL_CASE_ROWS) {
   CASE_DETAILS[row.id] = buildCaseDetail(row)
 }
+
+/** workflow の field label 群 (手動起票 form の入力項目、W3 C4)。 */
+export function fieldLabelsForWorkflow(workflow: string): string[] {
+  return fieldsForWorkflow(workflow).map((f) => f.fieldLabel)
+}
+
+/**
+ * 手動起票 (W3 C4) の store-only draft を CaseDetailModel に組む (CASE_DETAILS 不在の draft が一覧から開ける)。
+ * AI 抽出が無いので全項目を人手入力値 (overrides) で確認済表示し、左 pane は入力値の faux 申込書とする。
+ */
+export function buildManualCaseDetail(
+  id: string,
+  workflowName: string,
+  assignee: string | undefined,
+  overrides: Record<string, string>,
+): CaseDetailModel {
+  const inputter = assignee && assignee !== '—' ? assignee : '未割当'
+  const approver = approverFor(inputter)
+  const fileName = `${id}.pdf`
+  const isAccountOpening = workflowName === '口座開設書類完備'
+  const fields = fieldsForWorkflow(workflowName).map((f): FieldReview => {
+    const ov = overrides[f.fieldLabel]
+    const base: FieldReview = ov !== undefined ? { ...f, aiValue: ov, ocrRawValue: ov, humanValue: ov } : { ...f }
+    return {
+      ...base,
+      reconcileState: 'manually_confirmed',
+      sourceLocator: base.sourceLocator ? { ...base.sourceLocator, doc: fileName } : base.sourceLocator,
+    }
+  })
+  return {
+    id,
+    workflowName,
+    status: 'ready',
+    statusLabel: caseStatusLabel('ready'),
+    inputter,
+    approver,
+    fields,
+    document: {
+      fileName,
+      page: 'P.1',
+      pageCount: 1,
+      title: isAccountOpening ? '口座開設申込書（手動起票）' : `${workflowName}届（手動起票）`,
+      rows: buildDocRows(fields),
+    },
+    lifecycle: buildLifecycle('ready', inputter, approver),
+    citations: [],
+  }
+}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, CornerUpLeftIcon, RotateCcwIcon, PencilLineIcon, Undo2Icon } from 'lucide-react'
-import { CASE_DETAILS, buildLifecycle } from '@/data/mock-case-detail'
+import { CASE_DETAILS, buildLifecycle, buildManualCaseDetail } from '@/data/mock-case-detail'
 import type { CaseDetailModel } from '@/data/mock-case-detail'
 import type { FieldReview } from '@/data/types'
 import { isResolved } from '@/lib/reconcile-display'
@@ -33,8 +33,14 @@ function firstReviewLabel(c: CaseDetailModel | undefined, resolvedIds: string[] 
 
 export function CaseDetail() {
   const { id } = useParams()
-  const c = id ? CASE_DETAILS[id] : undefined
   const entity = useCase(id)
+  // 手動起票 (W3 C4) の store-only draft は CASE_DETAILS 不在 → 受付済 entity から faux detail を組む (EmptyState 回避)。
+  const c = useMemo(
+    () =>
+      (id ? CASE_DETAILS[id] : undefined) ??
+      (id && entity ? buildManualCaseDetail(id, entity.workflowName, entity.assignee, entity.overrides) : undefined),
+    [id, entity],
+  )
   const dispatch = useStoreDispatch()
   // 操作ビュー (入力者/承認者) は操作者 persona の role から導出 (remediation B4: 自己切替を廃し SoD を honest 化)。
   // 切替は TopBar の操作者 switcher (session/switchActor)。inputter は入力者ビュー、承認者/業務責任者は承認者ビュー。

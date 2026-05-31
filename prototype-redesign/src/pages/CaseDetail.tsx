@@ -326,8 +326,8 @@ export function CaseDetail() {
         submitLabel={reverseKind === '取消' ? '取消して差し戻す' : '訂正のため差し戻す'}
         outcome={
           reverseKind === '取消'
-            ? '反映済の案件を再処理（差戻し）に戻します。取消理由は記録されます。'
-            : '反映済の案件を入力者の確認待ちに戻します。再確認のうえ訂正してください。'
+            ? '反映済の案件を差戻し（再処理）に戻します。取消理由は記録されます。'
+            : '反映済の案件を差戻し（再処理）に戻します。再処理のうえ訂正してください。'
         }
         onClose={() => setReverseKind(null)}
         onSubmit={(reason) => {

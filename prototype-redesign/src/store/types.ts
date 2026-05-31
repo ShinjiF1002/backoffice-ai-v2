@@ -114,7 +114,7 @@ export interface StoreState {
  *   案件 B4 と同一 helper (isSelfApproval) を再利用し SoD を 案件/設定 で統一する (再発明しない)。承認 actor は store の現 actor を用いる。
  * case/escalate (remediation P1-3): 難案件を業務責任者へ裁定依頼。escalation 記録のみ (status は変えない、裁定の帰結は別途 case/sendback)。
  * case/reverse (remediation W3 C3、前進のみ→可逆): 反映済の訂正/取消。不可逆 guard = reflected かつ未 reversal のみ (二重 reversal は no-op)。
- *   訂正 → ready (入力者が再確認) / 取消 → sent-back (再処理 queue)。reversal 記録で kind/理由を保持 (理由を捨てない)。
+ *   訂正・取消とも sent-back (差戻し再処理) へ (ready 直行は false-success を生むため廃止)。reversal 記録で kind/理由を保持し通知/banner が区別。
  * case/create (remediation W3 C4、手動起票 = AI 障害時の業務継続): id 重複は冪等 no-op。全項目 人手入力ゆえ flags 0 / status ready、
  *   入力値は overrides に載せ humanValue overlay (B1) で表示。受付日時は action.receivedAt (UI が NOW を供給、store は lib/dates 非依存)。
  * notification/markRead / markAllRead (remediation P1-2): /inbox の既読化。冪等。markAllRead は現 selector が算出した通知 id 群を ids で受ける

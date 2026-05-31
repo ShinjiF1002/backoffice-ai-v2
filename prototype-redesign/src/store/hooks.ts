@@ -300,7 +300,7 @@ export function useSearchResults(query: string): SearchResultItem[] {
 // 差戻し受領 + エスカレーションの 2 種のみ (SLA 警告は scope-0 = JG-b、datetime 化が範囲外で偽 SLA を作らない)。
 // store entity ではなく派生 selector で都度算出 (S8)。actor 厳密 (JG-a): currentActor 宛のみ。既読は readNotificationIds。
 // 通知 id は由来 entity から決定的に導く安定文字列 (`sendback:${caseId}` / `escalation:${caseId}`)。
-export type NotificationKind = 'sendback' | 'escalation'
+export type NotificationKind = 'sendback' | 'reversal' | 'escalation'
 export interface NotificationItem {
   id: string
   kind: NotificationKind
@@ -321,16 +321,30 @@ export function useNotifications(): NotificationItem[] {
       // 差戻し受領: 担当 (入力者) 宛 — currentActor の氏名と一致する案件のみ。
       // seed 由来の差戻し案件は理由未記録のため fallback 文言 (in-session の case/sendback は理由を保持)。
       if (c.status === 'sent-back' && actor && c.assignee === actor.name) {
-        const id = `sendback:${c.id}`
-        items.push({
-          id,
-          kind: 'sendback',
-          caseId: c.id,
-          title: `${c.workflowName} ${c.id}`,
-          detail: c.sendback?.reason ?? '差し戻された案件です。内容を確認してください。',
-          href: `/cases/${c.id}`,
-          read: isRead(id),
-        })
+        if (c.reversal) {
+          // 反映済からの訂正/取消 (case/reverse) は通常の差戻しと区別して通知 (kind=reversal、取消理由を捨てない)。
+          const id = `reversal:${c.id}`
+          items.push({
+            id,
+            kind: 'reversal',
+            caseId: c.id,
+            title: `${c.workflowName} ${c.id}`,
+            detail: `反映後に${c.reversal.kind}されました：${c.reversal.reason}`,
+            href: `/cases/${c.id}`,
+            read: isRead(id),
+          })
+        } else {
+          const id = `sendback:${c.id}`
+          items.push({
+            id,
+            kind: 'sendback',
+            caseId: c.id,
+            title: `${c.workflowName} ${c.id}`,
+            detail: c.sendback?.reason ?? '差し戻された案件です。内容を確認してください。',
+            href: `/cases/${c.id}`,
+            read: isRead(id),
+          })
+        }
       }
       // エスカレーション: 宛先 actor 宛 — escalation.to が currentActorId と一致するもの
       if (c.escalation && c.escalation.to === s.currentActorId) {

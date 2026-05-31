@@ -96,10 +96,7 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
                 {!readOnly && (
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onActOnField?.(f.fieldLabel)
-                    }}
+                    onClick={() => onActOnField?.(f.fieldLabel)}
                     className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
                   >
                     対応
@@ -130,6 +127,7 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
             >
               <button
                 type="button"
+                aria-pressed={activeFieldLabel === f.fieldLabel}
                 onClick={() => onSelectField?.(f.fieldLabel)}
                 className="flex flex-1 items-center justify-between gap-3 text-left text-sm"
               >

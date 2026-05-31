@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { axe } from 'jest-axe'
 import { useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import { Modal } from '@/components/shared/Modal'
@@ -94,6 +95,13 @@ describe('ReasonDialog submit gate (Phase 2、載せ替え後も validation 不�
     expect(onSubmit).toHaveBeenCalledWith('理由テスト')
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('open ReasonDialog に axe violations がない (W3 review: open-modal a11y coverage)', async () => {
+    const { container } = render(
+      <ReasonDialog open title="却下" label="理由 (必須)" placeholder="理由を記載" submitLabel="却下する" outcome="却下します。" onClose={() => {}} onSubmit={() => {}} />,
+    )
+    expect(await axe(container)).toHaveNoViolations()
+  })
 })
 
 // W3 §4.2 G5 — modal hardening: body scroll-lock + dirty-dismiss guard。
@@ -145,5 +153,14 @@ describe('Modal W3 G5 (scroll-lock + dirty-dismiss guard)', () => {
     render(<DirtyModalHarness dirty={false} />)
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('破棄確認 overlay: 編集に戻る へ focus + 背景 inert + axe clean (W3 review fix)', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DirtyModalHarness dirty />)
+    await user.keyboard('{Escape}') // dirty → 破棄確認 overlay
+    expect(screen.getByText('編集に戻る')).toHaveFocus()
+    expect(container.querySelector('[inert]')).toBeInTheDocument() // 背景 (header/body/footer) が inert
+    expect(await axe(container)).toHaveNoViolations()
   })
 })

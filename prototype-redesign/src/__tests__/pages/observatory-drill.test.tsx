@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { axe } from 'jest-axe'
 import { MemoryRouter } from 'react-router-dom'
 import { StoreProvider } from '@/store/StoreProvider'
 import { Observatory } from '@/pages/Observatory'
@@ -71,5 +72,14 @@ describe('P1-7a Observatory drill', () => {
     expect(screen.queryByRole('link', { name: /CASE-2026-0142/ })).not.toBeInTheDocument() // page 2 では消える
     await user.click(screen.getByRole('button', { name: '全業務' })) // filter 変更で page reset
     expect(screen.getAllByRole('link', { name: /CASE-2026-0142/ }).length).toBeGreaterThan(0) // page 1 に戻る
+  })
+
+  it('メトリクス / ナレッジ tab に axe violations がない (W3 G11 補完: 非 default tab)', async () => {
+    const user = userEvent.setup()
+    const { container } = renderObservatory()
+    await user.click(screen.getByRole('button', { name: 'メトリクス' }))
+    expect(await axe(container)).toHaveNoViolations()
+    await user.click(screen.getByRole('button', { name: 'ナレッジ' }))
+    expect(await axe(container)).toHaveNoViolations()
   })
 })

@@ -8,7 +8,7 @@
  *      同一行 ±2 行の window に持つ場合のみ許容 (multi-line JSX 対応)。
  *   2. icon-suffix: `lucide-react` import は全て Icon suffix (§5/§8)。非 suffix import を検出。
  *   3. emoji: ✓✗✔✘✅❌⚠ 等の装飾 emoji を UI から禁止 (§5/§8)。
- *   4. future-date: UI timestamp の未来日 sentinel '2026-05-31' を禁止 (§4 G7、基準日 2026-05-30)。
+ *   4. future-date: 過去混入値 '2026-05-31' の再混入を検出する regression-sentinel (§4 G7)。未来日全般の ban ではない。
  *
  * off-token hex 全数 / 全画面 axe は本 gate の対象外 (P2B-4 / W3、§1.0)。
  * 既存 `typescript` 以外の新規 dep なし (Node 標準 fs のみ)。
@@ -44,7 +44,7 @@ const rel = (f) => f.replace(SRC, 'src')
 const EXCEPTION = /aria-hidden|Icon|cursor-not-allowed|disabled|pointer-events-none/
 const FG_SUBTLE_TEXT = /text-\[var\(--color-fg-subtle\)\]/
 const EMOJI = /[✓✔✗✘✅❌⚠]/ // ✓✔✗✘✅❌⚠
-const FUTURE_DATE = /2026-05-31/ // 基準日 2026-05-30 の翌日 sentinel (§4 G7)
+const FUTURE_DATE = /2026-05-31/ // §4 G7 で除去した特定値の regression-sentinel (未来日全般の ban ではない)
 const LUCIDE_IMPORT = /import\s+(?:type\s+)?\{([^}]+)\}\s+from\s+['"]lucide-react['"]/g
 
 for (const file of files) {
@@ -67,8 +67,9 @@ for (const file of files) {
     }
   })
 
-  // 4. future-date sentinel (§4 G7): 基準日 2026-05-30 より後の UI timestamp は未来日 bug。
-  //    効力発生日/有効期限 等の正当な未来日 (2026-06 / 2029) とは別 = sentinel '2026-05-31' のみ禁止。
+  // 4. future-date regression-sentinel (§4 G7): 過去に混入した特定値 '2026-05-31' の再混入のみ検出する。
+  //    基準日超の UI timestamp 全般を保証する invariant ではない (効力発生日/有効期限 等の正当な未来日 2026-06 / 2029 は
+  //    許容せねばならず blanket future-date ban は false-positive を生む)。新たな未来日混入が起きたら値を追加する運用。
   lines.forEach((line, i) => {
     if (FUTURE_DATE.test(line)) {
       violations.push(`${rel(file)}:${i + 1}  future-date: UI timestamp に未来日 '2026-05-31' (基準日 2026-05-30 以前へ)`)

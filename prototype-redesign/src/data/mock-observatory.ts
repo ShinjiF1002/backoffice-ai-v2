@@ -75,23 +75,23 @@ export const OBS_CASE_ID = 'CASE-2026-0142'
 /** 職務分離 (SoD) 注記 */
 export const OBS_SOD = { inputter: '山田太郎', approver: '鈴木課長' }
 
-// §8: lifecycle (業務の流れ順、confidence なし)
+// §8: lifecycle (業務の流れ順、confidence なし)。代表 0142 の時刻は receivedAt (2026-05-30 16:40、mock-case-list) 起点で整合 (受付→反映 が受付時刻以降)。
 export const OBS_LIFECYCLE: LifecycleEvent[] = [
-  { time: '2026-05-30 09:00', actor: 'システム', role: 'システム', tone: 'inset', title: '受付', body: '申請書類を受け付けました。' },
-  { time: '2026-05-30 09:02', actor: 'AI 担当 Agent', role: 'AI', tone: 'primary', title: 'AI 入力', body: '申請書類を読み取り、登録情報と照合して値を生成しました。' },
-  { time: '2026-05-30 10:15', actor: '山田太郎', role: '入力者', tone: 'alert', title: '入力者確認', body: 'ビル名を申請書類の値で確定し、他の項目を確認しました。' },
-  { time: '2026-05-30 11:30', actor: '鈴木課長', role: '承認者', tone: 'success', title: '承認者承認', body: '入力者の確認結果と申請書類を確認し、最終承認しました。' },
-  { time: '2026-05-30 11:31', actor: 'システム', role: 'システム', tone: 'inset', title: '反映', body: '登録情報を更新しました。' },
+  { time: '2026-05-30 16:40', actor: 'システム', role: 'システム', tone: 'inset', title: '受付', body: '申請書類を受け付けました。' },
+  { time: '2026-05-30 16:42', actor: 'AI 担当 Agent', role: 'AI', tone: 'primary', title: 'AI 入力', body: '申請書類を読み取り、登録情報と照合して値を生成しました。' },
+  { time: '2026-05-30 17:10', actor: '山田太郎', role: '入力者', tone: 'alert', title: '入力者確認', body: 'ビル名を申請書類の値で確定し、他の項目を確認しました。' },
+  { time: '2026-05-30 17:35', actor: '鈴木課長', role: '承認者', tone: 'success', title: '承認者承認', body: '入力者の確認結果と申請書類を確認し、最終承認しました。' },
+  { time: '2026-05-30 17:36', actor: 'システム', role: 'システム', tone: 'inset', title: '反映', body: '登録情報を更新しました。' },
 ]
 
 // §9: raw event ledger (監査 export schema、confidence は本 view のみ)。代表 0142 = rich 5 event。
 const C0142 = { caseId: OBS_CASE_ID, workflowName: '法人住所変更' }
 export const OBS_LEDGER: LedgerEvent[] = [
-  { ts: '2026-05-30 09:00:04', actor: 'system', role: 'system', action: 'intake', beforeAfter: '—', doc: 'CASE-2026-0142.pdf', policy: '—', approvalId: '—', confidence: '—', ...C0142 },
-  { ts: '2026-05-30 09:02:11', actor: 'agent-corp-addr', role: 'AI', action: 'ai_input', beforeAfter: '(値生成) 法人名 / 新住所 / 支店 / 効力日 / ビル名', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '法人名 0.98 / 住所 0.95 / ビル名 0.84', ...C0142 },
-  { ts: '2026-05-30 10:15:42', actor: '山田太郎', role: 'inputter', action: 'field_override', beforeAfter: 'ビル名: サンプルビル → サンプルビルディング', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '—', ...C0142 },
-  { ts: '2026-05-30 11:30:08', actor: '鈴木課長', role: 'approver', action: 'business_approve', beforeAfter: 'status: 確認済 → 承認済', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
-  { ts: '2026-05-30 11:31:00', actor: 'system', role: 'system', action: 'reflect', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 16:40:04', actor: 'system', role: 'system', action: 'intake', beforeAfter: '—', doc: 'CASE-2026-0142.pdf', policy: '—', approvalId: '—', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 16:42:11', actor: 'agent-corp-addr', role: 'AI', action: 'ai_input', beforeAfter: '(値生成) 法人名 / 新住所 / 支店 / 効力日 / ビル名', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '法人名 0.98 / 住所 0.95 / ビル名 0.84', ...C0142 },
+  { ts: '2026-05-30 17:10:42', actor: '山田太郎', role: 'inputter', action: 'field_override', beforeAfter: 'ビル名: サンプルビル → サンプルビルディング', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 17:35:08', actor: '鈴木課長', role: 'approver', action: 'business_approve', beforeAfter: 'status: 確認済 → 承認済', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 17:36:00', actor: 'system', role: 'system', action: 'reflect', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
 ]
 
 // P1-7: 横断台帳 (CROSS_LEDGER) = 13 業務 case を flatten (JG-1 (a)-lite)。代表 0142 は上記 rich event、

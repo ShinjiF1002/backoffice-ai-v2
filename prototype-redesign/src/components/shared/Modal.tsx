@@ -53,6 +53,7 @@ export interface ModalProps {
 
 export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, footer, dirty, confirmOnDismiss, children }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const discardBtnRef = useRef<HTMLButtonElement>(null)
   const titleId = useId()
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   // open が閉じたら破棄確認を reset (再 open で fresh)。render 中の prop 変化検知 (set-state-in-effect 回避)。
@@ -119,6 +120,11 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [open, onClose, dirty, confirmOnDismiss])
 
+  // W3 G5: 破棄確認 overlay 表示時は「編集に戻る」へ focus を移す (背景 inert と併せ Tab を overlay に閉じる)。
+  useEffect(() => {
+    if (showDiscardConfirm) discardBtnRef.current?.focus()
+  }, [showDiscardConfirm])
+
   if (!open) return null
 
   return (
@@ -138,27 +144,30 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
           size === 'md' ? 'w-[520px]' : 'w-[480px]',
         )}
       >
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
-          <h2 id={titleId} className="text-sm font-semibold text-[var(--color-fg)]">
-            {title}
-          </h2>
-          <button
-            type="button"
-            onClick={requestClose}
-            aria-label="閉じる"
-            className="rounded p-1 text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]"
-          >
-            <XIcon className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="p-5">{children}</div>
-
-        {footer && (
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] bg-[var(--color-panel-inset)] px-5 py-3">
-            {footer}
+        {/* W3 G5: 破棄確認中は背景 (header/body/footer) を inert 化し focus/操作を overlay に閉じる。 */}
+        <div className="flex flex-col" inert={showDiscardConfirm || undefined}>
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
+            <h2 id={titleId} className="text-sm font-semibold text-[var(--color-fg)]">
+              {title}
+            </h2>
+            <button
+              type="button"
+              onClick={requestClose}
+              aria-label="閉じる"
+              className="rounded p-1 text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
           </div>
-        )}
+
+          <div className="p-5">{children}</div>
+
+          {footer && (
+            <div className="flex justify-end gap-2 border-t border-[var(--color-border)] bg-[var(--color-panel-inset)] px-5 py-3">
+              {footer}
+            </div>
+          )}
+        </div>
 
         {/* W3 G5: dirty 時の破棄確認 overlay (Esc/backdrop/X で即閉じず、入力を捨てる前に確認)。 */}
         {showDiscardConfirm && (
@@ -167,6 +176,7 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
             <p className="text-xs text-[var(--color-fg-muted)]">入力した内容は保存されません。</p>
             <div className="mt-2 flex gap-2">
               <button
+                ref={discardBtnRef}
                 type="button"
                 onClick={() => setShowDiscardConfirm(false)}
                 className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"

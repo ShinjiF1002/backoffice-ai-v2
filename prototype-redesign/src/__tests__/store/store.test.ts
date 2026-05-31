@@ -242,9 +242,9 @@ describe('store foundation (Phase 1)', () => {
 
   describe('remediation W3 (reversal C3 / manual-entry C4)', () => {
     // CASE-2026-0120 = seed の reflected (反映済) 案件、CASE-2026-0142 = ready
-    it('case/reverse 訂正: reflected → ready + reversal 記録 (前進のみ→可逆)', () => {
+    it('case/reverse 訂正: reflected → sent-back + reversal 記録 (ready 直行廃止で false-success 回避)', () => {
       const s = storeReducer(seed(), { type: 'case/reverse', id: 'CASE-2026-0120', kind: '訂正', reason: '住所の訂正' })
-      expect(s.cases['CASE-2026-0120']!.status).toBe('ready')
+      expect(s.cases['CASE-2026-0120']!.status).toBe('sent-back') // ready ではなく sent-back
       expect(s.cases['CASE-2026-0120']!.reversal).toEqual({ kind: '訂正', reason: '住所の訂正' })
     })
     it('case/reverse 取消: reflected → sent-back + reversal 記録', () => {

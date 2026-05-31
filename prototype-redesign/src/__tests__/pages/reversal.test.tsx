@@ -1,11 +1,11 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import type { Dispatch } from 'react'
 import { StoreProvider } from '@/store/StoreProvider'
 import { CaseDetail } from '@/pages/CaseDetail'
 import type { StoreAction } from '@/store/types'
-import { useStoreDispatch } from '@/store/hooks'
+import { useStoreDispatch, useNotifications } from '@/store/hooks'
 import { clearPersisted } from '@/store/persist'
 
 // W3 C3 — 反映済 (terminal) の訂正/取消 affordance (前進のみ→可逆)。
@@ -53,7 +53,7 @@ describe('W3 C3 reversal: CaseDetail 反映済の訂正/取消', () => {
     expect(screen.queryByRole('button', { name: '訂正' })).not.toBeInTheDocument()
   })
 
-  it('訂正: 理由必須 → reflected→ready + reversal banner、反映済 badge が消える', async () => {
+  it('訂正: 理由必須 → reflected→sent-back + reversal banner、反映済 badge が消える', async () => {
     const user = userEvent.setup()
     const dispatch = renderCaseDetail('CASE-2026-0120')
     act(() => dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
@@ -81,5 +81,17 @@ describe('W3 C3 reversal: CaseDetail 反映済の訂正/取消', () => {
     expect(screen.getByText('この案件は反映済から取消されました')).toBeInTheDocument()
     expect(screen.getByText(/別案件の取り違えで誤って反映/)).toBeInTheDocument()
     expect(screen.queryByText('反映済')).not.toBeInTheDocument()
+  })
+
+  it('取消した案件は assignee(入力者) に reversal 通知 (差戻し受領 と区別、取消理由を保持)', () => {
+    const { result } = renderHook(() => ({ notes: useNotifications(), dispatch: useStoreDispatch() }), { wrapper: StoreProvider })
+    // 承認者で 0120 を取消 → 入力者 (山田太郎 = 0120 assignee) に切替えて通知確認
+    act(() => result.current.dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+    act(() => result.current.dispatch({ type: 'case/reverse', id: 'CASE-2026-0120', kind: '取消', reason: '誤反映' }))
+    act(() => result.current.dispatch({ type: 'session/switchActor', actorId: 'actor-inputter' }))
+    const rev = result.current.notes.find((n) => n.caseId === 'CASE-2026-0120')
+    expect(rev?.kind).toBe('reversal') // 'sendback' ではない
+    expect(rev?.detail).toContain('取消')
+    expect(rev?.detail).toContain('誤反映')
   })
 })

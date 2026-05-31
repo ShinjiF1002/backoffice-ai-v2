@@ -15,7 +15,7 @@
 
 ## 9 routes (Process-First、`ia-overview-v2.md` §2 SSOT)
 
-`src/App.tsx` で React Router v7。下記は **historical baseline の 9 画面** (remediation で 14 へ拡張中 — 現 11: W2b で `/search`・`/inbox` 追加済 ✓、W2c で `/business-approver`・`/config-approvals`・`/escalations` 追加予定。現行 route の SSOT は roadmap §1b):
+`src/App.tsx` で React Router v7。下記は **historical baseline の 9 画面** (remediation で **14 画面実装完了** — W2b `/search`・`/inbox` ✓ + W2c `/business-approver`・`/config-approvals`・`/escalations` ✓。現行 route の SSOT は roadmap §1b):
 
 1. `Hub` — `/`
 2. `Cases` (案件一覧) — `/cases`

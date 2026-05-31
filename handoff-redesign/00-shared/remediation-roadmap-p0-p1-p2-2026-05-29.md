@@ -6,7 +6,7 @@
 >
 > **SSOT 単一化 (2026-05-30)**: 本 roadmap が **唯一の実行 SSOT**。screen 軸の overlay (`~/.claude/plans/generic-noodling-lampson.md`、repo 外) と next-session handoff prompt (`next-session-handoff-full-rebuild-2026-05-30.md`、in-repo) は本 roadmap §1/§1b に吸収済 → **以後 historical / prompt-only** として扱い、実行判断に用いない。
 >
-> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (= P1-W4 strict Stage2 [`c7276a8`] + P1-1 ProcessSelector→ViewContext [`56d6dfa`] + P1-5 Loading/Error CORE) 実装完了 (§1.0 の closure 状態参照)。**P1-W5 完了 (W1-A CORE + P1-5-remainder [下記] 実装済 = full close、2026-05-30)**。次アクションは **P1-W6/W7 (6/12 後送り維持、master plan rebaseline 承認が前提)**。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
+> **CR 収束 (2026-05-30)**: 計画構造は ~6 CR round + external CR で converged。**本 statement 以降、plan 構造の追加 CR を禁止**。**W0 + W1-A (= P1-W4 strict Stage2 [`c7276a8`] + P1-1 ProcessSelector→ViewContext [`56d6dfa`] + P1-5 Loading/Error CORE) 実装完了 (§1.0 の closure 状態参照)。**P1-W5 完了 (W1-A CORE + P1-5-remainder [下記] 実装済 = full close、2026-05-30)**。**【更新 2026-05-30】P1-W6/W7 (= W2b/W2c) は option B 採択で実装完了** (9→14 画面 + 全 enhancement、§1.0/§1b as-built note 群が SSOT)。**次アクションは W3 (production polish、§4.0) のみ**。新規 cross-cutting 要件が出た場合のみ §1b/§4 に追記し、構造 re-CR はしない。
 >
 > **P1-5 closure (CORE + remainder 完了)**: loading/error を **hidden QA seam** (`useListData` + URL query) で到達可能化。**再現手順**: 任意 list route に `?demo=loading` (skeleton) / `?demo=error` (ErrorState + 再試行で ready 回復) を付与 (例 `/cases?demo=loading`、`/cases?demo=error`)。default OFF で demo chrome 非汚染、visible DevControls 不採用 (TopBar 混雑回避、CR)。DataTable は loading/error 中 filter chips + 一括操作 bar を非表示 (CR)。検証: behavioral test (`loading-error.test.tsx` 3) + browser proof (skeleton / ErrorState 両状態、filter 非表示確認)。**P1-5-remainder (実装済 2026-05-30)**: detail 3 画面 (CaseDetail/ProposalDetail/AgentDetail) の bespoke not-found → `EmptyState(truly-empty, role=status, Link action, 文言維持)` 統一 + `EmptyState` permission-empty dead branch 除去 (type/iconMap/LockIcon import、active caller 0)。検証: check:all green (119 test、not-found 3 route 文言 assert 維持) + 3 not-found route browser proof。not-found icon は truly-empty の Inbox を許容 (variant 不要、as-built)。
 
@@ -567,6 +567,8 @@ P0 全 wave 完了後に P1-W4 → P1-W7 を直列。順序の根拠:
 - **Sprint I+ = P2 batched** (各 wave 後に group gate で随時)
 
 ### 6.4 Session 4 (6/12) までに現実的に入る範囲 / 後送りの線引き
+
+> **★ 更新 2026-05-30 (本節は historical planning)**: user が **option B** を採択し **P1-W6/W7 (= W2b/W2c) を実装完了** (9→14 画面、`remediation/w2-screens`)。本節の「6/12 後送り推奨」「未着手前提の stop 条件」は当時の demo-優先 line-drawing であり、**現状の実装 status とは異なる**。実装済 status は §1.0 + §1b + 冒頭 as-built note 群が SSOT。本節は判断経緯の記録として保持。残るは **W3 (production polish)** のみ。
 
 > **判断基準**: demo の中核 message (「差戻しを次の正解手順に変える Flywheel」+ SoD + 突合修正 + 証拠アンカー) を観測可能にする最小集合を 6/12 前に、IA 拡張・観測性向上は demo 価値への寄与順で。
 

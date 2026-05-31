@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
 import { XIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
@@ -44,12 +44,37 @@ export interface ModalProps {
   initialFocusRef?: RefObject<HTMLElement | null>
   /** footer slot (cancel / primary 等を consumer が渡す)。未指定なら footer 非表示 */
   footer?: ReactNode
+  /** 未保存入力あり (W3 G5)。confirmOnDismiss と併用で Esc/backdrop/X の閉じを破棄確認に切替える。 */
+  dirty?: boolean
+  /** dirty 時に閉じ操作を破棄確認に切替える (W3 G5)。未指定 (既存 consumer) は即閉じ = 挙動不変。 */
+  confirmOnDismiss?: boolean
   children: ReactNode
 }
 
-export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, footer, children }: ModalProps) {
+export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, footer, dirty, confirmOnDismiss, children }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  // open が閉じたら破棄確認を reset (再 open で fresh)。render 中の prop 変化検知 (set-state-in-effect 回避)。
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (!open) setShowDiscardConfirm(false)
+  }
+  // W3 G5: dirty + confirmOnDismiss の時、閉じ操作を破棄確認へ振り替える。それ以外は即 onClose (既存 consumer 挙動不変)。
+  const requestClose = () => {
+    if (dirty && confirmOnDismiss) setShowDiscardConfirm(true)
+    else onClose()
+  }
+  // W3 G5: open 中は body scroll-lock (背景スクロール抑止)。前値を保存し close/unmount で復元 (単一 modal 前提)。
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
 
   // focus 移動 + 復帰 (open 遷移時のみ。onClose を deps に含めず focus 横取りを防ぐ)
   useEffect(() => {
@@ -68,7 +93,8 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        onClose()
+        if (dirty && confirmOnDismiss) setShowDiscardConfirm(true)
+        else onClose()
         return
       }
       if (e.key !== 'Tab') return
@@ -91,7 +117,7 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
+  }, [open, onClose, dirty, confirmOnDismiss])
 
   if (!open) return null
 
@@ -99,7 +125,7 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
     // backdrop = click target のみ。dialog container は panel 側 (a11y 責務分離、Phase 2 CR)
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-overlay)] p-6"
-      onClick={onClose}
+      onClick={requestClose}
     >
       <div
         ref={panelRef}
@@ -108,7 +134,7 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'flex max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl',
+          'relative flex max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl',
           size === 'md' ? 'w-[520px]' : 'w-[480px]',
         )}
       >
@@ -118,7 +144,7 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="閉じる"
             className="rounded p-1 text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]"
           >
@@ -131,6 +157,33 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
         {footer && (
           <div className="flex justify-end gap-2 border-t border-[var(--color-border)] bg-[var(--color-panel-inset)] px-5 py-3">
             {footer}
+          </div>
+        )}
+
+        {/* W3 G5: dirty 時の破棄確認 overlay (Esc/backdrop/X で即閉じず、入力を捨てる前に確認)。 */}
+        {showDiscardConfirm && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] bg-[var(--color-panel)] p-6 text-center">
+            <p className="text-sm font-medium text-[var(--color-fg)]">入力内容を破棄して閉じますか？</p>
+            <p className="text-xs text-[var(--color-fg-muted)]">入力した内容は保存されません。</p>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDiscardConfirm(false)}
+                className="rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+              >
+                編集に戻る
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDiscardConfirm(false)
+                  onClose()
+                }}
+                className="rounded-[var(--radius-control)] bg-[var(--color-error)] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
+              >
+                破棄して閉じる
+              </button>
+            </div>
           </div>
         )}
       </div>

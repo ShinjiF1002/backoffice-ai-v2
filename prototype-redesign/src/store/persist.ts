@@ -80,10 +80,28 @@ export function loadPersisted(fallback: StoreState): StoreState {
 export function savePersisted(state: StoreState): void {
   try {
     if (typeof localStorage === 'undefined') return
-    const payload: Persisted = { v: SCHEMA_VERSION, state }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+    const payload = JSON.stringify({ v: SCHEMA_VERSION, state })
+    // 同値の再書き込みは skip (multi-tab の hydrate→save→storage event ping-pong を防ぐ + 無害な write 削減)。
+    if (localStorage.getItem(STORAGE_KEY) === payload) return
+    localStorage.setItem(STORAGE_KEY, payload)
   } catch {
     /* no-op */
+  }
+}
+
+/**
+ * 他タブの localStorage 書き込み (StorageEvent) から validated state を復元 (W3 multi-tab、last-write-wins)。
+ * 対象 key 以外 / clear / 不正 shape / version 不一致は null (= 無視、現 state 据え置き)。StoreProvider が dispatch する。
+ */
+export function loadPersistedFromStorageEvent(e: StorageEvent): StoreState | null {
+  if (e.key !== STORAGE_KEY) return null // ViewContext 等の別 key を無視
+  if (!e.newValue) return null // removeItem / clear は無視 (現 state 据え置き)
+  try {
+    const parsed = JSON.parse(e.newValue) as Persisted
+    if (parsed?.v !== SCHEMA_VERSION || !isStoreStateShape(parsed.state)) return null
+    return parsed.state
+  } catch {
+    return null
   }
 }
 

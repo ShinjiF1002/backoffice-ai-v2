@@ -103,6 +103,8 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
       onClose={onClose}
       title={caseLevel ? '案件の差戻し' : isReview ? '項目の確認' : '項目の対応'}
       size="md"
+      dirty={!!(reason.trim() || value.trim())}
+      confirmOnDismiss
       initialFocusRef={reasonRef as RefObject<HTMLElement | null>}
       footer={
         isReview ? (

@@ -150,4 +150,5 @@ export type StoreAction =
   | { type: 'notification/markRead'; id: string }
   | { type: 'notification/markAllRead'; ids: string[] }
   | { type: 'session/switchActor'; actorId: string }
+  | { type: 'store/hydrate'; state: StoreState }
   | { type: 'store/reset' }

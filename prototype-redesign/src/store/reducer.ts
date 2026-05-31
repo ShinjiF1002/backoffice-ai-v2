@@ -199,6 +199,9 @@ export function storeReducer(state: StoreState, action: StoreAction): StoreState
       const cur = state.agents[action.id]
       return cur ? patchAgent(state, action.id, { paused: false, pausedReason: undefined }) : state
     }
+    case 'store/hydrate':
+      // W3 multi-tab: 他タブの外部書き込みを再 hydrate (last-write-wins)。validated state (persist guard 通過) をそのまま採用。
+      return action.state
     case 'store/reset':
       return seed()
     default: {

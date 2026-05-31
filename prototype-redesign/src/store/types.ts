@@ -40,7 +40,13 @@ export interface CaseEntity {
    * 裁定の帰結 (JG-3=a) は既存 case/sendback (差戻し) を再利用し、本 field は依頼記録に徹する (status は変えない)。
    */
   escalation?: { reason: string; category: string; to: string }
-  elapsedLabel: string
+  /**
+   * 反映済 (terminal) の訂正/取消 記録 (remediation W3 C3、前進のみ→可逆)。
+   * 存在 = 既に reversal 済 = 不可逆 guard の discriminant (二重 reversal を block)。理由を捨てない。
+   */
+  reversal?: { kind: '訂正' | '取消'; reason: string }
+  /** 受付日時 (ISO、SLA 経過の基準 fact)。表示 label は lib/dates で派生 (S8: 派生表示を store に持たない)。 */
+  receivedAt: string
 }
 
 /** 提案 (操作対象 = status)。 */
@@ -107,6 +113,10 @@ export interface StoreState {
  *   SoD (四眼原則を設定層へ拡張): 申請 actor (promotionRequestedBy) と承認 actor (state.currentActorId) が同一なら no-op block。
  *   案件 B4 と同一 helper (isSelfApproval) を再利用し SoD を 案件/設定 で統一する (再発明しない)。承認 actor は store の現 actor を用いる。
  * case/escalate (remediation P1-3): 難案件を業務責任者へ裁定依頼。escalation 記録のみ (status は変えない、裁定の帰結は別途 case/sendback)。
+ * case/reverse (remediation W3 C3、前進のみ→可逆): 反映済の訂正/取消。不可逆 guard = reflected かつ未 reversal のみ (二重 reversal は no-op)。
+ *   訂正 → ready (入力者が再確認) / 取消 → sent-back (再処理 queue)。reversal 記録で kind/理由を保持 (理由を捨てない)。
+ * case/create (remediation W3 C4、手動起票 = AI 障害時の業務継続): id 重複は冪等 no-op。全項目 人手入力ゆえ flags 0 / status ready、
+ *   入力値は overrides に載せ humanValue overlay (B1) で表示。受付日時は action.receivedAt (UI が NOW を供給、store は lib/dates 非依存)。
  * notification/markRead / markAllRead (remediation P1-2): /inbox の既読化。冪等。markAllRead は現 selector が算出した通知 id 群を ids で受ける
  *   (通知 universe の算出責務を selector 側に閉じ、reducer は既読 fact の追記に徹する)。
  */
@@ -117,6 +127,17 @@ export type StoreAction =
   | { type: 'case/escalate'; id: string; reason: string; category: string; to: string }
   | { type: 'case/assign'; id: string; assignee: string }
   | { type: 'case/bulkApprove'; ids: string[]; by: 'input' | 'checker' }
+  | { type: 'case/reverse'; id: string; kind: '訂正' | '取消'; reason: string }
+  | {
+      type: 'case/create'
+      id: string
+      workflowId: string
+      workflowName: string
+      assignee?: string
+      fieldLabels: string[]
+      values: Record<string, string>
+      receivedAt: string
+    }
   | { type: 'proposal/forward'; id: string }
   | { type: 'proposal/approve'; id: string }
   | { type: 'proposal/reject'; id: string; reason: string; category?: string }

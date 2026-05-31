@@ -12,8 +12,11 @@ const STORAGE_KEY = 'bo-ai-v2:store'
 // 3→4: remediation P0-W3 で AgentEntity.pausedReason 追加 (flywheel kill-switch、togglePause→emergencyStop/resume)。
 // 4→5: remediation W2a で StoreState.readNotificationIds + CaseEntity.escalation +
 //      AgentEntity.promotionStatus/promotionRequestedBy/promotionSendbackReason (旧 promotionRequested boolean を統合) 追加 (P1-2/P1-3)。
+// 5→6: remediation W3 で CaseEntity.reversal (反映済の訂正/取消、C3) 追加 + CaseEntity.elapsedLabel(静的文字列)→receivedAt
+//      (SLA を NOW 基準で派生化、§4 G7 / S8 fact-only) に置換。case 形が変わるため bump。
+//      ★ deploy は SCHEMA bump ゆえ 6/12 demo と別日に置く (roadmap §6.2 risk #1、旧 v5 localStorage は seed fallback)。
 // 旧 version は不一致で seed fallback (白画面化を防ぐ)。
-const SCHEMA_VERSION = 5
+const SCHEMA_VERSION = 6
 
 interface Persisted {
   v: number

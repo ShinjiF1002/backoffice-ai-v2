@@ -10,6 +10,7 @@ import { useCases } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { KPI_PROCESS_LABEL } from '@/data/mock-kpi'
 import { useListData } from '@/hooks/useListData'
+import { caseElapsedLabel } from '@/lib/dates'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
@@ -37,7 +38,7 @@ const columns: DataTableColumn<CaseListRow>[] = [
     cell: (r) => <StatusBadge tone={caseStatusToTone(r.status)} label={caseStatusLabel(r.status)} />,
     sortValue: (r) => r.status,
   },
-  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.elapsed },
+  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => caseElapsedLabel(r.receivedAt, r.status) },
   {
     key: 'owner',
     header: '担当',
@@ -71,7 +72,7 @@ export function Cases() {
     id: e.id,
     workflow: e.workflowName,
     status: e.status,
-    elapsed: e.elapsedLabel,
+    receivedAt: e.receivedAt,
     owner: e.assignee ?? '—',
     flags: e.flags,
   }))

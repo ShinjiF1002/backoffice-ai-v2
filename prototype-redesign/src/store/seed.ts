@@ -33,7 +33,7 @@ export function seed(): StoreState {
       overrides: {},
       // 既に承認待ちの seed 案件は入力者承認済とみなし inputApprovedBy を埋める (B4 SoD を seeded baw にも普遍適用)。
       inputApprovedBy: row.status === 'business-approval-waiting' ? DEFAULT_ACTOR_ID : undefined,
-      elapsedLabel: row.elapsed,
+      receivedAt: row.receivedAt,
     }
     caseOrder.push(row.id)
   }

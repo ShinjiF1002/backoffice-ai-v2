@@ -12,7 +12,8 @@ export interface CaseListRow {
   id: string
   workflow: string
   status: CaseStatus
-  elapsed: string
+  /** 受付日時 (ISO、SLA 経過の基準 fact)。一覧「経過」列の表示 label は lib/dates で派生する。 */
+  receivedAt: string
   owner: string
   /** 要確認 項目数 (0 = 全項目一致) */
   flags: number
@@ -23,19 +24,19 @@ export interface CaseListRow {
 
 /** 法人住所変更 (UC-BO-01) 代表 8 件 (各 status + recommended + change、detail dict と整合)。 */
 const BASE_CASES: CaseListRow[] = [
-  { id: 'CASE-2026-0142', workflow: '法人住所変更', status: 'ready', elapsed: '1時間20分', owner: '山田太郎', flags: 1, recommended: true,
+  { id: 'CASE-2026-0142', workflow: '法人住所変更', status: 'ready', receivedAt: '2026-05-30T16:40:00+09:00', owner: '山田太郎', flags: 1, recommended: true,
     change: { field: '新住所', from: '東京都千代田区丸の内 1 丁目 1 番 1 号', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
-  { id: 'CASE-2026-0145', workflow: '法人住所変更', status: 'ready', elapsed: '38分', owner: '山田太郎', flags: 2,
+  { id: 'CASE-2026-0145', workflow: '法人住所変更', status: 'ready', receivedAt: '2026-05-30T17:22:00+09:00', owner: '山田太郎', flags: 2,
     change: { field: '新住所', from: '大阪市北区梅田 1-2', to: '大阪市北区梅田 3-4-5' } },
-  { id: 'CASE-2026-0139', workflow: '法人住所変更', status: 'ready', elapsed: '2時間05分', owner: '山田太郎', flags: 0,
+  { id: 'CASE-2026-0139', workflow: '法人住所変更', status: 'ready', receivedAt: '2026-05-30T15:55:00+09:00', owner: '山田太郎', flags: 0,
     change: { field: '新住所', from: '名古屋市中区栄 2-1', to: '名古屋市中区栄 4-1-1' } },
-  { id: 'CASE-2026-0131', workflow: '法人住所変更', status: 'sent-back', elapsed: '4時間12分', owner: '山田太郎', flags: 0,
+  { id: 'CASE-2026-0131', workflow: '法人住所変更', status: 'sent-back', receivedAt: '2026-05-30T13:48:00+09:00', owner: '山田太郎', flags: 0,
     change: { field: '法人名', from: '株式会社旧商号', to: '株式会社サンプル商事' } },
-  { id: 'CASE-2026-0128', workflow: '法人住所変更', status: 'business-approval-waiting', elapsed: '5時間30分', owner: '鈴木課長', flags: 0,
+  { id: 'CASE-2026-0128', workflow: '法人住所変更', status: 'business-approval-waiting', receivedAt: '2026-05-30T12:30:00+09:00', owner: '鈴木課長', flags: 0,
     change: { field: '新住所', from: '福岡市博多区 1-1', to: '福岡市博多区博多駅前 2-2-2' } },
-  { id: 'CASE-2026-0150', workflow: '法人住所変更', status: 'pending', elapsed: '8分', owner: '—', flags: 0 },
-  { id: 'CASE-2026-0149', workflow: '法人住所変更', status: 'pending', elapsed: '14分', owner: '—', flags: 0 },
-  { id: 'CASE-2026-0120', workflow: '法人住所変更', status: 'reflected', elapsed: '昨日 16:40', owner: '山田太郎', flags: 0,
+  { id: 'CASE-2026-0150', workflow: '法人住所変更', status: 'pending', receivedAt: '2026-05-30T17:52:00+09:00', owner: '—', flags: 0 },
+  { id: 'CASE-2026-0149', workflow: '法人住所変更', status: 'pending', receivedAt: '2026-05-30T17:46:00+09:00', owner: '—', flags: 0 },
+  { id: 'CASE-2026-0120', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-29T16:40:00+09:00', owner: '山田太郎', flags: 0,
     change: { field: '新住所', from: '札幌市中央区 1-2', to: '札幌市中央区大通西 3-1' } },
 ]
 
@@ -46,12 +47,12 @@ const BASE_CASES: CaseListRow[] = [
  *   (B2: detail を口座開設書類で表示し「別明細なのに法人住所変更データ」破綻を解消)。
  */
 const ACCOUNT_OPENING_CASES: CaseListRow[] = [
-  { id: 'CASE-2026-0112', workflow: '口座開設書類完備', status: 'reflected', elapsed: '昨日 14:10', owner: '佐藤花子', flags: 0 },
-  { id: 'CASE-2026-0101', workflow: '口座開設書類完備', status: 'ready', elapsed: '1時間02分', owner: '佐藤花子', flags: 0 },
-  { id: 'CASE-2026-0104', workflow: '口座開設書類完備', status: 'ready', elapsed: '46分', owner: '高橋', flags: 1, recommended: true,
+  { id: 'CASE-2026-0112', workflow: '口座開設書類完備', status: 'reflected', receivedAt: '2026-05-29T14:10:00+09:00', owner: '佐藤花子', flags: 0 },
+  { id: 'CASE-2026-0101', workflow: '口座開設書類完備', status: 'ready', receivedAt: '2026-05-30T16:58:00+09:00', owner: '佐藤花子', flags: 0 },
+  { id: 'CASE-2026-0104', workflow: '口座開設書類完備', status: 'ready', receivedAt: '2026-05-30T17:14:00+09:00', owner: '高橋', flags: 1, recommended: true,
     change: { field: '有効期限', from: '(申請書類より読み取り)', to: '2026-06-12' } },
-  { id: 'CASE-2026-0103', workflow: '口座開設書類完備', status: 'pending', elapsed: '11分', owner: '—', flags: 0 },
-  { id: 'CASE-2026-0110', workflow: '口座開設書類完備', status: 'business-approval-waiting', elapsed: '3時間20分', owner: '高橋', flags: 0 },
+  { id: 'CASE-2026-0103', workflow: '口座開設書類完備', status: 'pending', receivedAt: '2026-05-30T17:49:00+09:00', owner: '—', flags: 0 },
+  { id: 'CASE-2026-0110', workflow: '口座開設書類完備', status: 'business-approval-waiting', receivedAt: '2026-05-30T14:40:00+09:00', owner: '高橋', flags: 0 },
 ]
 
 /**
@@ -68,7 +69,7 @@ export const VERIFICATION_EXTRA_CASES: CaseListRow[] = Array.from({ length: 20 }
     id: `CASE-VRF-${String(i + 1).padStart(4, '0')}`,
     workflow: '法人住所変更',
     status,
-    elapsed: `${(i % 6) + 1}時間${((i * 7) % 60).toString().padStart(2, '0')}分`,
+    receivedAt: `2026-05-30T${String(8 + (i % 9)).padStart(2, '0')}:${((i * 7) % 60).toString().padStart(2, '0')}:00+09:00`,
     owner: status === 'pending' ? '—' : (OWNERS[i % OWNERS.length] ?? OWNERS[0]),
     flags: status === 'ready' ? i % 3 : 0,
   }

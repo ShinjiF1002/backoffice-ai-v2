@@ -2,6 +2,7 @@
  * storeReducer — pure。操作 Action を状態遷移に適用 (Phase 1 — 状態基盤)。
  * status 遷移は CaseStatus / ProposalStatus enum の業務フローに従う:
  *   案件: ready --(入力者承認)--> business-approval-waiting --(承認者承認)--> reflected / 任意 --(差戻し)--> sent-back
+ *         反映済 (reflected) は終端だが訂正/取消 (case/reverse) で可逆: 訂正→ready / 取消→sent-back (前進のみ→可逆、W3 C3)
  *   提案: pending-triage --(送付)--> forwarded --(承認)--> approved / 任意 --(却下)--> rejected
  * UI 配線 (どの操作面が dispatch するか) は Phase 4/7。reducer はここで意味論を固める。
  */
@@ -94,6 +95,34 @@ export function storeReducer(state: StoreState, action: StoreAction): StoreState
       return patchCase(state, action.id, { assignee: action.assignee })
     case 'case/bulkApprove':
       return action.ids.reduce((acc, id) => approveCase(acc, id, action.by), state)
+    case 'case/reverse': {
+      // 反映済の訂正/取消 (remediation W3 C3、前進のみ→可逆)。
+      // 不可逆 guard: reflected かつ未 reversal のみ可逆 (非終端 / 既 reversal は no-op)。
+      // 訂正 → ready (入力者が再確認/再上書き) / 取消 → sent-back (再処理 queue)。reversal 記録で kind/理由を保持。
+      const cur = state.cases[action.id]
+      if (!cur || cur.status !== 'reflected' || cur.reversal !== undefined) return state
+      return patchCase(state, action.id, {
+        status: action.kind === '訂正' ? 'ready' : 'sent-back',
+        reversal: { kind: action.kind, reason: action.reason },
+      })
+    }
+    case 'case/create': {
+      // 手動起票 (remediation W3 C4、AI 障害時の業務継続)。id 重複は冪等 no-op。
+      // 全項目 人手入力ゆえ flags 0 / status ready、入力値は overrides に載せ humanValue overlay (B1) で表示。
+      if (state.cases[action.id]) return state
+      const draft: CaseEntity = {
+        id: action.id,
+        workflowId: action.workflowId,
+        workflowName: action.workflowName,
+        status: 'ready',
+        assignee: action.assignee,
+        flags: 0,
+        resolvedFieldIds: [...action.fieldLabels],
+        overrides: { ...action.values },
+        receivedAt: action.receivedAt,
+      }
+      return { ...state, cases: { ...state.cases, [action.id]: draft }, caseOrder: [...state.caseOrder, action.id] }
+    }
     case 'proposal/forward':
       return state.proposals[action.id]?.status === 'pending-triage'
         ? patchProposal(state, action.id, { status: 'forwarded' })

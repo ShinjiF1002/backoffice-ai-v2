@@ -46,27 +46,23 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
           {open.map((f) => (
             <div
               key={f.fieldLabel}
-              role="button"
-              tabIndex={0}
-              aria-pressed={activeFieldLabel === f.fieldLabel}
-              onClick={() => onSelectField?.(f.fieldLabel)}
-              onKeyDown={(e) => {
-                // P1-6: 内側「対応」button の Enter/Space と二重発火しないよう card 自身 focus 時のみ
-                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
-                  e.preventDefault()
-                  onSelectField?.(f.fieldLabel)
-                }
-              }}
               className={cn(
-                'cursor-pointer rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-alert)]',
+                // W3 a11y: card 自体は role=button にしない (内側「対応」button との nested-interactive 回避)。
+                // 項目選択は header の label button (keyboard 可)、行動作は「対応」button = 2 つの sibling button。
+                'rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3',
                 activeFieldLabel === f.fieldLabel && 'ring-2 ring-[var(--color-alert)]'
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-sm font-medium text-[var(--color-fg)]">
+                <button
+                  type="button"
+                  aria-pressed={activeFieldLabel === f.fieldLabel}
+                  onClick={() => onSelectField?.(f.fieldLabel)}
+                  className="flex items-center gap-1.5 rounded text-sm font-medium text-[var(--color-fg)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-alert)]"
+                >
                   <AlertTriangleIcon className="h-3.5 w-3.5 text-[var(--color-alert)]" aria-hidden="true" />
                   {f.fieldLabel}
-                </span>
+                </button>
                 <StatusBadge tone={reconcileStateTone(f.reconcileState)} label={reconcileStateLabel(f.reconcileState)} />
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs">

@@ -119,8 +119,8 @@ export const CASE_2026_0142: CaseDetailModel = {
   },
   // mock-fixture §8: 業務順 lifecycle (current = 入力者確認)
   lifecycle: [
-    { step: '受付', time: '09:00', actor: 'システム', detail: '申請書類を受け付けました。', done: true },
-    { step: 'AI処理', time: '09:02', actor: 'AI 担当 Agent', detail: '読み取り + 登録情報照合 + 値生成。', done: true },
+    { step: '受付', time: '16:40', actor: 'システム', detail: '申請書類を受け付けました。', done: true },
+    { step: 'AI処理', time: '16:42', actor: 'AI 担当 Agent', detail: '読み取り + 登録情報照合 + 値生成。', done: true },
     { step: '入力者確認', time: '進行中', actor: '山田太郎', detail: 'AI 入力と申請書類を照合して確認中。', done: false, current: true },
     { step: '承認者承認', time: '—', actor: '鈴木課長', detail: '最終承認。', done: false },
     { step: '反映', time: '—', actor: 'システム', detail: '登録情報を更新。', done: false },

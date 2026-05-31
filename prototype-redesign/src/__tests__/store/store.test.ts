@@ -75,13 +75,23 @@ describe('store foundation (Phase 1)', () => {
   })
 
   describe('reducer: 提案 / Agent', () => {
-    it('提案: pending-triage → forwarded → approved / reject', () => {
+    it('提案: pending-triage → forwarded → approved / reject (四眼: 送付者≠承認者)', () => {
+      // F-015: 送付 (forward) で forwardedBy 記録 → 別 actor へ切替えて承認 (四眼成立)。
       let s = storeReducer(seed(), { type: 'proposal/forward', id: 'PROP-2026-031' })
       expect(s.proposals['PROP-2026-031']!.status).toBe('forwarded')
+      expect(s.proposals['PROP-2026-031']!.forwardedBy).toBe('actor-inputter')
+      s = storeReducer(s, { type: 'session/switchActor', actorId: 'actor-approver' })
       s = storeReducer(s, { type: 'proposal/approve', id: 'PROP-2026-031' })
       expect(s.proposals['PROP-2026-031']!.status).toBe('approved')
       s = storeReducer(s, { type: 'proposal/reject', id: 'PROP-2026-028', reason: '影響範囲が大きい' })
       expect(s.proposals['PROP-2026-028']!.status).toBe('rejected')
+    })
+
+    it('F-015: 提案承認の identity-SoD — 送付者本人 (forwardedBy === currentActorId) は承認できず no-op', () => {
+      // 送付 (actor-inputter) → 切替えずに同 actor が承認しようとすると block (案件/設定と対称な四眼 defense-in-depth)。
+      let s = storeReducer(seed(), { type: 'proposal/forward', id: 'PROP-2026-031' })
+      s = storeReducer(s, { type: 'proposal/approve', id: 'PROP-2026-031' })
+      expect(s.proposals['PROP-2026-031']!.status).toBe('forwarded') // 自己承認 block で前進しない
     })
     it('Agent: 昇格申請 / 緊急停止 (emergencyStop) → 再開 (resume)', () => {
       let s = storeReducer(seed(), { type: 'agent/requestPromotion', id: 'agent-corporate-address-change' })
@@ -90,9 +100,33 @@ describe('store foundation (Phase 1)', () => {
       s = storeReducer(s, { type: 'agent/emergencyStop', id: 'agent-corporate-address-change', reason: '誤入力が急増' })
       expect(s.agents['agent-corporate-address-change']!.paused).toBe(true)
       expect(s.agents['agent-corporate-address-change']!.pausedReason).toBe('誤入力が急増')
-      s = storeReducer(s, { type: 'agent/resume', id: 'agent-corporate-address-change' })
+      s = storeReducer(s, { type: 'agent/resume', id: 'agent-corporate-address-change', reason: '原因を修正し再開可と判断' })
       expect(s.agents['agent-corporate-address-change']!.paused).toBe(false)
       expect(s.agents['agent-corporate-address-change']!.pausedReason).toBeUndefined()
+    })
+
+    it('F-014: 緊急停止が trust を実降格 (要所確認→全件確認) し、再開で原状回復 + 停止/再開が理由付きで台帳に残る', () => {
+      // 原状 checkpoint(要所確認) の agent を擬似生成 (seed は supervised ゆえ実降格を観測する fixture を組む)。
+      const base = seed()
+      const promoted = { ...base, agents: { ...base.agents, 'agent-account-opening': { ...base.agents['agent-account-opening']!, trust: 'checkpoint' as const } } }
+      const stopped = storeReducer(promoted, { type: 'agent/emergencyStop', id: 'agent-account-opening', reason: '異常検知のため停止' })
+      // 実降格: trust=supervised + 原状 (checkpoint) を trustBeforePause に保存
+      expect(stopped.agents['agent-account-opening']!.trust).toBe('supervised')
+      expect(stopped.agents['agent-account-opening']!.trustBeforePause).toBe('checkpoint')
+      // 停止は理由付きで台帳 append (Observatory で可視)
+      const stopEv = stopped.auditEvents.at(-1)!
+      expect(stopEv.action).toBe('緊急停止')
+      expect(stopEv.beforeAfter).toContain('異常検知のため停止')
+      // 再開: trust 原状回復 (checkpoint) + trustBeforePause クリア + 再開 event
+      const resumed = storeReducer(stopped, { type: 'agent/resume', id: 'agent-account-opening', reason: '是正完了' })
+      expect(resumed.agents['agent-account-opening']!.trust).toBe('checkpoint')
+      expect(resumed.agents['agent-account-opening']!.trustBeforePause).toBeUndefined()
+      const resumeEv = resumed.auditEvents.at(-1)!
+      expect(resumeEv.action).toBe('再開')
+      expect(resumeEv.beforeAfter).toContain('是正完了')
+      // 未停止からの resume は no-op (false 操作防止)
+      const noop = storeReducer(promoted, { type: 'agent/resume', id: 'agent-account-opening', reason: 'x' })
+      expect(noop).toBe(promoted)
     })
   })
 
@@ -223,8 +257,26 @@ describe('store foundation (Phase 1)', () => {
         category: 'judgment_gap',
         to: 'actor-approver',
       })
-      expect(s.cases['CASE-2026-0142']!.escalation).toEqual({ reason: '判断困難', category: 'judgment_gap', to: 'actor-approver' })
+      // from = 起票 actor (seed の currentActorId = 入力者)。裁定 closure を起票者へ戻す土台 (F-017)。
+      expect(s.cases['CASE-2026-0142']!.escalation).toEqual({ reason: '判断困難', category: 'judgment_gap', to: 'actor-approver', from: 'actor-inputter' })
       expect(s.cases['CASE-2026-0142']!.status).toBe('ready')
+    })
+
+    it('case/resolveEscalation: SoD lock (起票者は no-op) + proceed/sendback の 2 経路 (F-016/F-017)', () => {
+      const escalated = storeReducer(seed(), { type: 'case/escalate', id: 'CASE-2026-0142', reason: '判断困難', category: 'judgment_gap', to: 'actor-approver' })
+      // SoD lock: 現 actor=入力者 (= 起票者) は escalation.to ではない → no-op (resolution 未確定のまま)
+      const selfArb = storeReducer(escalated, { type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'proceed' })
+      expect(selfArb.cases['CASE-2026-0142']!.escalation!.resolution).toBeUndefined()
+      // 業務責任者へ切替 → proceed: status 不変 + resolution='proceed'
+      const asApprover = storeReducer(escalated, { type: 'session/switchActor', actorId: 'actor-approver' })
+      const proceeded = storeReducer(asApprover, { type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'proceed' })
+      expect(proceeded.cases['CASE-2026-0142']!.escalation!.resolution).toBe('proceed')
+      expect(proceeded.cases['CASE-2026-0142']!.status).toBe('ready')
+      // 差戻し: status→sent-back + sendback 記録 + resolution='sendback'。category 未指定なら元依頼を継承。
+      const sentback = storeReducer(asApprover, { type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'sendback', reason: '要件不足' })
+      expect(sentback.cases['CASE-2026-0142']!.status).toBe('sent-back')
+      expect(sentback.cases['CASE-2026-0142']!.escalation!.resolution).toBe('sendback')
+      expect(sentback.cases['CASE-2026-0142']!.sendback).toEqual({ reason: '要件不足', category: 'judgment_gap' })
     })
 
     it('notification/markRead + markAllRead: 既読集合に冪等追記 (重複排除)', () => {

@@ -15,23 +15,28 @@ import { cn } from '@/lib/cn'
  */
 interface ReconcilePanelProps {
   fields: FieldReview[]
+  /** 起票経路 (F-006)。'manual' は手入力項目として表示し「AI 入力」を主張しない。既定 'ai'。 */
+  origin?: 'ai' | 'manual'
   activeFieldLabel?: string
   onSelectField?: (fieldLabel: string) => void
   onActOnField?: (fieldLabel: string) => void
   /** 参照専用 (store に無い過去案件など): 対応ボタンを出さず空状態文言も参照専用にする */
   readOnly?: boolean
+  /** 現段階で承認可能か (F-018)。false (例 差戻し/取消後の sent-back) では「承認できます」と誤誘導しない。既定 true。 */
+  approvable?: boolean
 }
 
-export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActOnField, readOnly }: ReconcilePanelProps) {
+export function ReconcilePanel({ fields, origin = 'ai', activeFieldLabel, onSelectField, onActOnField, readOnly, approvable = true }: ReconcilePanelProps) {
   const open = fields.filter((f) => !isResolved(f.reconcileState))
   const resolved = fields.filter((f) => isResolved(f.reconcileState))
+  const isManual = origin === 'manual'
 
   return (
     <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] p-4">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--color-fg)]">
           <FileTextIcon className="h-4 w-4 text-[var(--color-fg-muted)]" aria-hidden="true" />
-          AI 入力項目
+          {isManual ? '手入力項目（書類走査なし）' : 'AI 入力項目'}
         </h2>
         <div className="flex gap-1.5">
           {open.length > 0 && <MetaChip tone="alert" label={`要確認 ${open.length}`} />}
@@ -109,7 +114,13 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
       ) : (
         <div className="flex items-center gap-2 rounded-[var(--radius-card)] bg-[var(--color-success-soft)] p-3 text-sm text-[var(--color-success-soft-fg)]">
           <CheckIcon className="h-4 w-4" aria-hidden="true" />
-          {readOnly ? '過去の案件 — 参照専用です' : '確認が必要な項目はありません — 承認できます'}
+          {readOnly
+            ? '過去の案件 — 参照専用です'
+            : isManual
+              ? '手入力値は入力済みです — 承認者の確認へ進めます'
+              : approvable
+                ? '確認が必要な項目はありません — 承認できます'
+                : '確認が必要な項目はありません（この段階では承認できません）'}
         </div>
       )}
 
@@ -131,7 +142,8 @@ export function ReconcilePanel({ fields, activeFieldLabel, onSelectField, onActO
                 onClick={() => onSelectField?.(f.fieldLabel)}
                 className="flex flex-1 items-center justify-between gap-3 text-left text-sm"
               >
-                <span className="w-24 flex-shrink-0 text-[var(--color-fg-muted)]">{f.fieldLabel}</span>
+                {/* active 行は primary-soft 背景になるため、label は fg-tertiary で AA を確保 (fg-muted は primary-soft 上で AA 未達)。 */}
+                <span className="w-24 flex-shrink-0 text-[var(--color-fg-tertiary)]">{f.fieldLabel}</span>
                 {/* B1: 確認済行は訂正値 (humanValue) を優先表示、未上書きは AI 値据え置き。P1-8: previousValue 有る変更系 field は inline で現行登録値→確定値を併記。 */}
                 <span className="flex flex-1 items-center gap-1.5 truncate text-[var(--color-fg)]">
                   {f.previousValue && (

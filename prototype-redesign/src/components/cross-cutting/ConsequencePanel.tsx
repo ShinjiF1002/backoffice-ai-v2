@@ -40,7 +40,7 @@ export function ConsequencePanel({ kind, before, after, impacts, scope, title }:
       <div className="grid gap-3 p-4 sm:grid-cols-[auto_1fr]">
         {/* before → after */}
         <div className="flex items-center gap-2 self-start rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-sm">
-          <span className="text-[var(--color-fg-muted)]">{before}</span>
+          <span className="text-[var(--color-fg-tertiary)]">{before}</span>
           <ArrowRightIcon className="h-4 w-4 text-[var(--color-fg-subtle)]" aria-hidden="true" />
           <span className="font-medium text-[var(--color-fg)]">{after}</span>
         </div>
@@ -57,6 +57,10 @@ export function ConsequencePanel({ kind, before, after, impacts, scope, title }:
           })}
         </ul>
       </div>
+      {/* F-054: 影響 (自動化件数等) は前向きの予測値ゆえ、隣接 KPI と同様に仮説ラベルを付す (断定数値の誤認防止)。 */}
+      <p className="border-t border-[var(--color-border)] px-4 py-2 text-[10px] text-[var(--color-fg-tertiary)]">
+        ※ 上記の影響・件数は［仮説 / 要検証］の試算値です（実処理からの確定値ではありません）。
+      </p>
     </section>
   )
 }

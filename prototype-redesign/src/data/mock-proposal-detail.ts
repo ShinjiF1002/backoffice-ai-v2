@@ -6,7 +6,7 @@ import type { ConsequenceImpact } from '@/components/cross-cutting/ConsequencePa
  * 提案詳細 (PROP-2026-031) detail 専用 model
  * SSOT: mock-fixture §6 / §10、reference: screens-v2/06-proposal-detail/proposal-detail.jsx。
  * 平易 JP、旧 mock-proposals の内部語 (OCR raw / staging / threshold) は使わない。
- * 原則 A: 手順全体の中で変更 1 箇所を before/after で示す / B: 根拠 差戻し case 原文 / C: mode 出し分け。
+ * 原則 A: 手順全体の中で変更 1 箇所を before/after で示す / B: 根拠 誤確定→是正の実例 (日次分析の指摘原文) / C: mode 出し分け。
  */
 export interface ProcedureStep {
   n: number
@@ -20,7 +20,7 @@ export interface SourceCase {
   id: string
   /** どの項目で起きたか */
   field: string
-  /** 差戻しコメント原文 (要約でなく) */
+  /** 日次分析の指摘原文 (誤確定→是正の実例、要約でなく)。F-021: 「差戻し」ではなく AI 誤確定の指摘。 */
   comment: string
   date: string
 }
@@ -49,7 +49,7 @@ export const PROP_2026_031: ProposalDetailModel = {
   status: 'pending-triage',
   // 判定基準 vs 実測 (mock-fixture §6 / reference METRIC_ROWS)
   criteria: [
-    { metricLabel: '番地表記の読み取り精度', actualValue: '0.93', threshold: '> 0.90', judgment: '達成 (+0.03)', achieved: true, period: '直近 30 日', denominator: '12 件で試算', previousDelta: '前回 +0.01', exclusions: 'エスカレーション案件を除く' },
+    { metricLabel: '番地表記の読み取り精度', actualValue: '93%', threshold: '> 90%', judgment: '達成 (+3pt)', achieved: true, period: '直近 30 日', denominator: '12 件で試算', previousDelta: '前回 +1pt', exclusions: 'エスカレーション案件を除く' },
     { metricLabel: '影響件数', actualValue: '12 件', threshold: '≤ 20 件', judgment: '達成 (余裕 8 件)', achieved: true, period: '過去案件で試算', denominator: '12 件' },
   ],
   consequence: {
@@ -76,7 +76,7 @@ export const PROP_2026_031: ProposalDetailModel = {
     { n: 4, text: '自動確定、または入力者の確認へ振り分ける' },
     { n: 5, text: '入力者が確認し、承認または差戻しする' },
   ],
-  // 原則 B: 根拠となった差戻し case の原文コメント
+  // 原則 B: 根拠となった誤確定→是正の実例 (日次分析の指摘原文)
   sourceCases: [
     { id: 'CASE-2026-0098', field: 'ビル名', comment: 'ビル名が申請書類と異なっていたが、自動確定されていた。「サンプルビルディング」が正しい。判定基準が甘く見逃された。', date: '2026-05-22' },
     { id: 'CASE-2026-0087', field: '新住所', comment: '番地の枝番 (2-3-5 の「5」) が欠落したまま自動確定。読み取りが微妙な精度だったが基準を超えて確定していた。', date: '2026-05-18' },
@@ -99,7 +99,7 @@ export const PROP_2026_028: ProposalDetailModel = {
   changeTitle: '法人名の表記ゆれ補正ルールを追加',
   status: 'forwarded',
   criteria: [
-    { metricLabel: '法人名の表記ゆれ検出精度', actualValue: '0.95', threshold: '> 0.90', judgment: '達成 (+0.05)', achieved: true, period: '直近 30 日', denominator: '7 件で試算', previousDelta: '前回 +0.02', exclusions: 'エスカレーション案件を除く' },
+    { metricLabel: '法人名の表記ゆれ検出精度', actualValue: '95%', threshold: '> 90%', judgment: '達成 (+5pt)', achieved: true, period: '直近 30 日', denominator: '7 件で試算', previousDelta: '前回 +2pt', exclusions: 'エスカレーション案件を除く' },
     { metricLabel: '影響件数', actualValue: '7 件', threshold: '≤ 20 件', judgment: '達成 (余裕 13 件)', achieved: true, period: '過去案件で試算', denominator: '7 件' },
   ],
   consequence: {
@@ -142,7 +142,7 @@ export const PROP_2026_024: ProposalDetailModel = {
   changeTitle: '本人確認書類の有効期限チェックを追加',
   status: 'approved',
   criteria: [
-    { metricLabel: '期限切れ書類の検出率', actualValue: '0.98', threshold: '> 0.95', judgment: '達成 (+0.03)', achieved: true, period: '直近 30 日', denominator: '19 件で試算', previousDelta: '前回 +0.01', exclusions: 'エスカレーション案件を除く' },
+    { metricLabel: '期限切れ書類の検出率', actualValue: '98%', threshold: '> 95%', judgment: '達成 (+3pt)', achieved: true, period: '直近 30 日', denominator: '19 件で試算', previousDelta: '前回 +1pt', exclusions: 'エスカレーション案件を除く' },
     { metricLabel: '影響件数', actualValue: '19 件', threshold: '≤ 25 件', judgment: '達成 (余裕 6 件)', achieved: true, period: '過去案件で試算', denominator: '19 件' },
   ],
   consequence: {

@@ -7,8 +7,9 @@
 import { useContext, useMemo } from 'react'
 import type { Dispatch } from 'react'
 import { StoreStateContext, StoreDispatchContext } from './context'
-import type { StoreState, StoreAction, CaseEntity, ProposalEntity, AgentEntity } from './types'
+import type { StoreState, StoreAction, CaseEntity, ProposalEntity, AgentEntity, LedgerEvent } from './types'
 import { AGENT_LIST } from '@/data/mock-agent-list'
+import { CROSS_LEDGER } from '@/data/mock-observatory'
 import { HUB_PROCESSES, HUB_HEADLINE, HUB_PRIMARY_ACTION } from '@/data/mock-hub'
 import type { HubProcess, HubHeadlineKpi, HubPrimaryAction } from '@/data/mock-hub'
 import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
@@ -55,6 +56,25 @@ export function useCases(workflowId?: string): CaseEntity[] {
 export function useCase(id: string | undefined): CaseEntity | undefined {
   const s = useStoreState()
   return id ? s.cases[id] : undefined
+}
+
+/**
+ * 証跡台帳 (F-002): 静的参照台帳 (CROSS_LEDGER = 過去事例) に本セッションの append-only 操作証跡 (state.auditEvents) を
+ * 追記して返す。操作 (起票/承認/差戻し/訂正/取消…) が必ず台帳に時系列で現れる。Observatory が消費。
+ * actor は reducer 側で store identity から解決済 (owner/CASE_DETAILS 非依存、F-001 SSOT 維持)。
+ */
+export function useCrossLedger(): LedgerEvent[] {
+  const s = useStoreState()
+  return useMemo(() => [...CROSS_LEDGER, ...s.auditEvents], [s])
+}
+
+/**
+ * 案件 id の操作証跡 (F-018)。reversal/差戻し/承認 等の who/when を auditEvents (canonical) から取得する。
+ * CaseEntity に audit metadata を denormalize しない方針 (W1.5 F-018 決定) の参照側。
+ */
+export function useCaseAuditEvents(id: string | undefined): LedgerEvent[] {
+  const s = useStoreState()
+  return useMemo(() => (id ? s.auditEvents.filter((e) => e.caseId === id) : []), [s, id])
 }
 
 /** 承認待ち (business-approval-waiting) のみ。Approvals 画面の派生 view。 */
@@ -153,7 +173,7 @@ export interface FlywheelLineage {
   workflow: string
   /** 改定対象 agent (agent→提案 link、B2)。 */
   agentId: string
-  /** 起点となった差戻し case id 群 (Flywheel の入口)。 */
+  /** 起点となった誤確定→是正の実例 id 群 (Flywheel の入口)。 */
   sourceCaseIds: string[]
   /** live status (store-truth)。forwarded=手順承認待ち / approved=設定承認済。 */
   status: ProposalStatus
@@ -300,7 +320,7 @@ export function useSearchResults(query: string): SearchResultItem[] {
 // 差戻し受領 + エスカレーションの 2 種のみ (SLA 警告は scope-0 = JG-b、datetime 化が範囲外で偽 SLA を作らない)。
 // store entity ではなく派生 selector で都度算出 (S8)。actor 厳密 (JG-a): currentActor 宛のみ。既読は readNotificationIds。
 // 通知 id は由来 entity から決定的に導く安定文字列 (`sendback:${caseId}` / `escalation:${caseId}`)。
-export type NotificationKind = 'sendback' | 'reversal' | 'escalation'
+export type NotificationKind = 'sendback' | 'reversal' | 'escalation' | 'escalation-resolved'
 export interface NotificationItem {
   id: string
   kind: NotificationKind
@@ -309,6 +329,8 @@ export interface NotificationItem {
   detail: string
   href: string
   read: boolean
+  /** F-030: 発生時刻 (事実、偽 SLA でない)。in-session 操作は auditEvents の ts、seed は案件受付時刻に fallback。'YYYY-MM-DD HH:MM'。 */
+  occurredAt: string
 }
 
 export function useNotifications(): NotificationItem[] {
@@ -316,6 +338,15 @@ export function useNotifications(): NotificationItem[] {
   return useMemo(() => {
     const actor = actorById(s.currentActorId)
     const isRead = (id: string) => s.readNotificationIds.includes(id)
+    // F-030: 発生時刻 = 当該 case の最新 relevant auditEvent ts (in-session)、無ければ受付時刻 (seed)。string slice で TZ parse 回避。
+    const fmt = (raw: string) => raw.replace('T', ' ').slice(0, 16)
+    const eventTs = (caseId: string, actions: string[]): string | undefined => {
+      for (let i = s.auditEvents.length - 1; i >= 0; i--) {
+        const e = s.auditEvents[i]
+        if (e && e.caseId === caseId && actions.includes(e.action)) return fmt(e.ts)
+      }
+      return undefined
+    }
     const items: NotificationItem[] = []
     for (const c of resolveOrder(s.caseOrder, s.cases)) {
       // 差戻し受領: 担当 (入力者) 宛 — currentActor の氏名と一致する案件のみ。
@@ -332,6 +363,7 @@ export function useNotifications(): NotificationItem[] {
             detail: `反映後に${c.reversal.kind}されました：${c.reversal.reason}`,
             href: `/cases/${c.id}`,
             read: isRead(id),
+            occurredAt: eventTs(c.id, ['訂正', '取消']) ?? fmt(c.receivedAt),
           })
         } else {
           const id = `sendback:${c.id}`
@@ -343,13 +375,22 @@ export function useNotifications(): NotificationItem[] {
             detail: c.sendback?.reason ?? '差し戻された案件です。内容を確認してください。',
             href: `/cases/${c.id}`,
             read: isRead(id),
+            occurredAt: eventTs(c.id, ['差戻し', 'エスカレーション裁定']) ?? fmt(c.receivedAt),
           })
         }
       }
-      // エスカレーション: 宛先 actor 宛 — escalation.to が currentActorId と一致するもの
-      if (c.escalation && c.escalation.to === s.currentActorId) {
+      // エスカレーション裁定依頼: 宛先 (裁定者) 宛 — escalation.to が currentActorId と一致し **未裁定** のもの。
+      // 裁定 (resolution 確定) で本通知は母集合から外れ closure する (F-017、bell/inbox に未読のまま残らない)。
+      if (c.escalation && c.escalation.to === s.currentActorId && c.escalation.resolution === undefined) {
         const id = `escalation:${c.id}`
-        items.push({ id, kind: 'escalation', caseId: c.id, title: `${c.workflowName} ${c.id}`, detail: c.escalation.reason, href: `/cases/${c.id}`, read: isRead(id) })
+        items.push({ id, kind: 'escalation', caseId: c.id, title: `${c.workflowName} ${c.id}`, detail: c.escalation.reason, href: `/cases/${c.id}`, read: isRead(id), occurredAt: eventTs(c.id, ['エスカレーション']) ?? fmt(c.receivedAt) })
+      }
+      // エスカレーション裁定結果: 起票者 (from) 宛 — 裁定 (resolution 確定) が起票入力者へ因果として戻る (F-017)。
+      // id に resolution を含め、続行可↔差戻し で別通知 (再裁定があっても既読が誤継承されない)。
+      if (c.escalation && c.escalation.resolution !== undefined && c.escalation.from === s.currentActorId) {
+        const id = `escalation-resolved:${c.id}:${c.escalation.resolution}`
+        const verdict = c.escalation.resolution === 'proceed' ? '続行可（このまま処理を進めてください）' : `差戻し（${c.escalation.category}）：${c.escalation.reason}`
+        items.push({ id, kind: 'escalation-resolved', caseId: c.id, title: `${c.workflowName} ${c.id}`, detail: `エスカレーションが裁定されました：${verdict}`, href: `/cases/${c.id}`, read: isRead(id), occurredAt: eventTs(c.id, ['エスカレーション裁定']) ?? fmt(c.receivedAt) })
       }
     }
     return items
@@ -377,16 +418,17 @@ export function usePendingPromotions(): AgentEntity[] {
 }
 
 /**
- * escalation 受信 = case/escalate された **未裁定** の案件 (業務責任者が裁定 = case/sendback 再利用)。
- * 裁定済 (sent-back) / 完了 (reflected) は active queue から除外し queue closure を担保 (escalation 記録自体は
- * 監査用に entity に残す = 履歴保持しつつ「裁定後も残り続ける」を防ぐ)。
+ * escalation 受信 = case/escalate された **未裁定** (escalation.resolution 未確定) の案件。
+ * 裁定 (続行可/差戻し) が確定したら resolution が入り active queue から外れ closure する (F-016/F-017)。
+ * resolution で判定するため「続行可で status 不変」のケースも正しく queue から除ける (旧 status ベースでは残った)。
+ * escalation 記録自体は監査用に entity に残す = 履歴保持しつつ「裁定後も残り続ける」を防ぐ。
  */
 export function useEscalations(): CaseEntity[] {
   const s = useStoreState()
   return useMemo(
     () =>
       resolveOrder(s.caseOrder, s.cases).filter(
-        (c) => c.escalation !== undefined && c.status !== 'sent-back' && c.status !== 'reflected',
+        (c) => c.escalation !== undefined && c.escalation.resolution === undefined,
       ),
     [s],
   )

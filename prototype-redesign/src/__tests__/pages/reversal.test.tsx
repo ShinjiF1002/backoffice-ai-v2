@@ -66,9 +66,12 @@ describe('W3 C3 reversal: CaseDetail 反映済の訂正/取消', () => {
     // 理由入力 → submit → reflected→ready、banner 出現、反映済 badge 消失
     await user.type(screen.getByRole('textbox'), '住所の番地に誤りがあったため訂正')
     await user.click(screen.getByRole('button', { name: '訂正のため差し戻す' }))
-    expect(screen.getByText('この案件は反映済から訂正されました')).toBeInTheDocument()
+    // F-018: banner は「…されました — 再処理が必要です」+ who/when (auditEvents 由来)。
+    expect(screen.getByText(/この案件は反映済から訂正されました — 再処理が必要です/)).toBeInTheDocument()
     expect(screen.getByText(/住所の番地に誤りがあったため訂正/)).toBeInTheDocument()
     expect(screen.queryByText('反映済')).not.toBeInTheDocument()
+    // F-018: 承認者ビューで取消/訂正を行った actor は currentActorId=actor-approver (業務責任者) → banner の who に出る
+    expect(screen.getByText(/業務責任者/)).toBeInTheDocument()
   })
 
   it('取消: reflected→sent-back + reversal banner (取消、理由保持)', async () => {
@@ -78,9 +81,26 @@ describe('W3 C3 reversal: CaseDetail 反映済の訂正/取消', () => {
     await user.click(screen.getByRole('button', { name: '取消' }))
     await user.type(screen.getByRole('textbox'), '別案件の取り違えで誤って反映')
     await user.click(screen.getByRole('button', { name: '取消して差し戻す' }))
-    expect(screen.getByText('この案件は反映済から取消されました')).toBeInTheDocument()
+    expect(screen.getByText(/この案件は反映済から取消されました — 再処理が必要です/)).toBeInTheDocument()
     expect(screen.getByText(/別案件の取り違えで誤って反映/)).toBeInTheDocument()
     expect(screen.queryByText('反映済')).not.toBeInTheDocument()
+  })
+
+  it('F-018: 差戻し/取消後の sent-back は入力者が再処理でき (dead-end 解消)、reversal event に who/when が残る', async () => {
+    const user = userEvent.setup()
+    const dispatch = renderCaseDetail('CASE-2026-0120')
+    // 承認者で取消 → sent-back
+    act(() => dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+    await user.click(screen.getByRole('button', { name: '取消' }))
+    await user.type(screen.getByRole('textbox'), '誤反映の取消')
+    await user.click(screen.getByRole('button', { name: '取消して差し戻す' }))
+    // 入力者に切替えると「再処理する」導線が出る (dead-end でない)
+    act(() => dispatch({ type: 'session/switchActor', actorId: 'actor-inputter' }))
+    const reprocess = await screen.findByRole('button', { name: '再処理する' })
+    expect(reprocess).toBeInTheDocument()
+    await user.click(reprocess)
+    // 再処理 → 確認待ちへ (banner 消失 = ready に戻った)
+    expect(screen.queryByText(/再処理が必要です/)).not.toBeInTheDocument()
   })
 
   it('取消した案件は assignee(入力者) に reversal 通知 (差戻し受領 と区別、取消理由を保持)', () => {

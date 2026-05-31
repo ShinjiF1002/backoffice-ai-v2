@@ -50,7 +50,7 @@ export function FilterChip({
         disabled
           ? 'cursor-not-allowed border border-[var(--color-border)] bg-[var(--color-panel-inset)] text-[var(--color-fg-subtle)]'
           : active
-            ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+            ? 'border border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
             : 'border border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]',
         className
       )}

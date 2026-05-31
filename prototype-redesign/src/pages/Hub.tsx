@@ -16,6 +16,7 @@ import { HUB_DAILY_SUMMARY } from '@/data/mock-hub'
 import type { HubHeadlineKpi, HubProcess } from '@/data/mock-hub'
 import { useHubModel } from '@/store/hooks'
 import type { CaseStatus } from '@/data/types'
+import { PageHeader } from '@/components/shared/PageHeader'
 import type { Tone } from '@/components/shared/StatusBadge'
 import { caseStatusToTone, caseStatusLabel } from '@/lib/status-tones'
 import { MetaChip } from '@/components/shared/MetaChip'
@@ -38,7 +39,7 @@ const KPI_ICON: Record<HubHeadlineKpi['icon'], LucideIcon> = {
 }
 const KPI_TONE: Record<HubHeadlineKpi['tone'], { box: string; fg: string }> = {
   alert: { box: 'bg-[var(--color-alert-soft)]', fg: 'text-[var(--color-alert-soft-fg)]' },
-  primary: { box: 'bg-[var(--color-primary-soft)]', fg: 'text-[var(--color-primary)]' },
+  primary: { box: 'bg-[var(--color-primary-soft)]', fg: 'text-[var(--color-primary-strong)]' },
 }
 // status dot 色 (resolver の Tone → token)
 const DOT: Record<Tone, string> = {
@@ -59,18 +60,16 @@ export function Hub() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <header
-        data-page-header
-        className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] items-end justify-between border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3"
-      >
-        <div>
-          <h1 className="text-xl font-semibold text-[var(--color-fg)]">ハブ</h1>
-          <p className="mt-0.5 text-xs text-[var(--color-fg-muted)]">業務別の注意点と次のアクション</p>
-        </div>
-        <div className="text-xs text-[var(--color-fg-muted)]">
-          最終更新 <span className="font-mono">2026-05-30 11:42</span>
-        </div>
-      </header>
+      <PageHeader
+        title={<h1 className="text-xl font-semibold text-[var(--color-fg)]">ハブ</h1>}
+        subtitle="業務別の注意点と次のアクション"
+        actions={
+          /* F-053: 「最終更新」は操作後も不変な hardcode で鮮度を誤認させるため、固定サンプル基準である旨を明示。 */
+          <div className="text-xs text-[var(--color-fg-tertiary)]">
+            表示基準（サンプル固定） <span className="font-mono">2026-05-30 11:42</span>
+          </div>
+        }
+      />
 
       {/* Body (A 型: スクロール、決定 footer なし) */}
       <div className="flex-1 overflow-auto p-6">
@@ -84,9 +83,9 @@ export function Hub() {
               <ZapIcon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-white/85">{primaryAction.kicker}</div>
+              <div className="text-[11px] font-medium uppercase tracking-wide text-white">{primaryAction.kicker}</div>
               <div className="mt-0.5 text-base font-semibold">{primaryAction.title}</div>
-              <div className="mt-0.5 text-xs text-white/85">{primaryAction.detail}</div>
+              <div className="mt-0.5 text-xs text-white">{primaryAction.detail}</div>
             </div>
             <ArrowRightIcon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
           </Link>

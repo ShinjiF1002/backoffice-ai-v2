@@ -25,10 +25,10 @@ interface Props {
 }
 
 const TONE_CLASS: Record<Tone, string> = {
-  neutral: 'bg-[var(--color-panel-inset)] text-[var(--color-fg-muted)]',
+  neutral: 'bg-[var(--color-panel-inset)] text-[var(--color-fg-tertiary)]',
   inset: 'bg-[var(--color-panel-inset)] text-[var(--color-fg)]',
   slate: 'bg-[var(--color-fg)] text-white',
-  primary: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]',
+  primary: 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]',
   success: 'bg-[var(--color-success-soft)] text-[var(--color-success-soft-fg)]',
   alert: 'bg-[var(--color-alert-soft)] text-[var(--color-alert-soft-fg)]',
   error: 'bg-[var(--color-error-soft)] text-[var(--color-error-soft-fg)]',

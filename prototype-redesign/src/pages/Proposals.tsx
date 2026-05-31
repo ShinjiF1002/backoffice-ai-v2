@@ -5,6 +5,7 @@ import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
+import { PageHeader } from '@/components/shared/PageHeader'
 import { useProposals } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { useListData } from '@/hooks/useListData'
@@ -57,13 +58,10 @@ export function Proposals() {
   const list = useListData(rows)
   return (
     <div className="flex flex-col">
-      <header
-        data-page-header
-        className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
-      >
-        <h1 className="text-lg font-semibold text-[var(--color-fg)]">AI 提案レビュー — 提案一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">日次提案分析が差戻しパターンから生成した手順改定の候補 · {rows.length} 件</p>
-      </header>
+      <PageHeader
+        title="AI 提案レビュー — 提案一覧"
+        subtitle={<>日次提案分析が現場の差戻し・誤確定パターンから生成した手順改定の候補{!list.status && ` · ${rows.length} 件`}</>}
+      />
 
       <div className="p-4">
         <DataTable

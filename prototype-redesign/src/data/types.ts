@@ -209,7 +209,7 @@ export interface ProposalDecisionCriterion {
   met: boolean
 }
 
-/** 提案の元になった差戻し case (source_case link 用) */
+/** 提案の元になった誤確定→是正の実例 (source_case link 用) */
 export interface ProposalSourceCase {
   caseId: string
   /** case タイトル (workflow + 簡易識別) */

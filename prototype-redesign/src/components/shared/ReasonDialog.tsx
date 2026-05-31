@@ -82,7 +82,8 @@ export function ReasonDialog({ open, title, label, placeholder, submitLabel, out
               {label}
             </label>
             {showError && (
-              <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+              // F-008: role=alert で SR に即時通知 (textarea が aria-describedby で参照)。
+              <span id="reason-dialog-error" role="alert" className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
                 <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
                 入力してください
               </span>
@@ -98,6 +99,7 @@ export function ReasonDialog({ open, title, label, placeholder, submitLabel, out
             }}
             rows={3}
             aria-invalid={showError}
+            aria-describedby={showError ? 'reason-dialog-error' : undefined}
             className={cn(
               'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
               showError
@@ -107,7 +109,7 @@ export function ReasonDialog({ open, title, label, placeholder, submitLabel, out
             placeholder={placeholder}
           />
         </div>
-        <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
+        <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-tertiary)]">
           {outcome}
         </div>
       </div>

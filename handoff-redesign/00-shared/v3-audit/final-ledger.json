@@ -1,0 +1,1051 @@
+[
+ {
+  "id": "F-001",
+  "title": "四眼原則(SoD)の入力者/承認者 actor が一覧・承認待ち・詳細・台帳で別人に表示される (同一案件で actor 同定が三者三様)",
+  "route": "/approvals, /cases, /cases/CASE-2026-0128 (全 business-approval-waiting 案件)",
+  "pillar": "truthfulness",
+  "severity": "P0",
+  "description": "四眼原則の中核 fact『誰が入力者承認したか』が route 間で矛盾する。一覧/承認待ちは CASE_DETAILS[id].inputter (=list owner=鈴木課長)→approverFor()=田中部長 を表示する一方、CaseDetail footer/承認者バナーは store.inputApprovedBy (seed=DEFAULT_ACTOR_ID=actor-inputter=山田太郎) 由来で『入力者 山田太郎 ≠ 承認者 鈴木課長』と表示。同一 CASE-2026-0128 で入力者が一覧=鈴木課長/詳細=山田太郎、鈴木課長が一覧では入力者・詳細では承認者(現persona)。二重 source の不整合。さらに承認者 persona=鈴木課長 が『画面上の入力者=自分』の案件を self-approval block 無しで最終承認でき、live で『1 件を最終承認しました』(rows 1→0) を確認。SR 11-7/NYDFS Part 500/FSA MRM の SoD 検証で actor を突き合わせれば確実に指摘される honesty 欠落。CaseDetail.tsx:108-109 のコメントは混同を認識しつつ詳細側だけ直し queue 側を未修正。",
+  "evidence": "facts-d.json: /approvals 行 担当=['鈴木課長 田中部長'] vs /cases/CASE-2026-0128 承認者ビュー banner='入力者 山田太郎 の確認結果を最終承認' + footer SoD='入力者 山田太郎 ≠ 承認者 鈴木課長'。一括承認 toast='1 件を最終承認しました' rows 1→0 (probes/approvals3.mjs checker)。src: mock-case-list.ts:35 owner='鈴木課長'; store/seed.ts:35 inputApprovedBy=DEFAULT_ACTOR_ID; actors.ts:24 DEFAULT_ACTOR_ID='actor-inputter'(=山田太郎); Approvals.tsx:75 inputter=CASE_DETAILS[e.id].inputter; CaseDetail.tsx:110 inputApproverName=actorById(entity.inputApprovedBy).name; mock-case-detail.ts:143 approverFor。screenshots approvals__desktop__checker.png, flow-4eyes 02/03。ssot-drift CHK-01 が同一不整合を CRITICAL 記録。audit-lineage: sodViolationCases=['CASE-2026-0128']。",
+  "expectedFlawless": "1 案件につき (入力者 actor, 承認者 actor) は単一 SSOT であり、一覧・承認待ち・詳細・lifecycle・監査台帳の全 surface で同一名が出る。owner 文字列でなく actorId を案件 entity の SSOT field にし、inputApprovedBy を owner-actor から導出。『画面上の入力者=現操作者』なら最終承認を disabled にし self-approval block を発火させる。",
+  "suggestedFix": "Approvals.tsx:75 の inputter を store 由来 actorById(e.inputApprovedBy)?.name に置換、approver も最終承認 actor を別 field で保持。seed.ts:35 の一律 DEFAULT_ACTOR_ID 付与を案件 owner 由来に置換。lib に inputter/approver 解決の単一 helper を作り CaseDetail と Approvals が共用。bulkApprove の skip 判定は既に store 由来なので表示と判定の source を揃えるだけで一致。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L4-regulator:1",
+   "case-detail:1",
+   "approvals:1",
+   "flow-4eyes:1"
+  ],
+  "finalSeverity": "P0",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-002",
+  "title": "監査台帳(CROSS_LEDGER)・KPI・lineage が store を subscribe しない静的 fixture で、操作者の決定・手動起票が一切記録されず append-only 完全性が破綻",
+  "route": "/observatory, /cases/new, /cases/:id (全 mutation)",
+  "pillar": "control-legibility",
+  "severity": "P0",
+  "description": "証跡台帳 (CROSS_LEDGER)・KPI metrics・承認済ナレッジは store state から decoupled な frozen fixture。手動起票案件 (CASE-MANUAL-NNN) を入力者承認→承認者最終承認→反映済 (master data 変更) まで完走しても、台帳を MANUAL で検索すると常に 0 件『該当する証跡がありません』、lifecycle view は固定 CASE-2026-0142 に pin。承認/差戻し/reversal/persona 切替/reset も新規 ledger 行を生まず KPI も再計算されない (53→53)。CROSS_LEDGER = OBS_LEDGER + CASE_LIST(seed) flatten で、state.cases を subscribe しない。監査者の中核前提『全操作が append-only trail に記録される』(SR 11-7 audit trail / NYDFS Part 500 §500.06 / FISC 証跡) に対する重大な完全性欠落。台帳は『append-only…出力可能』と提示しつつ静的サンプルである旨の disclaimer が無い。",
+  "evidence": "src mock-observatory.ts:122-125 CROSS_LEDGER = module-level const (store 非subscribe); KPI_ROWS frozen (mock-kpi.ts:31-35); OBS_KNOWLEDGE static (:138-156)。case/create は state.cases/caseOrder のみ書込 (reducer.ts:111-127)。live: manual-entry.mjs {manualCaseInLedger:false, ledgerEmptyForManual:true, lifecyclePinnedCase:'CASE-2026-0142'}; manual-entry-4.mjs フルライフサイクル後も {ledgerTraceFinal:false, ledgerCountFinal:'0'}。audit-lineage: ledgerCountUnchangedAfterApprove='53→53', metricsChangedAfterApprove=false, manualLedgerCount=0。screenshots manual-entry/06b/14, observatory-*.png。journeys AUD-02/03/05/GOV-01 で confirmed。",
+  "expectedFlawless": "(a) 台帳/KPI/lineage を store-truth に subscribe し操作者自身の session 操作 (手動起票・承認・反映) が時系列で台帳に append され KPI に反映される、または (b) 台帳 header に『本台帳は代表的な静的サンプルで、本セッションの操作・手動起票は反映されない』と明示 disclaimer を置き、操作の不在を記録漏れと誤認させない。",
+  "suggestedFix": "CROSS_LEDGER を静的 const から store-derived selector (useCrossLedger) に変更し state.caseOrder/cases を走査して受付/field確定/入力者承認/承認者承認/反映を deterministic に台帳行へ展開。OBS_LEDGER (canonical 0142) は seed 由来として温存し store 由来行を append。lifecycle view も対象 case を query 可能に。最小修正は台帳 header に disclaimer 1 行 (Observatory.tsx:209-213)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L4-regulator:7",
+   "observatory:6",
+   "flow-manual-entry:1",
+   "flow-flywheel:3",
+   "L7-ssot(audit-lineage)"
+  ],
+  "finalSeverity": "P0",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-003",
+  "title": "最頻 semantic token (primary chip/nav, neutral muted) が WCAG AA 未達で全 74/74 evidence cell が color-contrast serious — 全 route 横断の systemic a11y 欠陥",
+  "route": "全 route (15 routes × 全 viewport/persona)",
+  "pillar": "a11y",
+  "severity": "P0",
+  "description": "Operational Premium Light の token 自体が最頻 semantic 色で AA を割る。MetaChip/StatusBadge/FilterChip-active/Sidebar-active の primary tone = text #635bff on bg #eef2ff = 4.20:1 (FAIL)、active nav primary on canvas #f8fafc = 4.49:1 (FAIL)、neutral/muted #64748b on panel-inset #f1f5f9 = 4.34:1 (FAIL)。これらは chrome/一覧/詳細に遍在し、74 cell 全てで axe color-contrast (serious) が発火 (唯一発火している rule)。統制ラベル『手順承認/確認済/全件確認』や PrototypeModeLabel (規制告知 GOV-04) まで低コントラスト。index.css:17 のコメント自身が『panel-inset 上は fg-muted AA 未達 → fg-tertiary/fg を使う』と SSOT で自認しているのに広範に使用 (self-documented R7 違反)。a11y 100% (axe 0) が規制 prototype の下限。単一 token 変更で全 route に波及。",
+  "evidence": "evidence/ 全 *.json で axe color-contrast 74/74 cell。計算: #635bff/#eef2ff=4.20:1, #635bff/#f8fafc=4.49:1, #64748b/#f1f5f9=4.34:1。src MetaChip.tsx:17 + StatusBadge.tsx:31 + FilterChip.tsx:53 (bg-[primary-soft] text-[primary]); Sidebar.tsx:114,160; index.css:17,21,24。各 route axe: /cases 6, /approvals 3, case-detail desktop 5/mobile 3, observatory 5/3, search 10, ledger 17, config-approvals 4。代表 selector '.active[aria-current=page]>.truncate.flex-1', '.bg-[primary-soft].text-[primary]', '.sm:inline', '.max-w-full>.whitespace-nowrap'。",
+  "expectedFlawless": "全 route で axe serious 0。最頻 semantic 配色が AA 4.5:1 を満たす。primary-on-soft 用 --color-primary-strong (#4f46e5 級, eef2ff 上 ~5.0:1) を新設し chip/nav/active text を全て strong 経由に統一。neutral muted は panel-inset 上 AA pass する fg-tertiary #475569 (~7:1) へ降格。PrototypeModeLabel は規制告知ゆえ AA 必達。",
+  "suggestedFix": "index.css token を AA 化: --color-primary-strong 新設 → MetaChip/StatusBadge/FilterChip/Sidebar active の primary text を strong 経由に。muted-on-inset (操作者ラベル/PrototypeModeLabel/EmptyState description) を fg-tertiary に。token SSOT で一括是正後、15 route で axe 再走して color-contrast=0 を gate 化。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:1",
+   "L5-a11y:1",
+   "L5-a11y:2",
+   "L5-a11y:3",
+   "L5-a11y:4",
+   "L5-a11y:15",
+   "L4-regulator:13",
+   "approvals:3",
+   "case-detail:5",
+   "cases-new:4",
+   "config-approvals:2",
+   "escalations:6",
+   "observatory:4",
+   "search:3",
+   "flow-4eyes:3",
+   "flow-escalation:6",
+   "flow-flywheel:4",
+   "flow-manual-entry:4",
+   "agent-detail:4",
+   "business-approver:4",
+   "killswitch(AIADMIN-J2)"
+  ],
+  "finalSeverity": "P0",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-004",
+  "title": "ProposalDetail の diff add/del 文字色が 2.24:1 / 3.95:1 — flywheel 中核ナラティブの差分表示が判読困難 (AA 大幅未達)",
+  "route": "/proposals/:id",
+  "pillar": "a11y",
+  "severity": "P1",
+  "description": "提案差分 (before/after) を text-[--color-diff-add] (#10b981) on bg-[diff-add-bg] (#d1fae5) = 2.24:1、text-[diff-del] (#dc2626) on #fee2e2 = 3.95:1 で描画。差戻し→改善提案という製品中核メッセージ (flywheel) の最重要 surface が薄緑/薄赤地に薄緑/薄赤文字で読みにくく、判定の核となる『＋ 判定基準を厳しめに…』が読めない実害もある。#10b981 を text に使う設計自体が AA 不可 (白地でも 2.54:1)。F-003 と別 token・別 fix のため独立。",
+  "evidence": "src ProposalDetail.tsx:225-226; index.css:41-44。計算 #10b981/#d1fae5=2.24:1, #dc2626/#fee2e2=3.95:1。flow-flywheel:4 cc-nodes probe で diff-add #10b981 on #d1fae5=2.23, diff-del #dc2626 on #fee2e2=3.95 を実測。",
+  "expectedFlawless": "差分前景文字が地色に対し AA。add/del の意味色は border/icon/+−記号で担い、文字は -700/-800 濃色 (#047857 / #b91c1c)。bg は現行 -bg 維持。",
+  "suggestedFix": "diff block 文字色を --color-success-soft-fg (#047857, 5.2:1) / --color-error-soft-fg (#b91c1c) へ置換。index.css の --color-diff-add/del を AA 達成色へ。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:2",
+   "flow-flywheel:4(diff部分)",
+   "proposal-detail(diff contrast)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-005",
+  "title": "Hub 最優先 CTA (PrimaryAnchor) の kicker/detail が text-white/85 で 3.36-3.85:1 — 入口 hero が AA 未達",
+  "route": "/",
+  "pillar": "a11y",
+  "severity": "P1",
+  "description": "Hub 冒頭 primary CTA カード (bg #635bff) で kicker と detail を text-white/85 で描画 = 実効 3.36-3.85:1 で AA 未達。製品第一印象=入口の hero text が薄い。axe も .text-white/85 を fail node として検出。",
+  "evidence": "src Hub.tsx:87,89 (text-white/85 on bg-[--color-primary])。計算 white@85%/#635bff=3.36-3.85:1。evidence/hub__desktop.json で .text-white\\/85.text-\\[11px\\] と .mt-0\\.5 が color-contrast fail node。",
+  "expectedFlawless": "hero CTA 補助文字も AA。alpha を落とした白を使わず不透明 white か white@95%以上、または primary-hover (#4f46e5) 地。",
+  "suggestedFix": "Hub.tsx:87,89 を text-white/90 以上か不透明 text-white に。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:3",
+   "L5-a11y:5"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-006",
+  "title": "手動起票案件が AI処理/OCR/.pdf 走査書類/(押印済)印影を捏造表示し、人手入力を AI 出力・原本走査と誤認させる",
+  "route": "/cases/new → /cases/CASE-MANUAL-NNN",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "手動起票 (AI 障害時の業務継続が建付け) で全項目を人手入力して作成した案件の詳細が AI/OCR 由来であるかのように偽装される: (a) 右 panel 見出し『AI 入力項目』、(b) lifecycle stepper が『AI処理 完了 / AI 担当 Agent / 読み取り+登録情報照合+値生成』を done 表示、(c) 左 pane が CASE-MANUAL-NNN.pdf という存在しない走査申込書として描画され最下部に『押印/署名欄: (押印済)』という押印済印影まで捏造。AI も OCR も走らず PDF も存在しない。SR 11-7 (model output provenance) / 監査証跡完全性の lens で『AI が止まっている前提の案件に AI 処理履歴がある』『原本が無いのに押印済と記録』という確実な指摘事項。",
+  "evidence": "src CaseDraft.tsx:46-63 (handleSubmit→case/create, AI 不在); reducer.ts:111-127; mock-case-detail.ts:350 buildManualCaseDetail→buildLifecycle('ready') が AI処理 step 含む (:202-209), :226 push({label:'押印/署名欄', value:'(押印済)'}), :343-349 fileName=`${id}.pdf`; ReconcilePanel.tsx:34 'AI 入力項目'。live manual-entry-5.mjs {lifecycleMentionsAI:true, docTitleManual:'法人住所変更届（手動起票）', claimsPdf:true, claimsStampSignature:true}。screenshot manual-entry/15, cases-new/03-after-submit.png。",
+  "expectedFlawless": "手動起票 case は AI 由来でないことを provenance 上明示: 右 panel 見出しを『入力項目（手動起票）』、lifecycle から AI処理 step を除外 (受付=手動起票→入力者入力→承認者承認→反映)、左 pane を『手入力値の控え（書類画像なし）』に、捏造印影を出さない。CaseEntity に origin:'manual'|'ai' を持たせ表示分岐。",
+  "suggestedFix": "buildManualCaseDetail に manual flag を持たせ、専用 lifecycle builder で AI処理 step を omit、buildDocRows の (押印済) push を manual では行わず document を placeholder に、ReconcilePanel 見出しを source 種別で出し分け。",
+  "confidence": "high",
+  "mergedFrom": [
+   "cases-new:1",
+   "flow-manual-entry:2",
+   "L4-regulator:12",
+   "L3-legal(manual fabrication)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-007",
+  "title": "手動起票直後に全項目が『確認済(manually_confirmed)』・四眼の一次確認が自動成立し、照合工程が name-only に",
+  "route": "/cases/new → /cases/CASE-MANUAL-NNN",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "手動起票後の詳細で 5 項目すべてが reconcileState='manually_confirmed' になり『確認済 5』『確認が必要な項目はありません — 承認できます』と表示。入力者が起票時にタイプしただけで一次確認 (照合) 工程が system 側で済み扱いになり、そのまま承認者承認へ流せる。中核統制は『入力者が AI 入力と申請書類を照合して確認』だが、手動起票では照合対象 (AI 入力 vs 書類) が原理的に存在しないのに『確認済』を立てる。四眼原則の一次眼が name-only になり統制可視性が崩れる。",
+  "evidence": "src mock-case-detail.ts:331 (reconcileState:'manually_confirmed' 全 field 固定); reducer.ts:121 (flags:0); ReconcilePanel.tsx:38,112。screenshot cases-new/03-after-submit.png (確認済 5 + 緑『承認できます』)。probe: 起票直後そのまま承認可能状態。",
+  "expectedFlawless": "手動起票直後は『未確認（手入力・要照合）』状態とし、入力者が各値を能動的に確認するまで『確認済』にしない。少なくとも『手入力値（自己照合のみ）』source-truth ラベルで AI 照合済と区別。",
+  "suggestedFix": "起票直後を needs_review 相当の『手入力・要自己確認』にし入力者の明示確認後に manually_confirmed へ。あるいは reconcileStateLabel で manually_confirmed を『手入力確認済』と表記し AI 照合確認と弁別。",
+  "confidence": "high",
+  "mergedFrom": [
+   "cases-new:2"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-008",
+  "title": "起票フォームのエラーが SR に通知されず無効フィールドへ focus も移らない (role=alert/aria-live/aria-describedby 欠落)",
+  "route": "/cases/new",
+  "pillar": "a11y",
+  "severity": "P1",
+  "description": "空のまま『起票する』を押すと 5 input に aria-invalid + 赤枠 +『全項目を入力してください』が出るが、(1) 文言が role=alert/aria-live を持たず (祖先まで 0 件) SR に読まれない、(2) 各 input に aria-describedby が無くエラーと無効フィールドが programmatic に結び付かない、(3) focus が送信ボタンに残り最初の無効フィールドへ移らない (WCAG 3.3.1/4.1.3)。起票は AI 障害時フォールバックで最も誤入力ガードが要る経路なのに最弱。同系統の form-error 欠落は ReasonDialog/FieldActionModal の理由必須エラーにも (role=alert/aria-live 不在 + aria-describedby 未連結)。",
+  "evidence": "src CaseDraft.tsx:135-140 (<span> のみ role/aria-live なし), :122 (aria-invalid のみ aria-describedby なし); grep 'role=\"alert\"|aria-live' CaseDraft.tsx → NONE。probe cases-new emptySubmit: errorHasLiveRegion=[], activeAfterSubmit={tag:'BUTTON'}, invalidInputs=5。screenshot cases-new/02-empty-submit-error.png。modal 系は L5-a11y:7。",
+  "expectedFlawless": "起票/modal エラーは role='alert'/aria-live で即時通知、各無効 input に aria-describedby を紐付け、送信失敗時に最初の無効フィールドへ programmatically focus 移動。",
+  "suggestedFix": "CaseDraft.tsx エラー span に role='alert' + id、各 input に aria-describedby={invalid?errorId:undefined}、handleSubmit の !allFilled 分岐で最初の無効 input.focus()。ReasonDialog/FieldActionModal も同様。",
+  "confidence": "high",
+  "mergedFrom": [
+   "cases-new:3",
+   "L1-operator:11",
+   "L5-a11y:6",
+   "L5-a11y:7"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-009",
+  "title": "?demo=loading/error が 6+ list/detail route で完全 no-op — useListData seam 未配線で取得失敗時の縮退が route 間非一貫 (SSOT-drift)",
+  "route": "/search, /inbox, /escalations, /config-approvals, /observatory, /business-approver, /agents/:id",
+  "pillar": "ssot-integrity",
+  "severity": "P1",
+  "description": "/cases /approvals /agents /proposals は useListData seam で ?demo=loading→skeleton / ?demo=error→ErrorState+再試行 を出すが、/search /inbox /escalations /config-approvals /observatory /business-approver /agents/:id は seam 未配線 (import すらしない) で通常画面を描画 (証跡 PNG が byte-identical: escalations 3 状態とも md5 一致, inbox 全 73071 bytes)。useListData の docstring 自身が『任意の list route に付与』と謳うのに excluded。承認 queue (config-approvals/escalations) は取得失敗時に『空に見える』ことが裁定漏れに直結するため error 状態の明示が規制 UI の最低要件。取得失敗時に操作者が再試行に到達できるかは AI 障害時の業務継続検証の核心で、route 間不一致は信頼検証を破綻させる。",
+  "evidence": "各 walker live probe で no-op を確認: search:1, inbox:3, escalations:5, config-approvals:1, business-approver:6, agent-detail:5, observatory:11。md5 escalations__desktop.png==__loading.png==__error.png=7bb40b...; inbox 全 73071 bytes。src useListData.ts docstring『任意の list route に付与』。grep useSearchParams → active pages 0 hit (legacy/ のみ)。対照 Proposals.tsx:57,71 / Cases.tsx:81,104-106。",
+  "expectedFlawless": "全 list route が ?demo=loading で skeleton、?demo=error で ErrorState+再試行 を一貫表示。detail route には loading/error 縮退を追加。Observatory/BusinessApproverHub は fixture-backed のため『静的・degraded 非対象』を明示するか共通 demo-state hook で対応。",
+  "suggestedFix": "各 route で const {status,rows,onRetry}=useListData(...) を呼び DataTable に status/onRetry を渡す (Proposals.tsx:57/71 同型)。fixture-backed route は disclaimer か共通 demo-state hook 導入。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:16",
+   "L6-craft:8",
+   "search:1",
+   "inbox:3",
+   "escalations:5",
+   "config-approvals:1",
+   "business-approver:6",
+   "agent-detail:5",
+   "observatory:11"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-010",
+  "title": "横断検索が deep-link 不可・URL 非同期で検索状態が ephemeral — 証跡の共有/bookmark/再現が不能",
+  "route": "/search",
+  "pillar": "operator-efficiency",
+  "severity": "P1",
+  "description": "検索語は ViewProvider の useState('') に保持され URL に載らない。/search?q=0142 を直接開いても何も検索されず空プロンプト。TopBar 検索から /search へ navigate しても q が渡らない。監査者/検査官が証跡の所在を共有・bookmark・再現する手段がなく、deep-link 前提の他 route と整合しない。複数人での証跡受け渡し (operator→auditor) を阻害。",
+  "evidence": "src view-context.ts:5『searchQuery: ephemeral (永続しない)』; ViewProvider.tsx:11 useState(''); TopBar.tsx:29-32 onSubmit→navigate('/search') (q 非伝播)。probe search deepLinkQ: /search?q=0142 → {tableShown:0, emptyPromptShown:1}。screenshot search-out/deeplink-q.png。",
+  "expectedFlawless": "/search?q=… を開くと検索 box に復元され結果が即表示。検索実行で URL が ?q= に replace 同期し bookmark/共有/戻るで再現。",
+  "suggestedFix": "SearchResults で useSearchParams を読み初期 searchQuery を ?q から復元 + onChange で setSearchParams({q}) replace。TopBar onSubmit を navigate(`/search?q=${encodeURIComponent(q)}`) に。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:5",
+   "search:2"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "adjusted"
+ },
+ {
+  "id": "F-011",
+  "title": "全 list route で経過(滞留)・要確認・担当が sort 不可、Approvals 経過は整形済文字列で時系列ソート不能 — キュー triage が成立しない",
+  "route": "/cases, /approvals, /escalations, /search",
+  "pillar": "operator-efficiency",
+  "severity": "P1",
+  "description": "案件処理の中核操作『古い順・要確認優先でキューを捌く』が効かない。Cases は sortValue を持つ列が ID と状態のみで経過/担当/確認(flags) 非 sort。Approvals は ID のみ sort 可で経過は表示文字列『約5時間』を素描画 (sortValue なし)。Escalations も ID のみ、経過は case-受付からの age でエスカレ age でない (誤誘導)、owner/severity/SLA 列も無く難案件 triage が不能。Search は ID のみ sort で種別/名称非 sort・kind filter 無し。receivedAt は store の fact なので age sort は実装可能 (データ制約でなく sortValue 欠落)。SLA 管理観点でも基本期待。",
+  "evidence": "probe L1-operator-out.json: cases.headers 経過/担当/確認 sortable:false; approvals.headers 経過 sortable:false (r.elapsed=整形済文字列); escalations sortBtns=1 (id のみ); search ths 種別/名称 sortable:false。src Cases.tsx:43,50,44-49; Approvals.tsx:58; Escalations.tsx:20-25; SearchResults.tsx:24-29。lib/dates.ts NOW_ISO 起点で age 算出可。DataTable.tsx:287 は sortValue があれば自動 sort UI。",
+  "expectedFlawless": "全 queue の経過(滞留)・要確認件数列が sort 可能で滞留長/要確認多を上位に集められる。Approvals 経過は receivedAt(数値) を sortValue に。Escalations は escalatedAt 基準 + owner/category 列。Search は種別 sort/kind filter。",
+  "suggestedFix": "Cases.tsx 経過列に sortValue:(r)=>r.receivedAt、確認列に sortValue:(r)=>r.flags。Approvals は receivedAt を行に保持し sortValue 付与。Escalations 行に escalatedAt/owner/category を載せ列追加。SearchResults 種別列に sortValue + filters。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:1",
+   "L1-operator:6",
+   "L1-operator:14",
+   "escalations:4",
+   "search:6",
+   "flow-escalation:4"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-012",
+  "title": "詳細画面のパンくず『案件一覧』が非クリック span — 案件を捌いた後に一覧へ戻る明示導線が無い",
+  "route": "/cases/:id, /proposals/:id, /agents/:id",
+  "pillar": "operator-efficiency",
+  "severity": "P1",
+  "description": "案件を 1 件処理した操作者は次の案件へ移るため一覧に戻る。CaseDetail header の『業務名 › 案件一覧 › CASE-id』は chevron 付きで一覧へ戻れると強く期待されるが 3 要素すべて href/role 無しの plain <span> で cursor:auto。一覧へ戻る正規導線は Sidebar『受信トレイ』のみ。『案件一覧へ戻る』Link は case-not-found の EmptyState にだけ存在し本流では非対称。queue 処理の回遊コストを直接押し上げ、craft 面でも『リンクに見えてリンクでない』は本番品質の指摘対象。",
+  "evidence": "src CaseDetail.tsx:142-148 breadcrumb 全要素 <span>、:92 のみ <Link to='/cases'> (not-found 限定)。live case-detail probe breadcrumb.all = 全 3 要素 {tag:'SPAN',href:null,cursor:'auto'}。ProposalDetail/AgentDetail も同様。",
+  "expectedFlawless": "『案件一覧』(最低限) は <Link to='/cases'> でクリック可・hover 下線・focus ring・cursor pointer。決定後に明示『一覧へ戻る』/『次の案件へ』導線で連続処理を支援。クリック不可ならパンくず風にせず文脈ラベルに留める。",
+  "suggestedFix": "CaseDetail.tsx:145 の『案件一覧』span を <Link to='/cases' className='hover:underline'> に。決定 footer 付近に『一覧へ戻る』を 1 つ。ProposalDetail/AgentDetail も同様。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:4",
+   "case-detail:3"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-013",
+  "title": "エスカレーション後に案件詳細・一覧へ永続マーカーが一切出ず、審級中が誰にも不可視 + 操作者の決定が画面に反映されない",
+  "route": "/cases/:id, /cases, /observatory, /inbox",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "case/escalate は status を変えない設計のため、エスカレ後も /cases では『確認待ち(ready)』のまま並び、CaseDetail にエスカレーション中 banner/chip が無い (描画 banner は sendback と reversal の 2 種のみ、escalation 用は未実装)。要確認も未解消・footer 承認ボタンもそのまま。入力者が再度開いても『自分がエスカレ済み・裁定待ち』が画面のどこにも見えず二重対応・宙吊りの誤認を招く。より広く、操作者の 1 日の作業 (承認/差戻し/エスカレ/起票/取消) の帰結が他画面 (台帳/KPI/通知) に反映されず自分の作業結果を画面で追跡できない (F-002 と複合)。regulated workflow では『誰が・いつ・どの判断先へエスカレしたか』の可視化が統制要件。",
+  "evidence": "src CaseDetail.tsx の entity.escalation 参照は dispatch (:128-131) のみ、banner 条件は entity?.sendback (:175) と entity?.reversal (:187) の 2 つだけ。live flow-escalation-5.mjs caseDetailAfter.hasEscalationContext=false; esc.chips=['要確認 1','確認済 4'] 未解消、footerStillActive=true、statusBadge 不変。store afterEscalate.status='ready'。ssot-drift INP-06 confirmed。",
+  "expectedFlawless": "エスカレーション中の案件は CaseDetail に sendback/reversal と同型の永続バナー (理由/宛先 業務責任者/送信時刻) を表示し、/cases 一覧に『裁定依頼中』chip を出す。再エスカレ抑止/重複警告。status を変えない設計でも escalation 有無を視覚化。",
+  "suggestedFix": "CaseDetail.tsx に entity?.escalation banner を sendback/reversal banner と同 pattern (alert tone) で追加。Cases 一覧 status/meta 列に escalation!==undefined のとき chip (status-tones SSOT 経由)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "case-detail:2",
+   "flow-escalation:3",
+   "L1-operator:15"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-014",
+  "title": "緊急停止(kill-switch)が trust を実際には降格しない cosmetic + 再開が確認なし・理由なし 1 クリックで停止理由を state から消去",
+  "route": "/agents/:id, /agents",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "kill-switch 自体は存在し動作する (旧 audit UX-05『kill-switch 不在』は stale-claim、解消済) が、emergencyStop/resume reducer は paused のみ mutate し trust は不変 — 型コメント (types.ts:74,110) が『全件確認へ降格』と主張するのに実際には trust 降格しない cosmetic。さらに緊急停止した AI の『再開』が確認なし・理由なしの 1 クリックで、停止理由を state から消去する。停止という統制行為とその理由が監査に残らず、再開の判断根拠も失われる。",
+  "evidence": "src reducer.ts:194-203 (emergencyStop/resume — paused のみ mutate、trust 不変) vs types.ts:74,110 (型コメント『全件確認へ降格』主張)。AgentDetail.tsx:115-126 (resume 1-click 無理由)、360-428 (停止 modal 理由必須)。store.test.ts:86-95 は paused/pausedReason のみ assert、trust 検証なし。probes/killswitch*.mjs + result*.json。",
+  "expectedFlawless": "緊急停止が trust を実際に Supervised(全件確認) へ降格させ (型コメントと実装を一致)、再開は確認 + 再開理由を要求し、停止/再開がともに監査 event として理由付きで残る。",
+  "suggestedFix": "emergencyStop で trust を supervised に降格 (型コメント通り)、resume に確認 modal + 理由必須を追加し pausedReason を消さず履歴化。停止/再開を台帳 event 化 (F-002 連動)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L4-regulator:6",
+   "agent-detail:2",
+   "killswitch(findings)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-015",
+  "title": "設定承認(SoD)フローが代表 AgentDetail route では到達不能、提案承認は identity SoD でなく role 分離のみ — 三承認層で四眼強制ロジックが非対称",
+  "route": "/agents/:id, /proposals/:id, /config-approvals",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "案件承認(approveCase)・設定承認(approvePromotion) は reducer の isSelfApproval で identity ベースに四眼を強制するが、代表 AgentDetail route では設定承認(昇格)フローが到達不能でデモ/監査で四眼を見せられない。提案(手順承認)フローは ProposalDetail で mode を role のみで決め、forward→approve を役割で分離するだけで identity SoD チェックが無い (canManualAct/canOwnerAct は mode+status のみ、currentActorId 不参照)。現プロトタイプでは actor が一意に役割分担されるため UI 上は四眼成立するが、本番で一人が複数 role を兼務する組織では同一人物が自分の forward した提案を approve できる設計余地。監査者が『提案改定の四眼はどう強制されるか』を問うと、案件=identity 強制・提案=role 分離のみ、という統制ロジックの非対称が露見。",
+  "evidence": "src reducer.ts:36-38,54,181 (case/promotion は isSelfApproval(requesterId, currentActorId)) vs ProposalDetail.tsx:46 (mode = role only), :82-83 (canManualAct/canOwnerAct は currentActorId 不参照)。live proposal-layer-sod: inputter forward 後 approve 非表示、approver が forwarded 承認可 (役割分離、identity ではない)。agent-detail:1 (設定承認フロー到達不能)。",
+  "expectedFlawless": "四眼強制ロジックを 3 承認層 (案件/手順/設定) で一貫させ、提案承認も『forward した actor 本人は approve 不可』を identity ベースに強制 (案件と同じ isSelfApproval helper 再利用)。代表 route で設定承認の四眼を実演可能に。少なくとも提案層が role 分離である旨を統制注記/UI で明示。",
+  "suggestedFix": "ProposalEntity に forwardedBy:actorId を追加し proposal/forward で記録、proposal/approve で isSelfApproval(forwardedBy, currentActorId) を block。canOwnerAct を useCanApproveProposal(id) selector に差替え。AgentDetail に設定承認デモ経路を用意。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L4-regulator:9",
+   "agent-detail:1",
+   "flow-flywheel:2"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-016",
+  "title": "エスカレーション裁定が業務責任者に lock されず起票入力者が自己裁定可 + 肯定的裁定(続行可)経路が無く差戻し却下が唯一の出口",
+  "route": "/escalations, /cases/:id",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "case/escalate は escalation field を記録するだけで status を変えず案件を業務責任者に lock しない (reducer.ts:85-93『status 不変』)。canSendback は role gate が無く (CaseDetail.tsx:106)、エスカレした入力者本人が同じ案件を reopen して自分で差戻し裁定できる。modal copy『業務責任者の判断先へ送ります』/ SSOT claim『裁定=業務責任者が case/sendback』と矛盾。さらに業務責任者が案件を妥当と判断しても『内容妥当・このまま続行可』という肯定的裁定の経路が無く (ready→承認者承認は reducer が許さない)、差戻し=却下が唯一の裁定手段。妥当判断時はキューから外す手段が無くエスカレーションが恒久 open (無操作だと件数 1 のまま stuck)。",
+  "evidence": "src reducer.ts:85-93 (status 不変); CaseDetail.tsx:106 (canSendback role 非gate), :130 (to:'actor-approver' hardcode だが consumer 非強制)。probe flow-escalation-7.mjs: escalated ready case を approver で開くと footerButtons=[{差戻し,enabled},{最終承認,disabled}], approveBtn.present=false; 無操作で戻ると escalStillOpenNoAction=1。ssot-drift J4 confirmed。screenshot escal7/01。",
+  "expectedFlawless": "(a) エスカレ済案件の裁定を業務責任者 role に gate し入力者には read-only『裁定待ち』を表示、(b) 業務責任者が『妥当・続行可』と裁定できる肯定経路 (case/resolveEscalation {decision:'proceed'|'sendback', reason}) を用意し、裁定の帰結が独立 audit event として記録され queue が必ず closure。copy を実装能力に合わせる。",
+  "suggestedFix": "case/resolveEscalation action 追加: proceed は escalation.resolution 記録しキューから外す (status ready 維持)、sendback は既存再利用。reducer guard で escalation 存在時のみ resolve 可。CaseDetail で entity.escalation && mode==='input' のとき sendback を disable し『裁定待ち』表示。footer に escalated 専用決定面 (続行可/差戻し)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L4-regulator:10",
+   "escalations:2",
+   "flow-escalation:2"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-017",
+  "title": "裁定後もエスカレーション通知が bell/inbox に未読のまま残り、起票者へ裁定結果が因果として戻らない (closure 条件の SSOT 不一致)",
+  "route": "/escalations, /inbox, all (bell)",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "業務責任者が escalation を裁定(差戻し)すると /escalations キューからは消える (status sent-back で除外) が、bell は『未読 1 件』のまま /inbox にも未読で残る。裁定面(キュー)と通知面(inbox/bell)で closure ロジックが非対称 (useEscalations は status guard、useNotifications の escalation 分岐は escalation.to===currentActorId だけで status 不問)。業務責任者は『裁定済みなのに未対応通知が残る』二重表示。さらにエスカレ起票者は裁定結果を『エスカレーションの帰結』として受け取れず (差戻し通知は assignee 宛で escalation 事実と独立、起票者 field が escalation 型に無い)、起票者≠assignee では結果通知を一切受け取らない (因果の喪失)。",
+  "evidence": "src hooks.ts:350 useNotifications escalation 分岐 (status 非参照) vs hooks.ts:388 useEscalations (status!=='sent-back'&&!=='reflected')。probe flow-escalation-5.mjs: 裁定後 bellAfterAdjudicate='通知 (未読 1 件)', inbox に escalation 残存, escalRowsAfterAdjudicate=[]。起票者因果: 差戻し通知は c.assignee===actor.name 条件 (hooks.ts:323)、escalation 型に起票者 field 無し。screenshot escal5/02。",
+  "expectedFlawless": "裁定(差戻し/取消/反映)で escalation が解決したら bell・/inbox からも当該通知が消える (または『裁定済』へ遷移)。キューと通知の closure 条件を単一 SSOT に。起票者を escalation 記録に保持し裁定完了時に起票者へ『あなたのエスカレーションが裁定されました(帰結:…)』通知を返す。",
+  "suggestedFix": "hooks.ts useNotifications の escalation 分岐に status guard 追加 (useEscalations と同条件)、または reducer の case/sendback/reverse 時に escalation.resolved を立て両 selector が参照。types.ts の escalation に from(起票 actorId) 追加し裁定完了通知 kind を追加。",
+  "confidence": "high",
+  "mergedFrom": [
+   "flow-escalation:1",
+   "flow-escalation:7"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-018",
+  "title": "reversal(訂正/取消)が who/when を欠き監査台帳/lifecycle に残らず、reversed→sent-back 着地後に UI が承認可能と誤誘導し再処理 action 不在で永久 dead-end",
+  "route": "/cases/:id",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "reversal の操作機構 (gate/SoD/idempotency/kind区別/通知/persist) は堅牢だが、reversal record が who(裁定 actor)/when(timestamp) を欠き、監査台帳/lifecycle に一切記録されない (非否認 non-repudiation の核心 surface gap)。さらに reversed→sent-back 着地後に LifecycleStepper が反映到達を消去し、ReconcilePanel/checker banner が『承認できます』と誤誘導、sent-back→ready の再処理 action が不在で flywheel loop が永久 dead-end (『AI再処理中』は cosmetic)。反映後の訂正/取消は四眼原則・統制可視性の核心なのに証跡に残らない。",
+  "evidence": "flow-reversal walker: reversal が監査台帳/lifecycle に記録されない; reversal record が who/when 欠如; reversed→sent-back 後 LifecycleStepper が反映到達を消去 + ReconcilePanel/checker banner『承認できます』誤誘導 + 再処理 action 不在で loop dead-end。L4-regulator:11 (reversal who/when 欠落、台帳に残らない非否認 gap)。probes/flow-reversal*.mjs、reflected seed CASE-2026-0120/0112。",
+  "expectedFlawless": "reversal が実行 actor と timestamp を記録し監査台帳/lifecycle に append-only event として残る (F-002 連動)。reversed→sent-back 着地後は『反映が訂正/取消された』状態を正しく示し承認可能と誤誘導しない。再処理経路 (sent-back→ready) を提供し loop を閉じる。",
+  "suggestedFix": "reversal record に actorId + timestamp を追加し台帳 event 化。reversed sent-back 状態で LifecycleStepper/ReconcilePanel/banner を『訂正/取消反映済』表示に分岐し承認 CTA を出さない。sent-back→ready 再処理 action を追加。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L4-regulator:11",
+   "flow-reversal(findings)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-019",
+  "title": "Observatory メトリクスが synthetic/frozen KPI を『直近30日の実績』と表示し hedge は隅の 10px ラベルのみ + 分母 1,240/1,140/980/910 が単一期間枠と SSOT コメント(980統一)に矛盾",
+  "route": "/observatory (メトリクス tab)",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "各 KPI 表が subtitle『この業務の直近 30 日の実績』(=実際の処理結果) と表示するが、データは frozen synthetic fixture (Object.freeze) で操作に応じ再計算されない。唯一の hedge は隅の 10px『［仮説/要検証］参考値』span で『実績』framing よりはるかに弱く見落としやすい。コンプラ/監査者は live 処理由来と読む。加えて分母が単一『直近30日』内で 1,240/1,140/980/910 と metric ごとに異なり、mock-kpi.ts の header コメントは『分母は 980 に統一』と主張 (journey AUD-03 も 980 統一を期待) — 画面と SSOT コメントが矛盾し、auteur が母集合を突合すると分母不整合 (画面上に reconciliation note 無し)。CLAUDE.md の [仮説/要検証] 規律が弱く適用されている。",
+  "evidence": "probe metrics.subtitles=['この業務の直近 30 日の実績' x2], hypoLabels=corner 10px; denoms=['/1,240','/1,240','/1,240','/1,140','/980','/980','/980','/910']。src Observatory.tsx:393 subtitle; MetricVsThreshold.tsx:45,56 hypothesisLabel top-right; mock-kpi.ts:9 comment『分母は 980 に統一』vs rows :17-26 (1,240/1,140/980/910); frozen :31-35。journeys AUD-03。screenshot observatory-desktop-metrics.png。L4-regulator:8 (KPI を実績と表示しつつ frozen synthetic + 分母不一致)。",
+  "expectedFlawless": "synthetic KPI を実績でなく仮説として framing (subtitle を『［仮説/要検証］この業務の直近30日の想定値（実処理からの再計算ではありません）』に、hypothesisLabel を各値の先頭 badge に)。分母を真に統一するか、metric ごとに母集合が異なる理由 (除外) を画面に明示。mock-kpi.ts のコメントを data と一致させる。",
+  "suggestedFix": "Observatory.tsx:393 subtitle を hypothesis-explicit phrase に、MetricVsThreshold.tsx:56 の hypothesisLabel を leading badge に。mock-kpi.ts:17-26 の分母を :9 コメントと reconcile (または除外列に紐付け)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "observatory:1",
+   "observatory:2",
+   "L4-regulator:8",
+   "agent-detail:3",
+   "L3-legal(metrics actual claim)"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "adjusted"
+ },
+ {
+  "id": "F-020",
+  "title": "監査台帳 export が 0 件 (空 filter 結果) でも成功 toast を出す — 空エクスポートを完全な出力と誤認させるリスク",
+  "route": "/observatory (監査 tab → 証跡台帳 view)",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "エクスポートボタンは active filter 組合せ (例 actor=system × action=field_override) が 0 行で table が空状態『該当する証跡がありません』を表示していても enabled のままで、toast『証跡台帳の控えを出力しました（参考表示・外部システム未保存）』を発火する。監査者が証跡台帳を export し成功と告げられたのに 0 件、というのは misleading-success リスク (空 export を完全な export と誤認)。toast text は行数に言及しない。",
+  "evidence": "probe ledger.contradictoryCombo={rows:0, emptyStateText:'該当する証跡がありません。', exportEnabled:true, exportToastOnZero:[...,'証跡台帳の控えを出力しました（参考表示・外部システム未保存）']}。L3-legal.mjs out.exportToast + ledgerZeroVisible。src Observatory.tsx:214-221 onClick に ledgerRows.length guard 無し。audit-lineage: exportEnabledAtZeroRows=true。AUD-02 edgeCase。",
+  "expectedFlawless": "filtered set が空のとき export ボタンを disabled にする、または toast に行数を明示 (『53 件中 0 件を出力』『0 件のため出力する証跡がありません』)。",
+  "suggestedFix": "export onClick を ledgerRows.length===0 で guard (disable button or branch toast に row count を含める) Observatory.tsx:214。",
+  "confidence": "high",
+  "mergedFrom": [
+   "observatory:3",
+   "L3-legal(empty export)",
+   "L7-ssot(audit-lineage)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-021",
+  "title": "Flywheel lineage の起点『差戻し実例』が、ドリル先の実案件記録 (反映済・全項目確認済・差戻し痕跡なし) と矛盾 (証跡連鎖の破綻)",
+  "route": "/proposals/PROP-2026-031, /observatory, /cases/CASE-2026-0098",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "提案 PROP-2026-031 の根拠パネルは『日次提案分析が拾った、差戻しの実例』と明示し CASE-2026-0098/0087/0079 を差戻しコメント原文付きで根拠提示 (例 0098『ビル名が申請書類と異なっていたが自動確定されていた。サンプルビルディングが正しい』)。Observatory lineage も同 3 件をリンク。だが起点案件にドリルすると全て status=反映済、LifecycleStepper 全段完了、AI入力項目は全件『確認済』で差戻し痕跡が一切無く、0098 では根拠が『誤り』と述べた当の値『サンプルビル』が確認済の最終値として表示。SR 11-7/モデルリスク監査では設定変更の根拠過去事象は traceable でなければならず、根拠主張とドリル先の原本が食い違うのは証跡連鎖の破綻。",
+  "evidence": "src mock-proposal-detail.ts:80-83 (sourceCases コメント=差戻し主張) vs mock-case-detail.ts:294-298 (HISTORICAL_CASE_ROWS status:'reflected' 固定) + buildCaseDetail (:254-256 reflected→全 field manually_confirmed) + buildLifecycle (:202-217 reflected→全段完了)。live flow-flywheel/11-lineage-source-case-drill.png (0098 反映済・全段完了・ビル名サンプルビル確認済), 13。store に id 不在 (sourcesInStore:[])。",
+  "expectedFlawless": "根拠提示の起点案件は差戻しが原本記録から corroborate できる状態にする: (a) status を sent-back にし差戻し理由を保持し LifecycleStepper/banner に差戻し段を出す、または (b) reflected のままなら『過去に差戻し→修正→再反映された案件』であることと確認済最終値が修正後の正値である旨を明示 (0098 のビル名を『サンプルビルディング』に)。",
+  "suggestedFix": "HISTORICAL_CASE_ROWS 各行に差戻し→是正履歴を持たせ change.to を修正後正値に、CaseDetail の参照専用 banner/lifecycle に『過去に差戻し後 是正・再反映』を追記。または sourceCases コメントを『基準が甘く誤確定しかけた類型(是正済)』へ整え原本の反映済表示と整合。",
+  "confidence": "high",
+  "mergedFrom": [
+   "flow-flywheel:1",
+   "L4-regulator:15"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-022",
+  "title": "ProposalDetail の metric 値が raw decimal (0.93 / >0.90) で SSOT spec (92%/≥95%) と乖離し screen-contract F-17 の raw confidence 非表示に抵触、spec 必須の『mock 値』表記も欠落",
+  "route": "/proposals/:id",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "ProposalDetail の metric 値が raw decimal 0.93 / >0.90 で表示され、SSOT spec の 92% / ≥95% から逸脱、生 confidence/accuracy スコアに読め screen-contract F-17 (raw confidence 非表示) に抵触。さらに spec が要求する『mock 値』の wording が metric 表に欠落。raw confidence 非表示は本 prototype の honesty 制約 (KPI=[仮説/要検証]、raw confidence 非露出) の一部。",
+  "evidence": "proposal-detail walker summary: metric values shown as raw decimals 0.93 / >0.90 deviate from SSOT spec (92% / ≥95%), read as raw confidence/accuracy scores forbidden by screen-contract F-17; spec-required 『mock 値』wording missing on metric table。",
+  "expectedFlawless": "metric 値を spec 通り % 表記 (92%/≥95%) にし raw decimal を出さない。spec 必須の『mock 値』表記を metric 表に付す。raw confidence は非表示の制約を守る。",
+  "suggestedFix": "ProposalDetail の metric 表示を % 整形 + 『mock 値』注記を追加。raw decimal 表示箇所を spec 準拠の表記に置換。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "proposal-detail(metric raw decimal)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-023",
+  "title": "mobile 375px で decision-critical な CJK 見出し/表が 1 文字ずつ縦折れ — Observatory h1・ProposalDetail 判定基準表・LifecycleStepper が判読不能/clip",
+  "route": "/observatory, /proposals/:id, /cases/:id (mobile 375px)",
+  "pillar": "craft",
+  "severity": "P1",
+  "description": "Observatory h1『モニタリング』が 375px で幅 35.6px に潰れ約6行に 1 文字ずつ縦積み (モ/ニ/タ/リ/ン/グ)、TopBar ProcessSelector『法人住所』が重なり PrototypeModeLabel が右端で clip。原因は page header title 行が flex items-baseline justify-between で min-w-0/responsive collapse を持たず h1 が min-content に潰れる。ProposalDetail の判定基準表 (規制 reviewer の最重要表) は 375px で各 cell 46-82px 幅 × 396px 高 = 全 cell 1 文字縦折れ、横スクロール退避も無い。CaseDetail の LifecycleStepper も 375px で 5 段横並び固定でラベルが重なり可読不能 (62px 幅に 5 文字+コネクタ)。本番品質で CJK 1 文字縦折れ・clip は許されない。",
+  "evidence": "probe L6-craft.mjs observatoryMobileH1 box{w:35.66,h:140}; L6-craft2.mjs verticalWrapCells w66×h396; case-detail.mjs mobile.liBoxes [{w:62,'入力者確認'},{w:62,'承認者承認'},{w:43,'反映'}]。screenshots L6-observatory-mobile-h1wrap.png, L6-proposal-mobile.png, case-detail-mobile.png。src Observatory.tsx:102-106; ProposalDetail 判定基準表; LifecycleStepper.tsx (responsive 分岐なし)。L5-a11y:12 (Stepper 375px で 7px clip)。",
+  "expectedFlawless": "全 viewport で見出し・決定根拠の表が読める。page header title 行に min-w-0 + flex-wrap (sm:flex-col stack)、h1 に whitespace-nowrap。判定基準表は mobile で card 化か overflow-x-auto + min-w テーブル。LifecycleStepper は sm 未満で flex-col 縦タイムラインか横スクロール。",
+  "suggestedFix": "Observatory.tsx:102-106 / 各 page header title 行に min-w-0 + flex-wrap、h1 に whitespace-nowrap。判定基準表を mobile card 化。LifecycleStepper を sm 未満で flex-col / overflow-x-auto。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:4",
+   "observatory:5",
+   "case-detail:4",
+   "L5-a11y:12",
+   "proposal-detail(mobile table)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-024",
+  "title": "業務責任者ハブの手順承認/設定承認カードが同一 /config-approvals に着地しハブの区別が消える + sidebar nav と同名 link で accessible name 衝突",
+  "route": "/business-approver",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "ハブは『手順承認』『設定承認』を別カード・別 count・別 desc で独立 receptacle として提示するが両方とも href=/config-approvals に navigate。到達先 ConfigApprovals は両系統を 1 queue に混在表示し H1『設定承認 — 手順・設定変更の承認待ち』。『手順承認 1 件を確認』を押した業務責任者は『設定承認』見出しの混在 queue に着地しハブの期待が裏切られる。『手順承認(現場知の正式手順化)』と『設定承認(AI 権限/モデル変更)』は統制レベルが異なる別事象 (Tier1 語彙) で同一面に溶かすのは統制可視性の欠落。加えて sidebar nav『設定承認』とハブカード『設定承認』が同名・同 href で同一画面に accessible name 衝突 (WCAG 2.4.4/4.1.2)、カード accessible name も数字先頭で連結 (『1手順承認…』) し SR 読み上げが曖昧。",
+  "evidence": "probe out.desktop.cards 手順承認/設定承認 とも href:/config-approvals、afterH1='設定承認 — 手順・設定変更の承認待ち'。dupNameCollision.settei=2。focusTrace link '1 手順承認 現場の…1 件を確認'。src BusinessApproverHub.tsx:28-29 (両 href), :60-71 (count span がラベル span より前); ConfigApprovals.tsx:46 H1 + :36-39 concat; Sidebar.tsx:61。",
+  "expectedFlawless": "2 カードが別 queue へ着地 (?kind=proposal / ?kind=promotion で初期 filter)、または到達先に kind 切替 tab + deep-link pre-select。到達先 H1/サマリがカード文言と語彙整合。同名 link 衝突を解消し、カード accessible name を意味順 (『手順承認 1 件 — …』) に。",
+  "suggestedFix": "2 receptacle href に ?kind を付与し ConfigApprovals で useSearchParams で初期 filter/tab 選択。カード数字 span に aria-hidden、Link に aria-label={`${label} ${count} 件 — ${desc}`}。H1 を両系統包含語に。",
+  "confidence": "high",
+  "mergedFrom": [
+   "business-approver:1",
+   "business-approver:3",
+   "business-approver:5"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "adjusted"
+ },
+ {
+  "id": "F-025",
+  "title": "業務責任者ハブの『あなたが判断する案件 N 件』が default persona=入力者では偽 — CTA が権限の無い dead-end へ誘導 + 操作前に権限可否が見えない",
+  "route": "/business-approver, /approvals, /config-approvals",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "ハブ header は『あなたが判断する案件 N 件』と一人称で業務責任者の判断を約束するが default 操作者は山田太郎(入力者)固定で route に role guard も persona 自動切替も無い。入力者のまま『手順承認 1 件を確認』を踏むと到達先で owner 承認操作が SoD/role で disabled の dead-end。『あなた(=表示中の操作者)が判断する』は default persona に対し事実と異なる。より広く、操作者が action を押す前に『自分の権限でこの操作が成立するか』を知る手段が無い: default persona=入力者で /approvals 一括承認を押すと唯一の seed 行が自己承認 skip され『0 件を最終承認…承認者に切替えてください』の no-op に着地。事前ガイダンス (inline banner / disabled 理由) が無く事後 toast や到達先 disabled で初めて分かる。",
+  "evidence": "out.persona: inputter/checker/approver 全て header='あなたが判断する案件 1 件' 不変。ssot-drift J2/J3 (persona 自動切替なし、UC-BO-01 achieved:false)。src BusinessApproverHub.tsx:42。approvals defaultInputter: toast='0 件を最終承認しました（自己承認 1 件…承認者に切替えてください）' rowCountAfter=1; Approvals.tsx:117-124。",
+  "expectedFlawless": "ハブが業務責任者専用面である以上、入場時に操作者が業務責任者でなければ inline hint『業務責任者に切替えてください』を出す、または文言を役割名固定 (一人称偽装を外す)。権限の無いキューでは action 前に『入力者は承認できません(承認者へ切替)』を inline/disabled 理由で事前提示。",
+  "suggestedFix": "useCurrentActor().role が business-approver でなければハブに notice 表示。Approvals selection action の disabled に『全 in-scope 行が自己承認 skip』条件 + 理由 tooltip。または demo 既定 persona を承認者にして主要 journey を即操作可能に。",
+  "confidence": "high",
+  "mergedFrom": [
+   "business-approver:2",
+   "L1-operator:10",
+   "approvals:5"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-026",
+  "title": "error/loading 状態でも Approvals ヘッダ件数『· N 件』と『修正済』caption が残り、body の取得失敗/未取得と矛盾",
+  "route": "/approvals",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "description": "ヘッダ subtitle『入力者が確認済の案件を最終承認 · {rows.length} 件』は useListData を通す前の store 由来 rows を数える一方、body は list.rows (demo=error/loading で []) を描画。?demo=error では body『データの取得に失敗しました』+ table 0 件なのにヘッダ『· 1 件』、?demo=loading では skeleton 中もヘッダ『· 1 件』。取得失敗/未完了なのに『確認済案件が 1 件ある』と件数で主張し queue 件数を信頼する承認者/監査者を誤認させる。加えて『修正済』caption (列説明) が status branch の外で常時描画され error/loading 文脈で存在しない列を説明する。",
+  "evidence": "live /approvals?demo=error → header『· 1 件』かつ errorBodyHasTable=0; ?demo=loading → header『· 1 件』+ skeleton (probes/approvals2.mjs)。L7-ssot.mjs approvalsErrorHeaderCount + approvalsErrorHasCaption。src Approvals.tsx:95 {rows.length} は list.rows でなく rows; useListData.ts:26-31 が error/loading で []; DataTable.tsx:439 caption が status branch 外で常時描画。screenshots approvals__desktop__error/loading.png。",
+  "expectedFlawless": "ヘッダ件数は表示中の取得状態に整合 (error/loading 中は非表示か『—』『取得中』、ready 時のみ実数)。caption は effectiveStatus==='ready' のみ表示。",
+  "suggestedFix": "Approvals.tsx:95 件数を list.status に依存させる。DataTable.tsx:439 を {caption && effectiveStatus==='ready' && …} に。",
+  "confidence": "high",
+  "mergedFrom": [
+   "approvals:2",
+   "approvals:4",
+   "L7-ssot(approvals header)"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-027",
+  "title": "統制上重要な結果 toast が 2.4-2.8 秒で自動消滅・手動 dismiss/再表示/永続化なし・常時 success 緑 tone — SoD skip/緊急停止/0件export を見落とし後追い不能",
+  "route": "/approvals, /cases/:id, /agents/:id, /proposals/:id, /observatory",
+  "pillar": "operator-efficiency",
+  "severity": "P2",
+  "description": "feedback toast が共通化されず 5 page で別々に useState+setTimeout(2400-2800) を手書き、close ボタン無しで自動消滅。一括承認の『N 件承認・自己承認 M 件 skip』、エスカレ/差戻し確定、緊急停止確認、0 件 export といった統制上重要な結果がすべて ephemeral で手動 dismiss も再表示も永続化も無い。連続処理する操作者が目を離した隙に見逃すと『何件・どの案件が成功/skip したか』を後から確認できない (画面にも台帳にも残らない)。さらに全 toast が border-success bg-success-soft 固定で 0 件 export や skip も緑の成功 toast に見え truthfulness/control を侵食。shared Toast primitive 不在で tone 区別もできない。",
+  "evidence": "src CaseDetail.tsx:112-114,341-347 (2400ms, success hardcode :343); Approvals.tsx:67-70 (2800ms, toastDismissBtn=0); ProposalDetail.tsx:87; AgentDetail.tsx:63 (2.6s 無dismiss); Observatory.tsx:84。shared に Toast component 無し。walker agent-detail:7 / approvals:6 / observatory:3 一致。",
+  "expectedFlawless": "shared Toast primitive (tone success/alert/error 引数 + fade)。統制重要 event (SoD skip>0/緊急停止/0件export/取消・訂正) は auto-dismiss を無効化し手動 dismiss 可能 or inline summary/監査台帳 entry として永続化し後追い可能に (F-002 連動)。",
+  "suggestedFix": "shared/Toast.tsx を新設し 5 page を置換。重要結果は manual-dismiss または mutation 結果を audit ledger entry として store 記録。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:9",
+   "L6-craft:6",
+   "approvals:6",
+   "agent-detail:7"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-028",
+  "title": "/escalations が default seed で恒久 empty — C2『難案件が宙に消える』の旗艦面が初期表示で空白",
+  "route": "/escalations, /business-approver",
+  "pillar": "distinction",
+  "severity": "P1",
+  "description": "/escalations は中核ナラティブ『C2 難案件が宙に消える』の専用 landing かつ業務責任者の最 urgent receptacle だが、seed のどの案件も escalation field を持たず (seed.ts は escalation を設定せず、mock-case-list.ts に escalation 0 hit)、useEscalations() は初回 [] を返す。live: header『現場から上がった難案件 0 件』+ EmptyState。同セッションで手動エスカレしない限り空のまま。他 queue route が seeded row を持つ中、旗艦の『難案件を消さない』surface だけ初期表示が空白で demo/walkthrough で実演できない。",
+  "evidence": "probe escalations.mjs: emptyHeader『現場から上がった難案件 0 件』, rowCount0=0, approverRows=0。grep escalation src/data/mock-case-list.ts → 0; seed.ts:24-38 never sets escalation。手動エスカレ後 rowsNow=1 (escalations2.mjs)。screenshot escalations__desktop.png (empty)。",
+  "expectedFlawless": "代表的な未裁定 escalation を最低 1 件 seed し (category + reason + escalating actor)、/escalations と業務責任者ハブの裁定タイルが初回ロードで live content を出し、手動 setup 無しで C2 解決を実演できる。",
+  "suggestedFix": "mock-case-list.ts (or seed.ts post-processing) で status が sent-back/reflected でない案件 1 件に escalation:{reason,category,to:'actor-approver'} を追加。",
+  "confidence": "high",
+  "mergedFrom": [
+   "escalations:1"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-029",
+  "title": "主要受信トレイ(/cases)等に一括操作が無く、件数増で 1 件ずつ往復するしかない",
+  "route": "/cases, /proposals, /config-approvals",
+  "pillar": "operator-efficiency",
+  "severity": "P2",
+  "description": "DataTable は selection (複数選択+一括 action) を備え /approvals は『一括承認』を配線するが、入力者が最も長時間滞在する /cases には selection 未配線。入力者の一次確認 (flags=0 案件の一括確認) や複数案件の一括差戻しの batch 経路が無く、件数増で『行クリック→詳細→承認→戻る』の往復を繰り返す。Proposals/ConfigApprovals も selection 0。本番想定件数を超えると線形に効く。SoD 上個別判断が要る操作は個別のまま、『全項目一致(flags=0)の入力者一次確認を一括』は自然な batch 候補。",
+  "evidence": "probe cases.selectAll=false, rowCheckboxes=0; approvals.selectAll=true (唯一)。src Cases.tsx:103-116 DataTable 呼出に selection prop 無し; grep selection → Proposals.tsx:0 / ConfigApprovals.tsx:0。DataTable.tsx:41-47,222-246 は selection 完備。",
+  "expectedFlawless": "高頻度キューに少なくとも 1 つの安全な一括操作 (例 Cases で『全項目一致の案件をまとめて入力者確認』、選択行に要確認が残れば disabled)。個別判断要操作は個別のまま。",
+  "suggestedFix": "Cases.tsx の DataTable に selection={{actions:[{label:'一括で入力者確認', onRun, disabled:(rows)=>rows.some(r=>r.flags>0||r.status!=='ready')}]}} を配線 (Approvals.tsx:110-128 同型)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:3"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-030",
+  "title": "ワークインボックス(/inbox)が既読を消化できない — dismiss/archive/未読フィルタ・発生時刻が無く triage 劣化",
+  "route": "/inbox",
+  "pillar": "operator-efficiency",
+  "severity": "P2",
+  "description": "『ワークインボックス』を称するが既読化後も行は残りヘッダ『N 件（未読 0）』を恒久表示。per-item の dismiss/archive/未読戻し/未読のみフィルタが無く操作は行クリックと『すべて既読』のみ。通知増の本番想定で既読が溜まり『未対応の差戻し/エスカレ/取消がどれか』が一目で判別しづらい。各行に発生時刻が無く (receivedAt は存在するのに未使用) 時系列 triage 不可。さらに承認者/業務責任者の通知 (escalation/reversal) が seed に 0 件で checker/approver の inbox は永久空、空状態コピーも 3 kind を反映せず差戻しのみ言及 (kind 定義と実データ/コピーの乖離)。",
+  "evidence": "probe inbox2-result.json: rowClick 後 header='1 件（未読 0）', allReadBtnAfter=0, rowContent.hasTimestamp=false。inbox-result.json: persona_checker/approver={rowCount:0,emptyVisible:1}。src Notifications.tsx (archive/dismiss/時刻列なし, :58 空文言); seed に escalation/reversal 0; selector hooks.ts:323-353。data CASE-2026-0131 receivedAt 存在。",
+  "expectedFlawless": "未読のみ表示トグル (最小) or per-item dismiss/archive で処理済を消化。各行に発生時刻 (事実、偽SLAでない) を控えめ表示。承認者宛 reversal/escalation を seed に 1 件含め空状態コピーを 3 kind 反映。",
+  "suggestedFix": "Notifications に『未読のみ表示』トグル + case.receivedAt 由来の時刻 (text-fg-subtle)。mock-case-list に escalation.to=actor-checker / 承認者宛 reversal を各 1 件。空文言を 3 kind 反映へ。本格は store に dismiss action。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "L1-operator:7",
+   "inbox:2",
+   "inbox:4",
+   "inbox:5"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-031",
+  "title": "監査台帳に期間フィルタ・一括フィルタ解除が無く、監査者の証跡スライス操作が高コスト",
+  "route": "/observatory (証跡台帳 view)",
+  "pillar": "operator-efficiency",
+  "severity": "P2",
+  "description": "監査者は証跡を期間 (インシデント窓・四半期・任意日付) で絞るのが基本だが台帳は『直近 30 日』ハードコードで date-range/period 制御が無い (workflow/actor/action/free-text の 4 軸のみ)。4 軸を組合せ 0 件 dead-end に陥っても『クリア/すべて解除』の単一 control が無く各軸を個別に戻す手作業が要る。DataTable 本体は『絞り込みを解除』を持つが Observatory 台帳 filter は独自実装で救済されない。証跡を反復スライスする監査者 persona の friction が高い。",
+  "evidence": "probe ledger.hasPeriodControl={date_input:false,period_picker:false}; ledger.hasBulkClear=false。audit-lineage: hasDateFilter=false, hasClearAll=false。src Observatory.tsx:212 '直近 30 日' hardcoded; :224-301 個別『全〜』chip + search のみ。AUD-02 edgeCase。",
+  "expectedFlawless": "期間セレクタ (preset + custom) を提供 (または固定窓を『直近30日固定（プロトタイプ）』と明示)。非デフォルト filter が 1 つでも有効なとき『フィルタをクリア』を 1 ボタンで全軸 reset。",
+  "suggestedFix": "Observatory.tsx:224-260 に period selector 追加。条件付き『クリア』button (4 状態!=='all' || search) で全軸 + setLedgerPage(0) reset。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:8",
+   "observatory:7",
+   "observatory:8"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-032",
+  "title": "Observatory 台帳の actor/action FilterChip に英語/snake_case schema (system/ai_input/field_override...) が JP-only UI に露出",
+  "route": "/observatory (台帳 filter)",
+  "pillar": "craft",
+  "severity": "P2",
+  "description": "JP-only 規律の本番 UI で監査台帳の actor/action FilterChip が raw schema 値 (system / agent / agent-corp-addr / intake / ai_input / field_override / field_confirm / business_approve / reflect) をそのまま label 表示。CLAUDE.md の JP-only 原則 (英語 string は bug) に反し、非技術 auditor は field_override/ai_input を業務語に map できない。raw ledger 例外は『証跡台帳 view 内の列』に閉じるべきで、interactive な filter chip ラベルは業務語であるべき (table-cell 例外を control label に昇格させた legibility regression)。",
+  "evidence": "probe actionSample=['intake','ai_input','field_override','business_approve','reflect','field_confirm']; mobile screenshot observatory-mobile.png に chips system/agent-corp-addr/intake/ai_input/field_override 等。src Observatory.tsx:264-300 LEDGER_ACTORS/LEDGER_ACTIONS raw 値を chip text に; mock-observatory.ts:44-45。CLAUDE.md JP-only。",
+  "expectedFlawless": "filter chip は業務語 (JP: 受付/AI入力/入力者上書き/入力者確認/承認/反映、システム/AI/担当者氏名)。raw code は台帳 table cell 内のみの sanctioned 例外。",
+  "suggestedFix": "actor/action の raw 値→JP label mapping を追加し FilterChip 表示に適用 (Observatory.tsx:264-300、raw 値は filter key として保持)。table tds の raw 表示は維持。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "L6-craft:12",
+   "observatory:9"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-033",
+  "title": "起票フォームの日付/コードが素テキスト入力で型・形式検証・入力支援が皆無、submit が常時有効で未充足の事前フィードバックが送信後まで出ない",
+  "route": "/cases/new",
+  "pillar": "operator-efficiency",
+  "severity": "P2",
+  "description": "起票の全 5 項目 (効力発生日/生年月日/有効期限/支店コード 等を含む) がすべて type=text の素 input で、日付は date picker でなく自由テキスト、コードは数値/桁制約なし。検証は『空でないか』(allFilled) のみで形式・桁・日付妥当性を一切問わず HTML required すら無い (JS 検証のみ)。AI 不在のフォールバック経路なのに誤入力ガードが最も薄い。加えて『起票する』は未入力でも常に primary fill で活性、押して初めて赤枠+エラー (submit-time validation のみ) で、入力中に『あと何項目で送れるか』が分からず送信後の赤一斉点灯で初めて気付く (allFilled は計算済だが submit に未連動)。",
+  "evidence": "src CaseDraft.tsx:114-132 (全 field 同一汎用 input, type 指定なし=text), :33 (allFilled 非空のみ), :150-157 (submit に disabled 連動なし)。probe out.inputs: 全 input type='text', required=false。",
+  "expectedFlawless": "日付系は type='date' (または明示フォーマット+検証)、コードは数値/桁制約、各項目に inputMode/pattern と形式エラー文言、最低限 required 属性。必須未充足を入力中から示す (進捗『N/5 入力済』or 送信 disabled+理由)。",
+  "suggestedFix": "FieldReview に inputType/pattern メタを持たせ CaseDraft.tsx の input に type/inputMode/pattern を field 種別で出し分け (日付系 type='date')。submit に !allFilled で aria-disabled + hint or 見出しを『項目（${filled}/${total} 入力済）』に動的化。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:12",
+   "L1-operator:13",
+   "cases-new:5",
+   "cases-new:7"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-034",
+  "title": "手動起票が全 persona (承認者含む) で無制限に可能・SoD 注記なし、起票が四眼のどの眼かが画面上 legible でない",
+  "route": "/cases/new",
+  "pillar": "control-legibility",
+  "severity": "P2",
+  "description": "操作者を checker/approver に切替えても /cases/new は同じく起票でき『起票する』は常に有効で role-gate メッセージも無い。本 prototype は入力者と承認者の SoD を中核に据え他画面では isSelfApproval で同一 actor の承認を block するが、起票そのものは誰でも実行でき『この起票を後で承認する人とは別であるべき』という SoD 注記が起票面に無い。承認者が自分で起票→自分で最終承認する経路の独立性が画面上で見えない。",
+  "evidence": "probe persona_inputter/checker/approver いずれも submitVisible=1, submitDisabled=false, anyRoleGateMsg=0。src CaseDraft.tsx persona 分岐・権限 gate・SoD 注記なし (currentActorId 不参照); reducer case/create actor 制約なし (reducer.ts:111-127)。",
+  "expectedFlawless": "起票は入力者ロール前提であることを明示 (または全ロール可なら『起票者と承認者は別である必要がある』旨の SoD 注記)。手動起票が四眼のどの眼に当たるかを画面上で legible に。",
+  "suggestedFix": "起票 form 上部に短い SoD 注記 (『手動起票した案件も入力者確認→承認者承認の二段が必要。起票者自身は承認できません』) を追加。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "cases-new:6"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-035",
+  "title": "AgentDetail に flywheel lineage (relatedProposals) が model/test にあるのに未描画 + status 遷移/modal に entrance motion が無く reference-grade の signature moment 不在",
+  "route": "/agents/:id, all (modal), /cases/new",
+  "pillar": "distinction",
+  "severity": "P2",
+  "description": "製品差別化の中核 = 差戻し→改善の flywheel lineage が AgentDetail の relatedProposals として model/test には存在するのに画面に一切描画されず、際立ちの見せ場を捨てている。共通 Modal は focus-trap/scroll-lock まで堅牢だが開閉に transition/animation が一切無く mount=opacity:1 で瞬間 pop (overlay fade も panel scale/slide も無い)。status 遷移 (ready→approved→reflected) にも視覚的演出が無く、密度・配色は堅実だが全体として『丁寧な generic SaaS』の域に留まり reference-grade の signature moment が不在。攻めの差別化: (a) AgentDetail に lineage timeline、(b) 承認確定時に LifecycleStepper 段階点灯 motion、(c) flywheel を Observatory↔AgentDetail↔ProposalDetail を貫く視覚 motif に。",
+  "evidence": "src mock-agent-detail.ts に relatedProposals 定義あり、AgentDetail.tsx に lineage 描画 block 無し (agent-detail:6)。probe L6-craft.mjs modalOpened.anim {transition:'all', animation:'none', opacity:'1'}; Modal.tsx:130-145 (animate-* 無し)。grep animate-* は pulse/spin のみ、status/modal 遷移 keyframe 無し。cases-new:8 (手動起票面の演出弱)。",
+  "expectedFlawless": "製品中核ナラティブ (flywheel) が UI 上で際立ち、状態確定に signature な micro-interaction を持つ。modal は overlay fade + panel scale/slide-in (≤200ms, prefers-reduced-motion で off)。motion budget は regulated UI 規律内 (T1 ≤5 event) で控えめに。",
+  "suggestedFix": "AgentDetail に relatedProposals lineage timeline を section 追加。index.css に modal-overlay-fade/modal-panel-in keyframe を追加し Modal.tsx の overlay/panel に適用。承認確定時に LifecycleStepper 達成段に控えめ pulse/check motion。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "L6-craft:10",
+   "L6-craft:7",
+   "agent-detail:6",
+   "cases-new:8"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-036",
+  "title": "page header / toast が 15 画面で手書き重複し共通 primitive 不在、Observatory header が --height-pageheader contract から逸脱 (密度不統一 + mobile 潰れの温床)",
+  "route": "all 15 routes",
+  "pillar": "craft",
+  "severity": "P2",
+  "description": "共通 PageHeader primitive が無く 15 画面すべてが sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b px-6 py-4 を逐語コピー。12 画面はほぼ同一だが Observatory だけ flex flex-col gap-3 pt-3 で min-h も justify-center も持たず逸脱 → 高さ/密度が他画面と不一致かつ F-023 の mobile 潰れの温床。token --height-pageheader:88px の uniform header contract が存在するのに局所逸脱を許す SSOT-drift。手書き重複は今後の修正で更なる drift を生む tech debt (toast も 5 page で手書き重複、F-027 参照)。",
+  "evidence": "src/pages/*.tsx 全 15 file が data-page-header を inline 定義。grep: 12 file が min-h-[var(--height-pageheader)] flex-col justify-center 一致、Observatory.tsx:100 のみ flex flex-col gap-3 pt-3 (min-h/justify-center 欠)。components/shared, components/shell に PageHeader 無し。index.css:68 --height-pageheader:88px。",
+  "expectedFlawless": "header は単一 primitive (title/subtitle/actions slot + responsive collapse 内蔵) に集約され全画面で高さ・余白・折返し挙動が一致。",
+  "suggestedFix": "PageHeader 共通 component を新設し 15 画面を置換。最低でも Observatory を他 12 画面の header pattern に揃える。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:5"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-037",
+  "title": "desktop /search で同一 aria-label『横断検索』の searchbox が 2 個同時可視 — 重複・冗長 + SR で曖昧",
+  "route": "/search (desktop ≥lg)",
+  "pillar": "craft",
+  "severity": "P2",
+  "description": "/search を desktop で開くと TopBar の検索 input (lg:flex で常時可視) と SearchResults ページ自前の検索 input が同時表示され、同一 aria-label『横断検索』の searchbox が 2 個。どちらに打つべきか曖昧で reference-grade の clean な情報設計に反し、SR にも同名 control が重複露出 (WCAG 観点)。",
+  "evidence": "probe L6-craft.mjs searchDuplicate {ariaLabelCount:2, searchboxRole:2} (1440px); functional {visibleSearchInputsOnPage:2}。src TopBar.tsx:33,39-46 (lg:flex 常時可視, aria-label='横断検索') + SearchResults.tsx:51-58 (aria-label='横断検索')。screenshot search-out/typed-jusho.png。L5-a11y:9。",
+  "expectedFlawless": "/search 着地時は検索 control を全 viewport で単一に正規化。",
+  "suggestedFix": "SearchResults の page header input に lg:hidden を付け TopBar input が見える幅では非表示 (TopBar は hidden lg:flex)。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:9",
+   "search:4",
+   "L5-a11y:9"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "no-verdict"
+ },
+ {
+  "id": "F-038",
+  "title": "config-approvals の混在 queue が承認種別/対象業務 sort 不可・kind filter なし、設定承認 row が内部 slug ID『agent-account-opening』を露出 + 全業務横断スコープ非明示",
+  "route": "/config-approvals",
+  "pillar": "operator-efficiency",
+  "severity": "P2",
+  "description": "この queue は手順承認(proposal)と設定承認(promotion)という性質の異なる 2 系統を意図的に 1 表に混ぜるが sortValue は ID 列のみ、承認種別・対象業務は sort 不可、kind filter も未配線で『設定承認だけ先に裁く』ができず混在表を上から舐めるしかない。さらに設定承認 row の ID 列が agent-account-opening という slug 型内部 entity ID を露出し手順承認 row の業務 ID『PROP-2026-028』と表記体系が不統一 (監査トレース識別子の一貫性欠如)。sub-header の件数が ProcessSelector 非連動 (全業務横断) である旨も非明示で、法人住所変更選択中に口座開設の設定承認が出ると矛盾して見える。",
+  "evidence": "probe thButtons=['ID'], kindSortable=0, titleSortable=0; afterPromote.rowTexts に '設定承認\\tagent-account-opening\\t…'。src ConfigApprovals.tsx:27-31 (kind/title に sortValue なし, filters 未指定), :38 (promotions.map で id:a.id slug 使用); hooks.ts:368-377 (process 引数なし=全業務横断)。",
+  "expectedFlawless": "承認種別の filter chip + 承認種別/対象業務の sort。設定承認 row にも業務向け採番 (申請番号) を与え ID 列を全行一貫体系に。sub-header に『全業務横断』を明示。",
+  "suggestedFix": "columns kind/title に sortValue 追加、DataTable に filters=[{id:'kind',...}]。promotion row に promotionRequestId を持たせるか ID 列 cell を kind 別整形。sub-header に『（全業務横断）』。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "config-approvals:3",
+   "config-approvals:4",
+   "config-approvals:5"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-039",
+  "title": "モデル台帳(model inventory)・trust 昇格の独立検証・drift/bias 監視が UI 上に存在しない",
+  "route": "/agents, /agents/:id, /observatory",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "SR 11-7 / FSA MRM のモデルリスク管理が要求する基盤統制が UI に欠落: (1) モデル台帳 (model inventory — 各 AI/モデルの版・用途・所有者・検証状況の一覧) が存在しない、(2) trust 昇格 (Supervised→Checkpoint→Autonomous) の独立検証 (challenger/validation) の表現が無い、(3) drift/bias 監視の指標・アラートが UI 上に無い。規制担当が『どのモデルがどの統制下にあるか』『昇格は独立検証されたか』『drift をどう監視するか』を確認する surface が無い。決定 lineage も policy:v3.1 という 1 値に hardcode され版分解不能で合成的。",
+  "evidence": "L4-regulator:2 (model inventory 不在), L4-regulator:4 (trust 昇格の独立検証なし /agents/:id), L4-regulator:5 (drift/bias 監視 UI なし /observatory,/agents/:id), L4-regulator:3 (決定 lineage が policy:v3.1 hardcode、版分解不能 & 合成的 /observatory)。",
+  "expectedFlawless": "モデル台帳 view (版/用途/所有者/検証状況)、trust 昇格時の独立検証記録、drift/bias 監視指標を UI に表現。決定 lineage は policy 版を分解可能にする。少なくとも prototype scope では『model inventory / drift 監視は本番で別 module』と honest に明示。",
+  "suggestedFix": "Agents 一覧をモデル台帳として版/所有者/検証状況列を拡張、AgentDetail に昇格の独立検証 section、Observatory に drift/bias 監視 placeholder + lineage の policy 版分解。scope-out なら統制注記で明示。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "L4-regulator:2",
+   "L4-regulator:3",
+   "L4-regulator:4",
+   "L4-regulator:5"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-040",
+  "title": "画面 RBAC 不在で権限外の面を全 persona が閲覧でき、queue 行が遷移先の裁定可否を予告しない",
+  "route": "all routes, /config-approvals, /escalations",
+  "pillar": "control-legibility",
+  "severity": "P2",
+  "description": "Sidebar nav は static で RBAC が無く、入力者でも /config-approvals /escalations /business-approver など権限外の面を全て閲覧できる。queue 行は遷移先の owner mode 可否を予告せず、権限外 persona でも遷移後に初めて『承認/差戻しボタンが出ない』と判明 (空振り遷移を誘発)。操作実行は detail の mode guard で防がれ honesty は保たれるが、queue 段階で『誰の裁定対象か』の手掛かりが無い。エスカレ queue は global 表示で全 persona に見えるのに bell 通知は actor-approver のみ filter され audience が曖昧。本番 RBAC は scope-out 前提だが、画面上の閲覧/操作分離が legible でない。",
+  "evidence": "L4-regulator:14 (画面 RBAC 不在で権限外面を全閲覧可)。config-approvals:6 (queue 行が遷移先可否を予告せず、approver/checker で row 同一)。escalations:3 (list global & 全 persona、bell は actor-approver only filter)。src Sidebar.tsx:57-64 (static, no RBAC); ConfigApprovals/Escalations は persona 非参照。GOV-07 edgeCase。",
+  "expectedFlawless": "権限外面では『閲覧のみ(裁定は業務責任者)』の inline hint を出すか、現 persona が裁定者でない queue で role 文脈を提示。list-visibility と notification-visibility の audience を一致。本番では route-level の閲覧/操作分離を carve。",
+  "suggestedFix": "ConfigApprovals/Escalations header に現 actor が裁定者でない場合の注記。useEscalations を recipient/role で filter するか subtitle に『業務責任者の裁定キュー』。actors.ts が RBAC scope-out を明示する前提を維持。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "L4-regulator:14",
+   "config-approvals:6",
+   "escalations:3"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-041",
+  "title": "入力者承認直後の入力者ビューが disabled『承認』ボタンを残し次アクター(承認者待ち)への前向き導線が無い",
+  "route": "/cases/:id",
+  "pillar": "craft",
+  "severity": "P3",
+  "description": "入力者が承認すると案件は business-approval-waiting になり入力者の操作対象から外れるが footer は依然 disabled な『承認』ボタンと『この案件は入力者確認の段階ではありません』を出す。次に誰が何をすべきか (承認者待ち) の前向き導線が無く、disabled ボタンが残ることで『まだ自分が承認できるはず』という誤解を招く。SoD の前向きな受け渡し (『承認者の最終承認待ちです』への明示遷移) が弱い。正準 demo 案件 0142 (status=ready) も承認者ビューで最終承認の四眼フローを線形に提示できない (別途 baw 案件 0128 へ遷移要、その 0128 は F-001 の SoD 矛盾を抱える)。",
+  "evidence": "facts-b.json hp-input-approved: 入力者承認後 footer='この案件は入力者確認の段階ではありません / 差戻し / 承認' (disabled 承認残存)。case-detail:6 (0142 ready で checker 最終承認 disabled, 線形提示不能)。src CaseDetail footer。",
+  "expectedFlawless": "入力者ビューで案件が承認者待ちに進んだら disabled 承認ボタンの代わりに『承認者の最終承認待ち』状態カード + (任意で)承認者キューへの導線。正準 demo 案件で四眼フロー全段を 1 案件の persona 切替で線形に体験できる (F-001 修正前提)。",
+  "suggestedFix": "CaseDetail footer で mode=input かつ status≠ready のとき disabled approve を出さず『承認者の最終承認待ちです』に切替 (差戻しは precondition 許可時のみ残す)。SoD 矛盾の無い baw 案件を 1 件正準化し承認者ビュー実演をその案件で。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "flow-4eyes:4",
+   "case-detail:6"
+  ],
+  "finalSeverity": "P3",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-042",
+  "title": "四眼原則の self-approval block (reducer isSelfApproval) が live UI 経路では一度も発火しない dead path — デモで SoD 強制を実演できない",
+  "route": "/cases/:id, TopBar persona switcher",
+  "pillar": "control-legibility",
+  "severity": "P1",
+  "description": "reducer の isSelfApproval (自己承認禁止) は store レベルでは正しく機能するが live UI 操作経路では一度も発火しない dead path。CaseDetail の操作 mode は persona の role から導出され (inputter→input mode のみ / checker・business-approver→checker mode のみ)、入力者承認できるのは actor-inputter だけ。よって『自分が入力者承認した案件を同一 actor が承認者として承認しようとする』状況が UI 上で再現できず、観測可能な四眼強制は role→mode 派生 (=ボタンの出し分け) であって宣伝される『システムが自己承認を block する』機構ではない。規制担当に『システムが四眼を block で強制』と説明しても demo でその block を一度も示せず、SoD の実効性根拠が role 分離前提に依存。",
+  "evidence": "facts-c.json: checker persona で ready 0139 は入力者承認できず; inputter→approver 切替時は必ず別人で approve allowed。src CaseDetail.tsx:48 (mode = role 派生); actors.ts:17-21 (3 actor は role 重複なし); isSelfApproval(reducer.ts:54) は store.test.ts:118-127 の直接 dispatch でのみ true。",
+  "expectedFlawless": "デモ中に self-approval block が実際に発火する経路を 1 つ用意 (例: 入力者と承認者を兼務する 4 番目の demo actor が自分の入力承認案件を承認者承認しようとすると block + 理由表示)。または GOV 文書で『prototype の SoD 実効強制は role 分離由来、self-approval guard は本番 RBAC 用 defense-in-depth で demo 経路では非発火』と honest に記す。",
+  "suggestedFix": "DEMO_ACTORS に兼務 actor を追加するか、CaseDetail に currentActor が inputApprovedBy と一致する checker-mode 時『四眼原則により最終承認できません』block 状態を明示表示し reducer guard が live で発火する E2E demo path を 1 本通す。",
+  "confidence": "high",
+  "mergedFrom": [
+   "flow-4eyes:2"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-043",
+  "title": "業務責任者ハブの 0 件カードも遷移可で空 queue へ無駄誘導、urgent(裁定)と routine(承認) を等価合算しヘッダで緊急度階層が消える + loading/error 無反応",
+  "route": "/business-approver",
+  "pillar": "operator-efficiency",
+  "severity": "P3",
+  "description": "count=0 のカード (設定承認 0 / エスカレーション裁定 0) も active link のまま遷移し CTA は『確認する』、押すと空 queue に着地し操作コストだけ発生。urgent receptacle (エスカレーション裁定) も count=0 では alert tone が出ず件数があるときの緊急度可視化が default では検証できない。ヘッダ total は forwardedProposals + pendingPromotions + escalations を単純加算し、urgent(難案件裁定) と routine(手順/設定承認) を同一カウントに溶かすため『N 件のうち何件が緊急か』が読めない (裁定遅延は手順承認遅延より重大)。?demo=loading/error も無反応 (F-009 と複合)。",
+  "evidence": "out.desktop.cards 設定承認/エスカレーション裁定 {count:'0',cta:'確認する'} active link で遷移。src BusinessApproverHub.tsx:49 (active=count>0 は数字色のみ), :78 (CTA), :32 (total 単純加算), :30 (escalations のみ urgent)。",
+  "expectedFlawless": "0 件カードは『確認する』を促さず視覚的に沈静化 (CTA 控えめ/非リンク化 or『新規なし』)。urgent receptacle は件数>0 時に明確な alert tone。ヘッダが緊急(裁定)件数を分離表示 (『判断待ち N 件（うち裁定 M 件）』)。",
+  "suggestedFix": "count=0 カードは CTA 非表示か『新規なし』+ Link を div/aria-disabled に。header に escalations.length を別出ししたサマリ (urgent>0 で alert tone)。urgent tone が点灯する seed/demo state を 1 つ用意。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "business-approver:7",
+   "business-approver:8"
+  ],
+  "finalSeverity": "P3",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-044",
+  "title": "Escalations の経過列が案件受付 age を表示しエスカレ age でない + escalation record に空 category が保存される (収集しない値の偽データ)",
+  "route": "/escalations, /cases/:id (escalate action)",
+  "pillar": "truthfulness",
+  "severity": "P3",
+  "description": "/escalations の経過列は caseElapsedLabel(c.receivedAt) で案件受付からの経過を測り、裁定キューで操作者が自然に読む『エスカレしてから/裁定待ちの経過』ではない (escalation に timestamp が無く真の裁定待ち age を出せない)。stuck 案件を防ぐ control surface で age が裁定待ちを反映しないのは subtle な truthfulness gap。加えて case/escalate は category を渡すが FieldActionModal はエスカレ kind で category 入力欄を出さない (category は caseLevel||sendback のみ収集) ため store の escalation.category は常に空文字で、収集しない field を空値で埋める偽データ構造 (型は category:string 必須)。",
+  "evidence": "src Escalations.tsx:32 (caseElapsedLabel(c.receivedAt)); dates.ts:31-33; reducer.ts:91 (escalation を timestamp なしで記録)。store afterEscalate.escalation={reason,category:'',to:'actor-approver'} (flow-escalation-6.mjs)。FieldActionModal.tsx:94,217 (category 収集は caseLevel||sendback のみ); CaseDetail.tsx:130 (category ?? '')。",
+  "expectedFlawless": "escalatedAt timestamp を保存し列を裁定待ち age として label する (or 列を『受付からの経過』に rename)。escalation で category を収集するか型から category を外す (収集しない field を空文字で持たない)。",
+  "suggestedFix": "case/escalate に escalatedAt を載せ elapsed を escalatedAt 基準に (label『裁定待ち』) or header を『受付からの経過』に。escalation.category を optional 化 (型から削除) or FieldActionModal の escalate kind で category 収集。CaseDetail.tsx の category ?? '' を category || undefined に。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "escalations:7",
+   "flow-escalation:5"
+  ],
+  "finalSeverity": "P3",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-045",
+  "title": "Approvals 等で単一案件 queue 時に filter chip が 1 候補のみの退化 UI、rowHref が機能しない歴史的 query ?view=checker を保持",
+  "route": "/approvals",
+  "pillar": "ssot-integrity",
+  "severity": "P3",
+  "description": "現 seed は承認待ちが 1 件のみで入力者 filter chip は唯一候補を 1 つ出すだけ (1 行に対する filter/sort は実用価値が無く退化 UI)。pageSize 未指定で pagination も無い。加えて Approvals の rowHref は /cases/${id}?view=checker を生成するが CaseDetail の mode は currentActor.role 由来に統一済で ?view query は mode 決定に未使用 (dead query)。観察者/監査者が URL の view=checker を見ると『view を URL で切替/偽装できる』と誤解しうる (SoD の actor 同定が role 駆動である事実と矛盾する痕跡)。",
+  "evidence": "live default/checker: filterChips=['鈴木課長'] (1 候補) rowCount=1。src Approvals.tsx:83-86 (inputters 1 件), DataTable 呼出に pageSize なし, :105 rowHref={(r)=>`/cases/${r.id}?view=checker`}。ssot-drift GOV-02 (?view 歴史的 query, mode 決定に未使用)。",
+  "expectedFlawless": "filter は候補が 2 以上の時のみ表示 (seed を複数件にして queue の filter/sort/一括/pagination が意味を持つ既定に)。mode を決めない query を href から除去し URL が統制ロジックの SSOT (role) と一致。",
+  "suggestedFix": "filter options.length<2 のとき非表示 (DataTable or Approvals 側)。rowHref を /cases/${r.id} に変更。seed の business-approval-waiting を 2-3 件に。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "approvals:7",
+   "approvals:8"
+  ],
+  "finalSeverity": "P3",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-046",
+  "title": "ProcessSelector の業務 scope を横断検索が無視するが UI 上に明示が無く『この業務だけ検索』と誤認しうる + reset modal が persona 初期化を明示しない",
+  "route": "/search, /observatory (reset modal)",
+  "pillar": "control-legibility",
+  "severity": "P3",
+  "description": "TopBar の ProcessSelector (例『法人住所変更』) は他 list route をフィルタするが useSearchResults は process を一切参照せず全業務横断で検索する。横断検索の性質上妥当だが UI 上 ProcessSelector が効いて見えるため操作者が『この業務だけ検索』と誤認しうる (scope 明示なし)。別件として Observatory の reset modal は store/reset が currentActorId も DEFAULT_ACTOR_ID(入力者) に戻すのに modal body は『承認・差戻し・申請・上書き』のみ列挙し persona reset を明示しない (『すべて初期状態に戻します』という網羅主張と不一致)。",
+  "evidence": "src hooks.ts:265-297 useSearchResults (process 非参照); SearchResults.tsx:43 header copy (ProcessSelector 関係無言)。screenshot typed-jusho.png。reset: reducer.ts:207-208 (store/reset→seed()), actors.ts:23 (reset で currentActorId→入力者); probe modalMentionsPersona=false; Observatory.tsx:547-549。AUD-06 edgeCase。",
+  "expectedFlawless": "横断検索が業務 scope を無視することを UI から明確に (結果サブヘッダに『全業務横断 (業務フィルタ非適用)』)。reset modal body が persona/operator も初期化される旨を列挙 (網羅主張を正確に)。",
+  "suggestedFix": "SearchResults 結果サブヘッダに『全業務を横断検索 (業務フィルタ非適用)』を 1 行。Observatory.tsx:547-549 の reset modal body に『操作者の選択も入力者に戻ります』を追記。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "search:7",
+   "observatory:10"
+  ],
+  "finalSeverity": "P3",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-047",
+  "title": "TopBar に banner landmark が無く、PrototypeModeLabel の role=status が静的 pill に誤用 (live region 誤用) + dirty 破棄 overlay が未ラベル + 未読 SR シグナル非対称",
+  "route": "all (chrome / a11y polish)",
+  "pillar": "a11y",
+  "severity": "P3",
+  "description": "細目 a11y polish の集合: (1) グローバル chrome (TopBar) に banner landmark が無く landmark ナビゲーションで header 領域が露出しない。(2) PrototypeModeLabel の role=status は静的 pill には不適 (live region 誤用 — 動的更新でない要素に status role)。(3) Modal の dirty 破棄確認 overlay が独自 role=alertdialog/aria-label を持たず未ラベル。(4) 通知の未読シグナルが SR で行内とベルで非対称 (ベル赤ドットは aria-hidden、能動通知 aria-live なし、bell へ到達して初めて未読数を知る)。いずれも厳密 a11y 監査の細目で挙がりうる。",
+  "evidence": "L5-a11y:8 (TopBar banner landmark なし), L5-a11y:13 (PrototypeModeLabel role=status 誤用), L5-a11y:14 (dirty modal overlay 未ラベル), inbox:6 (TopBar.tsx:63 aria-label 切替, :75 赤ドット aria-hidden, Notifications.tsx:86 行内ドット aria-label='未読')。",
+  "expectedFlawless": "TopBar を <header role=banner> に。PrototypeModeLabel は静的なら role=status を外す。dirty 破棄 overlay に role=alertdialog + aria-label。未読数変化を aria-live='polite' で能動通知 (視覚の赤ドットと同等情報を SR に)。",
+  "suggestedFix": "AppShell/TopBar に banner landmark、PrototypeModeLabel の role=status 除去、dirty overlay に alertdialog role + label、未読数変化時に視覚外 aria-live リージョンへ件数を流す。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "L5-a11y:8",
+   "L5-a11y:13",
+   "L5-a11y:14",
+   "inbox:6"
+  ],
+  "finalSeverity": "P3",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-048",
+  "title": "手動起票案件が業務 KPI 母数(980 固定)・Hub 件数に反映されず、メトリクスの母集合整合が起票で崩れる",
+  "route": "/ (Hub), /observatory (メトリクス)",
+  "pillar": "ssot-integrity",
+  "severity": "P2",
+  "description": "手動起票で案件を作成しても (CASE_LIST 13→15) Observatory メトリクス KPI 母数は 980 固定 (mock-kpi.ts SSOT) のまま手動案件を分母に含めず、Hub も手動案件 ID を表示しない。KPI 自体は [仮説/要検証] ラベルで mock 値と明示されるため真実性主張は限定的だが、操作で生成した state が監視 surface に反映されない一貫性欠落 (F-002 の系)。監査者が母集合整合を追うと不一致として浮く。",
+  "evidence": "src mock-observatory.ts:127-135 (OBS_METRICS は KPI_ROWS denom 980 固定, store 非参照)。live manual-entry-2.mjs {hubMentionsManual:false, metricsMentions980:true}。screenshot 09-metrics.png, 07-hub.png。",
+  "expectedFlawless": "手動起票案件が監視 surface (Hub 件数・メトリクス母数) のいずれかに整合反映されるか、『当日処理分(台帳)と過去30日集計(KPI)は別母集合』である旨を UI で明示。F-002 (台帳) 修正と合わせ操作 state が監視に伝播。",
+  "suggestedFix": "KPI 母数を mock 固定のまま残すならメトリクスに『集計期間: 直近30日 (本日起票分は未集計)』等の母集合注記。手動起票案件は台帳 (F-002 修正) に反映。Hub 件数は store-derived ゆえ手動案件を含むか要検証。",
+  "confidence": "medium",
+  "mergedFrom": [
+   "flow-manual-entry:3"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-049",
+  "title": "EmptyState 説明文・inbox 未読本文が AA を僅かに割る (4.25-4.55:1) — secondary text の最弱コントラストが自プロジェクト token 規約(R7)違反",
+  "route": "/search (empty), /escalations (empty), /inbox",
+  "pillar": "a11y",
+  "severity": "P2",
+  "description": "EmptyState の description が text-[--color-fg-muted] (#64748b) で bg=panel-inset #f1f5f9 上では 4.34:1 = AA 未達 (canvas 上は 4.55:1 境界級)。inbox の未読通知本文も primary-soft 背景上で 4.25:1。index.css:17 が『panel-inset 上は fg-muted AA 未達』と自プロジェクト token 規約で明記しているのに EmptyState.tsx:44 / Notifications.tsx:90 が tinted/inset 地で fg-muted を使用 = self-documented R7 違反。/escalations は恒久 empty (F-028) のため EmptyState がこの route の主画面で AA fail が支配的。F-003 の token 整理と同時に救済可能だが対象が secondary/empty text に固有なため独立記録。",
+  "evidence": "src EmptyState.tsx:37 (bg panel-inset) + :44 (text fg-muted); Notifications.tsx:90 (未読時 fg-muted on bg-primary-soft, :76)。計算 #64748b/#f1f5f9=4.34:1, /#eef2ff=4.25:1, /#f8fafc=4.55:1。search:5, escalations:6, inbox:1, L6-craft:11, L5-a11y:10/11。evidence search__desktop.json .max-w-md.leading-relaxed fail node。",
+  "expectedFlawless": "全 secondary/empty/notification text が地色に対し AA。token ガイドに従い fg-tertiary (#475569, inset 上 ~7.1:1)。",
+  "suggestedFix": "EmptyState.tsx:44 description と Notifications.tsx:90 未読本文を fg-muted → fg-tertiary に。F-003 の token 整理と同時に。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L6-craft:11",
+   "L5-a11y:10",
+   "L5-a11y:11",
+   "search:5",
+   "escalations:6",
+   "inbox:1"
+  ],
+  "finalSeverity": "P2",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-050",
+  "title": "キーボードのみで案件を捌けない — skip-link 不在で先頭行まで 25+ Tab、focus 受け皿の main も無い (WCAG 2.4.1 Bypass Blocks)",
+  "route": "all routes (chrome systemic)",
+  "pillar": "a11y",
+  "severity": "P1",
+  "description": "高頻度に案件を処理する入力者/承認者にとってマウス無しの高速処理は実務要件だが、DOM 順が Sidebar(全 nav link)→TopBar→page header→全 filter chip→table 行 の固定順で skip-link が存在しない。/cases で先頭行へ到達するのに Tab を 25 回押しても届かず (focus は最後の担当 filter chip『高橋』で止まる)。AppShell の <main> は id も tabindex も持たず focus を本文へ飛ばす手段が無い。ページ遷移ごとにこの chrome 全走査が発生し 1 日に数十件捌く操作者の累積コストは大きい。WCAG 2.4.1 (Bypass Blocks) で skip-link 不在は指摘対象。",
+  "evidence": "live probe casesKeyboard: tabsToFirstRow=25 (cap), lastFocus={tag:'BUTTON',label:'高橋'} = 行リンク未到達。src AppShell.tsx:18 <main> に id/tabindex/skip-link 無し (grep skip|スキップ|tabindex → 0 hit)。",
+  "expectedFlawless": "ページ先頭に『本文へスキップ』リンク (focus 時のみ可視) を置き Enter で <main> または table 先頭へ jump。<main> に id + tabIndex=-1 を付け focus 受け皿に。Sidebar/TopBar は landmark (nav/banner) を明示。",
+  "suggestedFix": "AppShell.tsx で <Sidebar/> の前に <a href='#main' className='sr-only focus:not-sr-only'>本文へスキップ</a> を追加し <main id='main' tabIndex={-1}> に変更。",
+  "confidence": "high",
+  "mergedFrom": [
+   "L1-operator:2"
+  ],
+  "finalSeverity": "P1",
+  "verdict": "confirmed"
+ },
+ {
+  "id": "F-051",
+  "title": "全案件の文書ビューアが無条件で『押印/署名欄: (押印済)』を表示し、存在しない署名・押印を一律に主張(手動起票に限らない)",
+  "route": "/cases/:id",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "finalSeverity": "P1",
+  "verdict": "confirmed(L3)",
+  "description": "DocumentViewer が全 case で固定の押印済/署名表示。F-006(手動起票の捏造)を全案件に拡張した別観点。",
+  "evidence": "L3-legal finding; DocumentViewer.tsx",
+  "expectedFlawless": "mock 文書には『サンプル/モック』透かし。押印・署名は実データ駆動 or 明示 mock ラベル。",
+  "suggestedFix": "DocumentViewer に prototype watermark + 押印/署名を mock 明示",
+  "confidence": "high"
+ },
+ {
+  "id": "F-052",
+  "title": "PrototypeModeLabel(製品唯一の包括免責)が AA 未達(4.34:1)かつ折り畳み tooltip 依存で読めない・見落とされる",
+  "route": "all (chrome)",
+  "pillar": "truthfulness",
+  "severity": "P1",
+  "finalSeverity": "P1",
+  "verdict": "confirmed(L3)",
+  "description": "唯一の包括的 disclaimer が contrast 不足 + collapsed。法務観点で免責が機能しない。",
+  "evidence": "L3-legal; PrototypeModeLabel.tsx; axe contrast",
+  "expectedFlawless": "disclaimer は常時 AA+ で可視、折り畳み非依存。",
+  "suggestedFix": "PrototypeModeLabel を AA token + 常時可視 pill 化",
+  "confidence": "high"
+ },
+ {
+  "id": "F-053",
+  "title": "Hub『最終更新 2026-05-30 11:42』が static hardcode で操作後も不変 — データ鮮度を誤認させる虚偽の更新時刻",
+  "route": "/",
+  "pillar": "truthfulness",
+  "severity": "P2",
+  "finalSeverity": "P2",
+  "verdict": "confirmed(L3/L7)",
+  "description": "freshness 表示が固定文字列。鮮度 SSOT の固定化。",
+  "evidence": "L3-legal,L7-ssot; mock-hub.ts/Hub.tsx",
+  "expectedFlawless": "更新時刻は store 由来 or 相対表現 or 明示 mock。",
+  "suggestedFix": "最終更新を store-derived or [仮説] 化",
+  "confidence": "high"
+ },
+ {
+  "id": "F-054",
+  "title": "ConsequencePanel(Trust昇格『変更の帰結』)の自動化件数予測が断定数値で隣接 KPI にある[仮説/要検証]ラベルを欠く",
+  "route": "/agents/:id",
+  "pillar": "truthfulness",
+  "severity": "P2",
+  "finalSeverity": "P2",
+  "verdict": "confirmed(L3)",
+  "description": "帰結予測(80→約30件/日 等)が hedge なし断定。",
+  "evidence": "L3-legal; ConsequencePanel.tsx",
+  "expectedFlawless": "予測値に[仮説/要検証]。",
+  "suggestedFix": "ConsequencePanel に hedge label 付与",
+  "confidence": "high"
+ },
+ {
+  "id": "F-055",
+  "title": "mock-kpi.ts の SSOT コメントが『980 統一』を謳うが実データは 1,240/1,140/980/910 の 4 種 denominator で自己矛盾",
+  "route": "cross",
+  "pillar": "ssot-integrity",
+  "severity": "P2",
+  "finalSeverity": "P2",
+  "verdict": "confirmed(L7)",
+  "description": "SSOT コメントと実データの矛盾。F-048(母数整合)と関連するが SSOT-comment 観点で別。",
+  "evidence": "L7-ssot; mock-kpi.ts",
+  "expectedFlawless": "分母を単一 SSOT 化 or コメント修正で実態反映。",
+  "suggestedFix": "mock-kpi 分母統一 or コメント是正",
+  "confidence": "high"
+ },
+ {
+  "id": "F-056",
+  "title": "canonical-design-spec が C型 detail を『型・dev assert で強制』と主張するが実装に dev assert が存在しない(SSOT over-claim)",
+  "route": "cross",
+  "pillar": "ssot-integrity",
+  "severity": "P2",
+  "finalSeverity": "P2",
+  "verdict": "confirmed(L7)",
+  "description": "design SSOT の enforcement over-claim。docs が実装を超えて主張。",
+  "evidence": "L7-ssot; canonical-design-spec.md",
+  "expectedFlawless": "dev assert を実装する or 主張を是正。",
+  "suggestedFix": "C型 contract の dev assert 実装 or doc 修正",
+  "confidence": "high"
+ }
+]

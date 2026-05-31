@@ -41,7 +41,7 @@ export function EmptyState({ subState, title, description, action, className }: 
       <Icon className="h-7 w-7 text-[var(--color-fg-subtle)]" aria-hidden="true" />
       <p className="text-sm font-medium text-[var(--color-fg)]">{title}</p>
       {description && (
-        <p className="max-w-md text-xs leading-relaxed text-[var(--color-fg-muted)]">{description}</p>
+        <p className="max-w-md text-xs leading-relaxed text-[var(--color-fg-tertiary)]">{description}</p>
       )}
       {action && <div className="mt-1.5">{action}</div>}
     </div>

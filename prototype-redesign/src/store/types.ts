@@ -5,7 +5,10 @@
  * 方針:
  * - store が保持するのは「操作で変わる最小集合」のみ (status / assignee / trust 等)。
  * - 文書・lifecycle・citations 等の rich static data は store に載せず、各 mock dict から id 引き (Phase 4)。
- * - 監査台帳 (OBS_LEDGER) は store に載せない = 永続化が「証跡統制」を誤認させない型上の保証 (S8)。
+ * - **静的参照台帳** (OBS_LEDGER = 過去事例の rich fixture) は store に載せない (S8、型で「証跡統制」を誤認させない)。
+ * - **セッション操作証跡** (auditEvents、F-002) は store に持つ: 操作 (起票/承認/差戻し/訂正/取消…) が必ず append-only に
+ *   記録され、永続化済 case state と整合する。これは backend の改竄防止/長期保持 (WORM・retention) を主張するものではなく、
+ *   「この端末・このセッション内の操作記録 (mock)」であり Observatory に honest disclaimer を併記する (D2)。
  */
 import type { CaseStatus, ProposalStatus, TrustLevel } from '@/data/types'
 
@@ -35,11 +38,13 @@ export interface CaseEntity {
   /** 直近の差戻し理由 (remediation sendback-guard、受領入力者が参照)。 */
   sendback?: { reason: string; category: string }
   /**
-   * 業務責任者へのエスカレーション (remediation P1-3、難案件の裁定依頼)。
-   * 受信 queue (/escalations) の母集合判定 = この field が存在する case。
-   * 裁定の帰結 (JG-3=a) は既存 case/sendback (差戻し) を再利用し、本 field は依頼記録に徹する (status は変えない)。
+   * 業務責任者へのエスカレーション (remediation P1-3 + W3 F-013/016/017、難案件の裁定依頼)。
+   * 受信 queue (/escalations) の母集合 = この field が存在し `resolution` 未確定 (未裁定) の case。
+   * - `to`: 裁定者 actorId (= 業務責任者)。`from`: 起票/依頼した actorId (裁定 closure を起票者へ戻す F-017)。
+   * - `resolution`: 裁定の帰結 (F-016)。`'proceed'` = 続行可 (status 不変)、`'sendback'` = 差戻し (status→sent-back)。
+   *   未設定 = 裁定待ち。who/when は auditEvents 由来 (CaseEntity に actor/timestamp を denormalize しない、W1.5 決定)。
    */
-  escalation?: { reason: string; category: string; to: string }
+  escalation?: { reason: string; category: string; to: string; from?: string; resolution?: 'proceed' | 'sendback' }
   /**
    * 反映済 (terminal) の訂正/取消 記録 (remediation W3 C3、前進のみ→可逆)。
    * 存在 = 既に reversal 済 = 不可逆 guard の discriminant (二重 reversal を block)。理由を捨てない。
@@ -57,6 +62,12 @@ export interface ProposalEntity {
   status: ProposalStatus
   /** 却下/差戻し時の判断記録 (理由を捨てない、remediation sendback-guard)。 */
   decision?: { kind: 'reject' | 'sendback'; reason: string; category?: string }
+  /**
+   * 上長へ送付 (forward) した actorId (W3 F-015、四眼原則を 3 承認層で対称化)。
+   * 案件 (inputApprovedBy) / 設定 (promotionRequestedBy) と同型の identity-SoD discriminant: 送付者本人は承認不可。
+   * デモは role 分離 (手順管理者≠業務責任者) ゆえ非発火だが、本番 RBAC で兼務する場合の defense-in-depth を 3 層で揃える。
+   */
+  forwardedBy?: string
 }
 
 /** Agent (操作対象 = trust / 昇格申請 / 緊急停止)。 */
@@ -75,6 +86,30 @@ export interface AgentEntity {
   paused: boolean
   /** 緊急停止の理由 (kill-switch 操作時に保持、resume で解除)。理由を捨てない。 */
   pausedReason?: string
+  /**
+   * 緊急停止 直前の trust (W3 F-014、再開で復元する原状)。emergencyStop で trust を 'supervised'(全件確認) へ実降格させ、
+   * resume で本 field から原状回復する。停止中のみ存在し、resume でクリア (cosmetic だった kill-switch を実効化)。
+   */
+  trustBeforePause?: TrustLevel
+}
+
+/**
+ * 監査証跡 1 行 (export schema)。F-002 で静的 fixture から store-truth な append-only ログへ。
+ * `confidence` は監査台帳にのみ存在 (業務 view には型として出さない、S8 境界の継承)。
+ * 静的参照台帳 (OBS_LEDGER/CROSS_LEDGER、`data/mock-observatory`) と live `auditEvents` の両方がこの型を共有する。
+ */
+export interface LedgerEvent {
+  ts: string
+  actor: string
+  role: string
+  action: string
+  beforeAfter: string
+  doc: string
+  policy: string
+  approvalId: string
+  confidence: string
+  caseId: string
+  workflowName: string
 }
 
 export interface StoreState {
@@ -92,6 +127,14 @@ export interface StoreState {
    * 通知 id = 由来 entity から決定的に導く安定文字列 (例 `sendback:${caseId}`)。未読数 = 派生通知数 − 既読集合。
    */
   readNotificationIds: string[]
+  /**
+   * セッション操作証跡 (F-002、append-only)。各操作 mutation が immutable な event を push のみ (更新/削除なし)。
+   * Observatory の `useCrossLedger` が静的 OBS_LEDGER に append して表示。actor は store identity (currentActorId)
+   * から解決し owner/CASE_DETAILS は使わない (F-001 の actor SSOT 維持)。
+   */
+  auditEvents: LedgerEvent[]
+  /** auditEvents の決定的 ts 生成用シーケンス (Date.now 不使用、reducer 純粋性を保つ)。 */
+  auditSeq: number
 }
 
 /**
@@ -107,12 +150,17 @@ export interface StoreState {
  * case/sendback / proposal/reject / proposal/sendback (remediation sendback-guard): reason は P0-W3 UI 配線後に
  *   required 化済 (理由必須 modal が保証、理由を捨てず store に保持)。case/sendback は precondition (ready / business-approval-waiting のみ)。
  *   category は case/sendback は必須、proposal は任意 (ReasonDialog が category を持たないため)。
- * agent/emergencyStop / agent/resume (remediation flywheel、旧 togglePause を分割): kill-switch で全件確認へ降格 / 復帰。
- *   emergencyStop は停止理由を必須で pausedReason に保持 (AI 停止の根拠を捨てない、理由必須 modal が保証)。
+ * agent/emergencyStop / agent/resume (remediation flywheel + W3 F-014、旧 togglePause を分割): kill-switch で全件確認へ実降格 / 復帰。
+ *   emergencyStop は停止理由を必須で pausedReason に保持 + trust を 'supervised' へ実降格 (trustBeforePause に原状保存)、resume は
+ *   再開理由を必須で受け取り trust を原状回復する (cosmetic だった kill-switch を実効化)。停止/再開とも理由付きで監査台帳に append。
  * agent/approvePromotion / sendbackPromotion (remediation P1-3、設定承認): requested → approved / none。
  *   SoD (四眼原則を設定層へ拡張): 申請 actor (promotionRequestedBy) と承認 actor (state.currentActorId) が同一なら no-op block。
  *   案件 B4 と同一 helper (isSelfApproval) を再利用し SoD を 案件/設定 で統一する (再発明しない)。承認 actor は store の現 actor を用いる。
- * case/escalate (remediation P1-3): 難案件を業務責任者へ裁定依頼。escalation 記録のみ (status は変えない、裁定の帰結は別途 case/sendback)。
+ * case/escalate (remediation P1-3 + W3 F-013): 難案件を業務責任者へ裁定依頼。escalation 記録 + `from`=起票 actor 記録のみ (status は変えない)。
+ * case/resolveEscalation (W3 F-016/F-017): 業務責任者の裁定。SoD lock = currentActorId が escalation.to (裁定者) でなければ no-op
+ *   (起票入力者の自己裁定を block)。`proceed`=続行可 (status 不変、escalation.resolution='proceed')、`sendback`=差戻し
+ *   (status→sent-back + sendback 記録、case/sendback と同型)。両経路とも logEvent し、起票者への closure 通知は useNotifications が
+ *   escalation.from から決定的に導く (F-017、裁定結果が因果として起票者に戻る)。未裁定 (resolution 未設定) の case のみ /escalations 母集合。
  * case/reverse (remediation W3 C3、前進のみ→可逆): 反映済の訂正/取消。不可逆 guard = reflected かつ未 reversal のみ (二重 reversal は no-op)。
  *   訂正・取消とも sent-back (差戻し再処理) へ (ready 直行は false-success を生むため廃止)。reversal 記録で kind/理由を保持し通知/banner が区別。
  * case/create (remediation W3 C4、手動起票 = AI 障害時の業務継続): id 重複は冪等 no-op。全項目 人手入力ゆえ flags 0 / status ready、
@@ -125,9 +173,11 @@ export type StoreAction =
   | { type: 'case/override'; id: string; fieldLabel: string; value: string }
   | { type: 'case/sendback'; id: string; reason: string; category: string }
   | { type: 'case/escalate'; id: string; reason: string; category: string; to: string }
+  | { type: 'case/resolveEscalation'; id: string; resolution: 'proceed' | 'sendback'; reason?: string; category?: string }
   | { type: 'case/assign'; id: string; assignee: string }
   | { type: 'case/bulkApprove'; ids: string[]; by: 'input' | 'checker' }
   | { type: 'case/reverse'; id: string; kind: '訂正' | '取消'; reason: string }
+  | { type: 'case/reprocess'; id: string }
   | {
       type: 'case/create'
       id: string
@@ -146,7 +196,7 @@ export type StoreAction =
   | { type: 'agent/approvePromotion'; id: string }
   | { type: 'agent/sendbackPromotion'; id: string; reason: string }
   | { type: 'agent/emergencyStop'; id: string; reason: string }
-  | { type: 'agent/resume'; id: string }
+  | { type: 'agent/resume'; id: string; reason: string }
   | { type: 'notification/markRead'; id: string }
   | { type: 'notification/markAllRead'; ids: string[] }
   | { type: 'session/switchActor'; actorId: string }

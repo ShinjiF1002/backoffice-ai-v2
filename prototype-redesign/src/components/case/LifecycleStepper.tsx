@@ -9,7 +9,8 @@ import { cn } from '@/lib/cn'
  */
 export function LifecycleStepper({ steps }: { steps: CaseLifecycleEvent[] }) {
   return (
-    <ol className="flex items-center gap-0" aria-label="案件の進行状況">
+    // F-023: mobile 375px で step ラベルが 1 文字ずつ縦折れしないよう、横スクロール可能にし label は nowrap (clip 回避)。
+    <ol className="flex items-center gap-0 overflow-x-auto" aria-label="案件の進行状況">
       {steps.map((s, i) => {
         const last = i === steps.length - 1
         return (
@@ -31,7 +32,7 @@ export function LifecycleStepper({ steps }: { steps: CaseLifecycleEvent[] }) {
               <div className="flex flex-col leading-tight">
                 <span
                   className={cn(
-                    'text-xs',
+                    'whitespace-nowrap text-xs',
                     s.current
                       ? 'font-semibold text-[var(--color-primary-hover)]'
                       : s.done

@@ -55,7 +55,9 @@ export function MetricVsThreshold({
         </div>
         <span className="flex-shrink-0 text-[10px] text-[var(--color-fg-tertiary)]">{hypothesisLabel}</span>
       </div>
-      <table className="w-full text-sm">
+      {/* F-023: mobile 375px で 6 列がセル内 CJK を 1 文字ずつ折り返さないよう、横スクロール + 最小幅を確保。 */}
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[40rem] text-sm">
         <thead>
           <tr className="border-b border-[var(--color-border)] text-left text-[11px] text-[var(--color-fg-muted)]">
             <th className="px-4 py-1.5 font-medium">指標</th>
@@ -74,7 +76,7 @@ export function MetricVsThreshold({
             >
               <td className="px-4 py-2 text-[var(--color-fg)]">
                 {r.agentHref ? (
-                  <Link to={r.agentHref} className="text-[var(--color-primary)] hover:underline">
+                  <Link to={r.agentHref} className="text-[var(--color-primary-strong)] hover:underline">
                     {r.metricLabel}
                   </Link>
                 ) : (
@@ -95,6 +97,7 @@ export function MetricVsThreshold({
           ))}
         </tbody>
       </table>
+      </div>
     </section>
   )
 }

@@ -125,10 +125,10 @@ tone semantic: **inset**=中立/受付/system (**却下**を含む、下表参�
 
 ## 6. C 型 detail contract (`screen-contracts-v2.md` §全画面共通 由来、React component 契約化)
 
-C 型 detail 画面 (CaseDetail / ProposalDetail / AgentDetail) は以下を**型・dev assert で強制**:
-- **A 全体レビュー可能性**: 判断対象の全項目を default 表示 (resolved/一致 を折りたたみ default にしない)。dev assert: 「対象集合の件数 == 表示件数」。
+C 型 detail 画面 (CaseDetail / ProposalDetail / AgentDetail) は以下を**typed props 構造 + test で担保** (F-056 是正: 旧版は「dev assert で強制」と記したが runtime dev assert は未実装。実際の強制機構は ① typed-slot component (open children 不可) ② 単一 sticky footer 構造 ③ contract test (`src/__tests__/pages/detail-contract.test.tsx`) である):
+- **A 全体レビュー可能性**: 判断対象の全項目を default 表示 (resolved/一致 を折りたたみ default にしない)。test: 「対象集合の件数 == 表示件数」。
 - **B 証拠アンカー**: 一次証拠 (申請書類 / 根拠 case / metrics sample) を読めるサイズで併置 + 入力値と相互リンク。
-- **C 単一決定面**: standing 決定ボタンは object 単位 1 セットのみ。field/部分操作は行クリック→modal。dev assert: detail footer の primary button cluster == 1。
+- **C 単一決定面**: standing 決定ボタンは object 単位 1 セットのみ (sticky footer は画面あたり 1 つ)。field/部分操作は行クリック→modal。test: detail の sticky footer == 1。
 
 ## 7. 監査 drift → 解消 mapping (要約)
 
@@ -151,7 +151,7 @@ C 型 detail 画面 (CaseDetail / ProposalDetail / AgentDetail) は以下を**�
 - Sidebar/TopBar は shared component 単一実装 (画面ローカル chrome 0)
 - nav 6 項目 grouped (処理/改善/監視)
 - `text-{amber,emerald,red}-{700,800,900}` 直書き 0 (soft-fg token 経由)
-- C 型 3 画面で A/B/C dev assert pass
+- C 型 3 画面で A/B/C contract test pass (`detail-contract.test.tsx`、単一 footer + A 全項目表示)
 
 ## 9. コントラスト基準 (W0、AR1 / P1-4) — 意味テキストの最弱トークン
 

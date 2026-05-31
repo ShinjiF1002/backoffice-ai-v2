@@ -3,6 +3,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import type { Dispatch } from 'react'
 import { StoreProvider } from '@/store/StoreProvider'
 import { AgentDetail } from '@/pages/AgentDetail'
+import { BusinessApproverHub } from '@/pages/BusinessApproverHub'
 import type { StoreAction } from '@/store/types'
 import {
   useForwardedProposals,
@@ -36,18 +37,35 @@ describe('W2c/P1-3 業務責任者 selector', () => {
     expect(result.current.pending.some((a) => a.id === 'agent-corporate-address-change')).toBe(true)
   })
 
-  it('useEscalations: escalate で queue 入り、裁定 (case/sendback) で queue closure (F2 regression)', () => {
+  it('useEscalations: escalate で queue 入り、差戻し裁定 (resolveEscalation) で queue closure (F2/F-016 regression)', () => {
     const { result } = renderHook(
       () => ({ esc: useEscalations(), dispatch: useStoreDispatch() }),
       { wrapper: StoreProvider },
     )
-    expect(result.current.esc.length).toBe(0) // seed では escalation 0
+    // F-028: seed に未裁定 escalation (CASE-2026-0145) が 1 件あるが、0142 はまだ未 escalate。
+    expect(result.current.esc.some((c) => c.id === 'CASE-2026-0142')).toBe(false)
     act(() =>
       result.current.dispatch({ type: 'case/escalate', id: 'CASE-2026-0142', reason: '判断困難', category: 'judgment_gap', to: 'actor-approver' }),
     )
     expect(result.current.esc.some((c) => c.id === 'CASE-2026-0142')).toBe(true)
-    // 業務責任者が裁定 = case/sendback (ready→sent-back) → active queue から消える (裁定済が残り続けない)
-    act(() => result.current.dispatch({ type: 'case/sendback', id: 'CASE-2026-0142', reason: '要件不足', category: 'judgment_gap' }))
+    // F-016 SoD lock: 起票者 (入力者) 自身は裁定できない (no-op、queue に残る)
+    act(() => result.current.dispatch({ type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'sendback', reason: '要件不足' }))
+    expect(result.current.esc.some((c) => c.id === 'CASE-2026-0142')).toBe(true)
+    // 業務責任者へ切替えて裁定 = resolution 確定 → active queue から消える (裁定済が残り続けない)
+    act(() => result.current.dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+    act(() => result.current.dispatch({ type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'sendback', reason: '要件不足', category: 'judgment_gap' }))
+    expect(result.current.esc.some((c) => c.id === 'CASE-2026-0142')).toBe(false)
+  })
+
+  it('useEscalations: 続行可裁定 (proceed) は status 不変でも queue closure (F-016 affirmative path)', () => {
+    const { result } = renderHook(
+      () => ({ esc: useEscalations(), dispatch: useStoreDispatch() }),
+      { wrapper: StoreProvider },
+    )
+    act(() => result.current.dispatch({ type: 'case/escalate', id: 'CASE-2026-0142', reason: 'x', category: 'judgment_gap', to: 'actor-approver' }))
+    act(() => result.current.dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+    act(() => result.current.dispatch({ type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'proceed' }))
+    // 続行可は status を変えない (status ベースの旧判定では残るが、resolution ベースで正しく closure)
     expect(result.current.esc.some((c) => c.id === 'CASE-2026-0142')).toBe(false)
   })
 
@@ -117,5 +135,40 @@ describe('AgentDetail 承認者 mode (W2c/P1-3、F3 regression)', () => {
     expect(screen.queryByRole('button', { name: '設定変更を申請' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '承認済み' })).toBeDisabled()
     expect(screen.getByText('設定変更は承認済みです（再申請は不要）')).toBeInTheDocument()
+  })
+})
+
+describe('F-025 BusinessApproverHub persona truthfulness', () => {
+  function renderHub() {
+    let dispatch!: Dispatch<StoreAction>
+    function Capture() {
+      dispatch = useStoreDispatch()
+      return null
+    }
+    render(
+      <MemoryRouter initialEntries={['/business-approver']}>
+        <StoreProvider>
+          <Capture />
+          <Routes>
+            <Route path="/business-approver" element={<BusinessApproverHub />} />
+          </Routes>
+        </StoreProvider>
+      </MemoryRouter>,
+    )
+    return dispatch
+  }
+
+  it('既定 persona=入力者 では「あなたが判断」と偽らず、業務責任者への切替を促す', () => {
+    renderHub()
+    expect(screen.getByText(/業務責任者が判断待ち/)).toBeInTheDocument()
+    expect(screen.queryByText(/あなたが判断待ち/)).not.toBeInTheDocument()
+    expect(screen.getByText(/業務責任者に切替えてください/)).toBeInTheDocument()
+  })
+
+  it('業務責任者に切替えると「あなたが判断」+ 切替 hint が消える', () => {
+    const dispatch = renderHub()
+    act(() => dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+    expect(screen.getByText(/あなたが判断待ち/)).toBeInTheDocument()
+    expect(screen.queryByText(/業務責任者に切替えてください/)).not.toBeInTheDocument()
   })
 })

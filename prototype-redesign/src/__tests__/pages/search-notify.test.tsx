@@ -63,6 +63,26 @@ describe('W2b/P1-2 横断検索 + 通知', () => {
       expect(result.current.notifications.length).toBe(before + 1)
     })
 
+    it('F-017: 裁定結果が起票者 (from) に escalation-resolved 通知として戻り、裁定者の依頼通知は closure する', () => {
+      const { result } = renderHook(
+        () => ({ notifications: useNotifications(), dispatch: useStoreDispatch() }),
+        { wrapper: StoreProvider },
+      )
+      // 入力者 (起票者) が escalate → 裁定者宛 escalation 通知が立つ
+      act(() => result.current.dispatch({ type: 'case/escalate', id: 'CASE-2026-0142', reason: '判断困難', category: 'judgment_gap', to: 'actor-approver' }))
+      // 業務責任者へ切替: 裁定者には escalation (依頼) 通知が見える
+      act(() => result.current.dispatch({ type: 'session/switchActor', actorId: 'actor-approver' }))
+      expect(result.current.notifications.some((n) => n.kind === 'escalation' && n.caseId === 'CASE-2026-0142')).toBe(true)
+      // 続行可で裁定 → 裁定者の依頼通知は closure (resolution 確定で母集合から外れる)
+      act(() => result.current.dispatch({ type: 'case/resolveEscalation', id: 'CASE-2026-0142', resolution: 'proceed' }))
+      expect(result.current.notifications.some((n) => n.kind === 'escalation' && n.caseId === 'CASE-2026-0142')).toBe(false)
+      // 起票者 (入力者) へ戻ると、裁定結果が escalation-resolved 通知として因果で戻る
+      act(() => result.current.dispatch({ type: 'session/switchActor', actorId: 'actor-inputter' }))
+      const resolved = result.current.notifications.find((n) => n.kind === 'escalation-resolved' && n.caseId === 'CASE-2026-0142')
+      expect(resolved).toBeDefined()
+      expect(resolved!.detail).toContain('続行可')
+    })
+
     it('markAllRead で未読 0', () => {
       const { result } = renderHook(
         () => ({ notifications: useNotifications(), unread: useUnreadCount(), dispatch: useStoreDispatch() }),
@@ -95,8 +115,8 @@ describe('SearchResults page (自前 input UI、狭幅自己完結)', () => {
     expect(screen.getByText('検索語を入力してください')).toBeInTheDocument()
     // ページ自前の searchbox に入力 → 結果が live 更新 (TopBar input が無い狭幅でも /search 自己完結)
     await user.type(screen.getByRole('searchbox', { name: '横断検索' }), 'CASE-2026-0142')
-    // 結果 header (一意) で hit を確認。行 ID は table + mobile card の 2 箇所に出るため findAllByText で件数 confirm
-    expect(await screen.findByText('「CASE-2026-0142」の検索結果 1 件')).toBeInTheDocument()
+    // 結果 header (一意) で hit を確認。F-046 で「全業務横断」scope 注記が末尾に付くため部分一致で確認。
+    expect(await screen.findByText(/「CASE-2026-0142」の検索結果 1 件/)).toBeInTheDocument()
     expect(screen.getAllByText('CASE-2026-0142').length).toBeGreaterThan(0)
     expect(screen.queryByText('検索語を入力してください')).not.toBeInTheDocument()
   })

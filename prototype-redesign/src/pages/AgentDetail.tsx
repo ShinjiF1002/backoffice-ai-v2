@@ -1,13 +1,20 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon, PauseIcon, PlayIcon } from 'lucide-react'
+import { ChevronRightIcon, BotIcon, CheckIcon, AlertTriangleIcon, ArrowRightIcon, PauseIcon, PlayIcon, SparklesIcon, ShieldCheckIcon } from 'lucide-react'
 import { AGENT_DETAILS } from '@/data/mock-agent-detail'
+import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
 import { useAgent, useStoreDispatch, useAgentAdoptedProposals, useCurrentActor } from '@/store/hooks'
+import { useDetailDemo } from '@/hooks/useDetailDemo'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { Modal } from '@/components/shared/Modal'
 import { ReasonDialog } from '@/components/shared/ReasonDialog'
+import { DetailDemoFallback } from '@/components/shared/DetailDemoFallback'
+import { Toast } from '@/components/shared/Toast'
+import { useToast } from '@/hooks/useToast'
+import { trustLevelLabel } from '@/lib/status-tones'
+import type { TrustLevel } from '@/data/types'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/cn'
 
@@ -28,9 +35,11 @@ export function AgentDetail() {
   const [emergencyOpen, setEmergencyOpen] = useState(false)
   const [emergencyReason, setEmergencyReason] = useState('')
   const [emergencyError, setEmergencyError] = useState(false)
+  // F-014: 再開は autonomy 再付与ゆえ確認 + 理由必須 (1-click 廃止)。
+  const [resumeOpen, setResumeOpen] = useState(false)
   // P1-3 承認者 mode: 設定承認の差戻し理由入力 dialog (理由 state は ReasonDialog 内で管理)。
   const [configSendbackOpen, setConfigSendbackOpen] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
+  const { toast, show: showToast, dismiss: dismissToast } = useToast()
   // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
   const [prevId, setPrevId] = useState(id)
   if (id !== prevId) {
@@ -39,9 +48,14 @@ export function AgentDetail() {
     setEmergencyOpen(false)
     setEmergencyReason('')
     setEmergencyError(false)
+    setResumeOpen(false)
     setConfigSendbackOpen(false)
-    setToast(null)
+    dismissToast()
   }
+  // F-009: detail route の取得状態 (?demo=loading/error) を list route と一貫させる demo seam。
+  const demo = useDetailDemo()
+
+  if (demo.status) return <DetailDemoFallback status={demo.status} onRetry={demo.onRetry} />
 
   if (!a)
     return (
@@ -50,7 +64,7 @@ export function AgentDetail() {
           subState="truly-empty"
           title="指定のエージェントが見つかりません。"
           action={
-            <Link to="/agents" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+            <Link to="/agents" className="text-sm font-medium text-[var(--color-primary-strong)] hover:underline">
               エージェント一覧へ戻る
             </Link>
           }
@@ -58,16 +72,24 @@ export function AgentDetail() {
       </div>
     )
 
-  const showToast = (m: string) => {
-    setToast(m)
-    window.setTimeout(() => setToast(null), 2600)
-  }
-
+  // F-035: flywheel lineage — この Agent の設定改定の出所 (relatedProposals)。model/test に在りながら未描画だったため UI に出す。
+  const adoptedSet = new Set(adopted)
+  const lineage = a.relatedProposals.map((pid) => ({
+    id: pid,
+    title: PROPOSAL_DETAILS[pid]?.changeTitle ?? pid,
+    adopted: adoptedSet.has(pid),
+  }))
   const hasUnmet = a.metrics.some((m) => !m.achieved)
   const requested = agentEntity?.promotionStatus === 'requested'
   // 緊急停止 (kill-switch) 状態 (flywheel 観測化)。paused は header「緊急コントロール」で可視化 + 再開可能。
   const paused = agentEntity?.paused ?? false
   const pausedReason = agentEntity?.pausedReason
+  // F-014: trust 表示は store 真値由来 (kill-switch の実降格を反映)。停止中は trustBeforePause が再開後の原状。
+  const TRUST_EN: Record<TrustLevel, string> = { supervised: 'Supervised', checkpoint: 'Checkpoint', autonomous: 'Autonomous', 'n/a': 'N/A' }
+  const liveTrust: TrustLevel | undefined = agentEntity?.trust
+  const trustLabelMain = liveTrust ? trustLevelLabel(liveTrust) : a.trustLabel
+  const trustLabelEn = liveTrust ? TRUST_EN[liveTrust] : a.trustEn
+  const restoreTrust = agentEntity?.trustBeforePause ?? liveTrust
   // P1-3 承認者 mode (ProposalDetail と同型): 業務責任者 persona は owner = 設定承認/差戻し、それ以外は manual = 申請。
   const mode: 'manual' | 'owner' = actor?.role === 'business-approver' ? 'owner' : 'manual'
   const promotionSendbackReason = agentEntity?.promotionSendbackReason
@@ -100,8 +122,8 @@ export function AgentDetail() {
             <h1 className="flex flex-wrap items-center gap-2 text-lg font-semibold text-[var(--color-fg)]">
               {a.name}
               <span className="inline-flex items-center gap-1.5">
-                <MetaChip tone="primary" label={`現在 ${a.trustLabel}`} />
-                <MetaChip tone="inset" label={a.trustEn} />
+                <MetaChip tone="primary" label={`現在 ${trustLabelMain}`} />
+                <MetaChip tone="inset" label={trustLabelEn} />
                 {paused && <MetaChip tone="alert" label="緊急停止中" />}
                 {mode === 'owner' && <MetaChip tone="inset" label="業務責任者ビュー" />}
               </span>
@@ -115,10 +137,7 @@ export function AgentDetail() {
             {paused ? (
               <button
                 type="button"
-                onClick={() => {
-                  if (id) dispatch({ type: 'agent/resume', id })
-                  showToast('Agent を再開しました（緊急停止を解除）')
-                }}
+                onClick={() => setResumeOpen(true)}
                 className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
               >
                 <PlayIcon className="h-4 w-4" />
@@ -165,10 +184,48 @@ export function AgentDetail() {
               scope={a.consequence.scope}
               impacts={a.consequence.impacts}
             />
+            {/* F-039: 昇格は申請者と別系統の独立検証を前提とする旨を明示 + モデル台帳/drift 監視へ誘導 (規制担当の確認 surface)。 */}
+            <div className="flex items-start gap-2.5 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] p-3 text-[11px] leading-relaxed text-[var(--color-fg-tertiary)]">
+              <ShieldCheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-fg-muted)]" aria-hidden="true" />
+              <span>
+                自動化レベルの昇格は、設定承認（四眼原則）に加え、申請者と別系統の<strong className="text-[var(--color-fg)]">独立検証（challenger / 検証チーム）</strong>の合格を前提とします（実体は本番の別 module）。
+                この Agent が用いる embedded model の版・所有者・検証状況・drift 監視は{' '}
+                <Link to="/observatory" className="font-medium text-[var(--color-primary-strong)] hover:underline">モニタリングの「モデルガバナンス」</Link>
+                で確認できます。
+              </span>
+            </div>
           </div>
 
-          {/* 補助列: 裏付け (原則 B) + 設定 */}
+          {/* 補助列: Flywheel lineage (F-035) + 裏付け (原則 B) + 設定 */}
           <div className="flex flex-col gap-3">
+            {/* F-035: 製品中核ナラティブ (差戻し→提案→承認→設定反映の flywheel) を Agent 設定の出所として可視化。 */}
+            {lineage.length > 0 && (
+              <section className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)]">
+                <div className="flex items-center gap-1.5 border-b border-[var(--color-primary-soft-border)] px-4 py-2.5">
+                  <SparklesIcon className="h-4 w-4 text-[var(--color-primary-strong)]" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-[var(--color-fg)]">改善の流れ（Flywheel）</h3>
+                </div>
+                <p className="px-4 pt-2 text-[11px] leading-relaxed text-[var(--color-fg-tertiary)]">
+                  現場の差戻しから生まれた手順改定の提案が、この Agent の設定に反映されます。
+                </p>
+                <div className="flex flex-col p-2">
+                  {lineage.map((l) => (
+                    <Link
+                      key={l.id}
+                      to={`/proposals/${l.id}`}
+                      className="flex items-center gap-2.5 rounded-[var(--radius-control)] px-2 py-2 hover:bg-[var(--color-panel)]"
+                    >
+                      <MetaChip tone={l.adopted ? 'success' : 'inset'} label={l.adopted ? '反映済' : '審議中'} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-xs font-medium text-[var(--color-fg)]">{l.title}</div>
+                        <div className="font-mono text-[10px] text-[var(--color-fg-tertiary)]">{l.id}</div>
+                      </div>
+                      <ArrowRightIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-fg-subtle)]" aria-hidden="true" />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
             <section className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)]">
               <div className="border-b border-[var(--color-border)] px-4 py-2.5">
                 <h3 className="text-sm font-semibold text-[var(--color-fg)]">実績の裏付け</h3>
@@ -226,8 +283,8 @@ export function AgentDetail() {
               </>
             ) : (
               <>
-                <BotIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
-                <span className="font-medium text-[var(--color-primary)]">設定変更 (昇格) の申請を承認 / 差戻しできます</span>
+                <BotIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary-strong)]" />
+                <span className="font-medium text-[var(--color-primary-strong)]">設定変更 (昇格) の申請を承認 / 差戻しできます</span>
               </>
             )}
           </div>
@@ -279,8 +336,8 @@ export function AgentDetail() {
               </>
             ) : requested ? (
               <>
-                <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary)]" />
-                <span className="font-medium text-[var(--color-primary)]">昇格を申請済み — 設定承認の待ちに入りました</span>
+                <CheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-primary-strong)]" />
+                <span className="font-medium text-[var(--color-primary-strong)]">昇格を申請済み — 設定承認の待ちに入りました</span>
               </>
             ) : approved ? (
               <>
@@ -382,7 +439,8 @@ export function AgentDetail() {
                 }
                 if (id) dispatch({ type: 'agent/emergencyStop', id, reason: r })
                 setEmergencyOpen(false)
-                showToast('Agent を緊急停止しました（全件確認に降格）')
+                // F-027: 緊急停止 (kill-switch) は統制重要 — alert tone + sticky で見落とさせない (後追いは監査台帳)。
+                showToast('Agent を緊急停止しました（全件確認に降格）', { tone: 'alert', sticky: true })
               }}
               className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-error)] bg-[var(--color-error-soft)] px-3 py-1.5 text-sm font-medium text-[var(--color-error-soft-fg)] hover:opacity-90"
             >
@@ -400,7 +458,7 @@ export function AgentDetail() {
             <div className="mb-1 flex items-center justify-between">
               <label htmlFor="emergency-reason" className="text-xs font-medium text-[var(--color-fg)]">停止理由（必須）</label>
               {emergencyError && (
-                <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+                <span id="emergency-reason-error" role="alert" className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
                   <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
                   入力してください
                 </span>
@@ -415,6 +473,7 @@ export function AgentDetail() {
               }}
               rows={2}
               aria-invalid={emergencyError}
+              aria-describedby={emergencyError ? 'emergency-reason-error' : undefined}
               className={cn(
                 'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
                 emergencyError
@@ -426,6 +485,21 @@ export function AgentDetail() {
           </div>
         </div>
       </Modal>
+
+      {/* F-014: 再開 confirm dialog (autonomy 再付与ゆえ確認 + 再開理由必須、1-click 廃止)。trust は原状回復し台帳に記録。 */}
+      <ReasonDialog
+        open={resumeOpen}
+        title="Agent を再開"
+        label="再開の理由（必須）"
+        placeholder="例: 原因の入力誤りを修正し、再開可能と判断"
+        submitLabel="再開する"
+        outcome={`緊急停止を解除し、自動化レベルを「${restoreTrust ? trustLevelLabel(restoreTrust) : '原状'}」に戻します。再開理由は監査台帳に記録されます。`}
+        onClose={() => setResumeOpen(false)}
+        onSubmit={(reason) => {
+          if (id) dispatch({ type: 'agent/resume', id, reason })
+          showToast('Agent を再開しました（緊急停止を解除）')
+        }}
+      />
 
       {/* P1-3 設定承認の差戻し dialog (理由必須、approvePromotion と SoD 対。閉じは ReasonDialog 内で自動) */}
       <ReasonDialog
@@ -442,14 +516,7 @@ export function AgentDetail() {
         }}
       />
 
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-20 left-1/2 z-[80] -translate-x-1/2 rounded-[var(--radius-card)] border border-[var(--color-success)] bg-[var(--color-success-soft)] px-4 py-2 text-sm font-medium text-[var(--color-success-soft-fg)] shadow-lg"
-        >
-          {toast}
-        </div>
-      )}
+      <Toast toast={toast} onDismiss={dismissToast} />
     </div>
   )
 }

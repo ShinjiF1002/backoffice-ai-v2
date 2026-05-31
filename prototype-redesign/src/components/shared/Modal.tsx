@@ -129,8 +129,9 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
 
   return (
     // backdrop = click target のみ。dialog container は panel 側 (a11y 責務分離、Phase 2 CR)
+    // F-035: entrance motion — overlay fade + panel scale/slide-in (≤200ms、prefers-reduced-motion で off)。
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-overlay)] p-6"
+      className="animate-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-[var(--color-overlay)] p-6"
       onClick={requestClose}
     >
       <div
@@ -140,7 +141,7 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'relative flex max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl',
+          'animate-modal-panel relative flex max-w-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-panel)] shadow-2xl',
           size === 'md' ? 'w-[520px]' : 'w-[480px]',
         )}
       >
@@ -171,7 +172,13 @@ export function Modal({ open, onClose, title, size = 'sm', initialFocusRef, foot
 
         {/* W3 G5: dirty 時の破棄確認 overlay (Esc/backdrop/X で即閉じず、入力を捨てる前に確認)。 */}
         {showDiscardConfirm && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] bg-[var(--color-panel)] p-6 text-center">
+          // F-047: 破棄確認は alertdialog + aria-label (SR に destructive prompt として明示)。
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-label="入力内容を破棄して閉じますか"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] bg-[var(--color-panel)] p-6 text-center"
+          >
             <p className="text-sm font-medium text-[var(--color-fg)]">入力内容を破棄して閉じますか？</p>
             <p className="text-xs text-[var(--color-fg-muted)]">入力した内容は保存されません。</p>
             <div className="mt-2 flex gap-2">

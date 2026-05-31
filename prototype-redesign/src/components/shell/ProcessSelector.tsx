@@ -134,7 +134,7 @@ export function ProcessSelector() {
               onKeyDown={(e) => onOptionKeyDown(e, i)}
               className={cn(
                 'flex w-full cursor-pointer items-center px-3 py-1.5 text-left text-sm outline-none hover:bg-[var(--color-panel-inset)] focus-visible:bg-[var(--color-panel-inset)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-primary)]',
-                p.id === process ? 'font-medium text-[var(--color-primary)]' : 'text-[var(--color-fg)]',
+                p.id === process ? 'font-medium text-[var(--color-primary-strong)]' : 'text-[var(--color-fg)]',
               )}
             >
               {p.label}

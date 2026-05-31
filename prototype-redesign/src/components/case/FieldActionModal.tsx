@@ -91,7 +91,8 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
           : undefined
     onSubmit(caseLevel ? (caseId ?? '案件') : field!.fieldLabel, submitKind, {
       reason: reason.trim() || undefined,
-      category: caseLevel || kind === 'sendback' ? category : undefined,
+      // F-044: escalate も category を収集 (空 category の偽データ保存を解消、差戻し/エスカレーション共に区分必須)。
+      category: caseLevel || kind === 'sendback' || kind === 'escalate' ? category : undefined,
       value: submitValue,
     })
     onClose()
@@ -155,7 +156,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
 
         {/* 確定済み項目の再 open は read-only 確認 (silent 再上書きを防ぐ。変更は案件差戻しで)。 */}
         {isReview && (
-          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-tertiary)]">
             この項目は確定済みです。値を変更する場合は、フッターの「差戻し」で案件を差戻してください。
           </div>
         )}
@@ -171,7 +172,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
                 className={cn(
                   'rounded-[var(--radius-control)] border px-3 py-2 text-left text-sm',
                   kind === a.kind
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
+                    ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary-strong)]'
                     : 'border-[var(--color-border)] text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]'
                 )}
               >
@@ -187,7 +188,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
             <div className="mb-1 flex items-center justify-between">
               <label htmlFor="override-value" className="text-xs font-medium text-[var(--color-fg)]">訂正後の値 (必須)</label>
               {showValueError && (
-                <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+                <span id="override-value-error" role="alert" className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
                   <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
                   入力してください
                 </span>
@@ -202,6 +203,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
                 if (showValueError && e.target.value.trim()) setShowValueError(false)
               }}
               aria-invalid={showValueError}
+              aria-describedby={showValueError ? 'override-value-error' : undefined}
               className={cn(
                 'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
                 showValueError
@@ -213,10 +215,12 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
           </div>
         )}
 
-        {/* case-level / sendback: 理由カテゴリ */}
-        {(caseLevel || kind === 'sendback') && (
+        {/* case-level / sendback / escalate: 区分カテゴリ (F-044: escalate も区分を必ず収集し空 category を防ぐ) */}
+        {(caseLevel || kind === 'sendback' || kind === 'escalate') && (
           <div>
-            <label htmlFor="sendback-cat" className="mb-1 block text-xs font-medium text-[var(--color-fg)]">差戻し理由カテゴリ</label>
+            <label htmlFor="sendback-cat" className="mb-1 block text-xs font-medium text-[var(--color-fg)]">
+              {kind === 'escalate' ? 'エスカレーション区分' : '差戻し理由カテゴリ'}
+            </label>
             <select
               id="sendback-cat"
               value={category}
@@ -236,7 +240,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
                 {caseLevel || kind === 'sendback' ? 'コメント (必須)' : '理由 (必須)'}
               </label>
               {showError && (
-                <span className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
+                <span id="action-reason-error" role="alert" className="flex items-center gap-1 text-xs text-[var(--color-error-soft-fg)]">
                   <AlertTriangleIcon className="h-3 w-3 text-[var(--color-error)]" />
                   入力してください
                 </span>
@@ -252,6 +256,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
               }}
               rows={3}
               aria-invalid={showError}
+              aria-describedby={showError ? 'action-reason-error' : undefined}
               className={cn(
                 'w-full rounded-[var(--radius-control)] border px-3 py-2 text-sm outline-none',
                 showError
@@ -264,7 +269,7 @@ export function FieldActionModal({ field, caseLevel, caseId, onClose, onSubmit }
         )}
 
         {!isReview && (
-          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]">
+          <div className="rounded-[var(--radius-card)] bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-tertiary)]">
             {outcome}
           </div>
         )}

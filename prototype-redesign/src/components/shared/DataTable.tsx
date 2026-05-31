@@ -44,6 +44,8 @@ export interface DataTableSelectionAction<Row> {
   onRun: (ids: string[]) => void
   /** 選択行集合に対する無効化 (例: 要確認残があれば一括承認不可) */
   disabled?: (rows: Row[]) => boolean
+  /** disabled 時の理由 (F-025: 操作前に「なぜ押せないか」を tooltip で提示)。 */
+  disabledReason?: (rows: Row[]) => string | undefined
 }
 
 export type DataTableStatus = 'ready' | 'loading' | 'empty' | 'filtered-empty' | 'error'
@@ -102,6 +104,8 @@ export function DataTable<Row>({
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const hasActiveFilter = Object.values(active).some((v) => v.length > 0)
+  // F-045: 候補が 1 つだけの filter は退化 UI (選んでも絞れない) ゆえ非表示。候補 2 以上の filter のみ出す。
+  const visibleFilters = filters?.filter((f) => f.options.length >= 2)
 
   const filtered = useMemo(() => {
     if (!filters) return rows
@@ -190,10 +194,10 @@ export function DataTable<Row>({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* filter chips — loading/error 中は非表示 (取得状態に操作 UI を残さない、P1-5 CR) */}
-      {filters && filters.length > 0 && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
+      {/* filter chips — loading/error 中は非表示 (取得状態に操作 UI を残さない、P1-5 CR)。候補 1 つの退化 filter は除外 (F-045) */}
+      {visibleFilters && visibleFilters.length > 0 && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
         <div className="flex flex-wrap items-center gap-3">
-          {filters.map((f) => (
+          {visibleFilters.map((f) => (
             <div key={f.id} className="flex flex-wrap items-center gap-1.5">
               <span className="text-[11px] font-medium text-[var(--color-fg-muted)]">{f.label}</span>
               {f.options.map((o) => (
@@ -210,7 +214,7 @@ export function DataTable<Row>({
             <button
               type="button"
               onClick={resetFilters}
-              className="text-[11px] font-medium text-[var(--color-primary)] hover:underline"
+              className="text-[11px] font-medium text-[var(--color-primary-strong)] hover:underline"
             >
               絞り込みを解除
             </button>
@@ -221,14 +225,16 @@ export function DataTable<Row>({
       {/* 一括操作バー (選択中、in-scope のみ集計) — loading/error 中は非表示 (P1-5 CR) */}
       {selection && selectedInScope.length > 0 && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
         <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius-control)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] px-3 py-2 text-xs">
-          <span className="font-medium text-[var(--color-primary)]">{selectedInScope.length} 件選択中</span>
+          <span className="font-medium text-[var(--color-primary-strong)]">{selectedInScope.length} 件選択中</span>
           {selection.actions.map((a) => {
             const disabled = a.disabled?.(selectedInScope) ?? false
+            const disabledReason = disabled ? a.disabledReason?.(selectedInScope) : undefined
             return (
               <button
                 key={a.label}
                 type="button"
                 disabled={disabled}
+                title={disabledReason}
                 onClick={() => a.onRun(selectedInScopeIds)}
                 className={cn(
                   'inline-flex items-center gap-1 rounded-[var(--radius-control)] px-2.5 py-1 text-[11px] font-medium',
@@ -436,7 +442,10 @@ export function DataTable<Row>({
         </>
       )}
 
-      {caption && <p className="px-1 text-[10px] text-[var(--color-fg-tertiary)]">{caption}</p>}
+      {/* F-026: caption は取得失敗/読込中の body と矛盾しないよう ready/empty 時のみ表示。 */}
+      {caption && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
+        <p className="px-1 text-[10px] text-[var(--color-fg-tertiary)]">{caption}</p>
+      )}
     </div>
   )
 }

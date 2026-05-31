@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, CornerUpLeftIcon, RotateCcwIcon, PencilLineIcon, Undo2Icon } from 'lucide-react'
+import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, CornerUpLeftIcon, RotateCcwIcon, PencilLineIcon, Undo2Icon, AlertTriangleIcon, GavelIcon } from 'lucide-react'
 import { CASE_DETAILS, buildLifecycle, buildManualCaseDetail } from '@/data/mock-case-detail'
 import type { CaseDetailModel } from '@/data/mock-case-detail'
 import type { FieldReview } from '@/data/types'
 import { isResolved } from '@/lib/reconcile-display'
 import { caseStatusToTone, caseStatusLabel } from '@/lib/status-tones'
-import { useCase, useStoreDispatch, useCurrentActor, useCanApprove, useCanReverse } from '@/store/hooks'
-import { actorById } from '@/store/actors'
+import { useCase, useStoreDispatch, useCurrentActor, useCanApprove, useCanReverse, useCaseAuditEvents } from '@/store/hooks'
+import { useDetailDemo } from '@/hooks/useDetailDemo'
+import { resolveCaseActors } from '@/store/selectors'
 import { DocumentViewer } from '@/components/case/DocumentViewer'
 import { LifecycleStepper } from '@/components/case/LifecycleStepper'
 import { FieldActionModal } from '@/components/case/FieldActionModal'
@@ -15,7 +16,10 @@ import type { ActionKind } from '@/components/case/FieldActionModal'
 import { ReconcilePanel } from '@/components/cross-cutting/ReconcilePanel'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DetailDemoFallback } from '@/components/shared/DetailDemoFallback'
 import { ReasonDialog } from '@/components/shared/ReasonDialog'
+import { Toast } from '@/components/shared/Toast'
+import { useToast } from '@/hooks/useToast'
 import { cn } from '@/lib/cn'
 
 /**
@@ -38,7 +42,7 @@ export function CaseDetail() {
   const c = useMemo(
     () =>
       (id ? CASE_DETAILS[id] : undefined) ??
-      (id && entity ? buildManualCaseDetail(id, entity.workflowName, entity.assignee, entity.overrides) : undefined),
+      (id && entity ? buildManualCaseDetail(id, entity.workflowName, entity.assignee, entity.overrides, entity.status) : undefined),
     [id, entity],
   )
   const dispatch = useStoreDispatch()
@@ -51,7 +55,9 @@ export function CaseDetail() {
   const [caseSendbackOpen, setCaseSendbackOpen] = useState(false)
   // 反映済の訂正/取消 (W3 C3) の理由入力 dialog: 捕捉中の kind (null = 閉)。
   const [reverseKind, setReverseKind] = useState<'訂正' | '取消' | null>(null)
-  const [toast, setToast] = useState<string | null>(null)
+  // F-016: エスカレーション差戻し裁定の理由入力 dialog (続行可は理由不要なので dialog なし)。
+  const [arbitrateSendbackOpen, setArbitrateSendbackOpen] = useState(false)
+  const { toast, show: showToast, dismiss: dismissToast } = useToast()
   // :id 変更で同 component が再 render される時の local state reset (set-state-in-effect 回避、render 中 adjusting)
   const [prevId, setPrevId] = useState(id)
   if (id !== prevId) {
@@ -60,7 +66,8 @@ export function CaseDetail() {
     setModalField(null)
     setCaseSendbackOpen(false)
     setReverseKind(null)
-    setToast(null)
+    setArbitrateSendbackOpen(false)
+    dismissToast()
   }
 
   // overlay: dict の rich fields に store の resolvedFieldIds + overrides を被せる (store-truth)。
@@ -81,6 +88,12 @@ export function CaseDetail() {
   const approveGate = useCanApprove(id, mode)
   // 反映済の訂正/取消 可否 (W3 C3)。承認者/業務責任者 + reflected + 未 reversal が条件 (reducer guard と一致)。
   const reverseGate = useCanReverse(id, mode)
+  // F-018: reversal/差戻し の who/when は auditEvents (canonical) から参照 (CaseEntity に denormalize しない、W1.5 決定)。
+  const caseEvents = useCaseAuditEvents(id)
+  // F-009: detail route の取得状態 (?demo=loading/error) を list route と一貫させる demo seam。
+  const demo = useDetailDemo()
+
+  if (demo.status) return <DetailDemoFallback status={demo.status} onRetry={demo.onRetry} />
 
   if (!c)
     return (
@@ -89,7 +102,7 @@ export function CaseDetail() {
           subState="truly-empty"
           title="指定の案件が見つかりません。"
           action={
-            <Link to="/cases" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+            <Link to="/cases" className="text-sm font-medium text-[var(--color-primary-strong)] hover:underline">
               案件一覧へ戻る
             </Link>
           }
@@ -104,15 +117,23 @@ export function CaseDetail() {
   const lifecycle = liveStatus === c.status ? c.lifecycle : buildLifecycle(liveStatus, c.inputter, c.approver)
   // 差戻し可否を precondition と一致 (false-action 防止、sendback-guard): ready / business-approval-waiting からのみ。
   const canSendback = !readOnly && (liveStatus === 'ready' || liveStatus === 'business-approval-waiting')
-  // SoD 表示の入力者は「実際に入力者承認した actor」(store の inputApprovedBy) を解決する。
-  // 一覧 owner (c.inputter) は assignee であり承認 actor とは限らない (例 0128 は owner=鈴木課長 だが入力者承認は山田太郎)。
-  // これを混同すると承認者 persona と同名になり「X ≠ X」の不正直な SoD 表示になるため、actor 解決名を使う。
-  const inputApproverName = actorById(entity?.inputApprovedBy ?? '')?.name ?? c.inputter
-
-  const showToast = (m: string) => {
-    setToast(m)
-    window.setTimeout(() => setToast(null), 2400)
-  }
+  // SoD 表示の入力者/承認者は actor SSOT (resolveCaseActors、F-001) で解決し Approvals/Observatory と一致させる。
+  // 一覧 owner (c.inputter) は assignee であり入力者承認 actor とは限らない (例 0128 は owner=鈴木課長 だが入力者承認は山田太郎)。
+  const inputApproverName = resolveCaseActors(entity, c).inputterName
+  // F-018: 直近の reversal(訂正/取消) event を auditEvents から取得し who/when を banner に出す。
+  const reversalEvent = [...caseEvents].reverse().find((e) => e.action === '訂正' || e.action === '取消')
+  // F-018: 差戻し/取消 後の sent-back は再処理が必要な dead-end。入力者が再処理に入れる導線を出す。
+  const canReprocess = !readOnly && mode === 'input' && liveStatus === 'sent-back'
+  // F-041: 入力者承認後 (business-approval-waiting) の入力者ビューは、disabled 承認ボタンでなく次アクター (承認者待ち) への前向き状態カードを出す。
+  const awaitingChecker = !readOnly && mode === 'input' && liveStatus === 'business-approval-waiting'
+  // F-013/F-016: エスカレーション裁定。未裁定 (resolution 未確定) のとき永続マーカーを出す。
+  // who/when は auditEvents (canonical) 由来 — 依頼 event と裁定 event をそれぞれ参照 (CaseEntity に denormalize しない)。
+  const escalation = entity?.escalation
+  const escalationPending = escalation !== undefined && escalation.resolution === undefined
+  const escalationEvent = [...caseEvents].reverse().find((e) => e.action === 'エスカレーション')
+  const arbitrationEvent = [...caseEvents].reverse().find((e) => e.action === 'エスカレーション裁定')
+  // F-016: 裁定権は指名された裁定者 (escalation.to = 業務責任者) のみ。起票入力者の自己裁定を UI でも block (reducer と二重 gate)。
+  const canArbitrate = escalationPending && !readOnly && escalation.to === actor?.id && liveStatus !== 'reflected'
 
   const handleAct = (fieldLabel: string, kind: ActionKind, detail: { reason?: string; category?: string; value?: string }) => {
     if (!id || readOnly) return
@@ -142,7 +163,13 @@ export function CaseDetail() {
         <div className="flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)]">
           <span>{c.workflowName}</span>
           <ChevronRightIcon className="h-3 w-3 text-[var(--color-fg-subtle)]" />
-          <span>案件一覧</span>
+          {/* F-012: 案件を捌いた後に一覧へ戻る明示導線 (非クリック span → Link、hover 下線 + focus ring)。 */}
+          <Link
+            to="/cases"
+            className="rounded-[var(--radius-control)] hover:text-[var(--color-fg)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+          >
+            案件一覧
+          </Link>
           <ChevronRightIcon className="h-3 w-3 text-[var(--color-fg-subtle)]" />
           <span className="font-mono text-[var(--color-fg)]">{c.id}</span>
         </div>
@@ -157,9 +184,9 @@ export function CaseDetail() {
           {/* 操作ビュー (read-only): 操作者 persona の role 由来。切替は TopBar の操作者 switcher (自己切替 block、SoD honest 化)。 */}
           <span
             title="操作ビューは操作者 (右上) の役割で切替わります"
-            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-muted)]"
+            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-tertiary)]"
           >
-            <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-muted)]" aria-hidden="true" />
+            <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-tertiary)]" aria-hidden="true" />
             {mode === 'input' ? '入力者ビュー' : '承認者ビュー'}
           </span>
         </div>
@@ -169,8 +196,47 @@ export function CaseDetail() {
       {/* Body: 文書アンカー 2-pane */}
       <div className="flex-1 overflow-hidden p-4">
         <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-[52fr_48fr]">
-          <DocumentViewer document={c.document} activeFieldLabel={activeFieldLabel} onRowSelect={setActiveFieldLabel} />
+          <DocumentViewer document={c.document} origin={c.origin} activeFieldLabel={activeFieldLabel} onRowSelect={setActiveFieldLabel} />
           <div className="overflow-auto">
+            {/* F-021: 参照専用の過去案件 (提案 sourceCases = 誤確定→是正の実例) に履歴注記を出し lineage と整合させる。 */}
+            {c.historyNote && (
+              <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] p-3 text-xs">
+                <RotateCcwIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-fg-muted)]" aria-hidden="true" />
+                <p className="text-[var(--color-fg-tertiary)]">{c.historyNote}</p>
+              </div>
+            )}
+            {/* F-013: エスカレーション裁定の永続マーカー。未裁定は「裁定依頼中」、続行可は裁定結果を残す（差戻し裁定は下の差戻し banner が担う）。 */}
+            {escalationPending && (
+              <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3 text-xs">
+                <AlertTriangleIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-alert)]" aria-hidden="true" />
+                <div>
+                  <div className="font-medium text-[var(--color-fg)]">
+                    業務責任者へ裁定依頼中{escalation.category ? `（${escalation.category}）` : ''} — 裁定待ち
+                  </div>
+                  <p className="mt-0.5 text-[var(--color-fg-muted)]">依頼理由: {escalation.reason}</p>
+                  {escalationEvent && (
+                    <p className="mt-0.5 font-mono text-[10px] text-[var(--color-fg-tertiary)]">
+                      {escalationEvent.actor}（{escalationEvent.role}） · {escalationEvent.ts}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* F-016: 続行可裁定の結果を永続表示 (差戻し裁定は status→sent-back ゆえ下の差戻し banner が担う)。 */}
+            {escalation?.resolution === 'proceed' && (
+              <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-success-soft-border)] bg-[var(--color-success-soft)] p-3 text-xs">
+                <GavelIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-success)]" aria-hidden="true" />
+                <div>
+                  <div className="font-medium text-[var(--color-fg)]">エスカレーション裁定: 続行可 — このまま処理を進められます</div>
+                  {escalation.reason && <p className="mt-0.5 text-[var(--color-fg-muted)]">依頼理由: {escalation.reason}</p>}
+                  {arbitrationEvent && (
+                    <p className="mt-0.5 font-mono text-[10px] text-[var(--color-fg-tertiary)]">
+                      {arbitrationEvent.actor}（{arbitrationEvent.role}） · {arbitrationEvent.ts}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
             {/* sendback-guard: 差戻し済みの案件は理由を read-only で再表示 (理由を捨てない)。 */}
             {entity?.sendback && (
               <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-alert-soft-border)] bg-[var(--color-alert-soft)] p-3 text-xs">
@@ -188,8 +254,16 @@ export function CaseDetail() {
               <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3 text-xs">
                 <RotateCcwIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-primary-hover)]" aria-hidden="true" />
                 <div>
-                  <div className="font-medium text-[var(--color-fg)]">この案件は反映済から{entity.reversal.kind}されました</div>
-                  <p className="mt-0.5 text-[var(--color-fg-muted)]">{entity.reversal.kind}理由: {entity.reversal.reason}</p>
+                  <div className="font-medium text-[var(--color-fg)]">
+                    この案件は反映済から{entity.reversal.kind}されました — 再処理が必要です
+                  </div>
+                  <p className="mt-0.5 text-[var(--color-fg-tertiary)]">{entity.reversal.kind}理由: {entity.reversal.reason}</p>
+                  {/* F-018: who/when は auditEvents (canonical 証跡) 由来。CaseEntity に actor/timestamp を持たせない (W1.5 決定)。 */}
+                  {reversalEvent && (
+                    <p className="mt-0.5 font-mono text-[10px] text-[var(--color-fg-tertiary)]">
+                      {reversalEvent.actor}（{reversalEvent.role}） · {reversalEvent.ts}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -203,6 +277,8 @@ export function CaseDetail() {
             )}
             <ReconcilePanel
               fields={fields}
+              origin={c.origin}
+              approvable={approveGate.allowed}
               activeFieldLabel={activeFieldLabel}
               onSelectField={setActiveFieldLabel}
               onActOnField={(label) => setModalField(fields.find((f) => f.fieldLabel === label) ?? null)}
@@ -239,6 +315,69 @@ export function CaseDetail() {
                 訂正
               </button>
             </div>
+          </>
+        ) : canArbitrate ? (
+          // F-016: エスカレーション裁定の単一決定面 (業務責任者のみ)。続行可 (肯定経路) と 差戻し の 2 出口を明示。
+          <>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)]">
+              <GavelIcon className="h-3.5 w-3.5 text-[var(--color-alert-soft-fg)]" aria-hidden="true" />
+              エスカレーション裁定 — <strong className="text-[var(--color-fg)]">続行可</strong>（このまま処理）か
+              <strong className="text-[var(--color-fg)]">差戻し</strong>（理由必須）を選びます。結果は起票者へ通知されます。
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setArbitrateSendbackOpen(true)}
+                className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+              >
+                <CornerUpLeftIcon className="h-4 w-4" />
+                差戻し
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (id) dispatch({ type: 'case/resolveEscalation', id, resolution: 'proceed' })
+                  showToast('続行可で裁定しました — 起票者へ通知しました')
+                }}
+                className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+              >
+                <CheckIcon className="h-4 w-4" />
+                続行可
+              </button>
+            </div>
+          </>
+        ) : canReprocess ? (
+          // F-018: 差戻し/取消後の sent-back を dead-end にしない。入力者が再処理に入れる単一決定面。
+          <>
+            <div className="text-xs text-[var(--color-fg-muted)]">
+              差戻し/取消後の案件です — <strong className="text-[var(--color-fg)]">再処理</strong>して確認待ちに戻します
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (id) dispatch({ type: 'case/reprocess', id })
+                showToast('再処理を開始しました — 確認待ちに戻しました')
+              }}
+              className="flex items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+            >
+              <RotateCcwIcon className="h-4 w-4" />
+              再処理する
+            </button>
+          </>
+        ) : awaitingChecker ? (
+          // F-041: 入力者承認後は disabled 承認でなく、次アクター (承認者) への前向き状態カード + キュー導線を出す。
+          <>
+            <div className="flex items-center gap-1.5 text-xs text-[var(--color-fg-muted)]">
+              <ShieldCheckIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-success-soft-fg)]" aria-hidden="true" />
+              入力者確認は完了しました — <strong className="text-[var(--color-fg)]">承認者の最終承認待ち</strong>です（別担当者が承認します）
+            </div>
+            <Link
+              to="/approvals"
+              className="flex items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+            >
+              承認待ちキューへ
+              <ChevronRightIcon className="h-4 w-4" />
+            </Link>
           </>
         ) : (
           <>
@@ -333,19 +472,28 @@ export function CaseDetail() {
         onSubmit={(reason) => {
           if (id && reverseKind) {
             dispatch({ type: 'case/reverse', id, kind: reverseKind, reason })
-            showToast(reverseKind === '取消' ? '案件を取消しました — 再処理へ差し戻し' : '案件を訂正のため差し戻しました')
+            // F-027: 反映済の取消/訂正 は統制重要 — alert tone + sticky で見落とさせない (後追いは監査台帳)。
+            showToast(reverseKind === '取消' ? '案件を取消しました — 再処理へ差し戻し' : '案件を訂正のため差し戻しました', { tone: 'alert', sticky: true })
           }
         }}
       />
 
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-20 left-1/2 z-[80] -translate-x-1/2 rounded-[var(--radius-card)] border border-[var(--color-success)] bg-[var(--color-success-soft)] px-4 py-2 text-sm font-medium text-[var(--color-success-soft-fg)] shadow-lg"
-        >
-          {toast}
-        </div>
-      )}
+      {/* F-016: エスカレーション差戻し裁定の理由入力 (理由必須 → case/resolveEscalation sendback)。category は元依頼を継承。 */}
+      <ReasonDialog
+        open={arbitrateSendbackOpen}
+        title="エスカレーションを差戻しで裁定"
+        label="差戻しの理由 (必須)"
+        placeholder="なぜ差戻すか（不足情報・要再処理の理由など）を記入"
+        submitLabel="差戻しで裁定する"
+        outcome="案件を差戻し（再処理）に戻し、起票者へ裁定結果を通知します。理由は記録されます。"
+        onClose={() => setArbitrateSendbackOpen(false)}
+        onSubmit={(reason) => {
+          if (id) dispatch({ type: 'case/resolveEscalation', id, resolution: 'sendback', reason, category: escalation?.category })
+          showToast('差戻しで裁定しました — 起票者へ通知しました')
+        }}
+      />
+
+      <Toast toast={toast} onDismiss={dismissToast} />
     </div>
   )
 }

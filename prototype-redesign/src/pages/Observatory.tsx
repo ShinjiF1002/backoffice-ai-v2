@@ -40,6 +40,10 @@ const TL_DOT: Record<LifecycleEvent['tone'], string> = {
 }
 const LEDGER_HEADERS = ['時刻', '案件', '業務', 'actor', 'role', 'action', 'before → after', '参照文書', 'policy', 'approval id', 'confidence (監査用)']
 const LEDGER_WORKFLOWS = ['all', '法人住所変更', '口座開設書類完備'] as const
+// W3 G2: 横断台帳の actor / action 絞り込み (Observatory ローカル、S8-safe)。固定 fixture から重複排除して導出 (安定順序)。
+const LEDGER_ACTORS = ['all', ...new Set(CROSS_LEDGER.map((e) => e.actor))]
+const LEDGER_ACTIONS = ['all', ...new Set(CROSS_LEDGER.map((e) => e.action))]
+const LEDGER_PAGE_SIZE = 12
 
 const TABS = [
   { k: 'audit', label: '監査' },
@@ -55,12 +59,21 @@ export function Observatory() {
   const [auditView, setAuditView] = useState<'lifecycle' | 'ledger'>('lifecycle')
   // P1-7: 横断台帳の 案件選択 (workflow) + free-text 検索 (Observatory ローカル、JG-2=b)。期間は「直近30日」固定 (JG-4=b)。
   const [ledgerWorkflow, setLedgerWorkflow] = useState<string>('all')
+  const [ledgerActor, setLedgerActor] = useState<string>('all')
+  const [ledgerAction, setLedgerAction] = useState<string>('all')
   const [ledgerSearch, setLedgerSearch] = useState('')
+  const [ledgerPage, setLedgerPage] = useState(0)
   const ledgerRows = CROSS_LEDGER.filter((e) => {
     if (ledgerWorkflow !== 'all' && e.workflowName !== ledgerWorkflow) return false
+    if (ledgerActor !== 'all' && e.actor !== ledgerActor) return false
+    if (ledgerAction !== 'all' && e.action !== ledgerAction) return false
     const q = ledgerSearch.trim().toLowerCase()
     return !q || [e.caseId, e.actor, e.action, e.beforeAfter].some((v) => v.toLowerCase().includes(q))
   })
+  // W3 G2: pagination (Observatory ローカル)。filter 変更で page 0 へ戻す (各 filter setter に setLedgerPage(0) 配線)。
+  const totalPages = Math.max(1, Math.ceil(ledgerRows.length / LEDGER_PAGE_SIZE))
+  const safePage = Math.min(ledgerPage, totalPages - 1)
+  const pageRows = ledgerRows.slice(safePage * LEDGER_PAGE_SIZE, (safePage + 1) * LEDGER_PAGE_SIZE)
   // ナレッジ tab の view (承認済 知識 ⇄ 改善の流れ lineage、Gate 5ii)。lineage は P1-7 監査台帳 drill とは別 seat (監査 tab)。
   const [knowledgeView, setKnowledgeView] = useState<'approved' | 'lineage'>('approved')
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
@@ -214,7 +227,10 @@ export function Observatory() {
                         <button
                           key={w}
                           type="button"
-                          onClick={() => setLedgerWorkflow(w)}
+                          onClick={() => {
+                            setLedgerWorkflow(w)
+                            setLedgerPage(0)
+                          }}
                           className={cn(
                             'rounded-[var(--radius-control)] border px-2.5 py-1 text-xs font-medium transition-colors',
                             ledgerWorkflow === w
@@ -231,13 +247,57 @@ export function Observatory() {
                       <input
                         type="search"
                         value={ledgerSearch}
-                        onChange={(e) => setLedgerSearch(e.target.value)}
+                        onChange={(e) => {
+                          setLedgerSearch(e.target.value)
+                          setLedgerPage(0)
+                        }}
                         placeholder="案件 ID・actor・操作で検索"
                         aria-label="証跡台帳を検索"
                         className="h-8 w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-panel-inset)] pl-8 pr-3 text-xs text-[var(--color-fg)] placeholder:text-[var(--color-fg-tertiary)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                       />
                     </div>
                     <span className="text-[11px] text-[var(--color-fg-muted)]">{ledgerRows.length} 件</span>
+                  </div>
+                  {/* W3 G2: actor / action 絞り込み (FilterChip、flex-wrap)。raw 値は監査台帳の sanctioned 例外。 */}
+                  <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--color-border)] px-4 py-2">
+                    <span className="mr-1 text-[11px] font-medium text-[var(--color-fg-muted)]">操作者</span>
+                    {LEDGER_ACTORS.map((a) => (
+                      <button
+                        key={`actor-${a}`}
+                        type="button"
+                        onClick={() => {
+                          setLedgerActor(a)
+                          setLedgerPage(0)
+                        }}
+                        className={cn(
+                          'rounded-[var(--radius-control)] border px-2 py-0.5 text-[11px] font-medium transition-colors',
+                          ledgerActor === a
+                            ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                            : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]'
+                        )}
+                      >
+                        {a === 'all' ? '全員' : a}
+                      </button>
+                    ))}
+                    <span className="ml-2 mr-1 text-[11px] font-medium text-[var(--color-fg-muted)]">操作</span>
+                    {LEDGER_ACTIONS.map((a) => (
+                      <button
+                        key={`action-${a}`}
+                        type="button"
+                        onClick={() => {
+                          setLedgerAction(a)
+                          setLedgerPage(0)
+                        }}
+                        className={cn(
+                          'rounded-[var(--radius-control)] border px-2 py-0.5 text-[11px] font-medium transition-colors',
+                          ledgerAction === a
+                            ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                            : 'border-[var(--color-border-strong)] bg-[var(--color-panel)] text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]'
+                        )}
+                      >
+                        {a === 'all' ? '全操作' : a}
+                      </button>
+                    ))}
                   </div>
                   <div className="overflow-x-auto">
                     {ledgerRows.length === 0 ? (
@@ -254,7 +314,7 @@ export function Observatory() {
                           </tr>
                         </thead>
                         <tbody>
-                          {ledgerRows.map((r, i) => (
+                          {pageRows.map((r, i) => (
                             <tr key={`${r.caseId}-${i}`} className="border-b border-[var(--color-border)] last:border-b-0">
                               <td className="whitespace-nowrap px-2.5 py-2 font-mono text-[var(--color-fg)]">{r.ts}</td>
                               <td className="whitespace-nowrap px-2.5 py-2">
@@ -276,6 +336,42 @@ export function Observatory() {
                       </table>
                     )}
                   </div>
+                  {/* W3 G2: pagination (totalPages>1 のみ表示)。前へ/次へ + 件数レンジ。 */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between border-t border-[var(--color-border)] px-4 py-2 text-[11px] text-[var(--color-fg-muted)]">
+                      <span>
+                        {ledgerRows.length} 件中 {safePage * LEDGER_PAGE_SIZE + 1}–
+                        {Math.min((safePage + 1) * LEDGER_PAGE_SIZE, ledgerRows.length)} 件
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={safePage === 0}
+                          onClick={() => setLedgerPage(safePage - 1)}
+                          className={cn(
+                            'rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]',
+                            safePage === 0 && 'cursor-not-allowed opacity-50 hover:bg-[var(--color-panel)]'
+                          )}
+                        >
+                          前へ
+                        </button>
+                        <span className="font-mono">
+                          {safePage + 1} / {totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={safePage >= totalPages - 1}
+                          onClick={() => setLedgerPage(safePage + 1)}
+                          className={cn(
+                            'rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-2.5 py-1 font-medium text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]',
+                            safePage >= totalPages - 1 && 'cursor-not-allowed opacity-50 hover:bg-[var(--color-panel)]'
+                          )}
+                        >
+                          次へ
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <div className="border-t border-[var(--color-border)] px-4 py-2">
                     <span className="text-[11px] text-[var(--color-fg-muted)]">confidence は監査記録としてこの台帳にのみ残し、業務画面には表示しません。</span>
                   </div>

@@ -68,7 +68,7 @@ export function Hub() {
           <p className="mt-0.5 text-xs text-[var(--color-fg-muted)]">業務別の注意点と次のアクション</p>
         </div>
         <div className="text-xs text-[var(--color-fg-muted)]">
-          最終更新 <span className="font-mono">2026-05-31 11:42</span>
+          最終更新 <span className="font-mono">2026-05-30 11:42</span>
         </div>
       </header>
 

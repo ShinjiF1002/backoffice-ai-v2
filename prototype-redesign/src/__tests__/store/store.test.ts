@@ -240,6 +240,74 @@ describe('store foundation (Phase 1)', () => {
     })
   })
 
+  describe('remediation W3 (reversal C3 / manual-entry C4)', () => {
+    // CASE-2026-0120 = seed の reflected (反映済) 案件、CASE-2026-0142 = ready
+    it('case/reverse 訂正: reflected → sent-back + reversal 記録 (ready 直行廃止で false-success 回避)', () => {
+      const s = storeReducer(seed(), { type: 'case/reverse', id: 'CASE-2026-0120', kind: '訂正', reason: '住所の訂正' })
+      expect(s.cases['CASE-2026-0120']!.status).toBe('sent-back') // ready ではなく sent-back
+      expect(s.cases['CASE-2026-0120']!.reversal).toEqual({ kind: '訂正', reason: '住所の訂正' })
+    })
+    it('case/reverse 取消: reflected → sent-back + reversal 記録', () => {
+      const s = storeReducer(seed(), { type: 'case/reverse', id: 'CASE-2026-0120', kind: '取消', reason: '誤反映のため取消' })
+      expect(s.cases['CASE-2026-0120']!.status).toBe('sent-back')
+      expect(s.cases['CASE-2026-0120']!.reversal!.kind).toBe('取消')
+    })
+    it('不可逆 guard: 非 reflected (ready) の reverse は no-op (状態不変)', () => {
+      const before = seed()
+      const s = storeReducer(before, { type: 'case/reverse', id: 'CASE-2026-0142', kind: '訂正', reason: 'x' })
+      expect(s.cases['CASE-2026-0142']!.status).toBe('ready')
+      expect(s.cases['CASE-2026-0142']!.reversal).toBeUndefined()
+      expect(s).toBe(before)
+    })
+    it('不可逆 guard: 二重 reverse は no-op (reversal 済は再 reverse 不可)', () => {
+      const once = storeReducer(seed(), { type: 'case/reverse', id: 'CASE-2026-0120', kind: '訂正', reason: '一度目' })
+      const twice = storeReducer(once, { type: 'case/reverse', id: 'CASE-2026-0120', kind: '取消', reason: '二度目' })
+      expect(twice.cases['CASE-2026-0120']!.reversal).toEqual({ kind: '訂正', reason: '一度目' })
+      expect(twice).toBe(once)
+    })
+    it('case/create: 草案を caseOrder 末尾に追記 + 入力値を overrides に格納', () => {
+      const before = seed()
+      const s = storeReducer(before, {
+        type: 'case/create',
+        id: 'CASE-MANUAL-001',
+        workflowId: 'UC-BO-01',
+        workflowName: '法人住所変更',
+        assignee: '山田太郎',
+        fieldLabels: ['新住所'],
+        values: { 新住所: '東京都港区 1-1' },
+        receivedAt: '2026-05-30T18:00:00+09:00',
+      })
+      expect(s.caseOrder).toHaveLength(before.caseOrder.length + 1)
+      expect(s.caseOrder[s.caseOrder.length - 1]).toBe('CASE-MANUAL-001')
+      const draft = s.cases['CASE-MANUAL-001']!
+      expect(draft.status).toBe('ready')
+      expect(draft.flags).toBe(0)
+      expect(draft.overrides).toEqual({ 新住所: '東京都港区 1-1' })
+      expect(draft.resolvedFieldIds).toEqual(['新住所'])
+    })
+    it('case/create: id 重複は冪等 no-op (既存 case を上書きしない)', () => {
+      const before = seed()
+      const s = storeReducer(before, {
+        type: 'case/create',
+        id: 'CASE-2026-0142',
+        workflowId: 'UC-BO-01',
+        workflowName: '法人住所変更',
+        fieldLabels: [],
+        values: {},
+        receivedAt: '2026-05-30T18:00:00+09:00',
+      })
+      expect(s).toBe(before)
+      expect(s.caseOrder).toHaveLength(before.caseOrder.length)
+    })
+    it('persist round-trip: reversal / receivedAt が v6 で復元される', () => {
+      const reversed = storeReducer(seed(), { type: 'case/reverse', id: 'CASE-2026-0120', kind: '取消', reason: '取消理由' })
+      savePersisted(reversed)
+      const restored = loadPersisted(seed())
+      expect(restored.cases['CASE-2026-0120']!.reversal).toEqual({ kind: '取消', reason: '取消理由' })
+      expect(restored.cases['CASE-2026-0142']!.receivedAt).toBe('2026-05-30T16:40:00+09:00')
+    })
+  })
+
   describe('immutability / reset', () => {
     it('reducer は元 state を破壊しない', () => {
       const base = seed()
@@ -271,10 +339,10 @@ describe('store foundation (Phase 1)', () => {
     it('schema version 不一致は fallback (旧 v1 localStorage → seed、R2)', () => {
       localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 1, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
-      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v5 と不一致 → seed fallback
+      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // 旧 v1 は v6 と不一致 → seed fallback
     })
 
-    it('旧 v2 localStorage (overrides/currentActorId 欠落) は v5 不一致で安全に fallback (B1/B4 migration)', () => {
+    it('旧 v2 localStorage (overrides/currentActorId 欠落) は v6 不一致で安全に fallback (B1/B4 migration)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
@@ -294,7 +362,7 @@ describe('store foundation (Phase 1)', () => {
       expect(restored.cases['CASE-X']).toBeUndefined()
     })
 
-    it('旧 v4 localStorage (readNotificationIds 欠落) は v5 不一致で安全に fallback (W2a 4→5 migration)', () => {
+    it('旧 v4 localStorage (readNotificationIds 欠落) は v6 不一致で安全に fallback (W2a 4→5 migration)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
@@ -311,12 +379,35 @@ describe('store foundation (Phase 1)', () => {
         }),
       )
       const restored = loadPersisted(seed())
-      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // v4 ≠ v5 → seed fallback (白画面化しない)
+      expect(restored.caseOrder).toHaveLength(CASE_LIST.length) // v4 ≠ v6 → seed fallback (白画面化しない)
+    })
+
+    it('旧 v5 localStorage は v6 不一致で安全に fallback (W3 5→6 migration: elapsedLabel→receivedAt / reversal)', () => {
+      // 旧 v5 は CaseEntity.elapsedLabel を持ち receivedAt/reversal を持たない → v6 と不一致で seed fallback (白画面化しない)。
+      localStorage.setItem(
+        'bo-ai-v2:store',
+        JSON.stringify({
+          v: 5,
+          state: {
+            cases: { 'CASE-X': { id: 'CASE-X', status: 'ready', flags: 0, resolvedFieldIds: [], overrides: {}, elapsedLabel: '1時間' } },
+            caseOrder: ['CASE-X'],
+            proposals: {},
+            proposalOrder: [],
+            agents: {},
+            agentOrder: [],
+            currentActorId: 'actor-inputter',
+            readNotificationIds: [],
+          },
+        }),
+      )
+      const restored = loadPersisted(seed())
+      expect(restored.cases['CASE-2026-0142']).toBeDefined() // seed fallback
+      expect(restored.cases['CASE-X']).toBeUndefined()
     })
 
     it('同一 version でも形が壊れた state は fallback (shape guard: dict 欠落)', () => {
       // v は一致するが cases/proposals/agents 等を欠く → selector 白画面化を防ぐため seed に戻す
-      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 5, state: { caseOrder: [] } }))
+      localStorage.setItem('bo-ai-v2:store', JSON.stringify({ v: 6, state: { caseOrder: [] } }))
       const restored = loadPersisted(seed())
       expect(restored.caseOrder).toHaveLength(CASE_LIST.length)
       expect(restored.cases['CASE-2026-0142']).toBeDefined()
@@ -326,7 +417,7 @@ describe('store foundation (Phase 1)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
-          v: 5,
+          v: 6,
           state: {
             cases: { 'CASE-X': { id: 'CASE-X', status: 'ready', flags: 0, overrides: {} } }, // resolvedFieldIds 欠落
             caseOrder: ['CASE-X'],
@@ -348,7 +439,7 @@ describe('store foundation (Phase 1)', () => {
       localStorage.setItem(
         'bo-ai-v2:store',
         JSON.stringify({
-          v: 5,
+          v: 6,
           state: { cases: {}, caseOrder: [], proposals: {}, proposalOrder: [], agents: {}, agentOrder: [], readNotificationIds: [] }, // currentActorId 欠落
         }),
       )

@@ -12,8 +12,11 @@ const STORAGE_KEY = 'bo-ai-v2:store'
 // 3→4: remediation P0-W3 で AgentEntity.pausedReason 追加 (flywheel kill-switch、togglePause→emergencyStop/resume)。
 // 4→5: remediation W2a で StoreState.readNotificationIds + CaseEntity.escalation +
 //      AgentEntity.promotionStatus/promotionRequestedBy/promotionSendbackReason (旧 promotionRequested boolean を統合) 追加 (P1-2/P1-3)。
+// 5→6: remediation W3 で CaseEntity.reversal (反映済の訂正/取消、C3) 追加 + CaseEntity.elapsedLabel(静的文字列)→receivedAt
+//      (SLA を NOW 基準で派生化、§4 G7 / S8 fact-only) に置換。case 形が変わるため bump。
+//      ★ deploy は SCHEMA bump ゆえ 6/12 demo と別日に置く (roadmap §6.2 risk #1、旧 v5 localStorage は seed fallback)。
 // 旧 version は不一致で seed fallback (白画面化を防ぐ)。
-const SCHEMA_VERSION = 5
+const SCHEMA_VERSION = 6
 
 interface Persisted {
   v: number
@@ -77,10 +80,28 @@ export function loadPersisted(fallback: StoreState): StoreState {
 export function savePersisted(state: StoreState): void {
   try {
     if (typeof localStorage === 'undefined') return
-    const payload: Persisted = { v: SCHEMA_VERSION, state }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+    const payload = JSON.stringify({ v: SCHEMA_VERSION, state })
+    // 同値の再書き込みは skip (multi-tab の hydrate→save→storage event ping-pong を防ぐ + 無害な write 削減)。
+    if (localStorage.getItem(STORAGE_KEY) === payload) return
+    localStorage.setItem(STORAGE_KEY, payload)
   } catch {
     /* no-op */
+  }
+}
+
+/**
+ * 他タブの localStorage 書き込み (StorageEvent) から validated state を復元 (W3 multi-tab、last-write-wins)。
+ * 対象 key 以外 / clear / 不正 shape / version 不一致は null (= 無視、現 state 据え置き)。StoreProvider が dispatch する。
+ */
+export function loadPersistedFromStorageEvent(e: StorageEvent): StoreState | null {
+  if (e.key !== STORAGE_KEY) return null // ViewContext 等の別 key を無視
+  if (!e.newValue) return null // removeItem / clear は無視 (現 state 据え置き)
+  try {
+    const parsed = JSON.parse(e.newValue) as Persisted
+    if (parsed?.v !== SCHEMA_VERSION || !isStoreStateShape(parsed.state)) return null
+    return parsed.state
+  } catch {
+    return null
   }
 }
 

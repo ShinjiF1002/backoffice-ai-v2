@@ -111,3 +111,39 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* 印刷 stylesheet (W3 §8): 証跡 (CaseDetail 文書 / Observatory 台帳) を紙の記録として綺麗に出す。
+ * アプリ chrome (TopBar / Sidebar / mobile nav / 決定 footer) を隠し、page header は残す。
+ * h-screen / overflow-hidden の shell を解除して内容を複数ページに流す (clip 防止)。 */
+@media print {
+  /* TopBar header は data-page-header を持たない → page header (各画面) は残しつつ chrome のみ隠す。 */
+  header:not([data-page-header]),
+  aside,
+  nav,
+  footer {
+    display: none !important;
+  }
+  html,
+  body,
+  #root,
+  #root > div,
+  #root > div > div,
+  main {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+  /* sticky page header は印刷で static (先頭に 1 回出す)。 */
+  [data-page-header] {
+    position: static !important;
+  }
+  /* 証跡の行・section を途中改ページで割らない。 */
+  tr,
+  li,
+  section {
+    page-break-inside: avoid;
+  }
+}

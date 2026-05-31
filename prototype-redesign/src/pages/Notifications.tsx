@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CornerUpLeftIcon, AlertTriangleIcon } from 'lucide-react'
+import { CornerUpLeftIcon, AlertTriangleIcon, RotateCcwIcon } from 'lucide-react'
 import { useNotifications, useStoreDispatch } from '@/store/hooks'
 import type { NotificationKind } from '@/store/hooks'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -16,6 +16,7 @@ import { cn } from '@/lib/cn'
  */
 const KIND_META: Record<NotificationKind, { label: string; icon: typeof CornerUpLeftIcon; tone: MetaTone }> = {
   sendback: { label: '差戻し受領', icon: CornerUpLeftIcon, tone: 'alert' },
+  reversal: { label: '反映の訂正・取消', icon: RotateCcwIcon, tone: 'alert' },
   escalation: { label: 'エスカレーション', icon: AlertTriangleIcon, tone: 'primary' },
 }
 

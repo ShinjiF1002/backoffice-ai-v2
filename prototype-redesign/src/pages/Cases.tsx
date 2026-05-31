@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import { FilePlusIcon } from 'lucide-react'
 import { CASE_LIST } from '@/data/mock-case-list'
 import type { CaseListRow } from '@/data/mock-case-list'
 import type { CaseStatus } from '@/data/types'
@@ -10,6 +12,7 @@ import { useCases } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { KPI_PROCESS_LABEL } from '@/data/mock-kpi'
 import { useListData } from '@/hooks/useListData'
+import { caseElapsedLabel } from '@/lib/dates'
 
 /**
  * 案件一覧 (Cases, /cases) — B 型 queue / 入力者
@@ -37,7 +40,7 @@ const columns: DataTableColumn<CaseListRow>[] = [
     cell: (r) => <StatusBadge tone={caseStatusToTone(r.status)} label={caseStatusLabel(r.status)} />,
     sortValue: (r) => r.status,
   },
-  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.elapsed },
+  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => caseElapsedLabel(r.receivedAt, r.status) },
   {
     key: 'owner',
     header: '担当',
@@ -71,7 +74,7 @@ export function Cases() {
     id: e.id,
     workflow: e.workflowName,
     status: e.status,
-    elapsed: e.elapsedLabel,
+    receivedAt: e.receivedAt,
     owner: e.assignee ?? '—',
     flags: e.flags,
   }))
@@ -82,7 +85,17 @@ export function Cases() {
         data-page-header
         className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
       >
-        <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
+          {/* W3 C4: AI 障害時の手動起票 (全項目手入力 form へ) */}
+          <Link
+            to="/cases/new"
+            className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
+          >
+            <FilePlusIcon className="h-4 w-4" aria-hidden="true" />
+            新規案件作成
+          </Link>
+        </div>
         <p className="mt-1 text-xs text-[var(--color-fg-muted)]">{processLabel} · {rows.length} 件 ／ 行を選んで案件を確認</p>
       </header>
 

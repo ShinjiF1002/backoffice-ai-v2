@@ -53,6 +53,8 @@ export function ReasonDialog({ open, title, label, placeholder, submitLabel, out
       onClose={onClose}
       title={title}
       size="sm"
+      dirty={!!reason.trim()}
+      confirmOnDismiss
       initialFocusRef={textareaRef as RefObject<HTMLElement | null>}
       footer={
         <>

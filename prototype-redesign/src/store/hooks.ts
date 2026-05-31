@@ -128,6 +128,21 @@ export function useCanApprove(id: string | undefined, by: 'input' | 'checker'): 
   return { allowed: true }
 }
 
+/**
+ * 反映済 (terminal) の訂正/取消 可否 (remediation W3 C3、前進のみ→可逆)。
+ * 承認者/業務責任者 のみ可 (入力者は不可、反映は承認者が最終確定したものゆえ訂正/取消も承認者の責務)。
+ * 条件: status=reflected かつ未 reversal。reducer の case/reverse guard と一致させ false-action を封じる。
+ */
+export function useCanReverse(id: string | undefined, by: 'input' | 'checker'): ApproveGate {
+  const s = useStoreState()
+  const entity = id ? s.cases[id] : undefined
+  if (!entity) return { allowed: false, reason: '参照専用の案件です（この画面では操作できません）' }
+  if (by !== 'checker') return { allowed: false, reason: '反映済の訂正・取消は承認者が行います' }
+  if (entity.status !== 'reflected') return { allowed: false, reason: 'この案件は反映済ではありません' }
+  if (entity.reversal !== undefined) return { allowed: false, reason: 'この案件は既に訂正/取消済みです' }
+  return { allowed: true }
+}
+
 // ── Flywheel 観測化 (remediation P0-W3、Gate 5ii) ─────────────────────────
 // 承認段階に入った提案 (forwarded / approved) を「差戻し → 改善 → 承認」の lineage に派生。
 // 新 static fixture は増やさず store (live status) + PROPOSAL_DETAILS (起点 case / 改定内容) から都度算出。
@@ -285,7 +300,7 @@ export function useSearchResults(query: string): SearchResultItem[] {
 // 差戻し受領 + エスカレーションの 2 種のみ (SLA 警告は scope-0 = JG-b、datetime 化が範囲外で偽 SLA を作らない)。
 // store entity ではなく派生 selector で都度算出 (S8)。actor 厳密 (JG-a): currentActor 宛のみ。既読は readNotificationIds。
 // 通知 id は由来 entity から決定的に導く安定文字列 (`sendback:${caseId}` / `escalation:${caseId}`)。
-export type NotificationKind = 'sendback' | 'escalation'
+export type NotificationKind = 'sendback' | 'reversal' | 'escalation'
 export interface NotificationItem {
   id: string
   kind: NotificationKind
@@ -306,16 +321,30 @@ export function useNotifications(): NotificationItem[] {
       // 差戻し受領: 担当 (入力者) 宛 — currentActor の氏名と一致する案件のみ。
       // seed 由来の差戻し案件は理由未記録のため fallback 文言 (in-session の case/sendback は理由を保持)。
       if (c.status === 'sent-back' && actor && c.assignee === actor.name) {
-        const id = `sendback:${c.id}`
-        items.push({
-          id,
-          kind: 'sendback',
-          caseId: c.id,
-          title: `${c.workflowName} ${c.id}`,
-          detail: c.sendback?.reason ?? '差し戻された案件です。内容を確認してください。',
-          href: `/cases/${c.id}`,
-          read: isRead(id),
-        })
+        if (c.reversal) {
+          // 反映済からの訂正/取消 (case/reverse) は通常の差戻しと区別して通知 (kind=reversal、取消理由を捨てない)。
+          const id = `reversal:${c.id}`
+          items.push({
+            id,
+            kind: 'reversal',
+            caseId: c.id,
+            title: `${c.workflowName} ${c.id}`,
+            detail: `反映後に${c.reversal.kind}されました：${c.reversal.reason}`,
+            href: `/cases/${c.id}`,
+            read: isRead(id),
+          })
+        } else {
+          const id = `sendback:${c.id}`
+          items.push({
+            id,
+            kind: 'sendback',
+            caseId: c.id,
+            title: `${c.workflowName} ${c.id}`,
+            detail: c.sendback?.reason ?? '差し戻された案件です。内容を確認してください。',
+            href: `/cases/${c.id}`,
+            read: isRead(id),
+          })
+        }
       }
       // エスカレーション: 宛先 actor 宛 — escalation.to が currentActorId と一致するもの
       if (c.escalation && c.escalation.to === s.currentActorId) {

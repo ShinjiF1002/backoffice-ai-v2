@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn } from '@/components/shared/DataTable'
 import { useEscalations } from '@/store/hooks'
+import { caseElapsedLabel } from '@/lib/dates'
 
 /**
  * エスカレーション受信 (Escalations, /escalations) — B 型 queue / 業務責任者
@@ -28,7 +29,7 @@ export function Escalations() {
   const rows: EscalationRow[] = escalations.map((c) => ({
     id: c.id,
     workflow: c.workflowName,
-    elapsed: c.elapsedLabel,
+    elapsed: caseElapsedLabel(c.receivedAt, c.status),
     reason: c.escalation?.reason ?? '—',
   }))
   return (

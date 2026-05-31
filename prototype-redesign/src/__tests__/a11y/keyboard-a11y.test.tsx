@@ -91,14 +91,16 @@ describe('P1-6 keyboard a11y', () => {
   })
 
   describe('ReconcilePanel (要確認カード keyboard)', () => {
-    it('要確認カードを Enter で選択 (onSelectField 発火、card 自身 focus 時のみ)', () => {
+    it('要確認カードの項目選択 button を click で選択 (onSelectField 発火)', async () => {
+      const user = userEvent.setup()
       const onSelectField = vi.fn()
       render(<ReconcilePanel fields={CASE_2026_0142.fields} onSelectField={onSelectField} />)
-      const openCards = screen.getAllByRole('button').filter((b) => b.hasAttribute('aria-pressed'))
+      // W3 a11y: card は role=button を廃し、項目 label の <button aria-pressed> が keyboard 選択を担う (内側「対応」との nested-interactive 回避)。
+      const selectBtns = screen.getAllByRole('button').filter((b) => b.hasAttribute('aria-pressed'))
       const firstOpen = CASE_2026_0142.fields.find((f) => !isResolved(f.reconcileState))
       expect(firstOpen).toBeDefined()
-      // card 自身を target に keyDown → e.target===e.currentTarget で発火 (内側「対応」button とは二重発火しない)
-      fireEvent.keyDown(openCards[0]!, { key: 'Enter' })
+      expect(selectBtns.length).toBeGreaterThan(0)
+      await user.click(selectBtns[0]!)
       expect(onSelectField).toHaveBeenCalledWith(firstOpen!.fieldLabel)
     })
   })

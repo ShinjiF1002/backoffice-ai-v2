@@ -119,8 +119,8 @@ export const CASE_2026_0142: CaseDetailModel = {
   },
   // mock-fixture §8: 業務順 lifecycle (current = 入力者確認)
   lifecycle: [
-    { step: '受付', time: '09:00', actor: 'システム', detail: '申請書類を受け付けました。', done: true },
-    { step: 'AI処理', time: '09:02', actor: 'AI 担当 Agent', detail: '読み取り + 登録情報照合 + 値生成。', done: true },
+    { step: '受付', time: '16:40', actor: 'システム', detail: '申請書類を受け付けました。', done: true },
+    { step: 'AI処理', time: '16:42', actor: 'AI 担当 Agent', detail: '読み取り + 登録情報照合 + 値生成。', done: true },
     { step: '入力者確認', time: '進行中', actor: '山田太郎', detail: 'AI 入力と申請書類を照合して確認中。', done: false, current: true },
     { step: '承認者承認', time: '—', actor: '鈴木課長', detail: '最終承認。', done: false },
     { step: '反映', time: '—', actor: 'システム', detail: '登録情報を更新。', done: false },
@@ -293,13 +293,61 @@ CASE_DETAILS['CASE-2026-0142'] = CASE_2026_0142
 // 「元の案件を開く」リンクの NotFound を防ぐ (CR P1)。store entity が無いため detail は参照専用で描画される。
 const HISTORICAL_CASE_ROWS: CaseListRow[] = [
   // PROP-2026-031 sourceCases (住所読み取り基準) — ビル名 / 新住所
-  { id: 'CASE-2026-0098', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-22 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビルディング' } },
-  { id: 'CASE-2026-0087', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-18 処理済', owner: '山田太郎', flags: 0, change: { field: '新住所', from: '東京都千代田区丸の内 2 丁目 3', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
-  { id: 'CASE-2026-0079', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-14 処理済', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビル' } },
+  { id: 'CASE-2026-0098', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-22T09:00:00+09:00', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビルディング' } },
+  { id: 'CASE-2026-0087', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-18T09:00:00+09:00', owner: '山田太郎', flags: 0, change: { field: '新住所', from: '東京都千代田区丸の内 2 丁目 3', to: '東京都千代田区丸の内 2 丁目 3 番 5 号' } },
+  { id: 'CASE-2026-0079', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-14T09:00:00+09:00', owner: '山田太郎', flags: 0, change: { field: 'ビル名', from: 'サンプルビル', to: 'サンプルビル' } },
   // PROP-2026-028 sourceCases (法人名の表記ゆれ補正) — 法人名 (B2: 0118/0106 を法人名 historical に実体化、id 空間衝突回避)
-  { id: 'CASE-2026-0118', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-15 処理済', owner: '山田太郎', flags: 0, change: { field: '法人名', from: '株式会社髙橋商店', to: '株式会社高橋商店' } },
-  { id: 'CASE-2026-0106', workflow: '法人住所変更', status: 'reflected', elapsed: '2026-05-11 処理済', owner: '山田太郎', flags: 0, change: { field: '法人名', from: 'サンプル株式会社', to: '株式会社サンプル' } },
+  { id: 'CASE-2026-0118', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-15T09:00:00+09:00', owner: '山田太郎', flags: 0, change: { field: '法人名', from: '株式会社髙橋商店', to: '株式会社高橋商店' } },
+  { id: 'CASE-2026-0106', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-11T09:00:00+09:00', owner: '山田太郎', flags: 0, change: { field: '法人名', from: 'サンプル株式会社', to: '株式会社サンプル' } },
 ]
 for (const row of HISTORICAL_CASE_ROWS) {
   CASE_DETAILS[row.id] = buildCaseDetail(row)
+}
+
+/** workflow の field label 群 (手動起票 form の入力項目、W3 C4)。 */
+export function fieldLabelsForWorkflow(workflow: string): string[] {
+  return fieldsForWorkflow(workflow).map((f) => f.fieldLabel)
+}
+
+/**
+ * 手動起票 (W3 C4) の store-only draft を CaseDetailModel に組む (CASE_DETAILS 不在の draft が一覧から開ける)。
+ * AI 抽出が無いので全項目を人手入力値 (overrides) で確認済表示し、左 pane は入力値の faux 申込書とする。
+ */
+export function buildManualCaseDetail(
+  id: string,
+  workflowName: string,
+  assignee: string | undefined,
+  overrides: Record<string, string>,
+): CaseDetailModel {
+  const inputter = assignee && assignee !== '—' ? assignee : '未割当'
+  const approver = approverFor(inputter)
+  const fileName = `${id}.pdf`
+  const isAccountOpening = workflowName === '口座開設書類完備'
+  const fields = fieldsForWorkflow(workflowName).map((f): FieldReview => {
+    const ov = overrides[f.fieldLabel]
+    const base: FieldReview = ov !== undefined ? { ...f, aiValue: ov, ocrRawValue: ov, humanValue: ov } : { ...f }
+    return {
+      ...base,
+      reconcileState: 'manually_confirmed',
+      sourceLocator: base.sourceLocator ? { ...base.sourceLocator, doc: fileName } : base.sourceLocator,
+    }
+  })
+  return {
+    id,
+    workflowName,
+    status: 'ready',
+    statusLabel: caseStatusLabel('ready'),
+    inputter,
+    approver,
+    fields,
+    document: {
+      fileName,
+      page: 'P.1',
+      pageCount: 1,
+      title: isAccountOpening ? '口座開設申込書（手動起票）' : `${workflowName}届（手動起票）`,
+      rows: buildDocRows(fields),
+    },
+    lifecycle: buildLifecycle('ready', inputter, approver),
+    citations: [],
+  }
 }

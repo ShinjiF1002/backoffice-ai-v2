@@ -70,7 +70,8 @@ export function DocumentViewer({ document, activeFieldLabel, onRowSelect }: Docu
           <div className="text-center font-serif text-base font-bold">{document.title}</div>
           <div className="mx-auto mt-2 mb-4 h-0.5 w-14 bg-[var(--color-paper-ink)]" />
           {page === DETAIL_PAGE ? (
-            <dl className="space-y-3 font-serif text-[13px] leading-relaxed">
+            // dl→div: clickable row が role=button のため dl-child 制約 (dt/dd/div のみ) を避ける (W3 axe)。
+            <div className="space-y-3 font-serif text-[13px] leading-relaxed">
               {document.rows.map((row) => {
                 const active = row.fieldLabel && row.fieldLabel === activeFieldLabel
                 const clickable = !!row.fieldLabel
@@ -103,12 +104,12 @@ export function DocumentViewer({ document, activeFieldLabel, onRowSelect }: Docu
                           : clickable && 'hover:bg-[var(--color-paper-bg)]'
                     )}
                   >
-                    <dt className="text-[11px]" style={{ color: 'var(--color-paper-label)' }}>{row.label}</dt>
-                    <dd className="mt-0.5">{row.value}</dd>
+                    <div className="text-[11px]" style={{ color: 'var(--color-paper-label)' }}>{row.label}</div>
+                    <div className="mt-0.5">{row.value}</div>
                   </div>
                 )
               })}
-            </dl>
+            </div>
           ) : (
             <p className="py-10 text-center font-serif text-[12px]" style={{ color: 'var(--color-paper-label)' }}>
               このページに変更対象の記載はありません。

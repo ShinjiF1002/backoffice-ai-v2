@@ -3,6 +3,7 @@ import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon } from 'lu
 import { useApprovals, useStoreDispatch, useCurrentActor } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { useListData } from '@/hooks/useListData'
+import { caseElapsedLabel } from '@/lib/dates'
 import { CASE_DETAILS } from '@/data/mock-case-detail'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
@@ -76,7 +77,7 @@ export function Approvals() {
     modifiedCount: e.resolvedFieldIds.length,
     flags: e.flags,
     inputApprovedBy: e.inputApprovedBy,
-    elapsed: e.elapsedLabel,
+    elapsed: caseElapsedLabel(e.receivedAt, e.status),
   }))
   const list = useListData(rows)
   const inputters = [...new Set(rows.map((r) => r.inputter))]

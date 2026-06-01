@@ -88,6 +88,9 @@ export function seed(): StoreState {
       //   業務責任者ハブ「設定承認」タイル / config-approvals を初回 live に (空タイル解消)。
       //   注: agent-account-opening は business-approver/w3-remediation test が「未申請」前提で使うため 'none' 維持。
       promotionStatus: row.id === 'agent-direct-debit' ? 'requested' : 'none',
+      // PV2b-c: 設定承認の四眼原則 (申請者 ≠ 承認者) を seed でも成立させる。申請者 = 入力者 (山田太郎、申請 persona)、
+      //   承認者 = 業務責任者。reducer の self-approval block (isSelfApproval) + SoD 表示の判定材料となる (案件 B4 と同型)。
+      promotionRequestedBy: row.id === 'agent-direct-debit' ? DEFAULT_ACTOR_ID : undefined,
       paused: false,
     }
     agentOrder.push(row.id)

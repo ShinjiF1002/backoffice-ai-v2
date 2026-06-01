@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon, SearchIcon, ShieldIcon, ActivityIcon } from 'lucide-react'
+import { Building2Icon, WalletIcon, RepeatIcon, StampIcon, CreditCardIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon, SearchIcon, ShieldIcon, ActivityIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import {
   OBS_CASE_ID,
@@ -36,6 +36,9 @@ import { cn } from '@/lib/cn'
 const PROCESS_ICON: Record<KnowledgeGroup['icon'], LucideIcon> = {
   building: Building2Icon,
   wallet: WalletIcon,
+  transfer: RepeatIcon,
+  stamp: StampIcon,
+  card: CreditCardIcon,
 }
 const TL_DOT: Record<LifecycleEvent['tone'], string> = {
   inset: 'border-[var(--color-border-strong)]',
@@ -44,7 +47,7 @@ const TL_DOT: Record<LifecycleEvent['tone'], string> = {
   success: 'border-[var(--color-success)]',
 }
 const LEDGER_HEADERS = ['時刻', '案件', '業務', 'actor', 'role', 'action', 'before → after', '参照文書', 'policy', 'approval id', 'confidence (監査用)']
-const LEDGER_WORKFLOWS = ['all', '法人住所変更', '口座開設書類完備'] as const
+const LEDGER_WORKFLOWS = ['all', '法人住所変更', '口座開設書類完備', '口座振替登録', '改印・代表者変更届', 'カード再発行'] as const
 // W3 G2 / F-002: 横断台帳の actor / action 絞り込み候補は live 台帳 (静的参照 + セッション操作証跡) から component 内で導出する
 // (固定 fixture からの module-const では live 操作で増えた actor/action が filter に出ないため)。
 const LEDGER_PAGE_SIZE = 12

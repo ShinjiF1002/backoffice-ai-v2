@@ -77,5 +77,47 @@ export const VERIFICATION_EXTRA_CASES: CaseListRow[] = Array.from({ length: 20 }
   }
 })
 
-/** 業務 case (法人住所変更 8 + 口座開設書類完備 5 = 13)。seed / CASE_DETAILS / Cases 一覧の権威 source。 */
-export const CASE_LIST: CaseListRow[] = [...BASE_CASES, ...ACCOUNT_OPENING_CASES]
+/**
+ * PV2a (2026-06-01) 新業務 cases — 自動化対象 2→5。各業務 status 分布を網羅 (pending/ready/sent-back/baw/reflected)。
+ * change.field は各業務 field-set (mock-case-detail) の label と一致 (factory が要確認先頭化 + before/after 表示)。
+ * 受付日時は既存と同レンジ (≤2026-05-30、future-date gate 回避)。
+ */
+/** 口座振替登録 (UC-BO-03) 5 件。 */
+const DIRECT_DEBIT_CASES: CaseListRow[] = [
+  { id: 'CASE-2026-0201', workflow: '口座振替登録', status: 'ready', receivedAt: '2026-05-30T15:10:00+09:00', owner: '佐藤花子', flags: 1, recommended: true,
+    change: { field: '口座番号', from: '1234560', to: '1234567' } },
+  { id: 'CASE-2026-0202', workflow: '口座振替登録', status: 'ready', receivedAt: '2026-05-30T14:20:00+09:00', owner: '佐藤花子', flags: 0 },
+  { id: 'CASE-2026-0203', workflow: '口座振替登録', status: 'business-approval-waiting', receivedAt: '2026-05-30T11:30:00+09:00', owner: '高橋', flags: 0 },
+  { id: 'CASE-2026-0204', workflow: '口座振替登録', status: 'reflected', receivedAt: '2026-05-29T13:00:00+09:00', owner: '佐藤花子', flags: 0,
+    change: { field: '振替開始月', from: '2026-06', to: '2026-07' } },
+  { id: 'CASE-2026-0205', workflow: '口座振替登録', status: 'pending', receivedAt: '2026-05-30T17:40:00+09:00', owner: '—', flags: 0 },
+]
+/** 改印・代表者変更届 (UC-BO-04) 5 件。承認率 93% 未達業務 (demo: AI の未達検知)。 */
+const NOTIFICATION_CASES: CaseListRow[] = [
+  { id: 'CASE-2026-0231', workflow: '改印・代表者変更届', status: 'ready', receivedAt: '2026-05-30T16:05:00+09:00', owner: '山田太郎', flags: 1, recommended: true,
+    change: { field: '新代表者名', from: '山本 健', to: '山本 健一' } },
+  { id: 'CASE-2026-0232', workflow: '改印・代表者変更届', status: 'sent-back', receivedAt: '2026-05-30T12:50:00+09:00', owner: '山田太郎', flags: 0,
+    change: { field: '届出種別', from: '改印', to: '代表者変更' } },
+  { id: 'CASE-2026-0233', workflow: '改印・代表者変更届', status: 'business-approval-waiting', receivedAt: '2026-05-30T10:40:00+09:00', owner: '鈴木課長', flags: 0 },
+  { id: 'CASE-2026-0234', workflow: '改印・代表者変更届', status: 'reflected', receivedAt: '2026-05-29T15:20:00+09:00', owner: '山田太郎', flags: 0 },
+  { id: 'CASE-2026-0235', workflow: '改印・代表者変更届', status: 'pending', receivedAt: '2026-05-30T17:35:00+09:00', owner: '—', flags: 0 },
+]
+/** カード再発行 (UC-BO-05、checkpoint) 6 件 (高頻度業務)。 */
+const CARD_REISSUE_CASES: CaseListRow[] = [
+  { id: 'CASE-2026-0241', workflow: 'カード再発行', status: 'ready', receivedAt: '2026-05-30T16:30:00+09:00', owner: '高橋', flags: 1, recommended: true,
+    change: { field: '送付先住所', from: '東京都新宿区西新宿 2-8', to: '東京都新宿区西新宿 2-8-1' } },
+  { id: 'CASE-2026-0242', workflow: 'カード再発行', status: 'ready', receivedAt: '2026-05-30T15:45:00+09:00', owner: '佐藤花子', flags: 0 },
+  { id: 'CASE-2026-0243', workflow: 'カード再発行', status: 'business-approval-waiting', receivedAt: '2026-05-30T13:15:00+09:00', owner: '高橋', flags: 0 },
+  { id: 'CASE-2026-0244', workflow: 'カード再発行', status: 'reflected', receivedAt: '2026-05-29T11:00:00+09:00', owner: '佐藤花子', flags: 0 },
+  { id: 'CASE-2026-0245', workflow: 'カード再発行', status: 'reflected', receivedAt: '2026-05-29T14:40:00+09:00', owner: '高橋', flags: 0 },
+  { id: 'CASE-2026-0246', workflow: 'カード再発行', status: 'pending', receivedAt: '2026-05-30T17:48:00+09:00', owner: '—', flags: 0 },
+]
+
+/** 業務 case (法人住所変更 8 + 口座開設 5 + 口座振替 5 + 改印届 5 + カード再発行 6 = 29)。seed / CASE_DETAILS / Cases 一覧の権威 source。 */
+export const CASE_LIST: CaseListRow[] = [
+  ...BASE_CASES,
+  ...ACCOUNT_OPENING_CASES,
+  ...DIRECT_DEBIT_CASES,
+  ...NOTIFICATION_CASES,
+  ...CARD_REISSUE_CASES,
+]

@@ -10,7 +10,7 @@ describe('store foundation (Phase 1)', () => {
       const s = seed()
       expect(s.caseOrder).toHaveLength(CASE_LIST.length)
       expect(s.proposalOrder).toHaveLength(3)
-      expect(s.agentOrder).toHaveLength(2)
+      expect(s.agentOrder).toHaveLength(5) // PV2a: 業務 2→5 (法人住所/口座開設/口座振替/改印届/カード再発行)
       expect(s.cases['CASE-2026-0142']!.workflowId).toBe('UC-BO-01')
       expect(s.proposals['PROP-2026-024']!.workflowId).toBe('UC-BO-02')
       // owner '—' は未割当 (undefined) に正規化

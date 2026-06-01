@@ -7,7 +7,7 @@
 export interface HubProcess {
   id: string
   name: string
-  icon: 'building' | 'wallet'
+  icon: 'building' | 'wallet' | 'transfer' | 'stamp' | 'card'
   trustLabel: string // 業務語 主 (全件確認)
   trustEn: string // Tier 補助 chip (Supervised)
   approvalRate: number | null
@@ -63,6 +63,37 @@ export const HUB_PROCESSES: HubProcess[] = [
     approvalRate: null,
     approvalRateOk: null,
     agentTo: '/agents',
+  },
+  // PV2a (2026-06-01) 新業務 ×3。approvalRate は [仮説/要検証] (画面側ラベル)。total/dist は useHubModel が store から算出 (静的値なし)。
+  {
+    id: 'UC-BO-03',
+    name: '口座振替登録',
+    icon: 'transfer',
+    trustLabel: '全件確認',
+    trustEn: 'Supervised',
+    approvalRate: 95,
+    approvalRateOk: true,
+    agentTo: '/agents/agent-direct-debit',
+  },
+  {
+    id: 'UC-BO-04',
+    name: '改印・代表者変更届',
+    icon: 'stamp',
+    trustLabel: '全件確認',
+    trustEn: 'Supervised',
+    approvalRate: 93,
+    approvalRateOk: false,
+    agentTo: '/agents/agent-corp-notification',
+  },
+  {
+    id: 'UC-BO-05',
+    name: 'カード再発行',
+    icon: 'card',
+    trustLabel: '要所確認',
+    trustEn: 'Checkpoint',
+    approvalRate: 97,
+    approvalRateOk: true,
+    agentTo: '/agents/agent-card-reissue',
   },
 ]
 

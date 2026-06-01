@@ -214,9 +214,84 @@ function accountOpeningFields(change?: CaseListRow['change']): FieldReview[] {
   return fields
 }
 
-/** workflow に応じた field 集合を返す (口座開設は法人住所変更と別 detail = B2 証拠アンカー整合)。 */
+/** change がある field を申請書類の読み取り値で上書き (新業務 field-set 共通、accountOpeningFields と同パターン)。 */
+function applyChange(fields: FieldReview[], change?: CaseListRow['change']): FieldReview[] {
+  if (change) {
+    const f = fields.find((x) => x.fieldLabel === change.field)
+    if (f) {
+      f.aiValue = change.to
+      f.ocrRawValue = change.to
+      if (f.masterValue !== undefined) f.masterValue = change.to
+    }
+  }
+  return fields
+}
+
+/** 口座振替登録 (UC-BO-03) 用 5 項目。業務別 field 集合 = B2 証拠アンカー整合。 */
+function directDebitFields(change?: CaseListRow['change']): FieldReview[] {
+  return applyChange([
+    { fieldLabel: '依頼人名', aiValue: '株式会社サンプル商事', ocrRawValue: '株式会社サンプル商事', masterValue: '株式会社サンプル商事', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '依頼人欄' } },
+    { fieldLabel: '金融機関コード', aiValue: '0009', ocrRawValue: '0009', masterValue: '0009', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '金融機関欄' } },
+    { fieldLabel: '口座番号', aiValue: '1234567', ocrRawValue: '1234567', masterValue: '1234567', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '口座番号欄' } },
+    { fieldLabel: '収納企業コード', aiValue: 'SC-0482', ocrRawValue: 'SC-0482', masterValue: 'SC-0482', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '収納企業欄' } },
+    { fieldLabel: '振替開始月', aiValue: '2026-07', ocrRawValue: '2026-07', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '開始月欄' } },
+  ], change)
+}
+
+/** 改印・代表者変更届 (UC-BO-04) 用 5 項目。 */
+function corporateNotificationFields(change?: CaseListRow['change']): FieldReview[] {
+  return applyChange([
+    { fieldLabel: '法人名', aiValue: '株式会社サンプル商事', ocrRawValue: '株式会社サンプル商事', masterValue: '株式会社サンプル商事', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '法人名欄' } },
+    { fieldLabel: '支店コード', aiValue: '042', ocrRawValue: '042', masterValue: '042', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '支店コード欄' } },
+    { fieldLabel: '届出種別', aiValue: '代表者変更', ocrRawValue: '代表者変更', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '届出種別欄' } },
+    { fieldLabel: '新代表者名', aiValue: '山本 健一', ocrRawValue: '山本 健一', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '代表者欄' } },
+    { fieldLabel: '効力発生日', aiValue: '2026-07-01', ocrRawValue: '2026-07-01', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '効力日欄' } },
+  ], change)
+}
+
+/** カード再発行 (UC-BO-05) 用 5 項目。 */
+function cardReissueFields(change?: CaseListRow['change']): FieldReview[] {
+  return applyChange([
+    { fieldLabel: '氏名', aiValue: '佐藤花子', ocrRawValue: '佐藤花子', masterValue: '佐藤花子', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '氏名欄' } },
+    { fieldLabel: '会員番号', aiValue: '4980-1234', ocrRawValue: '4980-1234', masterValue: '4980-1234', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.1', region: '会員番号欄' } },
+    { fieldLabel: 'カード種別', aiValue: 'デビットカード', ocrRawValue: 'デビットカード', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: 'カード種別欄' } },
+    { fieldLabel: '本人確認書類', aiValue: '運転免許証', ocrRawValue: '運転免許証', masterValue: '運転免許証', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '本人確認欄' } },
+    { fieldLabel: '送付先住所', aiValue: '東京都新宿区西新宿 2-8-1', ocrRawValue: '東京都新宿区西新宿 2-8-1', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.1', region: '送付先欄' } },
+  ], change)
+}
+
+/** workflow → field 集合 builder の lookup (PV1: binary 三項を N-way 化、B2 証拠アンカー整合)。未知 workflow は法人住所変更 baseFields に fallback。 */
+const FIELD_SET_BUILDERS: Record<string, (change?: CaseListRow['change']) => FieldReview[]> = {
+  法人住所変更: baseFields,
+  口座開設書類完備: accountOpeningFields,
+  口座振替登録: directDebitFields,
+  改印・代表者変更届: corporateNotificationFields,
+  カード再発行: cardReissueFields,
+}
+
+/** workflow に応じた field 集合を返す (業務別 detail = B2 証拠アンカー整合)。 */
 function fieldsForWorkflow(workflow: string, change?: CaseListRow['change']): FieldReview[] {
-  return workflow === '口座開設書類完備' ? accountOpeningFields(change) : baseFields(change)
+  return (FIELD_SET_BUILDERS[workflow] ?? baseFields)(change)
+}
+
+/** workflow → 申請書類 title (AI 起票)。PV1: isAccountOpening 二項を N-way 化。未知は `${workflow}届` fallback。 */
+const DOC_TITLE: Record<string, string> = {
+  法人住所変更: '法人住所変更届',
+  口座開設書類完備: '口座開設申込書',
+  口座振替登録: '口座振替依頼書',
+  改印・代表者変更届: '改印・代表者変更届',
+  カード再発行: 'カード再発行依頼書',
+}
+function docTitle(workflow: string): string {
+  return DOC_TITLE[workflow] ?? `${workflow}届`
+}
+
+/** 手動起票 (手入力値の控え) の base 名。AI title と表記が異なる業務 (口座開設) のみ override、他は workflowName 既定。 */
+const MANUAL_DOC_BASE: Record<string, string> = {
+  口座開設書類完備: '口座開設',
+}
+function manualDocTitle(workflow: string): string {
+  return `${MANUAL_DOC_BASE[workflow] ?? workflow}（手動起票・手入力値の控え）`
 }
 
 /** status → 現在の lifecycle step index (reflected は全 done = current なし)。 */
@@ -292,7 +367,6 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
   const approver = approverFor(inputter)
 
   const change = row.change
-  const isAccountOpening = row.workflow === '口座開設書類完備'
   let fields = fieldsForWorkflow(row.workflow, change)
   // change.field を先頭へ (要確認の先頭割当 + 申請書類強調の先頭化、gate 3)
   if (change) {
@@ -333,7 +407,7 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
       fileName,
       page: 'P.2',
       pageCount: 3,
-      title: isAccountOpening ? '口座開設申込書' : `${row.workflow}届`,
+      title: docTitle(row.workflow),
       rows: buildDocRows(fields),
     },
     lifecycle: buildLifecycle(row.status, inputter, approver),
@@ -390,7 +464,6 @@ export function buildManualCaseDetail(
 ): CaseDetailModel {
   const inputter = assignee && assignee !== '—' ? assignee : '未割当'
   const approver = approverFor(inputter)
-  const isAccountOpening = workflowName === '口座開設書類完備'
   const fields = fieldsForWorkflow(workflowName).map((f): FieldReview => ({
     fieldLabel: f.fieldLabel,
     aiValue: overrides[f.fieldLabel] ?? '(未入力)', // 表示値 = 手入力値。AI 抽出値ではない (origin='manual' でラベル分岐)。
@@ -412,7 +485,7 @@ export function buildManualCaseDetail(
       fileName: '(スキャン画像なし)',
       page: '—',
       pageCount: 0,
-      title: isAccountOpening ? '口座開設（手動起票・手入力値の控え）' : `${workflowName}（手動起票・手入力値の控え）`,
+      title: manualDocTitle(workflowName),
       rows: buildDocRows(fields, { seal: false }),
     },
     lifecycle: buildManualLifecycle(status, inputter, approver),

@@ -12,6 +12,10 @@ import { DEFAULT_ACTOR_ID } from './actors'
 const WORKFLOW_NAME_TO_ID: Record<string, string> = {
   法人住所変更: 'UC-BO-01',
   口座開設書類完備: 'UC-BO-02',
+  // PV1 (2026-06-01): 新業務 3。新業務 case が CASE_LIST に入る PV2 まで未使用 (map 定義のみ、既存挙動に無影響)。
+  口座振替登録: 'UC-BO-03',
+  改印・代表者変更届: 'UC-BO-04',
+  カード再発行: 'UC-BO-05',
 }
 
 function workflowIdOf(name: string): string {

@@ -8,7 +8,9 @@ Backoffice 業務に AI Agent を段階自動化する構想 の v2 repo。cowor
 
 実装は `~/.claude/plans/ai-backoffice-ai-virtual-muffin.md` (v1.3 final patch 適用版 lock、Plan v1.1.2 22 日 base + Day 5 整合化 update、5/21 Thu Day 1 - 6/11 Thu Day 22) に従う。非自明な scope 変更 (新 doc 追加、画面追加、KPI 変更、業務追加) は plan を update してから実装。Plan に書かれていない変更は禁止。
 
-> **⚠ REBASELINE (2026-05-29、frame C 承認)**: prototype-redesign の本番 Readiness 監査 (confirmed 112) を受け remediation を開始。**実装 baseline = `handoff-redesign/00-shared/remediation-roadmap-p0-p1-p2-2026-05-29.md`** が上記ルールに基づく以下の承認済 scope 変更を記録・許可する: **画面追加** (P1: 9→12、検索 / 通知 / 業務責任者面) / **KPI 変更** (980 を mock-kpi.ts SSOT 統一) / **業務追加** (口座開設 case を CASE_LIST 入り) / **承認者 (Business Approval) 画面化 scope-out 解除** (P1) / store 拡張 (SoD / override / sendback、P0-W1 実装済 commit ba2f2ba)。各 wave・gate は roadmap §1/§5 を SSOT とする。
+> **⚠ REBASELINE (2026-05-29、frame C 承認)**: prototype-redesign の本番 Readiness 監査 (confirmed 112) を受け remediation を開始。**実装 baseline = `handoff-redesign/00-shared/remediation-roadmap-p0-p1-p2-2026-05-29.md`** が上記ルールに基づく以下の承認済 scope 変更を記録・許可する: **画面追加** (9→**15**、検索 / 通知 / 業務責任者面 3 画面 / 手動起票、typology A×3/B×9/C×3) / **KPI 変更** (980 を mock-kpi.ts SSOT 統一) / **業務追加** (口座開設 case を CASE_LIST 入り) / **承認者 (Business Approval) 画面化 scope-out 解除** (P1) / store 拡張 (SoD / override / sendback、P0-W1 実装済 commit ba2f2ba)。各 wave・gate は roadmap §1/§5 を SSOT とする。
+
+> **⚠ REBASELINE 2 (PV0、2026-06-01、承認済) — post-v3 増分**: v3 (PR #20、55 implemented + 1 accepted) + UI refresh (PR #22) を baseline (test 272 green) とし、実装 SSOT = `handoff-redesign/00-shared/v3-audit/{V3-UPGRADE-PLAN.md, closure-ledger.json}` (2026-05-29 roadmap は supersede 済)。増分 plan = `~/.claude/plans/boav2-postv3-data-and-cleanup-plan.md`。承認済: **業務追加 (自動化対象 2→5)** — 口座振替登録 (UC-BO-03, supervised) / 改印・代表者変更届 (UC-BO-04, supervised) / カード再発行 (UC-BO-05, checkpoint)。route 不変 (画面 15 維持、データ母数増)。**業務数 count gate = 5**、980 は UC-BO-02 専用不変。surgical 冗長清掃 med 2。
 
 ## 中核 message
 

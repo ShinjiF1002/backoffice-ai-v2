@@ -42,15 +42,25 @@ export function seed(): StoreState {
     caseOrder.push(row.id)
   }
 
-  // F-028 (distinction): C2「難案件が宙に消える」の旗艦面 (/escalations + 業務責任者ハブ裁定タイル) を初回ロードで
-  //   live にするため、代表的な未裁定 escalation を 1 件 seed する (手動 setup 無しで C2 解決を実演)。
-  //   起票 actor = 既定 (入力者)、裁定先 = 業務責任者。status は不変 (escalation は依頼記録)。who/when は in-session 操作でないため banner では理由のみ。
-  const seedEscalationId = 'CASE-2026-0145'
-  const seedEscalationCase = cases[seedEscalationId]
-  if (seedEscalationCase) {
-    cases[seedEscalationId] = {
-      ...seedEscalationCase,
-      escalation: { reason: '前例のない住所表記で確定可否の判断に迷う', category: '業務ルール抵触', to: 'actor-approver', from: DEFAULT_ACTOR_ID },
+  // F-028 (distinction) + PV2b: C2「難案件が宙に消える」の旗艦面 (/escalations + 業務責任者ハブ裁定タイル) を初回ロードで
+  //   live にするため、未裁定 escalation を業務横断で複数 seed する (区分・業務を分散、queue/滞留/triage の demo 価値を成立)。
+  //   起票 actor = 既定 (入力者)、裁定先 = 業務責任者。status は不変 (escalation は overlay 記録)。resolution 未確定 = active queue。
+  const SEED_ESCALATIONS: { id: string; reason: string; category: string }[] = [
+    { id: 'CASE-2026-0145', reason: '前例のない住所表記で確定可否の判断に迷う', category: '業務ルール抵触' },
+    { id: 'CASE-2026-0201', reason: '収納企業コードが未登録で確定可否の判断に迷う', category: '前例なし' },
+    { id: 'CASE-2026-0231', reason: '新代表者の本人確認書類の整合が取れない', category: '書類不備' },
+    { id: 'CASE-2026-0241', reason: '送付先住所が登録と相違し本人確認が必要', category: '本人確認' },
+  ]
+  for (const e of SEED_ESCALATIONS) {
+    const c = cases[e.id]
+    if (c) cases[e.id] = { ...c, escalation: { reason: e.reason, category: e.category, to: 'actor-approver', from: DEFAULT_ACTOR_ID } }
+  }
+  // PV2b: 裁定済 (続行可) escalation を 1 件 seed → 起票者 (入力者) へ escalation-resolved 通知を初回 live に (F-017、resolution 確定で /escalations queue からは外れる)。
+  const resolvedCase = cases['CASE-2026-0120']
+  if (resolvedCase) {
+    cases['CASE-2026-0120'] = {
+      ...resolvedCase,
+      escalation: { reason: '過去の住所表記との整合を確認依頼', category: '業務ルール抵触', to: 'actor-approver', from: DEFAULT_ACTOR_ID, resolution: 'proceed' },
     }
   }
 
@@ -74,7 +84,10 @@ export function seed(): StoreState {
       workflowId: workflowIdOf(row.workflow),
       workflowName: row.workflow,
       trust: row.trust,
-      promotionStatus: 'none',
+      // PV2b: 口座振替登録 Agent (95% 達成) は昇格基準達成済 → 設定承認待ち (requested) を初回 seed し、
+      //   業務責任者ハブ「設定承認」タイル / config-approvals を初回 live に (空タイル解消)。
+      //   注: agent-account-opening は business-approver/w3-remediation test が「未申請」前提で使うため 'none' 維持。
+      promotionStatus: row.id === 'agent-direct-debit' ? 'requested' : 'none',
       paused: false,
     }
     agentOrder.push(row.id)

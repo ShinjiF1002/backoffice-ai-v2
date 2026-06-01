@@ -196,7 +196,9 @@ export const AGENT_CORP_NOTIFICATION: AgentDetailModel = {
     { k: '権限', v: '法人名・支店コード・届出種別の自動入力', meta: '要確認は入力者へ' },
     { k: 'ツール', v: '届出書の文字読み取り / 法人マスタの照合', meta: '読み取り結果を判定基準で振り分け' },
   ],
-  relatedProposals: [],
+  // PV2b: 却下 proposal PROP-2026-019 (届出種別の自動判定、判定精度未達で却下) の逆リンク (B2 対称性)。
+  //   lineage 表示は forwarded/approved のみゆえ rejected は active 改善として非露出 (data link のみ保持)。
+  relatedProposals: ['PROP-2026-019'],
 }
 
 /** カード再発行 Agent (UC-BO-05、checkpoint = trust 多様性)。 */

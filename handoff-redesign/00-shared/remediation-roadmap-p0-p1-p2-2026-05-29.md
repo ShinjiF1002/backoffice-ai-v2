@@ -2,6 +2,8 @@
 
 **日付**: 2026-05-29 (統合改訂 2026-05-30) ／ **由来**: `user-perspective-ui-audit-2026-05-29.md` §7 (raw 121 → confirmed 112 = major 33 + minor 79、refuted 12。major 33 を P0 8 + P1 9 の work-item に consolidate、minor 79 を P2 backlog 29 batch 化) ／ **frame**: C (production-ready lens、即フル着手) ／ **新 baseline**: 本 roadmap が以降の実装 baseline。
 
+> **★ SUPERSEDED for v3 (2026-05-31)**: 本 roadmap は **W0-W3 (212 test 着地) の as-built SSOT**。それ以降の **v3 production-readiness 監査 (56 confirmed findings) の remediation は `v3-audit/V3-UPGRADE-PLAN.md` が実行 SSOT として本 roadmap を継承・supersede** する。v3 の closure status/evidence は **`v3-audit/closure-ledger.json`** (implemented 55 + accepted deviation 1=F-045、working-tree 独立検証済) を参照。本 roadmap §1b の画面 ledger (15 画面) は **v3 でも不変** (F-039 は Observatory タブ拡張で route 非追加)。以後、v3 finding の実行判断は V3-UPGRADE-PLAN / closure-ledger を用いる。
+
 > **本 roadmap は P0保全 + W0/W1/W2/W3 rebuild execution plan** (2026-05-30 統合改訂)。finding 軸の deep-plan (§3 P1 / §4 P2) と **screen 軸の完成定義 (§1b per-screen ledger)** を併載する。「rebuild」= IA/契約/findings/欠落画面の構造的再構築であり、visual のゼロ作り直しではない (既存路線 Operational Premium Light + Charter v1.0 + canonical-design-spec を精練化、`#635bff` 維持、新 visual language なし)。
 >
 > **SSOT 単一化 (2026-05-30)**: 本 roadmap が **唯一の実行 SSOT**。screen 軸の overlay (`~/.claude/plans/generic-noodling-lampson.md`、repo 外) と next-session handoff prompt (`next-session-handoff-full-rebuild-2026-05-30.md`、in-repo) は本 roadmap §1/§1b に吸収済 → **以後 historical / prompt-only** として扱い、実行判断に用いない。

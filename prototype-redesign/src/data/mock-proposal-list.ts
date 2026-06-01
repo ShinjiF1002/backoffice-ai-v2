@@ -19,4 +19,7 @@ export const PROPOSAL_LIST: ProposalListRow[] = [
   { id: 'PROP-2026-031', workflow: '法人住所変更', changeArea: '住所読み取りの判定基準を厳しめに調整', impactCount: 12, status: 'pending-triage' },
   { id: 'PROP-2026-028', workflow: '法人住所変更', changeArea: '法人名の表記ゆれ補正ルールを追加', impactCount: 7, status: 'forwarded' },
   { id: 'PROP-2026-024', workflow: '口座開設書類完備', changeArea: '本人確認書類の有効期限チェックを追加', impactCount: 19, status: 'approved' },
+  // PV2b: 却下 (rejected) status の実体化 — /proposals の「却下」filter chip を到達可能に (空 status 解消)。
+  //   却下理由は判定基準の未達 (精度/影響件数) で data-visible に表現 (MetricVsThreshold renders、store schema 不変)。
+  { id: 'PROP-2026-019', workflow: '改印・代表者変更届', changeArea: '届出種別の自動判定を追加', impactCount: 28, status: 'rejected' },
 ]

@@ -37,6 +37,16 @@ export const MODEL_INVENTORY: ModelInventoryRow[] = [
   { agentId: 'agent-account-opening', process: '口座開設書類完備', model: '帳票 OCR', version: 'ocr-2.4', purpose: '本人確認書類の読み取り', owner: 'モデル管理部', validation: '独立検証済', lastValidated: '2026-04-30', scope: 'MRM 適用 (非生成 model)' },
   { agentId: 'agent-account-opening', process: '口座開設書類完備', model: '項目分類', version: 'cls-1.9', purpose: '書類種別・項目の割当', owner: 'モデル管理部', validation: '検証中', lastValidated: '2026-05-20', scope: 'MRM 適用 (非生成 model)' },
   { agentId: 'agent-account-opening', process: '口座開設書類完備', model: '照合ルール', version: 'rule-v2.7', purpose: '完備チェック (確定的)', owner: '業務部', validation: '独立検証済', lastValidated: '2026-05-10', scope: 'rule-based (model 定義外)' },
+  // PV2a (2026-06-01) 新業務 ×3 のモデル台帳 (各 OCR / 項目分類 / 照合ルール)。scope framing は SR 26-2 honest 区分を踏襲。
+  { agentId: 'agent-direct-debit', process: '口座振替登録', model: '帳票 OCR', version: 'ocr-2.4', purpose: '依頼書の文字読み取り', owner: 'モデル管理部', validation: '独立検証済', lastValidated: '2026-04-30', scope: 'MRM 適用 (非生成 model)' },
+  { agentId: 'agent-direct-debit', process: '口座振替登録', model: '項目分類', version: 'cls-1.7', purpose: '口座情報項目の割当', owner: 'モデル管理部', validation: '検証中', lastValidated: '2026-05-18', scope: 'MRM 適用 (非生成 model)' },
+  { agentId: 'agent-direct-debit', process: '口座振替登録', model: '照合ルール', version: 'rule-v1.9', purpose: '口座情報との突合 (確定的)', owner: '業務部', validation: '独立検証済', lastValidated: '2026-05-10', scope: 'rule-based (model 定義外)' },
+  { agentId: 'agent-corp-notification', process: '改印・代表者変更届', model: '帳票 OCR', version: 'ocr-2.4', purpose: '届出書の文字読み取り', owner: 'モデル管理部', validation: '独立検証済', lastValidated: '2026-04-30', scope: 'MRM 適用 (非生成 model)' },
+  { agentId: 'agent-corp-notification', process: '改印・代表者変更届', model: '項目分類', version: 'cls-1.5', purpose: '届出種別・項目の割当', owner: 'モデル管理部', validation: '要再検証', lastValidated: '2025-11-30', scope: 'MRM 適用 (非生成 model)' },
+  { agentId: 'agent-corp-notification', process: '改印・代表者変更届', model: '照合ルール', version: 'rule-v2.2', purpose: '法人マスタとの突合 (確定的)', owner: '業務部', validation: '独立検証済', lastValidated: '2026-05-10', scope: 'rule-based (model 定義外)' },
+  { agentId: 'agent-card-reissue', process: 'カード再発行', model: '帳票 OCR', version: 'ocr-2.5', purpose: '依頼書の文字読み取り', owner: 'モデル管理部', validation: '独立検証済', lastValidated: '2026-05-12', scope: 'MRM 適用 (非生成 model)' },
+  { agentId: 'agent-card-reissue', process: 'カード再発行', model: '本人確認照合', version: 'cls-2.1', purpose: '本人確認書類と会員情報の照合', owner: 'モデル管理部', validation: '独立検証済', lastValidated: '2026-05-12', scope: 'MRM 適用 (非生成 model)' },
+  { agentId: 'agent-card-reissue', process: 'カード再発行', model: '照合ルール', version: 'rule-v3.0', purpose: '送付先・会員番号の突合 (確定的)', owner: '業務部', validation: '独立検証済', lastValidated: '2026-05-10', scope: 'rule-based (model 定義外)' },
 ]
 
 export const VALIDATION_TONE: Record<ValidationStatus, 'success' | 'primary' | 'alert'> = {
@@ -61,6 +71,13 @@ export const DRIFT_MONITORS: DriftMonitorRow[] = [
   { process: '法人住所変更', metric: 'OCR 信頼度の低下傾向', value: '−1.2pt / 30日', threshold: '> −3pt', status: '監視中' },
   { process: '口座開設書類完備', metric: '入力分布 drift (PSI)', value: '0.11', threshold: '< 0.10', status: '要確認' },
   { process: '口座開設書類完備', metric: '書類種別の構成変化', value: '+4pt / 30日', threshold: '< +5pt', status: '監視中' },
+  // PV2a (2026-06-01) 新業務 ×3 の drift/bias 監視 (各 2 指標)。
+  { process: '口座振替登録', metric: '入力分布 drift (PSI)', value: '0.06', threshold: '< 0.10', status: '安定' },
+  { process: '口座振替登録', metric: 'OCR 信頼度の低下傾向', value: '−0.8pt / 30日', threshold: '> −3pt', status: '監視中' },
+  { process: '改印・代表者変更届', metric: '入力分布 drift (PSI)', value: '0.12', threshold: '< 0.10', status: '要確認' },
+  { process: '改印・代表者変更届', metric: '届出種別の構成変化', value: '+3pt / 30日', threshold: '< +5pt', status: '監視中' },
+  { process: 'カード再発行', metric: '入力分布 drift (PSI)', value: '0.05', threshold: '< 0.10', status: '安定' },
+  { process: 'カード再発行', metric: '本人確認照合率の低下傾向', value: '−0.3pt / 30日', threshold: '> −2pt', status: '安定' },
 ]
 
 export const DRIFT_TONE: Record<DriftMonitorRow['status'], 'success' | 'primary' | 'alert'> = {

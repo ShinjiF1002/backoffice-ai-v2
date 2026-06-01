@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom'
 import {
   Building2Icon,
   WalletIcon,
+  RepeatIcon,
+  StampIcon,
+  CreditCardIcon,
   AlertTriangleIcon,
   ClockIcon,
   InboxIcon,
@@ -31,6 +34,9 @@ import { cn } from '@/lib/cn'
 const PROCESS_ICON: Record<HubProcess['icon'], LucideIcon> = {
   building: Building2Icon,
   wallet: WalletIcon,
+  transfer: RepeatIcon,
+  stamp: StampIcon,
+  card: CreditCardIcon,
 }
 const KPI_ICON: Record<HubHeadlineKpi['icon'], LucideIcon> = {
   alert: AlertTriangleIcon,

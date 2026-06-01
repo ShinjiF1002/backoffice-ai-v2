@@ -203,9 +203,12 @@ describe('P0-W2 B3 (gate 3=案A): 検証 fixture は業務 case と分離', () =
       expect(caseIds.has(v.id)).toBe(false) // 業務母数 (Hub/KPI) に検証 noise を混ぜない
     }
   })
-  it('業務 CASE_LIST は法人住所変更 8 + 口座開設 5 = 13 件', () => {
-    expect(CASE_LIST).toHaveLength(13)
+  it('業務 CASE_LIST は 5 業務 = 29 件 (法人住所 8 + 口座開設 5 + 口座振替 5 + 改印届 5 + カード再発行 6、PV2a)', () => {
+    expect(CASE_LIST).toHaveLength(29)
     expect(CASE_LIST.filter((r) => r.workflow === '口座開設書類完備')).toHaveLength(5)
+    expect(CASE_LIST.filter((r) => r.workflow === '口座振替登録')).toHaveLength(5)
+    expect(CASE_LIST.filter((r) => r.workflow === '改印・代表者変更届')).toHaveLength(5)
+    expect(CASE_LIST.filter((r) => r.workflow === 'カード再発行')).toHaveLength(6)
   })
 })
 

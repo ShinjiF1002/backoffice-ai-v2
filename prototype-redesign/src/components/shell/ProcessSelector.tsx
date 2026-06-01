@@ -18,6 +18,9 @@ const PROCESSES = [
   { id: 'all', label: '全業務' },
   { id: 'UC-BO-01', label: '法人住所変更' },
   { id: 'UC-BO-02', label: '口座開設書類完備' },
+  { id: 'UC-BO-03', label: '口座振替登録' },
+  { id: 'UC-BO-04', label: '改印・代表者変更届' },
+  { id: 'UC-BO-05', label: 'カード再発行' },
 ] as const
 
 export function ProcessSelector() {

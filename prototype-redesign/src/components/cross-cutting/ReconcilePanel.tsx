@@ -117,6 +117,8 @@ export function ReconcilePanel({ fields, origin = 'ai', activeFieldLabel, onSele
       {open.length > 0 ? (
         <div className="flex flex-col gap-2">
           <div className="text-xs font-medium text-[var(--color-alert-soft-fg)]">対応が必要な項目 ({open.length})</div>
+          {/* PV3: 各行で反復していた説明を group 見出し直下に 1 回集約 (各行は diff + StatusBadge で不一致が自明)。 */}
+          <p className="-mt-1 text-[11px] text-[var(--color-fg-muted)]">AI 入力と申請書類で値が違う項目です。正しい方を確認してください。</p>
           {open.map((f) => (
             <div
               key={f.fieldLabel}
@@ -160,9 +162,6 @@ export function ReconcilePanel({ fields, origin = 'ai', activeFieldLabel, onSele
                   <ChangeDiff before={f.previousValue} after={f.humanValue ?? f.aiValue} mono={f.mono} />
                 </div>
               )}
-              <p className="mt-1.5 text-[11px] text-[var(--color-fg-muted)]">
-                AI 入力と申請書類で値が違います。正しい方を確認してください。
-              </p>
               <div className="mt-2 flex items-center justify-between">
                 {f.sourceLocator && (
                   <span className="font-mono text-[10px] text-[var(--color-fg-tertiary)]">

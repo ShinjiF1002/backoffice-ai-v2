@@ -15,6 +15,9 @@ import { cn } from '@/lib/cn'
 const WORKFLOWS = [
   { id: 'UC-BO-01', name: '法人住所変更' },
   { id: 'UC-BO-02', name: '口座開設書類完備' },
+  { id: 'UC-BO-03', name: '口座振替登録' },
+  { id: 'UC-BO-04', name: '改印・代表者変更届' },
+  { id: 'UC-BO-05', name: 'カード再発行' },
 ]
 
 /**

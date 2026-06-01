@@ -267,14 +267,8 @@ export function CaseDetail() {
                 </div>
               </div>
             )}
-            {mode === 'checker' && (
-              <div className="mb-3 flex items-center gap-2 rounded-[var(--radius-card)] border border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] p-3 text-xs">
-                <ShieldCheckIcon className="h-4 w-4 text-[var(--color-primary-hover)]" aria-hidden="true" />
-                <span className="text-[var(--color-fg)]">
-                  承認者ビュー — 入力者 <strong>{inputApproverName}</strong> の確認結果を最終承認 (別担当者による確認: 承認者 ≠ 入力者)
-                </span>
-              </div>
-            )}
+            {/* PV3: 承認者ビューの SoD 説明 banner を削除 (header pill「承認者ビュー」+ LifecycleStepper の入力者/承認者 +
+                footer「入力者 X ≠ 承認者 Y — 最終承認できます」が同情報を担保。本体 ReconcilePanel を押し下げる重複を排除)。 */}
             <ReconcilePanel
               fields={fields}
               origin={c.origin}

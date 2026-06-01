@@ -101,6 +101,7 @@ export function ConfigApprovals() {
           rowKey={(r) => `${r.kind}:${r.id}`}
           rowHref={(r) => r.href}
           ariaLabel="設定承認一覧"
+          density
           emptyTitle="承認待ちはありません"
           emptyDescription="手順承認（提案の上長承認待ち）・設定承認（Agent 昇格申請）がここに集まります。"
           pageSize={10}

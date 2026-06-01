@@ -140,6 +140,7 @@ export function Agents() {
           rowKey={(r) => r.id}
           rowHref={(r) => `/agents/${r.id}`}
           ariaLabel="エージェント一覧"
+          density
           filters={filters}
         />
       </div>

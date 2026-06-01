@@ -228,9 +228,22 @@ export function ProposalDetail() {
                           <span>{s.text}</span>
                           <MetaChip tone="primary" label="変更箇所" />
                         </div>
-                        <div className="ml-6 flex flex-col gap-1">
-                          <div className="rounded-[4px] bg-[var(--color-diff-del-bg)] px-2 py-1 text-xs text-[var(--color-error-soft-fg)]">− {s.before}</div>
-                          <div className="rounded-[4px] bg-[var(--color-diff-add-bg)] px-2 py-1 text-xs text-[var(--color-success-soft-fg)]">＋ {s.after}</div>
+                        <div className="ml-6 flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center">
+                          <div className="flex flex-1 items-start gap-1.5 rounded-[var(--radius-chip)] border border-[var(--color-error-soft-border)] bg-[var(--color-diff-del-bg)] px-2 py-1.5 text-xs text-[var(--color-error-soft-fg)]">
+                            <XIcon className="mt-0.5 h-3 w-3 flex-shrink-0" aria-hidden="true" />
+                            <span className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">現行</span>
+                              <span className="line-through decoration-[var(--color-error-soft-fg)]">{s.before}</span>
+                            </span>
+                          </div>
+                          <ArrowRightIcon className="mx-auto h-3.5 w-3.5 flex-shrink-0 rotate-90 text-[var(--color-fg-subtle)] sm:rotate-0" aria-hidden="true" />
+                          <div className="flex flex-1 items-start gap-1.5 rounded-[var(--radius-chip)] border border-[var(--color-success-soft-border)] bg-[var(--color-diff-add-bg)] px-2 py-1.5 text-xs text-[var(--color-success-soft-fg)]">
+                            <CheckIcon className="mt-0.5 h-3 w-3 flex-shrink-0" aria-hidden="true" />
+                            <span className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">改定</span>
+                              <span className="font-medium">{s.after}</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     )}

@@ -72,6 +72,7 @@ export function Proposals() {
           rowKey={(r) => r.id}
           rowHref={(r) => `/proposals/${r.id}`}
           ariaLabel="提案一覧"
+          density
           filters={filters}
           caption="毎日の差戻し分析から自動生成された改定候補です。承認すると正式手順に反映されます。"
         />

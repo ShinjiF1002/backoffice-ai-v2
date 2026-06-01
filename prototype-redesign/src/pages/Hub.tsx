@@ -57,6 +57,15 @@ export function Hub() {
   const { processes, headline, primaryAction } = useHubModel()
   const [summaryOpen, setSummaryOpen] = useState(false)
 
+  // section header 集約バッジ用の総量 (既存データから導出、additive)
+  // T1 exec overview: 各 section の総件数を見出し直下に一目で提示する。
+  const attentionTotal = headline.reduce((sum, k) => sum + k.total, 0)
+  const caseTotal = processes.reduce((sum, p) => sum + p.total, 0)
+  const requireActionTotal = processes.reduce(
+    (sum, p) => sum + (p.dist.ready ?? 0) + (p.dist['sent-back'] ?? 0),
+    0,
+  )
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -92,7 +101,10 @@ export function Hub() {
 
           {/* Headline KPI — クリックで該当画面へ drill */}
           <section>
-            <h2 className="mb-2.5 text-sm font-semibold text-[var(--color-fg)]">全業務の注意 — クリックで該当画面へ</h2>
+            <div className="mb-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+              <h2 className="text-sm font-semibold text-[var(--color-fg)]">全業務の注意 — クリックで該当画面へ</h2>
+              <MetaChip tone="alert" mono label={`計 ${attentionTotal} 件`} />
+            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {headline.map((k) => {
                 const Icon = KPI_ICON[k.icon]
@@ -131,7 +143,11 @@ export function Hub() {
 
           {/* Process cards */}
           <section>
-            <h2 className="mb-2.5 text-sm font-semibold text-[var(--color-fg)]">業務別の状況</h2>
+            <div className="mb-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+              <h2 className="text-sm font-semibold text-[var(--color-fg)]">業務別の状況</h2>
+              <MetaChip tone="inset" mono label={`案件 ${caseTotal} 件`} />
+              {requireActionTotal > 0 && <MetaChip tone="alert" mono label={`要対応 ${requireActionTotal} 件`} />}
+            </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {processes.map((p) => {
                 const ProcessIcon = PROCESS_ICON[p.icon]

@@ -70,6 +70,8 @@ export const CASE_2026_0142: CaseDetailModel = {
   fields: [
     {
       fieldLabel: 'ビル名',
+      confidence: 0.72,
+      reversibility: 'Revertible',
       aiValue: 'サンプルビル',
       ocrRawValue: 'サンプルビルディング',
       masterValue: 'サンプルビル',
@@ -78,6 +80,8 @@ export const CASE_2026_0142: CaseDetailModel = {
     },
     {
       fieldLabel: '法人名',
+      confidence: 0.93,
+      reversibility: 'Revertible',
       aiValue: '株式会社サンプルHD',
       ocrRawValue: '株式会社サンプルＨＤ',
       ocrNormalizedValue: '株式会社サンプルHD',
@@ -88,6 +92,8 @@ export const CASE_2026_0142: CaseDetailModel = {
     },
     {
       fieldLabel: '新住所',
+      confidence: 0.84,
+      reversibility: 'Irreversible',
       aiValue: '東京都千代田区丸の内 2 丁目 3 番 5 号',
       ocrRawValue: '千代田区丸の内２－３－５',
       ocrNormalizedValue: '東京都千代田区丸の内 2 丁目 3 番 5 号',
@@ -99,6 +105,8 @@ export const CASE_2026_0142: CaseDetailModel = {
     },
     {
       fieldLabel: '支店コード',
+      confidence: 0.97,
+      reversibility: 'Revertible',
       aiValue: '042',
       ocrRawValue: '042',
       masterValue: '042',
@@ -108,6 +116,8 @@ export const CASE_2026_0142: CaseDetailModel = {
     },
     {
       fieldLabel: '効力発生日',
+      confidence: 0.95,
+      reversibility: 'Partial',
       aiValue: '2026-06-15',
       ocrRawValue: '2026-06-15',
       reconcileState: 'matched',

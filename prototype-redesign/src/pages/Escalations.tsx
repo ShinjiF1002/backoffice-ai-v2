@@ -72,6 +72,7 @@ export function Escalations() {
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}`}
           ariaLabel="エスカレーション受信一覧"
+          density
           emptyTitle="エスカレーションはありません"
           emptyDescription="現場から裁定依頼が上がると、ここに表示されます。"
           pageSize={10}

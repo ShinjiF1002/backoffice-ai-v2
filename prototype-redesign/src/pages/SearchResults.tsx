@@ -107,6 +107,7 @@ export function SearchResults() {
             rowKey={(r) => `${r.kind}:${r.id}`}
             rowHref={(r) => r.href}
             ariaLabel="検索結果"
+            density
             filters={filters}
             emptyTitle={`「${q}」に一致する項目がありません`}
             emptyDescription="案件 ID・業務名・担当者名・Agent 名で再検索してください。"

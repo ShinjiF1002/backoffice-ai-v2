@@ -319,4 +319,8 @@ export interface FieldReview {
   normalizationNote?: string
   sourceLocator?: SourceLocator
   mono?: boolean
+  /** REFRESH STUDIO (Diff/Change Preview): AI confidence (0-1)。UI は band (高/中/低) のみ表示し生数字は出さない (CLAUDE.md 遵守)。 */
+  confidence?: number
+  /** REFRESH STUDIO (Diff/Change Preview): 変更の取消可能性 tier。metadata strip + irreversible-on-top 序列に使う。 */
+  reversibility?: Reversibility
 }

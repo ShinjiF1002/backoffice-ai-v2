@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { FilePlusIcon, CheckCheckIcon } from 'lucide-react'
+import { FilePlusIcon, CheckCheckIcon, ArrowRightIcon } from 'lucide-react'
 import { CASE_LIST } from '@/data/mock-case-list'
 import type { CaseListRow } from '@/data/mock-case-list'
 import type { CaseStatus } from '@/data/types'
@@ -27,6 +28,41 @@ function AttentionCell({ status, flags }: { status: string; flags: number }) {
   if (status === 'reflected') return <span className="text-xs text-[var(--color-success-soft-fg)]">完了</span>
   if (flags > 0) return <MetaChip tone="alert" label={`要確認 ${flags} 項目`} />
   return <MetaChip tone="success" label="全項目一致" />
+}
+
+/** Data Table Premium: 行を展開した時の peek 詳細 (modal を開かず一覧上で要点を確認)。 */
+function CasePeekField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-[11px] text-[var(--color-fg-muted)]">{label}</dt>
+      <dd className="text-xs text-[var(--color-fg)]">{children}</dd>
+    </div>
+  )
+}
+
+function CasePeek({ row }: { row: CaseListRow }) {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-4">
+        <CasePeekField label="業務">{row.workflow}</CasePeekField>
+        <CasePeekField label="状態">{caseStatusLabel(row.status)}</CasePeekField>
+        <CasePeekField label="担当">{row.owner === '—' ? '未割当' : row.owner}</CasePeekField>
+        <CasePeekField label="確認状況">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <AttentionCell status={row.status} flags={row.flags} />
+            {row.escalated && <MetaChip tone="alert" label="裁定依頼中" />}
+          </div>
+        </CasePeekField>
+      </dl>
+      <Link
+        to={`/cases/${row.id}`}
+        className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] bg-[var(--color-primary)] px-3 py-1.5 text-xs font-medium text-[var(--color-primary-fg)] hover:bg-[var(--color-primary-hover)]"
+      >
+        案件を開く
+        <ArrowRightIcon className="h-3.5 w-3.5" aria-hidden="true" />
+      </Link>
+    </div>
+  )
 }
 
 const STATUS_VALUES: CaseStatus[] = ['pending', 'ready', 'sent-back', 'business-approval-waiting', 'reflected']
@@ -122,6 +158,9 @@ export function Cases() {
           rowKey={(r) => r.id}
           rowHref={(r) => `/cases/${r.id}`}
           ariaLabel="案件一覧"
+          // Data Table Premium: 行密度トグル + 行 inline 展開 peek (modal を開かず要点確認)
+          density
+          renderExpanded={(r) => <CasePeek row={r} />}
           pinTop={(r) => r.flags > 0}
           rowClassName={(r) => (r.flags > 0 ? 'bg-[var(--color-alert-soft)]' : undefined)}
           filters={filters}

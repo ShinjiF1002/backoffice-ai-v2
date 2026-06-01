@@ -1,4 +1,5 @@
-import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon, AlertTriangleIcon } from 'lucide-react'
+import { ChevronRightIcon, ShieldCheckIcon, PencilLineIcon, CheckIcon, AlertTriangleIcon, BotIcon, UserCheckIcon, ServerIcon } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useApprovals, useStoreDispatch, useCurrentActor } from '@/store/hooks'
 import { roleLabel } from '@/store/actors'
 import { Toast } from '@/components/shared/Toast'
@@ -69,6 +70,67 @@ const columns: DataTableColumn<ApprovalViewRow>[] = [
   { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.elapsed, sortValue: (r) => new Date(r.receivedAt).getTime() },
 ]
 
+/**
+ * HIL lifecycle strip (research トレンド: AI-native HIL approval)。
+ * agent / human / system の actor を icon + 帯色で分離し、5 step を常時可視化。
+ * business-approval-waiting = 受付/AI処理/入力者確認は完了 → 承認者承認(現在・人の操作) → 反映。
+ * 原則: 「最終承認は必ず人の操作」(agent は提案・入力のみ、approve は human)。
+ */
+type HilActor = 'agent' | 'human' | 'system'
+const HIL_STEPS: { label: string; actor: HilActor }[] = [
+  { label: '受付', actor: 'system' },
+  { label: 'AI 処理', actor: 'agent' },
+  { label: '入力者確認', actor: 'human' },
+  { label: '承認者承認', actor: 'human' },
+  { label: '反映', actor: 'system' },
+]
+const HIL_ACTOR: Record<HilActor, { Icon: typeof BotIcon; band: string }> = {
+  agent: { Icon: BotIcon, band: 'border-[var(--color-primary-soft-border)] bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]' },
+  human: { Icon: UserCheckIcon, band: 'border-[var(--color-border)] bg-[var(--color-panel)] text-[var(--color-fg)]' },
+  system: { Icon: ServerIcon, band: 'border-[var(--color-border)] bg-[var(--color-panel-inset)] text-[var(--color-fg-tertiary)]' },
+}
+
+function HilLifecycleStrip({ row }: { row: ApprovalViewRow }) {
+  const currentIndex = 3 // 承認者承認 = 現在 (business-approval-waiting)
+  return (
+    <div className="flex flex-col gap-2.5">
+      <ol className="flex flex-wrap items-center gap-1">
+        {HIL_STEPS.map((s, i) => {
+          const state = i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'future'
+          const { Icon, band } = HIL_ACTOR[s.actor]
+          return (
+            <li key={s.label} className="flex items-center gap-1">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-[var(--radius-chip)] border px-2 py-1 text-[11px] font-medium',
+                  band,
+                  state === 'current' && 'ring-2 ring-[var(--color-primary)]',
+                  state === 'future' && 'opacity-45',
+                )}
+              >
+                {state === 'done' ? (
+                  <CheckIcon className="h-3 w-3 text-[var(--color-success-soft-fg)]" aria-hidden="true" />
+                ) : (
+                  <Icon className="h-3 w-3" aria-hidden="true" />
+                )}
+                {s.label}
+                {state === 'current' && <span className="text-[10px] text-[var(--color-primary-strong)]">承認待ち</span>}
+              </span>
+              {i < HIL_STEPS.length - 1 && <ChevronRightIcon className="h-3 w-3 flex-shrink-0 text-[var(--color-fg-subtle)]" aria-hidden="true" />}
+            </li>
+          )
+        })}
+      </ol>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[var(--color-fg-muted)]">
+        <span className="inline-flex items-center gap-1"><BotIcon className="h-3 w-3 text-[var(--color-primary-strong)]" aria-hidden="true" />AI 操作</span>
+        <span className="inline-flex items-center gap-1"><UserCheckIcon className="h-3 w-3 text-[var(--color-fg)]" aria-hidden="true" />人の操作</span>
+        <span className="inline-flex items-center gap-1"><ServerIcon className="h-3 w-3 text-[var(--color-fg-tertiary)]" aria-hidden="true" />システム</span>
+        <span className="text-[var(--color-fg-tertiary)]">最終承認は必ず人の操作です（AI は提案・入力のみ）。入力: {row.inputter}（人）／ 最終承認: {row.approver}（人・承認待ち）</span>
+      </div>
+    </div>
+  )
+}
+
 export function Approvals() {
   const { process } = useView()
   const approvals = useApprovals(process)
@@ -123,6 +185,9 @@ export function Approvals() {
           // F-045: mode は persona role が SSOT (F-001) ゆえ ?view=checker は無効な歴史的 query。URL を統制ロジックと一致させ除去。
           rowHref={(r) => `/cases/${r.id}`}
           ariaLabel="承認待ち"
+          // HIL approval (research): 行密度トグル + 行展開で agent/human/system を分離した承認 lifecycle を可視化
+          density
+          renderExpanded={(r) => <HilLifecycleStrip row={r} />}
           filters={filters}
           // 一括承認 = case/bulkApprove(by:checker)。要確認残 (flags>0) があれば一括不可。
           // SoD: 自分が入力者承認した案件は reducer が四眼原則で skip → 承認/スキップ件数を toast で可視化 (B4)。

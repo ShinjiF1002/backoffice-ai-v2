@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon, SearchIcon, ShieldIcon } from 'lucide-react'
+import { Building2Icon, WalletIcon, SparklesIcon, CheckIcon, DownloadIcon, RotateCcwIcon, SearchIcon, ShieldIcon, ActivityIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import {
   OBS_CASE_ID,
@@ -18,7 +18,7 @@ import type { MetaTone } from '@/components/shared/MetaChip'
 import { Modal } from '@/components/shared/Modal'
 import { Toast } from '@/components/shared/Toast'
 import { useToast } from '@/hooks/useToast'
-import { useStoreDispatch, useFlywheelLineage, useCrossLedger } from '@/store/hooks'
+import { useStoreDispatch, useFlywheelLineage, useCrossLedger, useCases } from '@/store/hooks'
 import { clearPersisted } from '@/store/persist'
 import { cn } from '@/lib/cn'
 
@@ -61,6 +61,36 @@ type TabKey = (typeof TABS)[number]['k']
 export function Observatory() {
   const dispatch = useStoreDispatch()
   const lineage = useFlywheelLineage()
+  // Operator Cockpit (集約指標ストリップ): 全業務の案件 live state から運用健全性を導出 (静的 fixture ではなく store-truth)。
+  // /escalations 母集合と同義 (escalation あり かつ resolution 未確定 = 裁定待ち)。
+  const allCases = useCases('all')
+  const cockpit = useMemo(() => {
+    const c = {
+      total: allCases.length,
+      inProgress: 0, // 処理中 (受付〜入力者確認の手前: pending / ready)
+      approvalWaiting: 0, // 承認待ち (business-approval-waiting)
+      needsCheck: 0, // 要確認 項目を抱える案件 (flags > 0)
+      sentBack: 0, // 差戻し (sent-back)
+      escalation: 0, // 業務責任者の裁定待ち (escalation あり・未裁定)
+    }
+    for (const e of allCases) {
+      if (e.status === 'pending' || e.status === 'ready') c.inProgress += 1
+      if (e.status === 'business-approval-waiting') c.approvalWaiting += 1
+      if (e.status === 'sent-back') c.sentBack += 1
+      if (e.flags > 0) c.needsCheck += 1
+      if (e.escalation !== undefined && e.escalation.resolution === undefined) c.escalation += 1
+    }
+    return c
+  }, [allCases])
+  // 横並び集約指標。tone は注意喚起の段階のみ (要確認/差戻し/エスカレーションは alert 系、健全側は neutral)。
+  const cockpitItems: { label: string; value: number; tone?: MetaTone; chip?: string }[] = [
+    { label: '案件総数', value: cockpit.total },
+    { label: '処理中', value: cockpit.inProgress },
+    { label: '承認待ち', value: cockpit.approvalWaiting, tone: cockpit.approvalWaiting > 0 ? 'primary' : undefined, chip: cockpit.approvalWaiting > 0 ? '要対応' : undefined },
+    { label: '要確認', value: cockpit.needsCheck, tone: cockpit.needsCheck > 0 ? 'alert' : undefined, chip: cockpit.needsCheck > 0 ? '注意' : undefined },
+    { label: '差戻し', value: cockpit.sentBack, tone: cockpit.sentBack > 0 ? 'alert' : undefined },
+    { label: 'エスカレーション', value: cockpit.escalation, tone: cockpit.escalation > 0 ? 'alert' : undefined, chip: cockpit.escalation > 0 ? '裁定待ち' : undefined },
+  ]
   const [tab, setTab] = useState<TabKey>('audit')
   const [auditView, setAuditView] = useState<'lifecycle' | 'ledger'>('lifecycle')
   // P1-7: 横断台帳の 案件選択 (workflow) + free-text 検索 (Observatory ローカル、JG-2=b)。期間は「直近30日」固定 (JG-4=b)。
@@ -151,7 +181,31 @@ export function Observatory() {
 
       {/* Body (A 型: 決定 footer なし) */}
       <div className="flex-1 overflow-auto p-5">
-        <div className="mx-auto max-w-[1080px]">
+        <div className="mx-auto flex max-w-[1080px] flex-col gap-4">
+          {/* Operator Cockpit — 集約指標ストリップ (T4 監視 console、boring-reliable)。
+              全業務の案件 live state から運用健全性を一目で掴む。値は store-truth (静的 fixture ではない)。
+              recessive chrome: shadow-sm + border、数値 tabular。glass / 派手 motion なし。 */}
+          <section
+            aria-label="運用サマリー（全業務の集約指標）"
+            className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] p-4 shadow-sm"
+          >
+            <div className="mb-3 flex items-center gap-1.5">
+              <ActivityIcon className="h-3.5 w-3.5 text-[var(--color-fg-muted)]" aria-hidden="true" />
+              <h2 className="text-xs font-semibold text-[var(--color-fg-muted)]">運用サマリー（全業務・現時点）</h2>
+            </div>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
+              {cockpitItems.map((it) => (
+                <div key={it.label} className="flex flex-col gap-1 border-l border-[var(--color-border)] pl-3 first:border-l-0 first:pl-0">
+                  <dt className="text-[11px] text-[var(--color-fg-muted)]">{it.label}</dt>
+                  <dd className="flex items-baseline gap-2">
+                    <span className="tabular text-2xl font-semibold leading-none text-[var(--color-fg)]">{it.value}</span>
+                    {it.chip && it.tone && <MetaChip tone={it.tone} label={it.chip} />}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
           {tab === 'audit' && (
             <div className="flex flex-col gap-3">
               {/* view 切替 + 対象 case */}

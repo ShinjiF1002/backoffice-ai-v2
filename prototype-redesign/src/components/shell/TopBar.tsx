@@ -23,7 +23,7 @@ export function TopBar() {
   // F-037: /search 着地時は page 自前の検索 input に正規化し、TopBar の同名 searchbox を出さない (二重 searchbox 解消)。
   const onSearchPage = location.pathname === '/search'
   return (
-    <header role="banner" className="flex h-14 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-panel)] px-3 sm:px-6">
+    <header role="banner" className="flex h-14 items-center justify-between border-b border-[var(--color-chrome-border)] bg-[var(--color-chrome)] px-3 sm:px-6">
       {/* Left: ProcessSelector (Process-First IA 中核) + 横断検索 */}
       <div className="flex min-w-0 items-center gap-3">
         <ProcessSelector />

@@ -77,9 +77,9 @@ export function Sidebar() {
   const actor = useCurrentActor()
   return (
     <>
-      <aside className="hidden h-full w-56 flex-col border-r border-[var(--color-border)] bg-[var(--color-panel)] md:flex">
+      <aside className="hidden h-full w-56 flex-col border-r border-[var(--color-chrome-border)] bg-[var(--color-chrome)] md:flex">
         {/* Brand */}
-        <div className="flex h-14 items-center border-b border-[var(--color-border)] px-4">
+        <div className="flex h-14 items-center border-b border-[var(--color-chrome-border)] px-4">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--color-primary)] text-white">
               <span className="text-sm font-bold">B</span>
@@ -128,7 +128,7 @@ export function Sidebar() {
         </nav>
 
         {/* 現在の操作者 (remediation B4: hardcode 廃止、persona switcher と同期した store-truth)。切替は TopBar の操作者 switcher。 */}
-        <div className="border-t border-[var(--color-border)] p-2">
+        <div className="border-t border-[var(--color-chrome-border)] p-2">
           <div className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-[var(--color-fg)]">
             <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--color-panel-inset)] font-mono text-xs font-medium text-[var(--color-fg)]">
               {actor ? actor.name.slice(0, 2) : '—'}
@@ -144,7 +144,7 @@ export function Sidebar() {
       {/* Mobile bottom nav (flat、group 見出しなし) */}
       <nav
         aria-label="主要ナビゲーション"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-panel)]/95 px-2 py-1.5 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-chrome-border)] bg-[var(--color-chrome)]/95 px-2 py-1.5 backdrop-blur md:hidden"
       >
         <ul className="flex items-center justify-between gap-1">
           {allItems.map((item) => {

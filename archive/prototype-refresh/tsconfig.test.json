@@ -1,0 +1,12 @@
+{
+  // test 専用 (エディタ/型確認用)。tsconfig.json の references には載せない
+  // → `tsc -b` (build) は本 config を見ず、test file は本番 build から除外されたまま。
+  // 目的: src/__tests__ に `@/` path alias と vitest globals / jest-dom 型を与える。
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "composite": false,
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
+  },
+  "include": ["src/__tests__"],
+  "exclude": ["src/legacy"]
+}

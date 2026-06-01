@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ChevronUpIcon, ChevronDownIcon, ChevronsUpDownIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { FilterChip } from './FilterChip'
 import { EmptyState } from './EmptyState'
@@ -13,11 +13,16 @@ import { LoadingState } from './LoadingState'
  * SSOT: ~/.claude/plans/reactive-percolating-gizmo.md Phase 3 / Track B。
  *
  * typed column config (open children でなく typed props で構造散逸を防ぐ)。
- * 行は <Link> stretched-link 化 (Cmd+click 新規タブ + keyboard 到達 + 可視 focus ring)。
+ * 行は row-level onClick で navigate (Safari の table containing-block 問題を回避)。先頭セルは実 <Link> で Cmd+click 新規タブ + keyboard 到達。
  * 列 sort / 状態+担当 filter (FilterChip) / pinTop (要確認上部固定) / pageSize pagination /
  * selection (複数選択 UI、実行は呼び出し側) / md 未満 card layout / Empty/Error/Loading status。
  *
- * stretched-link の視覚 stretch は browser 依存 → R0 Gate の実ブラウザ smoke で確認 (Phase 3 計画注記)。
+ * REFRESH STUDIO 追加 (Data Table Premium tier、全て optional・後方互換):
+ *   - density: 行の高さを 狭い/標準/広い で切替 (--density-row-* token 消費)。未指定で従来の標準。
+ *   - renderExpanded: 行を inline 展開し peek 詳細を表示 (modal でなく click-to-expand、dense-enterprise)。
+ *   deferred (本番化時): sticky header (要 height-constrained scroller) / inline-edit / virtualization (200+ 行)。
+ *
+ * 旧 stretched-link (::after inset-0) は WebKit/Safari が <tr position:relative> を containing block 化できず overlay が暴れる不具合があり、row onClick に置換済。
  */
 export interface DataTableColumn<Row> {
   key: string
@@ -50,6 +55,15 @@ export interface DataTableSelectionAction<Row> {
 
 export type DataTableStatus = 'ready' | 'loading' | 'empty' | 'filtered-empty' | 'error'
 
+/** Data Table Premium: 行密度 tier (--density-row-* token と対応)。 */
+type Density = 'compact' | 'default' | 'comfortable'
+const DENSITY_LABEL: Record<Density, string> = { compact: '狭い', default: '標準', comfortable: '広い' }
+const DENSITY_CFG: Record<Density, { th: string; td: string; rowVar: string }> = {
+  compact: { th: 'px-3 py-1', td: 'px-3 py-1.5', rowVar: 'var(--density-row-compact)' },
+  default: { th: 'px-4 py-2', td: 'px-4 py-2.5', rowVar: 'var(--density-row-default)' },
+  comfortable: { th: 'px-4 py-2.5', td: 'px-4 py-3.5', rowVar: 'var(--density-row-comfortable)' },
+}
+
 export interface DataTableProps<Row> {
   rows: Row[]
   columns: DataTableColumn<Row>[]
@@ -66,6 +80,10 @@ export interface DataTableProps<Row> {
   pageSize?: number
   /** 複数選択 UI (実行 handler は呼び出し側)。未指定なら選択列なし */
   selection?: { actions: DataTableSelectionAction<Row>[] }
+  /** Data Table Premium: 行密度トグルを出す (狭い/標準/広い)。未指定で従来の標準固定。 */
+  density?: boolean
+  /** Data Table Premium: 行を inline 展開した時の peek 詳細。未指定なら展開列なし。 */
+  renderExpanded?: (row: Row) => ReactNode
   /** 明示 status (loading/error)。未指定なら rows から empty/filtered-empty/ready を自動判定 */
   status?: DataTableStatus
   emptyTitle?: string
@@ -75,9 +93,6 @@ export interface DataTableProps<Row> {
   /** 表下の注記 */
   caption?: ReactNode
 }
-
-const thBase = 'px-4 py-2 font-medium'
-const tdBase = 'px-4 py-2.5'
 
 export function DataTable<Row>({
   rows,
@@ -90,6 +105,8 @@ export function DataTable<Row>({
   filters,
   pageSize,
   selection,
+  density,
+  renderExpanded,
   status,
   emptyTitle = '該当する項目がありません',
   emptyDescription,
@@ -97,15 +114,23 @@ export function DataTable<Row>({
   onRetry,
   caption,
 }: DataTableProps<Row>) {
+  const navigate = useNavigate()
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [active, setActive] = useState<Record<string, string[]>>({})
   const [page, setPage] = useState(0)
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [densityLevel, setDensityLevel] = useState<Density>('default')
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
   const hasActiveFilter = Object.values(active).some((v) => v.length > 0)
   // F-045: 候補が 1 つだけの filter は退化 UI (選んでも絞れない) ゆえ非表示。候補 2 以上の filter のみ出す。
   const visibleFilters = filters?.filter((f) => f.options.length >= 2)
+
+  // density tier: トグル無効時は従来の標準固定 (= 既存画面の render を byte 互換に保つ)。
+  const dcfg = density ? DENSITY_CFG[densityLevel] : DENSITY_CFG.default
+  const thBase = cn('font-medium', dcfg.th)
+  const tdBase = dcfg.td
 
   const filtered = useMemo(() => {
     if (!filters) return rows
@@ -144,6 +169,9 @@ export function DataTable<Row>({
   const effectiveStatus: DataTableStatus =
     status ?? (sorted.length === 0 ? (hasActiveFilter ? 'filtered-empty' : 'empty') : 'ready')
 
+  // 展開列 + 選択列を含む desktop colSpan (展開詳細 row の全幅セル用)。
+  const colSpanTotal = columns.length + (selection ? 1 : 0) + (renderExpanded ? 1 : 0)
+
   const toggleFilter = (filterId: string, value: string) => {
     setActive((prev) => {
       const cur = prev[filterId] ?? []
@@ -165,6 +193,15 @@ export function DataTable<Row>({
       setSortKey(key)
       setSortDir('asc')
     }
+  }
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }
 
   // 選択は filter/sort 後の表示集合 (scope) に正規化。filter で hidden になった ID は
@@ -192,32 +229,62 @@ export function DataTable<Row>({
     })
   }
 
+  const showToolbar =
+    (visibleFilters && visibleFilters.length > 0) || density
+  const showToolbarNow = showToolbar && effectiveStatus !== 'loading' && effectiveStatus !== 'error'
+
   return (
     <div className="flex flex-col gap-3">
-      {/* filter chips — loading/error 中は非表示 (取得状態に操作 UI を残さない、P1-5 CR)。候補 1 つの退化 filter は除外 (F-045) */}
-      {visibleFilters && visibleFilters.length > 0 && effectiveStatus !== 'loading' && effectiveStatus !== 'error' && (
-        <div className="flex flex-wrap items-center gap-3">
-          {visibleFilters.map((f) => (
-            <div key={f.id} className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-medium text-[var(--color-fg-muted)]">{f.label}</span>
-              {f.options.map((o) => (
-                <FilterChip
-                  key={o.value}
-                  label={o.label}
-                  active={(active[f.id] ?? []).includes(o.value)}
-                  onClick={() => toggleFilter(f.id, o.value)}
-                />
+      {/* toolbar: filter chips (left) + density トグル (right)。loading/error 中は非表示 (P1-5 CR)。 */}
+      {showToolbarNow && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {visibleFilters?.map((f) => (
+              <div key={f.id} className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-medium text-[var(--color-fg-muted)]">{f.label}</span>
+                {f.options.map((o) => (
+                  <FilterChip
+                    key={o.value}
+                    label={o.label}
+                    active={(active[f.id] ?? []).includes(o.value)}
+                    onClick={() => toggleFilter(f.id, o.value)}
+                  />
+                ))}
+              </div>
+            ))}
+            {hasActiveFilter && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="text-[11px] font-medium text-[var(--color-primary-strong)] hover:underline"
+              >
+                絞り込みを解除
+              </button>
+            )}
+          </div>
+          {density && (
+            <div
+              role="group"
+              aria-label="行の高さ"
+              className="inline-flex shrink-0 items-center gap-0.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel)] p-0.5 shadow-2xs"
+            >
+              {(Object.keys(DENSITY_LABEL) as Density[]).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  aria-pressed={densityLevel === l}
+                  onClick={() => setDensityLevel(l)}
+                  className={cn(
+                    'rounded-[var(--radius-chip)] px-2 py-1 text-[11px] font-medium transition-colors',
+                    densityLevel === l
+                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
+                      : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]',
+                  )}
+                >
+                  {DENSITY_LABEL[l]}
+                </button>
               ))}
             </div>
-          ))}
-          {hasActiveFilter && (
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="text-[11px] font-medium text-[var(--color-primary-strong)] hover:underline"
-            >
-              絞り込みを解除
-            </button>
           )}
         </div>
       )}
@@ -274,13 +341,18 @@ export function DataTable<Row>({
         />
       ) : (
         <>
-          {/* desktop table (md 以上) */}
-          <div className="hidden overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] md:block">
+          {/* desktop table (md 以上)。elevation-over-borders: card は shadow-sm + 細い border。 */}
+          <div className="hidden overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] shadow-sm md:block">
             <table className="w-full text-sm" aria-label={ariaLabel}>
               <thead>
-                <tr className="border-b border-[var(--color-border)] text-left text-xs text-[var(--color-fg-muted)]">
+                <tr className="border-b border-[var(--color-border)] bg-[var(--color-panel-inset)]/60 text-left text-xs text-[var(--color-fg-muted)]">
+                  {renderExpanded && (
+                    <th className="w-9">
+                      <span className="sr-only">詳細の展開</span>
+                    </th>
+                  )}
                   {selection && (
-                    <th className="w-10 px-4 py-2">
+                    <th className={cn('w-10', dcfg.th)}>
                       <input
                         type="checkbox"
                         aria-label="表示中をすべて選択"
@@ -327,40 +399,82 @@ export function DataTable<Row>({
                 {pageRows.map((row) => {
                   const id = rowKey(row)
                   const href = rowHref(row)
+                  const isExpanded = expanded.has(id)
                   return (
-                    <tr
-                      key={id}
-                      className={cn(
-                        'relative border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-panel-inset)] focus-within:bg-[var(--color-panel-inset)]',
-                        rowClassName?.(row),
-                      )}
-                    >
-                      {selection && (
-                        <td className="relative z-10 w-10 px-4 py-2.5">
-                          <input
-                            type="checkbox"
-                            aria-label={`${id} を選択`}
-                            checked={selected.has(id)}
-                            onChange={() => toggleSelectRow(id)}
-                          />
-                        </td>
-                      )}
-                      {columns.map((c, ci) => (
-                        <td key={c.key} className={cn(tdBase, c.className)}>
-                          {/* 先頭セルに stretched-link を置き行全体をクリック可能化 (内側 interactive は relative z-10) */}
-                          {ci === 0 && href ? (
-                            <Link
-                              to={href}
-                              className="after:absolute after:inset-0 after:rounded-[var(--radius-control)] after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--color-primary)]"
+                    <Fragment key={id}>
+                      <tr
+                        style={density ? { height: dcfg.rowVar } : undefined}
+                        // Safari 修正: stretched-link (::after inset-0) は WebKit が <tr position:relative> を
+                        // containing block 化できず overlay が table 全体を覆い「最後の行」が全 click を奪っていた
+                        // (= 別画面に飛ぶ / 二度押し)。row-level onClick に置換し overlay を撤廃。
+                        onClick={
+                          href
+                            ? (e) => {
+                                if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                                if (window.getSelection()?.toString()) return // テキスト選択中は遷移しない
+                                navigate(href)
+                              }
+                            : undefined
+                        }
+                        className={cn(
+                          'border-b border-[var(--color-border)] hover:bg-[var(--color-panel-inset)] focus-within:bg-[var(--color-panel-inset)]',
+                          renderExpanded && isExpanded ? '' : 'last:border-b-0',
+                          href && 'cursor-pointer',
+                          rowClassName?.(row),
+                        )}
+                      >
+                        {renderExpanded && (
+                          // 展開トグルは行遷移と分離 (stopPropagation)
+                          <td className="w-9 pl-3" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              aria-expanded={isExpanded}
+                              aria-label={isExpanded ? `${id} の詳細を閉じる` : `${id} の詳細を展開`}
+                              onClick={() => toggleExpand(id)}
+                              className="flex h-6 w-6 items-center justify-center rounded-[var(--radius-chip)] text-[var(--color-fg-tertiary)] hover:bg-[var(--color-border)] hover:text-[var(--color-fg)]"
                             >
-                              {c.cell(row)}
-                            </Link>
-                          ) : (
-                            c.cell(row)
-                          )}
-                        </td>
-                      ))}
-                    </tr>
+                              <ChevronRightIcon
+                                className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-90')}
+                              />
+                            </button>
+                          </td>
+                        )}
+                        {selection && (
+                          // チェックボックスは行遷移と分離 (stopPropagation)
+                          <td className={cn('w-10', tdBase)} onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              aria-label={`${id} を選択`}
+                              checked={selected.has(id)}
+                              onChange={() => toggleSelectRow(id)}
+                            />
+                          </td>
+                        )}
+                        {columns.map((c, ci) => (
+                          <td key={c.key} className={cn(tdBase, c.className)}>
+                            {/* 先頭セルは実 <Link> (a11y / ⌘+click)。stopPropagation で行 onClick と二重遷移しない。 */}
+                            {ci === 0 && href ? (
+                              <Link
+                                to={href}
+                                onClick={(e) => e.stopPropagation()}
+                                className="rounded-[var(--radius-control)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                              >
+                                {c.cell(row)}
+                              </Link>
+                            ) : (
+                              c.cell(row)
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                      {renderExpanded && isExpanded && (
+                        <tr className="border-b border-[var(--color-border)] last:border-b-0">
+                          <td colSpan={colSpanTotal} className="bg-[var(--color-panel-inset)] px-4 py-3">
+                            {renderExpanded(row)}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   )
                 })}
               </tbody>
@@ -372,6 +486,7 @@ export function DataTable<Row>({
             {pageRows.map((row) => {
               const id = rowKey(row)
               const href = rowHref(row)
+              const isExpanded = expanded.has(id)
               const content = columns.map((c) => (
                 <div key={c.key} className="flex items-baseline justify-between gap-3 py-0.5 text-sm">
                   {c.mobileLabel !== false && <span className="shrink-0 text-[11px] text-[var(--color-fg-muted)]">{c.header}</span>}
@@ -382,28 +497,44 @@ export function DataTable<Row>({
                 <li
                   key={id}
                   className={cn(
-                    'flex items-start gap-2 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] p-3',
+                    'flex flex-col gap-2 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-panel)] p-3 shadow-2xs',
                     rowClassName?.(row),
                   )}
                 >
-                  {selection && (
-                    <input
-                      type="checkbox"
-                      aria-label={`${id} を選択`}
-                      checked={selected.has(id)}
-                      onChange={() => toggleSelectRow(id)}
-                      className="mt-1 shrink-0"
-                    />
-                  )}
-                  {href ? (
-                    <Link
-                      to={href}
-                      className="block min-w-0 flex-1 rounded-[var(--radius-control)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-                    >
-                      {content}
-                    </Link>
-                  ) : (
-                    <div className="min-w-0 flex-1">{content}</div>
+                  <div className="flex items-start gap-2">
+                    {selection && (
+                      <input
+                        type="checkbox"
+                        aria-label={`${id} を選択`}
+                        checked={selected.has(id)}
+                        onChange={() => toggleSelectRow(id)}
+                        className="mt-1 shrink-0"
+                      />
+                    )}
+                    {href ? (
+                      <Link
+                        to={href}
+                        className="block min-w-0 flex-1 rounded-[var(--radius-control)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div className="min-w-0 flex-1">{content}</div>
+                    )}
+                    {renderExpanded && (
+                      <button
+                        type="button"
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded ? `${id} の詳細を閉じる` : `${id} の詳細を展開`}
+                        onClick={() => toggleExpand(id)}
+                        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--radius-chip)] text-[var(--color-fg-tertiary)] hover:bg-[var(--color-panel-inset)]"
+                      >
+                        <ChevronRightIcon className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-90')} />
+                      </button>
+                    )}
+                  </div>
+                  {renderExpanded && isExpanded && (
+                    <div className="rounded-[var(--radius-control)] bg-[var(--color-panel-inset)] p-3">{renderExpanded(row)}</div>
                   )}
                 </li>
               )

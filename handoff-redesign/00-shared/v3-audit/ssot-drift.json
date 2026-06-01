@@ -1,0 +1,217 @@
+[
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-01",
+  "note": "lifecycle view は固定 fixture (OBS_LIFECYCLE) であり、対象 case を reset/操作で sent-back や reversal に変えても lifecycle タイムラインは CASE-2026-0142 の静的 5 event のまま更新されない → live 案件 status と乖離しうる。SSOT-drift: docs は『lifecycle は live 案件由来』と読めるが実装は static fixture。"
+ },
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-02",
+  "note": "SSOT-drift: タスク前提では『期間 絞込』が挙がるが、ledger の期間は『直近 30 日』固定で期間 filter control は存在しない (副題と画面コメントに hardcode)。日付範囲指定はできない。"
+ },
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-02",
+  "note": "SSOT-drift: タスク前提の『期間/actor/action 絞込』のうち期間軸が欠落。actor/action/workflow/free-text の 4 軸のみ。"
+ },
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-03",
+  "note": "メトリクスは静的 OBS_METRICS (KPI_ROWS) 由来で、案件の承認/差戻し/reset を行っても実績値は再計算されない → live 状態と乖離。監査者が『この実績は現在の処理から算出』と期待すると誤り。SSOT-drift: KPI は store-truth 由来でなく frozen fixture。"
+ },
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-04",
+  "note": "SSOT-drift: 承認済ナレッジ (OBS_KNOWLEDGE) は静的 fixture で、設定承認 (agent/approvePromotion) を実行しても承認済リストには反映されない。lineage (動的) と承認済ナレッジ (静的) の整合が保証されない。"
+ },
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-05",
+  "note": "SSOT-drift / 証跡欠落: CROSS_LEDGER は OBS_LEDGER + CASE_LIST(seed) を flatten した静的 fixture で、case/create で新規追加された CASE-MANUAL-NNN は CROSS_LEDGER に反映されない → 手動起票案件は証跡台帳に痕跡が残らない。監査者の『全操作が台帳に記録される』前提に対する重大な完全性ギャップ。"
+ },
+ {
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプ",
+  "journey": "AUD-06",
+  "note": "toast は role=status で 2600ms 後に自動消去 — 監査ログとして reset 実行の恒久痕跡は残らない (証跡台帳にも reset action は記録されない)。SSOT-drift: 『全操作が台帳に残る』前提に対し、reset/persona switch/エクスポートは台帳非記録。"
+ },
+ {
+  "stakeholder": "AI管理者 (AI administrator) — Age",
+  "journey": "AIADMIN-J1",
+  "note": "SSOT-drift: route-summary.json で /agents の axeSerious=16 (color-contrast serious)。Agent 一覧の全件確認 chip / persona『操作者』ラベル / PrototypeModeLabel pill が WCAG コントラスト未達。flawless 監査では指摘対象 (規制担当が a11y 100% を要求した場合 fail)"
+ },
+ {
+  "stakeholder": "AI管理者 (AI administrator) — Age",
+  "journey": "AIADMIN-J2",
+  "note": "SSOT-drift: route-summary.json で /agents/:id の axeSerious=22 (color-contrast serious、最大級)。axe node は『全件確認』consequence ラベル, 操作者ラベル, prototype pill, 業務責任者ビュー chip。flawless 監査では a11y 指摘対象"
+ },
+ {
+  "stakeholder": "AI管理者 (AI administrator) — Age",
+  "journey": "AIADMIN-J3",
+  "note": "SSOT-drift: ドメインモデル記述の『設定昇格も同論理 (SoD)』は申請段階ではなく承認段階に効く。申請は誰でも可で SoD block は approvePromotion のみ — 申請動線だけ見ると SoD が無いように見えるが正しい設計"
+ },
+ {
+  "stakeholder": "AI管理者 (AI administrator) — Age",
+  "journey": "AIADMIN-J5",
+  "note": "SSOT-drift: ドメインモデル『persona 切替: actor-inputter/checker/approver』のうち、AgentDetail owner mode に入れるのは business-approver (actor-approver) のみ。checker (承認者) は manual mode 扱いで設定承認できない (agent-detail__desktop__checker.png で申請 footer disabled を確認) — 案件の承認者と設定の承認者は別レイヤ"
+ },
+ {
+  "stakeholder": "AI管理者 (AI administrator) — Age",
+  "journey": "AIADMIN-J5",
+  "note": "SSOT-drift: route-summary.json で /config-approvals axeSerious=18。queue の chip / persona ラベルが color-contrast serious"
+ },
+ {
+  "stakeholder": "AI管理者 (AI administrator) — Age",
+  "journey": "AIADMIN-J6",
+  "note": "SSOT-drift: ?demo=loading / ?demo=error は『list route』に効く (Agents は対応)。AgentDetail (/agents/:id) は demo state パラメータ非対応 — 詳細画面の loading/error 縮退は存在しない (取得失敗時の振る舞い未定義、本番では要設計)"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-01",
+  "note": "SSOT-drift: route-summary.json で hub の axe-serious color-contrast が x16/x10/x14 と全 route 中最多 (axeSerious 40)。KPI 大数字 (font-mono text-3xl, primary/alert soft-fg) や white/85 CTA テキストのコントラストが WCAG AA 未達の疑い。当局 (a11y) 指摘リスク"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-01",
+  "note": "最終更新「2026-05-30 11:42」は static 文字列 (Hub.tsx ハードコード)。store 操作後も更新されない — 鮮度の誤認リスク (SSOT-drift: live で操作しても日時不変)"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-02",
+  "note": "demo=loading: /cases?demo=loading で skeleton 行が表示される。ただしヘッダ件数は「8 件」のまま (rows.length は load 状態と無関係に算出) — SSOT-drift 候補: loading 中も確定件数を見せる"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-02",
+  "note": "demo=error: /cases?demo=error で「データの取得に失敗しました」+「再試行」button が table 領域を置換。ただしヘッダは「8 件」と caption「要確認のある案件を上部に強調表示しています。」が残り、error と矛盾する文言が同居 — SSOT-drift: error 時に件数/caption を抑止していない"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-03",
+  "note": "SSOT-drift: route-summary で case-detail の axeSerious=23・focusSteps=28。文書ビューアの faux paper (paper-label/paper-ink token) や line-through previousValue のコントラスト要確認"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-05",
+  "note": "seed 由来の差戻し案件 (CASE-2026-0131) は理由未記録 → banner fallback 文言「差し戻された案件です。内容を確認してください。」。in-session 差戻しは理由保持 — SSOT-drift 候補: seed と in-session で理由表示が非対称"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-06",
+  "note": "エスカレーション後の案件状態: status 不変のため /cases では依然 ready/要確認のまま表示。エスカレ済の視覚的マーカーが CaseDetail / 一覧に無い — SSOT-drift 候補: escalation 記録が案件詳細上で入力者に明示されない (banner は sendback/reversal のみ)"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-07",
+  "note": "SLA 警告通知は scope-0 (JG-b、datetime化範囲外)。SLA 系通知は存在しない — SSOT-drift 候補: Hub の SLA KPI はあるが通知連動は無い"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-09",
+  "note": "SSOT-drift: docs では『9画面』が baseline だが /cases/new は W3 C4 で追加された 15画面目。古い SSOT 記述は陳腐化 (App.tsx が SSOT)"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-10",
+  "note": "route に RBAC 無し: 入力者が /business-approver /config-approvals /escalations /approvals を全て開ける (App.tsx に role guard 無)。SSOT(ドメインモデルの6role)は権限分離を謳うが live はナビ自由 — SSOT-drift: 画面アクセス制御は prototype scope-out (本番 RBAC は carve)。監査では『prototype は操作面の SoD のみ強制、画面アクセス制御は未実装』と明記すべき"
+ },
+ {
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-i",
+  "journey": "INP-11",
+  "note": "mobile case-detail の LifecycleStepper: 375px で step ラベル(受付/AI処理/入力者確認/承認者確認/反映)が横並びで重なり/truncate する (『入力者確承認者確反映』のような圧縮表示) — SSOT-drift 候補: 狭幅で stepper ラベルの可読性低下 (visual 指摘リスク)"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-01",
+  "note": "SSOT-drift: 旧 audit (production-readiness-audit.md) の『全行が同一 case を開く X-10』は live では解消済 (台帳各行が r.caseId へ個別 drill)。docs を信じると誤指摘になる"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-02",
+  "note": "SSOT-drift: ?view=checker のような URL query での mode 強制は廃止され、mode は currentActor.role 由来に統一済 (CaseDetail.tsx)。approvals の rowHref は `?view=checker` を残すが mode 決定には使われない (歴史的 query、観察者が view 切替を URL で偽装できると誤解しうる)"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-03",
+  "note": "SSOT-drift: 旧 audit の『kill-switch 不在 UX-05』は live では解消済 (header に緊急停止/再開、reducer に emergencyStop/resume)。docs を信じると誤指摘。MEMORY/CLAUDE.md も kill-switch を flywheel 観測化で実装済と記録"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-04",
+  "note": "SSOT-drift: PrototypeModeLabel.tsx の SSOT コメントは『9 画面横断 + BusinessApprovalView mock』と古い 9 画面前提を残すが、live では 15 route 全てに適用済 (TopBar 経由)。docs の 9 画面記述は陳腐化"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-05",
+  "note": "SSOT-drift: allowed-actions-and-state-transitions.md (docs) が SSOT を主張するが、reflected の可逆化 (W3 C3) は後発で、docs が『reflected は終端』と古い記述を残す場合は live (可逆) と矛盾。docs を信じると誤指摘"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-06",
+  "note": "SSOT-drift: ProposalDetail の proposal/sendback dispatch は後発補完 (コメント『欠落していた...を補完』) で、旧 docs/audit が『差戻し dispatch 欠落』を主張する場合は live (実装済) と矛盾"
+ },
+ {
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: S",
+  "journey": "GOV-07",
+  "note": "SSOT-drift: CLAUDE.md/MEMORX は 15 route・業務責任者面 3 分離を実装済と記録するが、PrototypeModeLabel/CaseDetail 等のソース内 SSOT コメントは旧 9 画面前提を残す。docs 内でも新旧記述が混在し、observer が『どの route が canonical か』を docs だけでは判断できない (roadmap §1b が現行 SSOT と CLAUDE.md が指示)"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J1-triage-forward",
+  "note": "SSOT-drift: inventory-raw.json の proposal-detail は 入力者(actor-inputter) で採取されたため manual mode 控え(却下/上長へ送付)のみ記録。owner mode(承認/差戻し)は記録されていない — 後続監査はこの非対称に注意"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J1-triage-forward",
+  "note": "SSOT-drift: 提案一覧ヘッダの本文コピーは「日次提案分析」表記で cron/trigger 語を排除。types コメントの内部語(staging/threshold/OCR)は UI 非露出を live 確認済"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J2-owner-approve-proposal",
+  "note": "persona 自動切替なし: 業務責任者ハブへ来ても操作者は入力者のまま。手順管理者が誤って入力者のまま提案を開くと owner ボタンは出ない — 運用上の落とし穴 (SSOT-drift: docs にこの手動切替要件の明記が薄い)"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J2-owner-approve-proposal",
+  "note": "SSOT-drift: PROP-2026-028 を owner で開くと name『承認』が複数(stepper『上長承認』ラベル等)に一致し得る。実操作ボタンはフッターの単一決定面のみ — 自動監査の locator は exact:true 必須"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J3-config-promotion-approve",
+  "note": "未達 Agent は申請不能: agent-corporate-address-change(UC-BO-01) は AI入力承認率92%<95%(achieved:false) で 設定変更を申請 が恒久 disabled。タスク代表ID『agent-corporate-address-change』では 設定承認 approve フローを実演不能 — UC-BO-02 を使う必要あり (SSOT-drift: 代表 detail ID の選定が承認フロー実演に不適)"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J4-escalation-arbitrate",
+  "note": "裁定=新 action を増やさない: 裁定の帰結は既存 case/sendback を再利用(JG-3=a)。専用『裁定』action や承認ボタンは無く、差戻しが唯一の裁定手段 — 監査で『裁定操作の独立 audit event 不在』を指摘され得る (SSOT-drift 候補)"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J5-cross-cutting-chrome",
+  "note": "axe color-contrast: 全 route で serious(主に color-contrast)が検出されている(proposal-detail x45・hub x40 等、route-summary.json)。focusSteps の ringMissing は 0(可視 focus ring は全到達 control で担保)。規制監査の WCAG AA 観点で color-contrast 是正が残課題 (SSOT-drift: production-readiness の『解消済』主張と齟齬の可能性、要再検証)"
+ },
+ {
+  "stakeholder": "業務責任者 (business-approver) + Ma",
+  "journey": "J5-cross-cutting-chrome",
+  "note": "SSOT-drift: inventory-raw.json は全 route で 操作者=山田太郎(入力者) 採取のため、業務責任者固有の owner chrome 状態(ハブカウントの urgent tone 等)は静的証跡に不在 — owner 系は J2-J4 で live 検証済を正とする"
+ },
+ {
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認",
+  "journey": "CHK-01",
+  "note": "SSOT-drift (CRITICAL SoD表示不整合): 承認待ちキューの行は CASE_DETAILS dict 由来で『入力者 鈴木課長 → 承認者 田中部長』と表示するが、同一案件 CASE-2026-0128 の詳細footerは store の inputApprovedBy (seed=actor-inputter=山田太郎) 由来で『入力者 山田太郎 ≠ 承認者 鈴木課長』と表示する。同じ案件で『入力者』が一覧では鈴木課長、詳細では山田太郎と食い違い、しかも鈴木課長が一覧では入力者・詳細では承認者として現れる。規制監査 (四眼原則の actor 同定) で確実に指摘される。原因: 一覧 inputter=CASE_DETAILS[id].inputter (owner=assignee 由来)、詳細 inputApproverName=actorById(entity.inputApprovedBy)。code内コメント (CaseDetail.tsx:107-110) も混同を認識しているが一覧側を直していない。"
+ },
+ {
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認",
+  "journey": "CHK-02",
+  "note": "SSOT-drift確認: screen-contracts-v2 は『差戻しコメント必須』を要求、live で理由空送信が弾かれることを確認済 (drift なし、claim 妥当)。"
+ },
+ {
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認",
+  "journey": "CHK-05",
+  "note": "SSOT-drift (CRITICAL, SoD ブロック到達不能): reducer の isSelfApproval / useCanApprove の自己承認 block (『入力者として承認済みのため最終承認できません — 別の担当者に切替えてください（四眼原則）』) は inputApprovedBy===currentActorId のときのみ発火する。だが mode は actor の role から導出 (inputter→input / checker→checker) され、入力者承認できるのは inputter role の actor のみ、最終承認できるのは checker role のみ。同一 actor が両 role を持てないため inputApprovedBy が checker actor になる経路が存在せず、自己承認 block メッセージは UI から到達不能 (dead path)。SSOT (domain-model/remediation B4) は『自己承認 block を必ず journey 化』と主張するが、live では実演不能。監査では『四眼原則は実装されているが、その self-approval guard が demo で発火しないため検証不能』と指摘されうる。"
+ },
+ {
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認",
+  "journey": "CHK-07",
+  "note": "SSOT-drift確認: 旧 audit の『参照専用案件で操作できてしまう false-success』claim は現 live では解消済 (readOnly guard 機能)。"
+ }
+]

@@ -33,6 +33,21 @@ describe('W3 C4 manual entry: /cases/new 手動起票 form', () => {
     expect(screen.getByText('案件 ID（自動採番）')).toBeInTheDocument()
   })
 
+  it('F-008: error は role=alert で通知され、最初の無効 field へ focus が移り aria-describedby が紐づく', async () => {
+    const user = userEvent.setup()
+    renderAt('/cases/new')
+    await user.click(screen.getByRole('button', { name: '起票する' }))
+    // role=alert で SR 通知
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('全項目を入力してください')
+    // 最初の無効 field (法人名) へ programmatic focus
+    const first = screen.getByLabelText('法人名')
+    expect(first).toHaveFocus()
+    // 無効 input は aria-invalid + aria-describedby=error id
+    expect(first).toHaveAttribute('aria-invalid', 'true')
+    expect(first).toHaveAttribute('aria-describedby', 'casedraft-error')
+  })
+
   it('全項目入力 → 起票 → store-only draft が CaseDetail で開け入力値が確認済表示 (旧 AI 値は出ない)', async () => {
     const user = userEvent.setup()
     renderAt('/cases/new')
@@ -47,6 +62,27 @@ describe('W3 C4 manual entry: /cases/new 手動起票 form', () => {
     expect(screen.getAllByText('東京都港区テスト 1-2-3').length).toBeGreaterThan(0)
     // 旧 AI 既定値 (上書き済) は出ない
     expect(screen.queryByText('株式会社サンプル商事')).not.toBeInTheDocument()
+  })
+
+  it('F-006/F-007/F-051: 手動起票 detail は AI処理/OCR/.pdf/押印/「AI 入力項目」を捏造せず手入力として表示', async () => {
+    const user = userEvent.setup()
+    renderAt('/cases/new')
+    await user.type(screen.getByLabelText('法人名'), '株式会社テスト商事')
+    await user.type(screen.getByLabelText('新住所'), '東京都港区テスト 1-2-3')
+    await user.type(screen.getByLabelText('ビル名'), 'テストビル')
+    await user.type(screen.getByLabelText('支店コード'), '099')
+    await user.type(screen.getByLabelText('効力発生日'), '2026-06-20')
+    await user.click(screen.getByRole('button', { name: '起票する' }))
+    await screen.findAllByText('株式会社テスト商事') // navigate 完了待ち
+
+    // 起きていない AI/OCR/書類/押印 を捏造しない (F-006)
+    expect(screen.queryByText('AI処理')).not.toBeInTheDocument()
+    expect(screen.queryByText('AI 入力項目')).not.toBeInTheDocument() // 手入力なので AI ラベルは出さない (F-007)
+    expect(screen.queryByText(/\.pdf/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/押印/)).not.toBeInTheDocument()
+    // 手入力として honest に表示 (origin='manual')
+    expect(screen.getByText('手入力項目（書類走査なし）')).toBeInTheDocument()
+    expect(screen.getByText('手入力値の控え（スキャン画像なし）')).toBeInTheDocument()
   })
 
   it('業務切替で入力項目が口座開設の field 集合に変わる (全項目手入力)', async () => {

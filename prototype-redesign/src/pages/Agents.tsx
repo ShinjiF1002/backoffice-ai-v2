@@ -5,6 +5,9 @@ import { MetaChip } from '@/components/shared/MetaChip'
 import { MiniTrend } from '@/components/shared/MiniTrend'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { MODEL_INVENTORY, VALIDATION_TONE } from '@/data/mock-governance'
+import type { ValidationStatus } from '@/data/mock-governance'
 import { useAgents } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { useListData } from '@/hooks/useListData'
@@ -30,6 +33,15 @@ const TRUST_EN: Record<TrustLevel, string> = {
 /** list mock + store の昇格申請状態 / 緊急停止状態を join した view row。 */
 type AgentViewRow = AgentListRow & { promotionRequested: boolean; paused: boolean }
 
+// F-039: Agents 一覧をモデル台帳として拡張 — 各 Agent の embedded model の独立検証状況を集約 (最悪値)。
+//   詳細な台帳/版/drift はモニタリングの「モデルガバナンス」タブに集約。
+const VALIDATION_RANK: Record<ValidationStatus, number> = { 要再検証: 0, 検証中: 1, 独立検証済: 2 }
+function agentValidation(agentId: string): ValidationStatus | undefined {
+  const rows = MODEL_INVENTORY.filter((m) => m.agentId === agentId)
+  if (rows.length === 0) return undefined
+  return rows.reduce((worst, m) => (VALIDATION_RANK[m.validation] < VALIDATION_RANK[worst] ? m.validation : worst), rows[0]!.validation)
+}
+
 const columns: DataTableColumn<AgentViewRow>[] = [
   { key: 'name', header: 'Agent', className: 'text-[var(--color-fg)]', cell: (r) => r.name, sortValue: (r) => r.name },
   { key: 'workflow', header: '業務', className: 'text-[var(--color-fg-muted)]', cell: (r) => r.workflow },
@@ -54,6 +66,16 @@ const columns: DataTableColumn<AgentViewRow>[] = [
         <span className="text-[10px] text-[var(--color-fg-tertiary)]">[仮説/要検証]</span>
       </span>
     ),
+  },
+  {
+    // F-039: モデル検証状況 (model inventory の独立検証) を一覧に出す。詳細はモニタリング「モデルガバナンス」タブ。
+    key: 'validation',
+    header: 'モデル検証',
+    sortValue: (r) => agentValidation(r.id) ?? '',
+    cell: (r) => {
+      const v = agentValidation(r.id)
+      return v ? <MetaChip tone={VALIDATION_TONE[v]} label={v} /> : <span className="text-[var(--color-fg-tertiary)]">—</span>
+    },
   },
   {
     key: 'promotable',
@@ -104,13 +126,10 @@ export function Agents() {
   const list = useListData(rows)
   return (
     <div className="flex flex-col">
-      <header
-        data-page-header
-        className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
-      >
-        <h1 className="text-lg font-semibold text-[var(--color-fg)]">Agent 設定 — エージェント一覧</h1>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">業務別 AI Agent の自動化レベルと直近の実績 · {rows.length} 件</p>
-      </header>
+      <PageHeader
+        title="Agent 設定 — エージェント一覧"
+        subtitle={<>業務別 AI Agent の自動化レベルと直近の実績{!list.status && ` · ${rows.length} 件`}</>}
+      />
 
       <div className="p-4">
         <DataTable

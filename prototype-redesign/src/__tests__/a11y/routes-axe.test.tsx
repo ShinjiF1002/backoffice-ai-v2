@@ -45,3 +45,22 @@ describe('W3 G9/G11 — 15 route 全画面 axe smoke (構造 a11y)', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 })
+
+describe('F-050 Bypass Blocks — skip-link + main landmark', () => {
+  it('本文へスキップ link が #main-content を指し、main は focus 受け皿 (tabIndex=-1)', () => {
+    const { container } = renderAt('/cases')
+    const skip = container.querySelector('a[href="#main-content"]')
+    expect(skip).not.toBeNull()
+    expect(skip).toHaveTextContent('本文へスキップ')
+    const main = container.querySelector('main#main-content')
+    expect(main).not.toBeNull()
+    expect(main).toHaveAttribute('tabindex', '-1')
+  })
+
+  it('複数 nav landmark が区別される aria-label を持つ (サイドバー / 主要)', () => {
+    const { container } = renderAt('/cases')
+    const labels = Array.from(container.querySelectorAll('nav')).map((n) => n.getAttribute('aria-label'))
+    expect(labels).toContain('サイドバーナビゲーション')
+    expect(labels).toContain('主要ナビゲーション')
+  })
+})

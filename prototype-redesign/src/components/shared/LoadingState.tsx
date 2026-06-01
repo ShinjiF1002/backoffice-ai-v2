@@ -34,11 +34,11 @@ export function LoadingState(props: LoadingStateProps) {
         role="status"
         aria-live="polite"
         className={cn(
-          'inline-flex items-center gap-2 rounded-md bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-muted)]',
+          'inline-flex items-center gap-2 rounded-md bg-[var(--color-panel-inset)] px-3 py-2 text-xs text-[var(--color-fg-tertiary)]',
           className
         )}
       >
-        <Loader2Icon className="h-3.5 w-3.5 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
+        <Loader2Icon className="h-3.5 w-3.5 animate-spin text-[var(--color-primary-strong)]" aria-hidden="true" />
         <span>{message ?? '読み込み中...'}</span>
       </div>
     )

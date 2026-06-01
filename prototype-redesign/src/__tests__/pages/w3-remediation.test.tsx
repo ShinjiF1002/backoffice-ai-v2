@@ -65,8 +65,9 @@ describe('P0-W3 B4: persona 切替で操作ビュー + 承認 gate が変わる 
     const user = userEvent.setup()
     renderAt('/cases/CASE-2026-0128') // business-approval-waiting (一覧 owner=鈴木課長 / 入力者承認 actor=山田太郎)
 
-    // 既定 persona = 入力者 → 入力者ビュー → baw は入力者確認段階でないため承認 disabled
-    expect(screen.getByRole('button', { name: '承認' })).toBeDisabled()
+    // 既定 persona = 入力者 → 入力者ビュー → baw は入力者確認段階でないため承認ボタンを出さず (F-041)、承認者待ちの状態カードを出す
+    expect(screen.queryByRole('button', { name: '承認' })).not.toBeInTheDocument()
+    expect(screen.getByText(/承認者の最終承認待ち/)).toBeInTheDocument()
 
     // 操作者を承認者 (鈴木課長) に切替 → 承認者ビュー → SoD 成立 (入力者≠承認者) で最終承認可
     await user.selectOptions(screen.getByRole('combobox', { name: '操作者（デモ用の担当者）の切替' }), 'actor-checker')
@@ -154,6 +155,27 @@ describe('P0-W3 flywheel: AgentDetail 緊急停止 → 一覧反映', () => {
     await user.click(screen.getByRole('button', { name: '緊急停止する' }))
     expect(screen.getAllByText('緊急停止中').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: '設定変更を申請' })).toBeDisabled()
+  })
+
+  it('F-014: 再開は 1-click でなく確認 + 再開理由必須、解除で緊急停止中が消える', async () => {
+    const user = userEvent.setup()
+    renderAt('/agents/agent-account-opening')
+    // 停止
+    await user.click(screen.getByRole('button', { name: '緊急停止' }))
+    await user.type(screen.getByLabelText('停止理由（必須）'), '異常検知のため停止')
+    await user.click(screen.getByRole('button', { name: '緊急停止する' }))
+    expect(screen.getAllByText('緊急停止中').length).toBeGreaterThan(0)
+    // 再開ボタンは即座には解除しない → 確認 dialog が開く
+    await user.click(screen.getByRole('button', { name: '再開' }))
+    expect(screen.getByRole('button', { name: '再開する' })).toBeInTheDocument()
+    // 理由未入力では再開不可
+    await user.click(screen.getByRole('button', { name: '再開する' }))
+    expect(screen.getByText('入力してください')).toBeInTheDocument()
+    expect(screen.getAllByText('緊急停止中').length).toBeGreaterThan(0) // まだ停止中
+    // 理由入力 → 再開 → 緊急停止中 が消える
+    await user.type(screen.getByRole('textbox'), '原因を修正し再開可と判断')
+    await user.click(screen.getByRole('button', { name: '再開する' }))
+    expect(screen.queryByText('緊急停止中')).not.toBeInTheDocument()
   })
 
   it('緊急停止後、一覧 (/agents) の該当行に緊急停止中が反映される (P0 evidence)', async () => {

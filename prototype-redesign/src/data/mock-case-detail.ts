@@ -30,6 +30,12 @@ export interface DocumentRow {
 export interface CaseDetailModel {
   id: string
   workflowName: string
+  /**
+   * 起票経路 (F-006/F-007 honesty)。`'ai'` = AI 抽出 + 書類走査あり (既定)、`'manual'` = 手動起票 (人手入力・書類走査なし)。
+   * UI は本値で「AI 入力項目 / 手入力項目」「書類ビューア / 手入力値の控え」「AI処理 step の有無」を分岐し、
+   * 手動起票案件で起きていない AI 処理・OCR・スキャン書類・押印を捏造表示しない。
+   */
+  origin: 'ai' | 'manual'
   /** 案件 status (remediation status-badge-resolver / 2b)。header badge・stepper の tone/label を resolver で導出する source。 */
   status: CaseStatus
   statusLabel: string
@@ -45,11 +51,17 @@ export interface CaseDetailModel {
   }
   lifecycle: CaseLifecycleEvent[]
   citations: { title: string; id: string; version: string; date: string }[]
+  /**
+   * 参照専用の過去案件に付す履歴注記 (F-021)。手順改定提案の根拠 (= AI が基準内で誤確定し後に是正・再反映された実例) を
+   * drill-in 先で明示し、提案 lineage の「誤確定の実例」claim と案件記録 (反映済) の整合を取る。
+   */
+  historyNote?: string
 }
 
 export const CASE_2026_0142: CaseDetailModel = {
   id: 'CASE-2026-0142',
   workflowName: '法人住所変更',
+  origin: 'ai',
   status: 'ready', // 確認待ち (入力者確認段階)。badge/stepper は CaseDetail で liveStatus 経由 resolve。
   statusLabel: '入力者確認待ち',
   inputter: '山田太郎',
@@ -114,7 +126,7 @@ export const CASE_2026_0142: CaseDetailModel = {
       { label: '支店コード', value: '042', fieldLabel: '支店コード' },
       { label: '新住所', value: '千代田区丸の内２－３－５ サンプルビルディング８Ｆ', fieldLabel: 'ビル名', highlight: true },
       { label: '効力発生日', value: '2026-06-15', fieldLabel: '効力発生日' },
-      { label: '押印 / 署名欄', value: '(押印済)' },
+      { label: '押印 / 署名欄', value: '(押印済・サンプル)' },
     ],
   },
   // mock-fixture §8: 業務順 lifecycle (current = 入力者確認)
@@ -144,20 +156,28 @@ function approverFor(inputter: string): string {
   return inputter === '鈴木課長' ? '田中部長' : '鈴木課長'
 }
 
-/** 既定 5 項目 (全 matched)。change がある field は申請後の新値を反映。 */
+/** 既定 5 項目 (全 matched)。change がある field は申請後の新値 (change.to) を確定値に反映。 */
 function baseFields(change?: CaseListRow['change']): FieldReview[] {
-  const newAddr = change?.field === '新住所' ? change.to : '東京都千代田区丸の内 2 丁目 3 番 5 号'
-  const corpName = change?.field === '法人名' ? change.to : '株式会社サンプル商事'
-  // P1-8: 変更系 field は現行登録値 (change.from) を previousValue に保持し before/after 表示。変更対象でない field は省略。
-  const prevAddr = change?.field === '新住所' ? change.from : undefined
-  const prevCorp = change?.field === '法人名' ? change.from : undefined
-  return [
-    { fieldLabel: '法人名', aiValue: corpName, ocrRawValue: corpName, masterValue: corpName, previousValue: prevCorp, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '法人名欄' } },
-    { fieldLabel: '新住所', aiValue: newAddr, ocrRawValue: newAddr, previousValue: prevAddr, reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
+  const fields: FieldReview[] = [
+    { fieldLabel: '法人名', aiValue: '株式会社サンプル商事', ocrRawValue: '株式会社サンプル商事', masterValue: '株式会社サンプル商事', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '法人名欄' } },
+    { fieldLabel: '新住所', aiValue: '東京都千代田区丸の内 2 丁目 3 番 5 号', ocrRawValue: '東京都千代田区丸の内 2 丁目 3 番 5 号', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
     { fieldLabel: 'ビル名', aiValue: 'サンプルビル', ocrRawValue: 'サンプルビル', masterValue: 'サンプルビル', reconcileState: 'matched', sourceLocator: { doc: '', page: 'P.2', region: '住所欄' } },
     { fieldLabel: '支店コード', aiValue: '042', ocrRawValue: '042', masterValue: '042', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '支店コード欄' } },
     { fieldLabel: '効力発生日', aiValue: '2026-06-15', ocrRawValue: '2026-06-15', reconcileState: 'matched', mono: true, sourceLocator: { doc: '', page: 'P.2', region: '効力日欄' } },
   ]
+  // F-021: change がある field は申請後の新値 (change.to) を確定値に反映し、現行登録値 (change.from) を previousValue に保持 (P1-8 before/after)。
+  //   accountOpeningFields と同じ汎用適用 — 旧版は 新住所/法人名 のみ反映し ビル名 を hardcode していたため、起点案件
+  //   CASE-2026-0098 (change.field='ビル名'、是正後='サンプルビルディング') で根拠コメントと確定値が矛盾していた (それを解消)。
+  if (change) {
+    const f = fields.find((x) => x.fieldLabel === change.field)
+    if (f) {
+      f.aiValue = change.to
+      f.ocrRawValue = change.to
+      if (f.masterValue !== undefined) f.masterValue = change.to
+      f.previousValue = change.from
+    }
+  }
+  return fields
 }
 
 /**
@@ -216,15 +236,43 @@ export function buildLifecycle(status: CaseStatus, inputter: string, approver: s
   }))
 }
 
-function buildDocRows(fields: FieldReview[]): DocumentRow[] {
+function buildDocRows(fields: FieldReview[], opts: { seal: boolean } = { seal: true }): DocumentRow[] {
   const rows: DocumentRow[] = fields.map((f) => ({
     label: f.fieldLabel,
     value: f.ocrRawValue ?? f.aiValue,
     fieldLabel: f.fieldLabel,
     highlight: f.reconcileState === 'needs_review',
   }))
-  rows.push({ label: '押印 / 署名欄', value: '(押印済)' })
+  // F-051: スキャン書類のある AI 案件のみ押印欄を出す。値は「サンプル」明示で実印影の存在を主張しない。
+  if (opts.seal) rows.push({ label: '押印 / 署名欄', value: '(押印済・サンプル)' })
   return rows
+}
+
+/**
+ * 手動起票 (origin='manual') の lifecycle (F-006)。AI処理 step を持たない 4 段:
+ * 受付(手動起票) → 入力者確認(手入力) → 承認者承認 → 反映。起きていない AI 処理を捏造しない。
+ */
+const MANUAL_CURRENT_STEP: Record<CaseStatus, number> = {
+  pending: 0,
+  ready: 1, // 入力者確認 (手入力済の自己確認)
+  'sent-back': 0, // 受付 (再処理)
+  'business-approval-waiting': 2, // 承認者承認
+  reflected: 4, // 全 done
+}
+export function buildManualLifecycle(status: CaseStatus, inputter: string, approver: string): CaseLifecycleEvent[] {
+  const steps: { step: CaseLifecycleStep; actor: string; detail: string }[] = [
+    { step: '受付', actor: inputter, detail: '担当者が手動で起票しました（人手入力・書類走査なし）。' },
+    { step: '入力者確認', actor: inputter, detail: '入力者が手入力値を確認しました。' },
+    { step: '承認者承認', actor: approver, detail: '最終承認。' },
+    { step: '反映', actor: 'システム', detail: '登録情報を更新。' },
+  ]
+  const current = MANUAL_CURRENT_STEP[status]
+  return steps.map((s, i): CaseLifecycleEvent => ({
+    ...s,
+    time: i < current ? '完了' : i === current ? '進行中' : '—',
+    done: i < current,
+    current: i === current,
+  }))
 }
 
 /** list row 1 行 → CaseDetailModel。status/flags/change を整合させて量産。 */
@@ -265,6 +313,7 @@ function buildCaseDetail(row: CaseListRow): CaseDetailModel {
   return {
     id: row.id,
     workflowName: row.workflow,
+    origin: 'ai',
     status: row.status,
     statusLabel: caseStatusLabel(row.status),
     inputter,
@@ -301,7 +350,11 @@ const HISTORICAL_CASE_ROWS: CaseListRow[] = [
   { id: 'CASE-2026-0106', workflow: '法人住所変更', status: 'reflected', receivedAt: '2026-05-11T09:00:00+09:00', owner: '山田太郎', flags: 0, change: { field: '法人名', from: 'サンプル株式会社', to: '株式会社サンプル' } },
 ]
 for (const row of HISTORICAL_CASE_ROWS) {
-  CASE_DETAILS[row.id] = buildCaseDetail(row)
+  // F-021: 提案 sourceCases (誤確定→是正の実例) の drill-in 先。lineage の claim と整合する履歴注記を付す。
+  CASE_DETAILS[row.id] = {
+    ...buildCaseDetail(row),
+    historyNote: 'この案件は、AI が基準内で誤確定し、後に是正・再反映された実例です（手順改定提案の根拠）。',
+  }
 }
 
 /** workflow の field label 群 (手動起票 form の入力項目、W3 C4)。 */
@@ -310,44 +363,49 @@ export function fieldLabelsForWorkflow(workflow: string): string[] {
 }
 
 /**
- * 手動起票 (W3 C4) の store-only draft を CaseDetailModel に組む (CASE_DETAILS 不在の draft が一覧から開ける)。
- * AI 抽出が無いので全項目を人手入力値 (overrides) で確認済表示し、左 pane は入力値の faux 申込書とする。
+ * 手動起票 (origin='manual'、W3 C4) の store-only draft を CaseDetailModel に組む (CASE_DETAILS 不在の draft が一覧から開ける)。
+ * **honesty (F-006/F-007)**: AI 抽出・OCR・スキャン書類・押印は起きていないので捏造しない。
+ * - field は人手入力値 (humanValue) のみ。aiValue は表示値の置き場として humanValue を入れるが、ReconcilePanel が
+ *   origin='manual' で「手入力値」とラベルし「AI 入力 / 申請書類」とは出さない。ocrRawValue / masterValue / sourceLocator は付けない。
+ * - document は「手入力値の控え（スキャン画像なし）」。fileName を `.pdf` にせず、押印欄も出さない (seal:false)。
+ * - lifecycle は AI処理 step を持たない手動 4 段 (buildManualLifecycle)。
+ * status は呼び出し側 (store entity) の値を反映 (承認後の段階遷移を AI 5 段に化けさせない)。
  */
 export function buildManualCaseDetail(
   id: string,
   workflowName: string,
   assignee: string | undefined,
   overrides: Record<string, string>,
+  status: CaseStatus = 'ready',
 ): CaseDetailModel {
   const inputter = assignee && assignee !== '—' ? assignee : '未割当'
   const approver = approverFor(inputter)
-  const fileName = `${id}.pdf`
   const isAccountOpening = workflowName === '口座開設書類完備'
-  const fields = fieldsForWorkflow(workflowName).map((f): FieldReview => {
-    const ov = overrides[f.fieldLabel]
-    const base: FieldReview = ov !== undefined ? { ...f, aiValue: ov, ocrRawValue: ov, humanValue: ov } : { ...f }
-    return {
-      ...base,
-      reconcileState: 'manually_confirmed',
-      sourceLocator: base.sourceLocator ? { ...base.sourceLocator, doc: fileName } : base.sourceLocator,
-    }
-  })
+  const fields = fieldsForWorkflow(workflowName).map((f): FieldReview => ({
+    fieldLabel: f.fieldLabel,
+    aiValue: overrides[f.fieldLabel] ?? '(未入力)', // 表示値 = 手入力値。AI 抽出値ではない (origin='manual' でラベル分岐)。
+    humanValue: overrides[f.fieldLabel],
+    reconcileState: 'manually_confirmed', // 手入力済み (header は「手入力項目」、AI 照合確認とは弁別)
+    mono: f.mono,
+    // ocrRawValue / masterValue / ocrNormalizedValue / normalizationNote / sourceLocator は付けない (OCR/突合/走査が無いため)
+  }))
   return {
     id,
     workflowName,
-    status: 'ready',
-    statusLabel: caseStatusLabel('ready'),
+    origin: 'manual',
+    status,
+    statusLabel: caseStatusLabel(status),
     inputter,
     approver,
     fields,
     document: {
-      fileName,
-      page: 'P.1',
-      pageCount: 1,
-      title: isAccountOpening ? '口座開設申込書（手動起票）' : `${workflowName}届（手動起票）`,
-      rows: buildDocRows(fields),
+      fileName: '(スキャン画像なし)',
+      page: '—',
+      pageCount: 0,
+      title: isAccountOpening ? '口座開設（手動起票・手入力値の控え）' : `${workflowName}（手動起票・手入力値の控え）`,
+      rows: buildDocRows(fields, { seal: false }),
     },
-    lifecycle: buildLifecycle('ready', inputter, approver),
+    lifecycle: buildManualLifecycle(status, inputter, approver),
     citations: [],
   }
 }

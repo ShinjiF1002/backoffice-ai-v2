@@ -4,19 +4,23 @@ import { ChevronRightIcon, ShieldCheckIcon, CheckIcon, XIcon, CornerUpLeftIcon, 
 import { PROPOSAL_DETAILS } from '@/data/mock-proposal-detail'
 import type { ProposalStatus } from '@/data/types'
 import { useStoreDispatch, useProposal, useCurrentActor } from '@/store/hooks'
+import { useDetailDemo } from '@/hooks/useDetailDemo'
 import { proposalStatusToTone, proposalStatusLabel } from '@/lib/status-tones'
 import { MetricVsThreshold } from '@/components/cross-cutting/MetricVsThreshold'
 import { ConsequencePanel } from '@/components/cross-cutting/ConsequencePanel'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DetailDemoFallback } from '@/components/shared/DetailDemoFallback'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { ReasonDialog } from '@/components/shared/ReasonDialog'
+import { Toast } from '@/components/shared/Toast'
+import { useToast } from '@/hooks/useToast'
 import { cn } from '@/lib/cn'
 
 /**
  * ProposalDetail (/proposals/:id) — Process-First v2 / C 型 detail contract
  * SSOT: screens-v2/06-proposal-detail/canonical-export.md + screen-contracts-v2 + canonical-design-spec §6
- * A 手順全体 before/after (diff だけでなく全 step) / B 根拠 差戻し case 原文 / C mode で決定 1 セット。
+ * A 手順全体 before/after (diff だけでなく全 step) / B 根拠 誤確定→是正の実例 原文 / C mode で決定 1 セット。
  * collapse は canonical token の inline 実装 (継承 Disclosure は off-token のため P2B-4 tokenize 待ち)。
  */
 const STEPPER = ['生成', '手順確認', '上長承認', '反映']
@@ -49,7 +53,7 @@ export function ProposalDetail() {
     p && p.sourceCases[0] ? { [p.sourceCases[0].id]: true } : {},
   )
   const [hintOpen, setHintOpen] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
+  const { toast, show: showToast, dismiss: dismissToast } = useToast()
   // :id 変更時の local state reset (set-state-in-effect 回避、render 中 adjusting)
   const [prevId, setPrevId] = useState(id)
   if (id !== prevId) {
@@ -57,8 +61,12 @@ export function ProposalDetail() {
     setDialog(null)
     setOpenEvidence(p && p.sourceCases[0] ? { [p.sourceCases[0].id]: true } : {})
     setHintOpen(false)
-    setToast(null)
+    dismissToast()
   }
+  // F-009: detail route の取得状態 (?demo=loading/error) を list route と一貫させる demo seam。
+  const demo = useDetailDemo()
+
+  if (demo.status) return <DetailDemoFallback status={demo.status} onRetry={demo.onRetry} />
 
   if (!p)
     return (
@@ -67,7 +75,7 @@ export function ProposalDetail() {
           subState="truly-empty"
           title="指定の提案が見つかりません。"
           action={
-            <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+            <Link to="/proposals" className="text-sm font-medium text-[var(--color-primary-strong)] hover:underline">
               提案一覧へ戻る
             </Link>
           }
@@ -78,14 +86,13 @@ export function ProposalDetail() {
   const liveStatus: ProposalStatus = entity?.status ?? p.status
   const decision = entity?.decision
   const stepperCurrent = proposalStepperCurrent(liveStatus)
-  // 操作可否 (precondition と一致): 手順管理者は pending-triage で送付/却下、業務責任者は forwarded で承認/差戻し。
+  // F-015: 四眼原則 identity-SoD — 上長へ送付した本人 (forwardedBy) は承認できない (案件/設定と対称、reducer も hard-block)。
+  // デモは role 分離 (手順管理者≠業務責任者) ゆえ非発火だが defense-in-depth として UI でも disabled + 理由を出す。
+  const isSelfForward = entity?.forwardedBy !== undefined && entity.forwardedBy === actor?.id
+  // 操作可否 (precondition と一致): 手順管理者は pending-triage で送付/却下、業務責任者は forwarded で承認/差戻し (自己承認は除く)。
   const canManualAct = mode === 'manual' && liveStatus === 'pending-triage'
-  const canOwnerAct = mode === 'owner' && liveStatus === 'forwarded'
+  const canOwnerAct = mode === 'owner' && liveStatus === 'forwarded' && !isSelfForward
 
-  const showToast = (m: string) => {
-    setToast(m)
-    window.setTimeout(() => setToast(null), 2600)
-  }
 
   return (
     <div className="flex h-full flex-col">
@@ -112,9 +119,9 @@ export function ProposalDetail() {
           {/* 操作ビュー (read-only): 操作者 persona の role 由来。切替は TopBar の操作者 switcher (自己切替 block)。 */}
           <span
             title="操作ビューは操作者 (右上) の役割で切替わります"
-            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-muted)]"
+            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-panel-inset)] px-2.5 py-1 text-xs font-medium text-[var(--color-fg-tertiary)]"
           >
-            <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-muted)]" aria-hidden="true" />
+            <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-tertiary)]" aria-hidden="true" />
             {mode === 'manual' ? '手順管理者ビュー' : '業務責任者ビュー'}
           </span>
         </div>
@@ -189,7 +196,7 @@ export function ProposalDetail() {
           <div className="flex flex-col gap-3">
             <MetricVsThreshold
               title="判定基準 vs 実績"
-              subtitle="この改定が判定基準を満たすか、過去案件で試算した実測値"
+              subtitle="この改定が判定基準を満たすか、過去案件で試算した mock 値（[仮説 / 要検証]・% は精度指標で生 confidence ではありません）"
               rows={p.criteria}
             />
             <ConsequencePanel
@@ -222,8 +229,8 @@ export function ProposalDetail() {
                           <MetaChip tone="primary" label="変更箇所" />
                         </div>
                         <div className="ml-6 flex flex-col gap-1">
-                          <div className="rounded-[4px] bg-[var(--color-diff-del-bg)] px-2 py-1 text-xs text-[var(--color-diff-del)]">− {s.before}</div>
-                          <div className="rounded-[4px] bg-[var(--color-diff-add-bg)] px-2 py-1 text-xs text-[var(--color-diff-add)]">＋ {s.after}</div>
+                          <div className="rounded-[4px] bg-[var(--color-diff-del-bg)] px-2 py-1 text-xs text-[var(--color-error-soft-fg)]">− {s.before}</div>
+                          <div className="rounded-[4px] bg-[var(--color-diff-add-bg)] px-2 py-1 text-xs text-[var(--color-success-soft-fg)]">＋ {s.after}</div>
                         </div>
                       </div>
                     )}
@@ -241,7 +248,7 @@ export function ProposalDetail() {
                   <h3 className="text-sm font-semibold text-[var(--color-fg)]">この提案の根拠</h3>
                   <MetaChip label={`${p.sourceCases.length} 件`} />
                 </div>
-                <p className="mt-0.5 text-[11px] text-[var(--color-fg-muted)]">日次提案分析が拾った、差戻しの実例。コメント原文で確認できます。</p>
+                <p className="mt-0.5 text-[11px] text-[var(--color-fg-muted)]">日次提案分析が拾った、基準が甘く AI が誤確定した実例（後に是正・再反映済）。指摘の原文で確認できます。</p>
               </div>
               <div className="flex flex-col">
                 {p.sourceCases.map((sc, i) => {
@@ -265,12 +272,12 @@ export function ProposalDetail() {
                       {isOpen && (
                         <div className="px-4 pb-3 pl-9">
                           <div className="rounded-[var(--radius-control)] bg-[var(--color-panel-inset)] px-3 py-2.5 text-xs leading-relaxed text-[var(--color-fg)]">
-                            <div className="mb-1 text-[11px] text-[var(--color-fg-muted)]">差戻しコメント (原文)</div>
+                            <div className="mb-1 text-[11px] text-[var(--color-fg-tertiary)]">日次分析の指摘 (原文)</div>
                             「{sc.comment}」
                           </div>
                           <Link
                             to={`/cases/${sc.id}`}
-                            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)] hover:underline"
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary-strong)] hover:underline"
                           >
                             元の案件を開く <ArrowRightIcon className="h-3 w-3" />
                           </Link>
@@ -328,6 +335,12 @@ export function ProposalDetail() {
             <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
               <CheckIcon className="h-3.5 w-3.5 text-[var(--color-success-soft-fg)]" />
               判定基準は実測値で確認済 — 承認または差戻しを選べます
+            </span>
+          ) : mode === 'owner' && liveStatus === 'forwarded' && isSelfForward ? (
+            // F-015 四眼原則: 送付者本人は承認不可 (identity-SoD、案件/設定と対称)。
+            <span className="flex items-center gap-1.5 text-[var(--color-fg-muted)]">
+              <ShieldCheckIcon className="h-3.5 w-3.5 text-[var(--color-fg-tertiary)]" />
+              送付者本人のため承認できません（四眼原則：送付者 ≠ 承認者）
             </span>
           ) : mode === 'owner' ? (
             <span className="text-[var(--color-fg-muted)]">手順管理者の送付待ちです（業務責任者の承認段階ではありません）</span>
@@ -411,14 +424,7 @@ export function ProposalDetail() {
         }}
       />
 
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-20 left-1/2 z-[80] -translate-x-1/2 rounded-[var(--radius-card)] border border-[var(--color-success)] bg-[var(--color-success-soft)] px-4 py-2 text-sm font-medium text-[var(--color-success-soft-fg)] shadow-lg"
-        >
-          {toast}
-        </div>
-      )}
+      <Toast toast={toast} onDismiss={dismissToast} />
     </div>
   )
 }

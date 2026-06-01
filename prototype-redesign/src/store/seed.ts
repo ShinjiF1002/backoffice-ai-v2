@@ -38,6 +38,18 @@ export function seed(): StoreState {
     caseOrder.push(row.id)
   }
 
+  // F-028 (distinction): C2「難案件が宙に消える」の旗艦面 (/escalations + 業務責任者ハブ裁定タイル) を初回ロードで
+  //   live にするため、代表的な未裁定 escalation を 1 件 seed する (手動 setup 無しで C2 解決を実演)。
+  //   起票 actor = 既定 (入力者)、裁定先 = 業務責任者。status は不変 (escalation は依頼記録)。who/when は in-session 操作でないため banner では理由のみ。
+  const seedEscalationId = 'CASE-2026-0145'
+  const seedEscalationCase = cases[seedEscalationId]
+  if (seedEscalationCase) {
+    cases[seedEscalationId] = {
+      ...seedEscalationCase,
+      escalation: { reason: '前例のない住所表記で確定可否の判断に迷う', category: '業務ルール抵触', to: 'actor-approver', from: DEFAULT_ACTOR_ID },
+    }
+  }
+
   const proposals: Record<string, ProposalEntity> = {}
   const proposalOrder: string[] = []
   for (const row of PROPOSAL_LIST) {
@@ -73,5 +85,8 @@ export function seed(): StoreState {
     agentOrder,
     currentActorId: DEFAULT_ACTOR_ID,
     readNotificationIds: [],
+    // F-002: セッション操作証跡は空から始まる (静的参照台帳 OBS_LEDGER/CROSS_LEDGER は data 側、useCrossLedger が append)。
+    auditEvents: [],
+    auditSeq: 0,
   }
 }

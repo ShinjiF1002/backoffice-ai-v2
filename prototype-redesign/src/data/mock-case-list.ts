@@ -20,6 +20,8 @@ export interface CaseListRow {
   recommended?: boolean
   /** 何が変わったか (drawer 用) */
   change?: { field: string; from: string; to: string }
+  /** F-013: 業務責任者へ裁定依頼中 (escalation 未裁定)。一覧に永続マーカーを出す (store-derived、静的 fixture では未使用)。 */
+  escalated?: boolean
 }
 
 /** 法人住所変更 (UC-BO-01) 代表 8 件 (各 status + recommended + change、detail dict と整合)。 */

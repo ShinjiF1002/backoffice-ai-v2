@@ -31,6 +31,30 @@ describe('P1-7a Observatory drill', () => {
     expect(screen.getByRole('link', { name: 'AI 入力承認率' })).toHaveAttribute('href', '/agents/agent-corporate-address-change')
   })
 
+  it('F-039: モデルガバナンス tab に model 台帳 + drift 監視 + SR 26-2 honest framing が出る', async () => {
+    const user = userEvent.setup()
+    renderObservatory()
+    await user.click(screen.getByRole('button', { name: 'モデルガバナンス' }))
+    // honest framing (規制準拠は主張しない)
+    expect(screen.getByText(/規制準拠（compliance）を主張するものではありません/)).toBeInTheDocument()
+    // model 台帳 (版 + 検証状況)
+    expect(screen.getByText('モデル台帳（model inventory）')).toBeInTheDocument()
+    expect(screen.getAllByText('ocr-2.4').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('要再検証').length).toBeGreaterThan(0) // cls-1.8 = 要再検証
+    // 台帳行から該当 Agent へ drill
+    expect(screen.getAllByRole('link', { name: '帳票 OCR' })[0]).toHaveAttribute('href', '/agents/agent-corporate-address-change')
+    // drift/bias 監視
+    expect(screen.getByText('drift / bias 監視')).toBeInTheDocument()
+    expect(screen.getAllByText(/入力分布 drift/).length).toBeGreaterThan(0)
+  })
+
+  it('F-039: モデルガバナンス tab に axe violations がない', async () => {
+    const user = userEvent.setup()
+    const { container } = renderObservatory()
+    await user.click(screen.getByRole('button', { name: 'モデルガバナンス' }))
+    expect(await axe(container)).toHaveNoViolations()
+  })
+
   it('証跡台帳: 横断 ledger に複数案件が drill link、業務 filter で page reset & 絞り込み (P1-7b + W3 G2)', async () => {
     const user = userEvent.setup()
     renderObservatory()
@@ -57,8 +81,8 @@ describe('P1-7a Observatory drill', () => {
     const user = userEvent.setup()
     renderObservatory()
     await user.click(screen.getByRole('button', { name: '証跡台帳 (詳細)' }))
-    // field_override は 0142 のみが持つ操作 → 0142 だけ残り、他 case (0145) は消える
-    await user.click(screen.getByRole('button', { name: 'field_override' }))
+    // F-032: filter chip は JP 業務語。「入力者上書き」は 0142 のみが持つ操作 → 0142 だけ残り、他 case (0145) は消える
+    await user.click(screen.getByRole('button', { name: '入力者上書き' }))
     expect(screen.getAllByRole('link', { name: /CASE-2026-0142/ }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('link', { name: /CASE-2026-0145/ })).not.toBeInTheDocument()
   })

@@ -101,9 +101,13 @@ describe('Phase 4b: 承認ボタンが reducer precondition と整合 (false suc
     renderAt('/cases/CASE-2026-0139')
     expect(screen.getByRole('button', { name: '承認' })).toBeEnabled()
   })
-  it('承認待ち案件を入力者ビューで開くと承認 disabled (input は ready のみ前進)', () => {
-    renderAt('/cases/CASE-2026-0128')
-    expect(screen.getByRole('button', { name: '承認' })).toBeDisabled()
+  it('F-041: 承認待ち案件を入力者ビューで開くと、disabled 承認でなく承認者待ちの前向き状態カードを出す', () => {
+    renderAt('/cases/CASE-2026-0128') // business-approval-waiting
+    // 入力者ビューでは承認ボタンを出さない (disabled の死に体ボタンを残さない)
+    expect(screen.queryByRole('button', { name: '承認' })).not.toBeInTheDocument()
+    // 代わりに「承認者の最終承認待ち」状態カード + 承認待ちキューへの導線
+    expect(screen.getByText(/承認者の最終承認待ち/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /承認待ちキューへ/ })).toBeInTheDocument()
   })
 })
 

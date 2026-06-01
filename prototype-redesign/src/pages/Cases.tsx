@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FilePlusIcon } from 'lucide-react'
+import { FilePlusIcon, CheckCheckIcon } from 'lucide-react'
 import { CASE_LIST } from '@/data/mock-case-list'
 import type { CaseListRow } from '@/data/mock-case-list'
 import type { CaseStatus } from '@/data/types'
@@ -8,7 +8,8 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MetaChip } from '@/components/shared/MetaChip'
 import { DataTable } from '@/components/shared/DataTable'
 import type { DataTableColumn, DataTableFilter } from '@/components/shared/DataTable'
-import { useCases } from '@/store/hooks'
+import { PageHeader } from '@/components/shared/PageHeader'
+import { useCases, useStoreDispatch } from '@/store/hooks'
 import { useView } from '@/context/view-context'
 import { KPI_PROCESS_LABEL } from '@/data/mock-kpi'
 import { useListData } from '@/hooks/useListData'
@@ -40,14 +41,28 @@ const columns: DataTableColumn<CaseListRow>[] = [
     cell: (r) => <StatusBadge tone={caseStatusToTone(r.status)} label={caseStatusLabel(r.status)} />,
     sortValue: (r) => r.status,
   },
-  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => caseElapsedLabel(r.receivedAt, r.status) },
+  // F-011: 経過(滞留)で triage できるよう receivedAt を数値 sortValue に (古い受付=長い滞留を上位へ)。
+  { key: 'elapsed', header: '経過', className: 'text-[var(--color-fg-muted)]', cell: (r) => caseElapsedLabel(r.receivedAt, r.status), sortValue: (r) => new Date(r.receivedAt).getTime() },
   {
     key: 'owner',
     header: '担当',
     className: 'text-[var(--color-fg)]',
     cell: (r) => (r.owner === '—' ? <span className="text-[var(--color-fg-tertiary)]">未割当</span> : r.owner),
+    sortValue: (r) => r.owner,
   },
-  { key: 'attention', header: '確認', cell: (r) => <AttentionCell status={r.status} flags={r.flags} /> },
+  {
+    key: 'attention',
+    header: '確認',
+    // F-011: 要確認件数で sort 可能に (要確認多い案件を上位へ集約し triage)。
+    sortValue: (r) => r.flags,
+    cell: (r) => (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <AttentionCell status={r.status} flags={r.flags} />
+        {/* F-013: エスカレーション未裁定の永続マーカー (一覧でも「裁定待ち」を見失わない)。 */}
+        {r.escalated && <MetaChip tone="alert" label="裁定依頼中" />}
+      </div>
+    ),
+  },
 ]
 
 const filters: DataTableFilter<CaseListRow>[] = [
@@ -68,6 +83,7 @@ const filters: DataTableFilter<CaseListRow>[] = [
 export function Cases() {
   const { process } = useView()
   const cases = useCases(process)
+  const dispatch = useStoreDispatch()
   const processLabel = process === 'all' ? '全業務' : (KPI_PROCESS_LABEL[process] ?? '全業務')
   // store entity → list row view-model (status/flags/assignee は store-truth で reactive)
   const rows: CaseListRow[] = cases.map((e) => ({
@@ -77,17 +93,16 @@ export function Cases() {
     receivedAt: e.receivedAt,
     owner: e.assignee ?? '—',
     flags: e.flags,
+    escalated: e.escalation !== undefined && e.escalation.resolution === undefined,
   }))
   const list = useListData(rows)
   return (
     <div className="flex flex-col">
-      <header
-        data-page-header
-        className="sticky top-0 z-30 flex min-h-[var(--height-pageheader)] flex-col justify-center border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-4"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-lg font-semibold text-[var(--color-fg)]">受信トレイ — 案件一覧</h1>
-          {/* W3 C4: AI 障害時の手動起票 (全項目手入力 form へ) */}
+      <PageHeader
+        title="受信トレイ — 案件一覧"
+        subtitle={<>{processLabel}{!list.status && ` · ${rows.length} 件`} ／ 行を選んで案件を確認</>}
+        actions={
+          /* W3 C4: AI 障害時の手動起票 (全項目手入力 form へ) */
           <Link
             to="/cases/new"
             className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-panel)] px-3 py-1.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]"
@@ -95,9 +110,8 @@ export function Cases() {
             <FilePlusIcon className="h-4 w-4" aria-hidden="true" />
             新規案件作成
           </Link>
-        </div>
-        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">{processLabel} · {rows.length} 件 ／ 行を選んで案件を確認</p>
-      </header>
+        }
+      />
 
       <div className="p-4">
         <DataTable
@@ -112,7 +126,19 @@ export function Cases() {
           rowClassName={(r) => (r.flags > 0 ? 'bg-[var(--color-alert-soft)]' : undefined)}
           filters={filters}
           pageSize={10}
-          caption="要確認のある案件を上部に強調表示しています。"
+          // F-029: 高頻度キューの安全な一括操作 — 全項目一致(確認待ち)の案件をまとめて入力者確認。
+          // 要確認残や確認待ち以外を含む選択は disabled (個別判断要は個別のまま、reducer も非該当は no-op)。
+          selection={{
+            actions: [
+              {
+                label: '全項目一致をまとめて入力者確認',
+                icon: <CheckCheckIcon className="h-3.5 w-3.5" />,
+                onRun: (ids) => dispatch({ type: 'case/bulkApprove', ids, by: 'input' }),
+                disabled: (rows) => rows.some((r) => r.flags > 0 || r.status !== 'ready'),
+              },
+            ],
+          }}
+          caption="要確認のある案件を上部に強調表示しています。複数選択で全項目一致の案件をまとめて確認できます。"
         />
       </div>
     </div>

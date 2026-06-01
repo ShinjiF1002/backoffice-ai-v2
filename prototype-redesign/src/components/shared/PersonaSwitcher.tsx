@@ -23,7 +23,7 @@ export function PersonaSwitcher() {
     >
       <UserRoundCogIcon className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-fg-muted)]" aria-hidden="true" />
       {/* 狭幅では label を畳み icon + select のみ (mobile でも SoD 切替を可能に保つ)。 */}
-      <span className="hidden whitespace-nowrap text-[var(--color-fg-muted)] sm:inline">操作者</span>
+      <span className="hidden whitespace-nowrap text-[var(--color-fg-tertiary)] sm:inline">操作者</span>
       <select
         aria-label="操作者（デモ用の担当者）の切替"
         value={actor?.id ?? ''}

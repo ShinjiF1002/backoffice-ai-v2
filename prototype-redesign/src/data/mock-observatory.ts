@@ -1,6 +1,10 @@
 import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
 import { KPI_ROWS } from './mock-kpi'
 import { CASE_LIST } from './mock-case-list'
+// 証跡台帳の行型 LedgerEvent は store layer に集約 (F-002 guardrail #2)。
+// 静的参照台帳 (OBS_LEDGER/CROSS_LEDGER) と store の live auditEvents が同型を共有し、store→data の逆依存を作らない。
+import type { LedgerEvent } from '@/store/types'
+export type { LedgerEvent }
 
 /**
  * Observatory (/observatory) data — Process-First v2, typology A, 監査者 view (read-only)
@@ -23,22 +27,7 @@ export interface LifecycleEvent {
   body: string
 }
 
-/** 監査 view: 証跡台帳 (export schema)。confidence はこの型にのみ存在する (LifecycleEvent には無い)。 */
-export interface LedgerEvent {
-  ts: string
-  actor: string
-  role: string
-  action: string
-  beforeAfter: string
-  doc: string
-  policy: string
-  approvalId: string
-  /** 監査記録としてのみ保持。業務 view (LifecycleEvent) には型として存在しない。 */
-  confidence: string
-  /** P1-7: 横断台帳 (CROSS_LEDGER) の案件キー。row→/cases/:caseId drill + 案件/業務 filter の母集合。 */
-  caseId: string
-  workflowName: string
-}
+// LedgerEvent 型定義は store/types.ts に集約済 (上の re-export 参照)。confidence は監査台帳のみ (業務 view 非露出) の境界を継承。
 
 export interface KnowledgeGroup {
   process: string
@@ -85,29 +74,32 @@ export const OBS_LIFECYCLE: LifecycleEvent[] = [
 ]
 
 // §9: raw event ledger (監査 export schema、confidence は本 view のみ)。代表 0142 = rich 5 event。
+// F-032: actor / role / action は JP 業務語で保持 (JP-only UI ゆえ filter chip + table とも snake_case/英語を出さない)。
+//   policy(v3.1) / confidence / doc(.pdf) 等の技術 schema は raw のまま (台帳 cell の sanctioned 例外)。live auditEvents と語彙整合。
 const C0142 = { caseId: OBS_CASE_ID, workflowName: '法人住所変更' }
 export const OBS_LEDGER: LedgerEvent[] = [
-  { ts: '2026-05-30 16:40:04', actor: 'system', role: 'system', action: 'intake', beforeAfter: '—', doc: 'CASE-2026-0142.pdf', policy: '—', approvalId: '—', confidence: '—', ...C0142 },
-  { ts: '2026-05-30 16:42:11', actor: 'agent-corp-addr', role: 'AI', action: 'ai_input', beforeAfter: '(値生成) 法人名 / 新住所 / 支店 / 効力日 / ビル名', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '法人名 0.98 / 住所 0.95 / ビル名 0.84', ...C0142 },
-  { ts: '2026-05-30 17:10:42', actor: '山田太郎', role: 'inputter', action: 'field_override', beforeAfter: 'ビル名: サンプルビル → サンプルビルディング', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '—', ...C0142 },
-  { ts: '2026-05-30 17:35:08', actor: '鈴木課長', role: 'approver', action: 'business_approve', beforeAfter: 'status: 確認済 → 承認済', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
-  { ts: '2026-05-30 17:36:00', actor: 'system', role: 'system', action: 'reflect', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 16:40:04', actor: 'システム', role: 'システム', action: '受付', beforeAfter: '—', doc: 'CASE-2026-0142.pdf', policy: '—', approvalId: '—', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 16:42:11', actor: 'AI 担当 Agent', role: 'AI', action: 'AI入力', beforeAfter: '(値生成) 法人名 / 新住所 / 支店 / 効力日 / ビル名', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '法人名 0.98 / 住所 0.95 / ビル名 0.84', ...C0142 },
+  { ts: '2026-05-30 17:10:42', actor: '山田太郎', role: '入力者', action: '入力者上書き', beforeAfter: 'ビル名: サンプルビル → サンプルビルディング', doc: 'CASE-2026-0142.pdf P.2', policy: 'v3.1', approvalId: '—', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 17:35:08', actor: '鈴木課長', role: '承認者', action: '承認者承認', beforeAfter: 'status: 確認済 → 承認済', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
+  { ts: '2026-05-30 17:36:00', actor: 'システム', role: 'システム', action: '反映', beforeAfter: 'master 更新', doc: '—', policy: 'v3.1', approvalId: 'A-7731', confidence: '—', ...C0142 },
 ]
 
 // P1-7: 横断台帳 (CROSS_LEDGER) = 13 業務 case を flatten (JG-1 (a)-lite)。代表 0142 は上記 rich event、
 // 他 case は 4-event 雛形 (受付/AI入力/入力者確認/承認者承認) を deterministic 生成 (未来日回避: 2026-05-01..28、Date parse 不使用)。
+// F-032: action/role/actor は JP 業務語 (filter chip 露出を業務語に揃える)。
 const LEDGER_TEMPLATE: { action: string; role: string; beforeAfter: string; hasApproval: boolean }[] = [
-  { action: 'intake', role: 'system', beforeAfter: '申請書類を受付', hasApproval: false },
-  { action: 'ai_input', role: 'AI', beforeAfter: '(値生成) 申請項目を読み取り照合', hasApproval: false },
-  { action: 'field_confirm', role: 'inputter', beforeAfter: '入力者が確認', hasApproval: false },
-  { action: 'business_approve', role: 'approver', beforeAfter: 'status: 確認済 → 承認済', hasApproval: true },
+  { action: '受付', role: 'システム', beforeAfter: '申請書類を受付', hasApproval: false },
+  { action: 'AI入力', role: 'AI', beforeAfter: '(値生成) 申請項目を読み取り照合', hasApproval: false },
+  { action: '入力者確認', role: '入力者', beforeAfter: '入力者が確認', hasApproval: false },
+  { action: '承認者承認', role: '承認者', beforeAfter: 'status: 確認済 → 承認済', hasApproval: true },
 ]
 function templateLedger(caseId: string, workflowName: string, owner: string, idx: number): LedgerEvent[] {
   const inputter = owner === '—' ? '(未割当)' : owner
   const day = String(((idx * 3) % 28) + 1).padStart(2, '0')
   return LEDGER_TEMPLATE.map((t, j) => ({
     ts: `2026-05-${day} ${String(9 + j).padStart(2, '0')}:${String((idx * 7 + j * 11) % 60).padStart(2, '0')}:00`,
-    actor: t.role === 'system' ? 'system' : t.role === 'AI' ? 'agent' : t.role === 'inputter' ? inputter : '鈴木課長',
+    actor: t.role === 'システム' ? 'システム' : t.role === 'AI' ? 'AI 担当 Agent' : t.role === '入力者' ? inputter : '鈴木課長',
     role: t.role,
     action: t.action,
     beforeAfter: t.beforeAfter,

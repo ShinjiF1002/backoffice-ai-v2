@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { SearchIcon, BellIcon } from 'lucide-react'
 import { PrototypeModeLabel } from '@/components/shared/PrototypeModeLabel'
 import { PersonaSwitcher } from '@/components/shared/PersonaSwitcher'
@@ -18,9 +18,12 @@ import { cn } from '@/lib/cn'
 export function TopBar() {
   const { searchQuery, setSearchQuery } = useView()
   const navigate = useNavigate()
+  const location = useLocation()
   const unread = useUnreadCount()
+  // F-037: /search 着地時は page 自前の検索 input に正規化し、TopBar の同名 searchbox を出さない (二重 searchbox 解消)。
+  const onSearchPage = location.pathname === '/search'
   return (
-    <header className="flex h-14 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-panel)] px-3 sm:px-6">
+    <header role="banner" className="flex h-14 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-panel)] px-3 sm:px-6">
       {/* Left: ProcessSelector (Process-First IA 中核) + 横断検索 */}
       <div className="flex min-w-0 items-center gap-3">
         <ProcessSelector />
@@ -30,7 +33,7 @@ export function TopBar() {
             e.preventDefault()
             navigate('/search')
           }}
-          className="relative hidden h-9 w-56 items-center lg:flex"
+          className={cn('relative h-9 w-56 items-center', onSearchPage ? 'hidden' : 'hidden lg:flex')}
         >
           <SearchIcon
             className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-fg-subtle)]"
@@ -65,7 +68,7 @@ export function TopBar() {
             cn(
               'relative flex h-8 w-8 items-center justify-center rounded-md',
               isActive
-                ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
                 : 'text-[var(--color-fg-muted)] hover:bg-[var(--color-panel-inset)]',
             )
           }
@@ -75,6 +78,10 @@ export function TopBar() {
             <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-alert)]" aria-hidden="true" />
           )}
         </NavLink>
+        {/* F-047: 未読数の変化を SR にも能動通知 (視覚の赤ドットと同等情報を polite live region で)。 */}
+        <span aria-live="polite" className="sr-only">
+          {unread > 0 ? `未読の通知が ${unread} 件あります` : '未読の通知はありません'}
+        </span>
         <PersonaSwitcher />
         <PrototypeModeLabel />
       </div>

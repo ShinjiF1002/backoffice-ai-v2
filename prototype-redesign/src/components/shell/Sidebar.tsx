@@ -92,7 +92,8 @@ export function Sidebar() {
         </div>
 
         {/* Nav (grouped) */}
-        <nav className="flex-1 overflow-y-auto p-2">
+        {/* F-050: 複数 nav landmark を区別する明示 label (mobile bottom nav と衝突させない)。 */}
+        <nav aria-label="サイドバーナビゲーション" className="flex-1 overflow-y-auto p-2">
           {navGroups.map((g, gi) => (
             <div key={g.group ?? 'top'} className={cn(gi > 0 && 'mt-3')}>
               {g.group && (
@@ -111,7 +112,7 @@ export function Sidebar() {
                         className={cn(
                           'group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors',
                           active
-                            ? 'bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary)]'
+                            ? 'bg-[var(--color-primary-soft)] font-medium text-[var(--color-primary-strong)]'
                             : 'text-[var(--color-fg)] hover:bg-[var(--color-panel-inset)]'
                         )}
                       >
@@ -157,7 +158,7 @@ export function Sidebar() {
                   className={cn(
                     'flex h-11 items-center justify-center rounded-md transition-colors',
                     active
-                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+                      ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary-strong)]'
                       : 'text-[var(--color-fg-tertiary)] hover:bg-[var(--color-panel-inset)]'
                   )}
                 >

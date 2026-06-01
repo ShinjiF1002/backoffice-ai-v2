@@ -80,6 +80,24 @@ export function trustTone(level: TrustLevel): Tone {
   }
 }
 
+/**
+ * TrustLevel → 業務語ラベル (W3 F-014、Tier 名でなく主表示の業務語)。
+ * kill-switch の実降格/復帰 (reducer) と AgentDetail header が同一語彙で trust を語るための SSOT。
+ * 全件確認(supervised) / 要所確認(checkpoint) / 自律(autonomous) / 対象外(n/a)。
+ */
+export function trustLevelLabel(level: TrustLevel): string {
+  switch (level) {
+    case 'supervised':
+      return '全件確認'
+    case 'checkpoint':
+      return '要所確認'
+    case 'autonomous':
+      return '自律'
+    case 'n/a':
+      return '対象外'
+  }
+}
+
 /** CaseStatus → UI 業務語ラベル (status enum literal を画面に出さない) */
 export function caseStatusLabel(status: CaseStatus): string {
   switch (status) {

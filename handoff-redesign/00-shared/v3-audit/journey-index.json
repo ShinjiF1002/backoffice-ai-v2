@@ -1,0 +1,547 @@
+[
+ {
+  "id": "AUD-01",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "案件ライフサイクルの統制トレース (lifecycle view で 受付→AI入力→入力者確認→承認者承認→反映 の連続性と SoD を検証)",
+  "routes": [
+   "/observatory"
+  ],
+  "steps": 6,
+  "touched": 4
+ },
+ {
+  "id": "AUD-02",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "証跡台帳 (ledger) の全件横断レビュー: actor/action/業務/free-text 絞込 + ページング + エクスポート + 行ドリル",
+  "routes": [
+   "/observatory"
+  ],
+  "steps": 9,
+  "touched": 11
+ },
+ {
+  "id": "AUD-03",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "業務別 AI 精度・処理メトリクスの閾値判定レビュー (未達 KPI の Agent ドリル)",
+  "routes": [
+   "/observatory"
+  ],
+  "steps": 3,
+  "touched": 2
+ },
+ {
+  "id": "AUD-04",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "承認済ナレッジと Flywheel lineage (差戻し→改善ヒント→手順承認→設定承認) の改善追跡",
+  "routes": [
+   "/observatory"
+  ],
+  "steps": 7,
+  "touched": 6
+ },
+ {
+  "id": "AUD-05",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "手動起票 (/cases/new) の業務継続経路を横断検証 (AI 障害時の人手起票 → queue 投入 → 監査台帳反映)",
+  "routes": [
+   "/cases/new",
+   "/observatory"
+  ],
+  "steps": 8,
+  "touched": 5
+ },
+ {
+  "id": "AUD-06",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "表示データ初期化 (reset) の確認ダイアログと不可逆操作ガード検証",
+  "routes": [
+   "/observatory"
+  ],
+  "steps": 3,
+  "touched": 3
+ },
+ {
+  "id": "AUD-07",
+  "stakeholder": "監査者 (Auditor) — 第3線 / 内部監査・コンプライアンス。AI バ",
+  "role": "監査者",
+  "title": "共通 chrome (横断検索 / 通知 / ProcessSelector / persona) を経由した監査導線とアクセシビリティ確認",
+  "routes": [
+   "/observatory"
+  ],
+  "steps": 5,
+  "touched": 6
+ },
+ {
+  "id": "AIADMIN-J1",
+  "stakeholder": "AI管理者 (AI administrator) — Agent の自動化レベル",
+  "role": "AI管理者",
+  "title": "Agent一覧で全業務の自動化レベルと直近実績を俯瞰する",
+  "routes": [
+   "/agents"
+  ],
+  "steps": 8,
+  "touched": 9
+ },
+ {
+  "id": "AIADMIN-J2",
+  "stakeholder": "AI管理者 (AI administrator) — Agent の自動化レベル",
+  "role": "AI管理者",
+  "title": "Agent詳細で実績 vs 閾値と昇格の帰結を精査する (全件確認→要所確認のConsequence確認)",
+  "routes": [
+   "/agents",
+   "/agents/agent-corporate-address-change"
+  ],
+  "steps": 8,
+  "touched": 7
+ },
+ {
+  "id": "AIADMIN-J3",
+  "stakeholder": "AI管理者 (AI administrator) — Agent の自動化レベル",
+  "role": "AI管理者",
+  "title": "全指標達成Agentで信頼度昇格 (設定変更) を申請する",
+  "routes": [
+   "/agents",
+   "/agents/agent-account-opening",
+   "/config-approvals"
+  ],
+  "steps": 7,
+  "touched": 6
+ },
+ {
+  "id": "AIADMIN-J4",
+  "stakeholder": "AI管理者 (AI administrator) — Agent の自動化レベル",
+  "role": "AI管理者",
+  "title": "Agentを緊急停止 (kill-switch) し、原因収束後に再開する",
+  "routes": [
+   "/agents/agent-corporate-address-change",
+   "/agents"
+  ],
+  "steps": 7,
+  "touched": 7
+ },
+ {
+  "id": "AIADMIN-J5",
+  "stakeholder": "AI管理者 (AI administrator) — Agent の自動化レベル",
+  "role": "業務責任者 (AI管理者の承認者カウンターパート)",
+  "title": "設定承認queueから昇格申請を承認/差戻しする (SoD四眼原則の検証含む)",
+  "routes": [
+   "/config-approvals",
+   "/business-approver",
+   "/agents/agent-account-opening",
+   "/agents/agent-corporate-address-change"
+  ],
+  "steps": 8,
+  "touched": 9
+ },
+ {
+  "id": "AIADMIN-J6",
+  "stakeholder": "AI管理者 (AI administrator) — Agent の自動化レベル",
+  "role": "AI管理者",
+  "title": "例外・状態縮退・横断chromeの網羅検証 (空/エラー/権限外/狭幅/通知/検索)",
+  "routes": [
+   "/agents",
+   "/config-approvals",
+   "/agents/agent-corporate-address-change"
+  ],
+  "steps": 8,
+  "touched": 8
+ },
+ {
+  "id": "INP-01",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "朝の起動 — Hub で全業務の注意点を俯瞰し最優先アクションへ誘導される",
+  "routes": [
+   "/"
+  ],
+  "steps": 7,
+  "touched": 11
+ },
+ {
+  "id": "INP-02",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "受信トレイで要確認案件をトリアージ — filter / sort / pagination / 要確認上部固定",
+  "routes": [
+   "/cases"
+  ],
+  "steps": 6,
+  "touched": 24
+ },
+ {
+  "id": "INP-03",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "案件詳細で AI入力 vs 申請書類を突合し、要確認(ビル名)を解消して入力者承認する (正常系コア)",
+  "routes": [
+   "/cases/CASE-2026-0142"
+  ],
+  "steps": 7,
+  "touched": 15
+ },
+ {
+  "id": "INP-04",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "手入力で上書き(override)による要確認解消 — AI入力誤りを訂正値で確定",
+  "routes": [
+   "/cases/CASE-2026-0145"
+  ],
+  "steps": 5,
+  "touched": 4
+ },
+ {
+  "id": "INP-05",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "差戻し (理由必須) — 項目単位 / 案件単位の 2 経路",
+  "routes": [
+   "/cases/CASE-2026-0142",
+   "/cases/CASE-2026-0131"
+  ],
+  "steps": 5,
+  "touched": 3
+ },
+ {
+  "id": "INP-06",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "エスカレーション — 入力者では判断できない難案件を業務責任者へ送る",
+  "routes": [
+   "/cases/CASE-2026-0142"
+  ],
+  "steps": 3,
+  "touched": 1
+ },
+ {
+  "id": "INP-07",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "通知(ワークインボックス)で差戻し受領を確認し、再処理のため案件詳細へ",
+  "routes": [
+   "/",
+   "/inbox"
+  ],
+  "steps": 4,
+  "touched": 3
+ },
+ {
+  "id": "INP-08",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "横断検索で案件/提案/Agent を ID・業務名・担当で探す",
+  "routes": [
+   "/",
+   "/search"
+  ],
+  "steps": 4,
+  "touched": 1
+ },
+ {
+  "id": "INP-09",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "AI障害時の手動起票 (/cases/new) — 全項目手入力で案件を作成し end-to-end で確認待ちへ",
+  "routes": [
+   "/cases",
+   "/cases/new"
+  ],
+  "steps": 6,
+  "touched": 5
+ },
+ {
+  "id": "INP-10",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "権限境界の確認 — SoD四眼原則 / 反映済の訂正取消 / 参照専用 / エスカレーション queue",
+  "routes": [
+   "/cases/CASE-2026-0128",
+   "/cases/CASE-2026-0120",
+   "/cases/CASE-2026-0112",
+   "/escalations"
+  ],
+  "steps": 5,
+  "touched": 7
+ },
+ {
+  "id": "INP-11",
+  "stakeholder": "入力者 (inputter / 山田太郎 = actor-inputter) —",
+  "role": "inputter",
+  "title": "狭幅(mobile/tablet)・状態シーム(空/エラー/ローディング)での入力者操作の堅牢性",
+  "routes": [
+   "/cases",
+   "/cases/CASE-2026-0142",
+   "/escalations"
+  ],
+  "steps": 5,
+  "touched": 7
+ },
+ {
+  "id": "GOV-01",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "監査者 / 当局検査官 (SR 26-2 model lifecycle, NYDFS Part 500 audit trail)",
+  "title": "監査証跡の完全性・否認防止・可検証性の評価 (Observatory 監査タブ縦断)",
+  "routes": [
+   "/observatory",
+   "/observatory → /cases/CASE-2026-0142",
+   "/observatory → /cases/:id"
+  ],
+  "steps": 11,
+  "touched": 12
+ },
+ {
+  "id": "GOV-02",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "コンプライアンス (四眼原則 / SoD 統制テスト担当)",
+  "title": "職務分離 (四眼原則) の実効性検証 — 案件承認・設定承認・一括承認の自己承認 block を実地で試す",
+  "routes": [
+   "/",
+   "/cases → /cases/:id",
+   "/cases/:id",
+   "/approvals",
+   "/agents/:id",
+   "/observatory"
+  ],
+  "steps": 8,
+  "touched": 8
+ },
+ {
+  "id": "GOV-03",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "モデルリスク管理 / 当局 (SR 26-2 model governance, model lifecycle & override)",
+  "title": "AI モデルの lineage・権限・昇格ガバナンス・緊急停止 (kill-switch) の評価",
+  "routes": [
+   "/agents",
+   "/agents/agent-corporate-address-change",
+   "/agents/:id",
+   "/agents/:id → /cases/:id"
+  ],
+  "steps": 9,
+  "touched": 11
+ },
+ {
+  "id": "GOV-04",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "コンプライアンス / リーガル (AI honesty, disclaimer, 過大主張防止)",
+  "title": "Prototype-mode/[仮説]/disclaimer の誠実性 (over-claim 監査) — 全画面で『模擬であること』が常時可視か",
+  "routes": [
+   "/ /cases /approvals /cases/new /cases/:id /proposals /proposals/:id /agents /agents/:id /observatory /search /inbox /business-approver /config-approvals /escalations",
+   "/",
+   "/observatory",
+   "/proposals/:id",
+   "/cases/:id",
+   "全 route"
+  ],
+  "steps": 8,
+  "touched": 7
+ },
+ {
+  "id": "GOV-05",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "コンプライアンス / 当局 (HITL 統制, 案件 state machine の不正遷移防止)",
+  "title": "案件 state machine の統制健全性 — 差戻し/取消/訂正/再処理/前進不可ガードの evil-path 検証",
+  "routes": [
+   "/cases",
+   "/cases/:id",
+   "/cases/:id (reflected)",
+   "/cases/:id (readOnly)"
+  ],
+  "steps": 10,
+  "touched": 12
+ },
+ {
+  "id": "GOV-06",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "業務責任者 / 経営 (flywheel value story, 改善ガバナンス, 価値の説明可能性)",
+  "title": "中核 value story『差戻しを次の正解手順に変える』の追跡可能性と統制 — flywheel lineage 全段の検証",
+  "routes": [
+   "/proposals",
+   "/proposals/:id",
+   "/config-approvals",
+   "/observatory",
+   "/agents/:id"
+  ],
+  "steps": 9,
+  "touched": 17
+ },
+ {
+  "id": "GOV-07",
+  "stakeholder": "コンプライアンス / リーガル / 当局検査官 (US: SR 26-2, OC",
+  "role": "コンプライアンス / 当局 (RBAC 可視性, 権限外アクセス, 通知/否認防止, 横断到達性)",
+  "title": "役割別アクセス境界・通知 (受信トレイ) の否認防止・横断検索の網羅性 — 権限外・空・狭幅の周辺統制",
+  "routes": [
+   "全 route (サイドバー)",
+   "/config-approvals /business-approver",
+   "全 route",
+   "/inbox",
+   "/business-approver",
+   "/escalations ← /cases/:id (エスカレーション)",
+   "/search",
+   "/search (empty)",
+   "/search /any (mobile)"
+  ],
+  "steps": 10,
+  "touched": 11
+ },
+ {
+  "id": "J1-triage-forward",
+  "stakeholder": "業務責任者 (business-approver) + Manual管理者 (提",
+  "role": "Manual管理者 (手順管理者, 入力者 persona = manual mode)",
+  "title": "AI 提案の triage → 実測値検証 → 上長へ送付",
+  "routes": [
+   "/proposals",
+   "/proposals/PROP-2026-031"
+  ],
+  "steps": 11,
+  "touched": 18
+ },
+ {
+  "id": "J2-owner-approve-proposal",
+  "stakeholder": "業務責任者 (business-approver) + Manual管理者 (提",
+  "role": "業務責任者 (business-approver, owner mode)",
+  "title": "手順承認 — forwarded 提案を業務責任者ハブから裁可",
+  "routes": [
+   "/business-approver",
+   "/config-approvals",
+   "/proposals/PROP-2026-028"
+  ],
+  "steps": 6,
+  "touched": 9
+ },
+ {
+  "id": "J3-config-promotion-approve",
+  "stakeholder": "業務責任者 (business-approver) + Manual管理者 (提",
+  "role": "業務責任者 (business-approver, owner mode)",
+  "title": "設定承認 — Agent 自動化レベル昇格(設定変更)の裁可と SoD",
+  "routes": [
+   "/agents/agent-account-opening",
+   "/config-approvals"
+  ],
+  "steps": 7,
+  "touched": 10
+ },
+ {
+  "id": "J4-escalation-arbitrate",
+  "stakeholder": "業務責任者 (business-approver) + Manual管理者 (提",
+  "role": "業務責任者 (business-approver)",
+  "title": "エスカレーション裁定 — 難案件の受信と差戻し裁定",
+  "routes": [
+   "/cases/CASE-2026-0142",
+   "/business-approver",
+   "/escalations"
+  ],
+  "steps": 6,
+  "touched": 6
+ },
+ {
+  "id": "J5-cross-cutting-chrome",
+  "stakeholder": "業務責任者 (business-approver) + Manual管理者 (提",
+  "role": "業務責任者 / Manual管理者 (両ロール共通)",
+  "title": "横断 chrome — 検索・通知・プロトタイプ表示・業務切替の到達性",
+  "routes": [
+   "/proposals",
+   "/business-approver"
+  ],
+  "steps": 6,
+  "touched": 14
+ },
+ {
+  "id": "CHK-01",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長 = actor-checker)",
+  "title": "承認待ちキューを開き、案件詳細で入力者判断+突合結果を再確認して最終承認する (happy path)",
+  "routes": [
+   "/approvals",
+   "/cases/CASE-2026-0128"
+  ],
+  "steps": 10,
+  "touched": 13
+ },
+ {
+  "id": "CHK-02",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "承認者として案件を差戻す (理由・カテゴリ必須)",
+  "routes": [
+   "/cases/CASE-2026-0110",
+   "/approvals"
+  ],
+  "steps": 5,
+  "touched": 6
+ },
+ {
+  "id": "CHK-03",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "複数の承認待ち案件を一括承認する (要確認残ゲート + SoD スキップ)",
+  "routes": [
+   "/approvals"
+  ],
+  "steps": 4,
+  "touched": 6
+ },
+ {
+  "id": "CHK-04",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "反映済 (reflected) 案件を承認者として訂正/取消し、可逆化する",
+  "routes": [
+   "/cases/CASE-2026-0120"
+  ],
+  "steps": 5,
+  "touched": 6
+ },
+ {
+  "id": "CHK-05",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "SoD 自己承認の試行 (四眼原則ブロック) — および prototype での到達不能性",
+  "routes": [
+   "/cases/CASE-2026-0139"
+  ],
+  "steps": 3,
+  "touched": 3
+ },
+ {
+  "id": "CHK-06",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "承認待ちキューの絞り込み・並べ替え・状態 (空/読み込み/エラー) のハンドリング",
+  "routes": [
+   "/approvals",
+   "/approvals?demo=error",
+   "/approvals?demo=loading"
+  ],
+  "steps": 5,
+  "touched": 4
+ },
+ {
+  "id": "CHK-07",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "参照専用 (過去/提案根拠) 案件を開いた場合の操作抑止",
+  "routes": [
+   "/cases/CASE-2026-0098",
+   "/cases/CASE-9999-9999"
+  ],
+  "steps": 3,
+  "touched": 1
+ },
+ {
+  "id": "CHK-08",
+  "stakeholder": "承認者 (checker) — 四眼原則の後半を担う最終承認担当者。入力者が確認",
+  "role": "承認者 (checker / 鈴木課長)",
+  "title": "通知 (差戻し受領/エスカレーション/反映後訂正) と横断検索からの案件着地",
+  "routes": [
+   "/approvals"
+  ],
+  "steps": 3,
+  "touched": 11
+ }
+]

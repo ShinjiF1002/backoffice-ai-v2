@@ -3,7 +3,7 @@ import type { ProposalStatus } from './types'
 /**
  * 提案一覧 (Proposals) mock — screen-contracts-v2 §5 / screens-v2/05-proposals / mock-fixture §6
  * list 専用 view-model: 平易語のみ (旧 mock-proposals の OCR/threshold 等 内部語は使わない)。
- * 「日次提案分析」が差戻しパターンから生成した改定候補。cron/trigger 表記なし。
+ * 「日次提案分析」が現場の差戻し・誤確定パターンから生成した改定候補。cron/trigger 表記なし。
  */
 export interface ProposalListRow {
   id: string

@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* ============================================================================
+ * Operational Premium v2 — REFRESH STUDIO foundation (基盤先行)
+ * 研究目的: research-compounder の dense-enterprise / boring-reliable トレンドを
+ *   prototype-redesign に "既存コード非改変" で当てる実験 (元 src は別ディレクトリで保全)。
+ *
+ * 本 file の刷新方針 (foundation step):
+ *   1. OKLCH token 体系へ移行 (perceptual 均等・color-mix 互換・3-engine ready)。
+ *      token "名" は全て継承 → 既存 15 画面は 1 component も触らず自動で再テーマされる。
+ *   2. elevation-over-borders: 重い 1px 境界を refined な多層 shadow に置換できる
+ *      --shadow-* を定義 (既存 shadow-sm/md/lg utility が新値を拾う)。
+ *   3. recessive chrome substrate: nav 用 --color-chrome (content panel より一段沈む面)。
+ *   4. density / type-scale / motion の substrate token を新設 (screen step で消費)。
+ *
+ * 不採用 (research が regulated/dense で avoid 判定): liquid glass / translucency /
+ *   decorative motion / Wow factor。boring-reliable の抑制を維持する。
+ * Adoption gate: OKLCH / container-query / Popover / View Transitions は Baseline
+ *   "Widely/Newly" 帯 (2026-05-29 fetch)。固定ブラウザ matrix 確認は本番化時に別途。
+ * 元 SSOT: prototype-redesign/src/index.css (Operational Premium Light, Day 11 lock)
+ * ========================================================================== */
+
+@theme inline {
+  /* === Color — 中立面 (cool slate ramp, OKLCH) ===
+   * content 面ほど明るく (panel = 最明)、chrome 面は一段沈めて data を前進させる。 */
+  --color-canvas: oklch(97.7% 0.006 264);    /* content 地: panel 白を前進させるため一段深い cool 地 */
+  --color-panel: oklch(100% 0 0);            /* content card: 最明面 */
+  --color-panel-inset: oklch(95.8% 0.009 264);
+  --color-chrome: oklch(96.3% 0.0095 264);    /* NEW: nav/chrome 面。content より明確に沈め data を前進 (recessive) */
+  --color-border: oklch(91.5% 0.009 264);
+  --color-border-strong: oklch(85.5% 0.014 264);
+  --color-chrome-border: oklch(90% 0.011 264); /* NEW: chrome 面の境界 */
+
+  --color-fg: oklch(25% 0.03 264);
+  --color-fg-muted: oklch(52% 0.022 260);     /* AA on panel/canvas。inset 上は fg-tertiary/fg */
+  --color-fg-tertiary: oklch(44% 0.03 262);   /* 意味テキストの最弱コントラスト。全背景で AA pass を狙う */
+  --color-fg-subtle: oklch(70% 0.018 260);    /* 装飾/disabled/icon 専用に降格。意味テキスト不可 (R7 gate) */
+
+  --color-primary: oklch(55% 0.215 274);      /* brand fill (solid bg + white fg)。TEXT には使わない */
+  --color-primary-hover: oklch(49% 0.205 274);
+  --color-primary-strong: oklch(47% 0.2 274); /* primary 系 TEXT/link/active-nav/chip 用 (light 地で AA) */
+  --color-primary-fg: oklch(100% 0 0);
+  --color-primary-soft: oklch(96.5% 0.022 274);
+
+  --color-success: oklch(70% 0.142 165);
+  --color-success-fg: oklch(100% 0 0);
+  --color-success-soft: oklch(96.5% 0.03 165);
+  --color-success-soft-fg: oklch(48% 0.1 165); /* soft 背景上の foreground (AA) */
+
+  --color-alert: oklch(78% 0.15 75);
+  --color-alert-fg: oklch(100% 0 0);
+  --color-alert-soft: oklch(97.6% 0.035 85);
+  --color-alert-soft-fg: oklch(43% 0.085 60);  /* dark amber, soft 背景上 (AA) */
+
+  --color-error: oklch(58% 0.215 27);
+  --color-error-fg: oklch(100% 0 0);
+  --color-error-soft: oklch(96.6% 0.018 22);
+  --color-error-soft-fg: oklch(50% 0.19 27);   /* red-700 相当, soft 背景上 (AA) */
+
+  --color-diff-add: oklch(70% 0.142 165);
+  --color-diff-del: oklch(58% 0.215 27);
+  --color-diff-add-bg: oklch(93% 0.06 165);
+  --color-diff-del-bg: oklch(93% 0.05 22);
+
+  /* === soft-tint -200 border (canonical-design-spec §2.1 継承) === */
+  --color-alert-soft-border: oklch(88% 0.09 80);
+  --color-primary-soft-border: oklch(90% 0.05 274);
+  --color-success-soft-border: oklch(88% 0.07 165);
+  --color-error-soft-border: oklch(88% 0.08 24);
+
+  /* === 紙文書 token (CaseDetail 文書ビューア専用) === */
+  --color-paper: oklch(100% 0 0);
+  --color-paper-ink: oklch(22% 0.012 264);
+  --color-paper-label: oklch(52% 0.022 260);
+  --color-paper-line: oklch(86% 0.013 264);
+  --color-paper-bg: oklch(95.5% 0.006 264);
+
+  /* === modal overlay === */
+  --color-overlay: oklch(25% 0.03 264 / 0.45);
+
+  /* === Radius (refresh: 丸みを 1 段上げ modern に、抑制内) === */
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --radius-chip: 6px;
+
+  /* === Elevation (NEW: elevation-over-borders。既存 shadow-{sm,md,lg} utility が拾う) ===
+   * 低 chroma の cool shadow。dense UI で border を減らし面の階層を影で語る。 */
+  --shadow-2xs: 0 1px 1px 0 oklch(25% 0.03 264 / 0.04);
+  --shadow-xs: 0 1px 2px 0 oklch(25% 0.03 264 / 0.06);
+  --shadow-sm: 0 1px 2px 0 oklch(25% 0.03 264 / 0.06), 0 1px 3px 0 oklch(25% 0.03 264 / 0.05);
+  --shadow-md: 0 2px 4px -1px oklch(25% 0.03 264 / 0.07), 0 4px 8px -2px oklch(25% 0.03 264 / 0.06);
+  --shadow-lg: 0 4px 8px -2px oklch(25% 0.03 264 / 0.08), 0 12px 20px -4px oklch(25% 0.03 264 / 0.08);
+
+  /* === Layout === */
+  --height-pageheader: 88px;
+
+  /* === Density substrate (NEW: screen step の Data Table Premium tier で消費) === */
+  --density-row-compact: 32px;
+  --density-row-default: 40px;
+  --density-row-comfortable: 48px;
+
+  /* === Type-scale substrate (NEW: 11px step を追加。既定 text-* は維持) === */
+  --text-2xs: 0.6875rem;        /* 11px — meta/badge/eyebrow 用の追加段 */
+  --text-2xs--line-height: 1rem;
+
+  /* === Motion substrate (NEW: tier 別 budget の base。reduced-motion で無効化) === */
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+
+  /* === Typography stacks === */
+  --font-sans: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: 'tnum' 1, 'cv11' 1;
+  color: var(--color-fg);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:lang(ja) {
+  font-feature-settings: 'palt' 1;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+/* F-035: modal entrance signature motion (overlay fade + panel scale/slide-in、≤200ms)。
+ * prefers-reduced-motion では下の global block が duration を 0.01ms に潰し off になる (regulated UI 規律内、T1 控えめ)。 */
+@keyframes modal-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-modal-overlay { animation: modal-overlay-in 150ms ease-out; }
+.animate-modal-panel { animation: modal-panel-in 180ms var(--ease-emphasized); }
+
+/* motion budget (canonical-design-spec §10): prefers-reduced-motion で全 animation/transition を抑制 (a11y mandatory)。
+ * regulated UI では motion = default off の policy。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 印刷 stylesheet (W3 §8): 証跡 (CaseDetail 文書 / Observatory 台帳) を紙の記録として綺麗に出す。
+ * アプリ chrome (TopBar / Sidebar / mobile nav / 決定 footer) を隠し、page header は残す。
+ * h-screen / overflow-hidden の shell を解除して内容を複数ページに流す (clip 防止)。 */
+@media print {
+  header:not([data-page-header]),
+  aside,
+  nav,
+  footer {
+    display: none !important;
+  }
+  html,
+  body,
+  #root,
+  #root > div,
+  #root > div > div,
+  main {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+  [data-page-header] {
+    position: static !important;
+  }
+  tr,
+  li,
+  section {
+    page-break-inside: avoid;
+  }
+}

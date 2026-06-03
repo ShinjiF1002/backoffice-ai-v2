@@ -8,6 +8,8 @@ import { SessionStore } from './identity/session.js'
 import { loginOperator, resolveOperator, loadAllowedActors } from './identity/identity.js'
 import { parseStrict } from './validation.js'
 import { mountMutations } from './handlers/router.js'
+import { mountReads } from './handlers/reads.js'
+import { securityHeaders, errorSanitizer, makeRateLimiter } from './exposure.js'
 
 /** Liveness probe logic (testable in-process without HTTP). */
 export function healthCheck(db: Db): { ok: boolean; status: string } {
@@ -36,8 +38,11 @@ export function createApp(db: Db, deps: AppDeps = {}): Express {
   const secret = deps.secret ?? loadConfig().sessionSecret
   const sessionStore = deps.sessionStore ?? new SessionStore()
 
+  const rateLimit = makeRateLimiter()
+
   const app = express()
   app.use(express.json())
+  app.use(securityHeaders) // CSP + nosniff + referrer on every response
 
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json(healthCheck(db))
@@ -73,8 +78,11 @@ export function createApp(db: Db, deps: AppDeps = {}): Express {
     })
   })
 
-  // 22 mutation endpoints (SoD / state / audit enforcement; governance-boundary gated).
-  mountMutations(app, db, { sessionStore, secret })
+  // 22 mutation endpoints (SoD / state / audit; governance-boundary gated + rate-limited).
+  mountMutations(app, db, { sessionStore, secret, rateLimit })
+  // read endpoints (business all-role + governance-only + IDOR-scoped).
+  mountReads(app, db, { sessionStore, secret })
 
+  app.use(errorSanitizer) // terminal handler: never leak stack/SQL (must be last)
   return app
 }

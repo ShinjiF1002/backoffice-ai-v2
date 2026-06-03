@@ -16,6 +16,8 @@ export interface MutationDeps {
   sessionStore: SessionStore
   secret: string | undefined
   now?: number
+  /** per-key (effective_actor_id) rate gate for mutations; returns false when over the limit. */
+  rateLimit?: (key: string) => boolean
 }
 
 /**
@@ -72,6 +74,7 @@ export function dispatchMutation<I extends { actorId: string }>(
   if (!parsed.ok) return deny(parsed.denialReason)
   const resolved = resolveMutationContext(db, deps, raw.token, parsed.data.actorId)
   if (!resolved.ok) return deny(resolved.denialReason)
+  if (deps.rateLimit && !deps.rateLimit(resolved.ctx.effectiveActorId)) return deny('RATE_LIMITED')
   const result = run(db, resolved.ctx, parsed.data, raw.params ?? {})
   if (!result.ok) return deny(result.denialReason)
   return { status: 200, body: { ok: true, entity: result.entity, auditEvent: result.auditEvent } }

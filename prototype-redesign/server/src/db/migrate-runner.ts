@@ -71,3 +71,46 @@ export function runMigrations(db: Db, opts: { dir?: string; appliedAt?: string }
   }
   return count
 }
+
+/** All application tables the boot path requires present (21 total; contract 08 (a)). */
+export const REQUIRED_TABLES: readonly string[] = [
+  'workflows', 'roles', 'actors', 'cases', 'case_fields', 'case_documents', 'case_document_rows',
+  'lifecycle_events', 'agents', 'agent_samples', 'proposals', 'proposal_source_cases',
+  'governance_model_inventory', 'drift_monitors', 'escalations', 'notifications_read_state',
+  'synthetic_metric_rows', 'historical_cases', 'audit_events', 'demo_clock', 'schema_migrations',
+]
+
+/** Highest migration version available on disk (the version the DB should be at). */
+export function latestVersion(dir: string = MIGRATIONS_DIR): number {
+  const versions = listMigrations(dir).map((m) => m.version)
+  return versions.length ? Math.max(...versions) : 0
+}
+
+/** Application (non-sqlite-internal) table names present in the DB. */
+export function listTables(db: Db): string[] {
+  const rows = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    .all() as { name: string }[]
+  return rows.map((r) => r.name)
+}
+
+export interface SchemaDrift {
+  ok: boolean
+  missingTables: string[]
+  dbVersion: number
+  expectedVersion: number
+}
+
+/**
+ * Demo-DB drift detection (contract 08 (f) / 06 OPEN-DB-3): drift = a required table is missing
+ * OR the applied version is behind the latest on disk. Recovery is `db:reset-demo` (no auto-repair).
+ * (checksum drift-on-startup is intentionally NOT a gate here — optional per 08 (f).)
+ */
+export function checkSchemaDrift(db: Db, opts: { dir?: string } = {}): SchemaDrift {
+  const expectedVersion = latestVersion(opts.dir)
+  const applied = appliedVersions(db)
+  const dbVersion = applied.size ? Math.max(...applied) : 0
+  const present = new Set(listTables(db))
+  const missingTables = REQUIRED_TABLES.filter((t) => !present.has(t))
+  return { ok: missingTables.length === 0 && dbVersion >= expectedVersion, missingTables, dbVersion, expectedVersion }
+}

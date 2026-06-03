@@ -1,4 +1,4 @@
-import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
+import type { MetricRow } from './types'
 
 /**
  * KPI SSOT (remediation B3 + v3 W5 F-055/F-019) — process 別の MetricRow を単一 source 化。

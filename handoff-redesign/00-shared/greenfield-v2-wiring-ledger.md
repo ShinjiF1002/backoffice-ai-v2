@@ -77,21 +77,25 @@
 - **test 移行 + 旧 v1 component (shell/cross-cutting) cleanup + check:all green 収束 = Codex 委譲 (実装、strict coverage 保持 spec) — 進行中**。
 - CLAUDE.md route SSOT 更新済。IA doc (ia-overview/screen-contracts/coverage-matrix) banner 更新。
 
-## 完了状態 (2026-06-03、main 置換 readiness / user 最終承認待ち)
+## 完了状態 — **historical snapshot (route-swap 時点 2026-06-03)。現行 status は下記「残 (deferred)」section が SSOT**
 
-- **配線 + parity + route-swap + operator-UX port 完了**。`check:all` green: lint / check:no-op (84 .tsx) / types / types:test / design (違反0) / **test 250 pass + 25 skip = 275 (≥272)** / build。
+> ⚠ 本 section の数値は route-swap 完了時点の snapshot。その後 #23 merge (281/14/295) → postv4 cleanup で **test 278 pass + 8 skip = 286 / main 置換 DONE (PR #24, fd35150)** に更新済。下記 deferred section が現行 SSOT。
+
+- **配線 + parity + route-swap + operator-UX port 完了**。`check:all` green (snapshot: test 250 pass + 25 skip = 275、現行は 278/8/286)。
 - **axe-core (Playwright, build+preview)**: 全 16 **本番 route** で serious/critical = 0 (`prod-axe-sweep.mjs`)。
 - **機能 parity (Playwright 14/14)**: 承認/一括承認(SoD)/SoD banner/forward/promotion req+approve/create/markAllRead/escalate/escalation queue/reverse/emergencyStop/resume。
 - **Codex #1 (配線後)**: 1 blocking + 3 high 修正済。**Codex #2 (pre-merge)**: 0 blocking、1 high (CaseDraftV2 focus-to-first-invalid a11y) 修正済 + v2 test 追加。全 8 capability が passing test に map (Codex 確認)。skip 25 件は v2 design 差として正当 (silent drop 無し、product code 非弱体化を Codex 確認)。
 - route-swap: v2 15 画面 = 本番 route (`/`…)、v1 pages 削除、`/v2` prefix 全除去。CLAUDE.md route SSOT + IA doc banner 更新。
 - **#23 merge reconciliation (2026-06-03)**: PR 作成後に origin/main が PR #23 (post-v3 data: 自動化業務 2→5、UC-BO-03/04/05) を先取り。`git merge origin/main` で v1 4 page の modify/delete conflict は **削除側を採用**。v2 への影響は **data 増分のみ** (route/視覚不変): HubV2 `PROC_ICON` を transfer/stamp/card へ拡張 (RepeatIcon/StampIcon/CreditCardIcon、#23 v1 Hub と同 icon)。ObservatoryV2 メトリクスは OBS_METRICS (5 業務) を render、未達 2 件 (法人住所変更/改印・代表者変更届=agent-corp-notification) のみ drill link → observatory-drill.test の 5-業務期待に適合。再 verify: **check:all green (test 281 pass + 14 skip = 295)** / prod-axe 16 route 0 s/c / Observatory 5 tab 0 s/c。
 
-### 残 (deferred、main 置換前/後の follow-up、user 判断)
-1. **Observatory depth + model governance** (compliance/oversight): v2 ObservatoryV2 は監視 3-card 縮約版。v1 tabbed cockpit (監査/メトリクス/ナレッジ/モデルガバナンス [SR11-7 model台帳/drift]) + 台帳 drill/filter/search/pagination の port。skip: observatory-drill 9 + w3 reset/ナレッジ 2。**最大の残 feature (compliance 関連)**。
-2. **dead-code 0** (要型抽出、本 route-swap scope 外): cross-cutting (ReconcilePanel/ConsequencePanel/MetricVsThreshold) + case (DocumentViewer/LifecycleStepper) は v2 で未 render だが、各 file が export する data 型 (`MetricVsThresholdData`/`ConsequencePanelData` 等) を **live mock data が `import type` で参照**するため file 削除不可 (#23 merge 時に確認、tsc TS2307 で検出)。完全撤去 = 型を `data/` へ抽出 → 全 importer 再 point → component 削除 → before-after.test 撤去 + keyboard-a11y の DocumentViewer/ReconcilePanel block 撤去。build は tree-shake 済 (bundle 影響無)。
-3. manual-entry v1-form test (skip、v2-form test で代替済) / loading-error seam (v2 同期で非該当)。
-4. v2-parity*.mjs は /v2 URL (swap 前検証、historical)。prod-axe-sweep.mjs が本番 route 版。
-- **main 置換 = 全て branch `redesign/greenfield-v2` 上 (uncommitted)。main 不可侵。user 最終承認後に commit/merge**。
+### 残 (deferred、follow-up) — **全 close 済 (postv4、2026-06-03)**
+1. ~~**Observatory depth + model governance**~~ → **DONE (route-swap で port 済)**。ObservatoryV2 = 5-tab cockpit (監査/メトリクス/ナレッジ/モデルガバナンス [SR11-7 model台帳/drift]/証跡台帳)、observatory-drill 9 test un-skip+pass、5 tab とも axe 0。当初「最大の残」は解消済 (この deferred 記載が stale だった)。
+2. ~~**dead-code 0**~~ → **active src は DONE (postv4)**。純データ型 `MetricRow`・`ConsequenceImpact` を `data/types.ts` へ移設 → 4 mock importer を `./types` へ再 point → cross-cutting (ReconcilePanel/ConsequencePanel/MetricVsThreshold) + case (DocumentViewer/LifecycleStepper) 5 file 削除。before-after.test 撤去、keyboard-a11y は ProcessSelector block のみ残置。tsc/build/test green。CSS は v1 `--color-*` 死蔵 class が消え ~2.3kB 減 (v2 presentation 不変)。
+   - **残: `src/legacy/` graveyard** (別 slice)。`legacy/pages/{CaseReview,SendBackComment}` 等は v1 component への dangling import を多数 (CaseReview は 17 `@/` import の大半が削除済) 抱える完全な dead quarantine で、tsconfig.app/test が `src/legacy` を exclude するため全 gate 影響無。LifecycleStepper 削除で dangling が +1 したが piecemeal fix はせず (一貫性が無い)、legacy/ は将来 wholesale purge する。
+   - **残: v2 keyboard a11y** (別 batch)。CaseDetailV2 の文書行・要確認 card row-select が `<div onClick>` で mouse-only (v1 の keyboard 選択経路は v2 で消失)。field 実 action「対応」は native button で keyboard 可ゆえ実害限定的だが、row-select の keyboard 化 (role=button + tabIndex + onKeyDown) は a11y 残課題。
+3. ~~manual-entry v1-form skip / loading-error seam~~ → **整理済 (postv4)**。manual-entry: v1 skip block 撤去 + v2 form の create→navigate→手動起票 detail 統合 test 追加 (honesty F-006/F-051 は manual-honesty.test が data 層で担保)。w3 緊急停止→一覧反映: persist→remount 経路で v2 DOM 用に re-enable (skip 解除)。loading-error: v2 同期設計で loading/error 状態が発生しない旨を明記した恒久 skip 維持 (偽 seam を作らない)。skip 14→8 (loading-error のみ)。
+4. ~~v2-parity*.mjs 等 temp script~~ → **削除済 (postv4)**。/v2 prefix 時代の historical script (v2-parity*/v2-axe-sweep/capture/compare/shot) + 本番 route 版 (prod-axe-sweep/obs-verify) を含む全 untracked 検証 script を削除 (再検証時は再生成)。
+- **main 置換 = DONE**。PR #24 で merge 済 (`fd35150`)。本 cleanup は postv4 follow-up (branch `postv4/dead-code-test-cleanup` → PR)。
 
 ## feature-richness port (user 指示 2026-06-03: 全 bank stakeholder の end-to-end UX 最大化 + compliance、判断委任)
 

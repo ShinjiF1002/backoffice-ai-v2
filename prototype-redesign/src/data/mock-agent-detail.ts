@@ -1,5 +1,4 @@
-import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
-import type { ConsequenceImpact } from '@/components/cross-cutting/ConsequencePanel'
+import type { MetricRow, ConsequenceImpact } from './types'
 import { KPI_ROWS } from './mock-kpi'
 import { CASE_LIST } from './mock-case-list'
 import { caseResultTone } from '@/lib/status-tones'

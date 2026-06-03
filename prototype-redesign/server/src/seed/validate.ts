@@ -117,9 +117,9 @@ export function validateSeed(db: Db, data: SeedData = loadSeedData()): { ok: boo
   // the "now" authority is the live DB demo_clock row (08 d single-row SSOT), not the seed JSON
   const clockRows = db.prepare('SELECT id, now_iso FROM demo_clock').all() as { id: number; now_iso: string }[]
   if (clockRows.length !== 1 || clockRows[0]!.id !== 1) fail(`demo_clock must be exactly one row id=1 (got ${clockRows.length})`)
-  const dbNowIso = clockRows[0]?.now_iso ?? data.demo_clock.now_iso
-  if (!TZ_ISO.test(dbNowIso)) fail(`demo_clock.now_iso not tz-ISO: ${dbNowIso}`)
-  const nowMs = Date.parse(dbNowIso)
+  const dbNowIso = clockRows[0]?.now_iso // authority is the DB row only — no seed-JSON fallback
+  if (dbNowIso !== undefined && !TZ_ISO.test(dbNowIso)) fail(`demo_clock.now_iso not tz-ISO: ${dbNowIso}`)
+  const nowMs = dbNowIso !== undefined ? Date.parse(dbNowIso) : Number.NaN // NaN → future check is a no-op (clock already failed)
   const dated = [
     ...(db.prepare('SELECT id, received_at FROM cases').all() as { id: string; received_at: string }[]),
     ...(db.prepare('SELECT id, received_at FROM historical_cases').all() as { id: string; received_at: string }[]),

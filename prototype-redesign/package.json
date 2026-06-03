@@ -21,6 +21,8 @@
     "server:test": "vitest run -c server/vitest.server.config.ts",
     "server:migrate": "tsx server/src/migrate.ts",
     "db:reset-demo": "tsx server/src/reset-demo.ts",
+    "seed:gen": "tsx --tsconfig server/scripts/tsconfig.gen.json server/scripts/gen-seed.ts",
+    "seed:validate": "tsx server/src/seed-validate-cli.ts",
     "server:audit": "npm audit --audit-level=high --prefix server",
     "check:server": "tsc -p server/tsconfig.server.json --noEmit && npm run server:test && npm run server:audit",
     "dev:full": "concurrently -k \"npm run dev\" \"npm run server:dev\"",

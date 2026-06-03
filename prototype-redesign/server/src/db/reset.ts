@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import type { ServerConfig } from '../config.js'
 import { openDb, ensureDbDir } from './connection.js'
 import { runMigrations } from './migrate-runner.js'
+import { seedDemo } from '../seed/seed.js'
 
 export interface ResetResult {
   ok: boolean
@@ -29,7 +30,7 @@ export function resetDemo(config: ServerConfig): ResetResult {
   ensureDbDir(config.dbPath)
   const db = openDb(config.dbPath)
   const migrationsApplied = runMigrations(db)
-  // PR3: seedDemo(db) is invoked here once the seed module exists (recreate = migrate + seed).
+  seedDemo(db) // recreate = migrate + re-seed (audit_events starts empty; no trigger-DELETE)
   db.close()
   return { ok: true, migrationsApplied }
 }

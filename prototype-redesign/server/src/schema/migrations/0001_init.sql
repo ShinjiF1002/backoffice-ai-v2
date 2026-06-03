@@ -42,7 +42,7 @@ CREATE TABLE cases (
   workflow_id       TEXT NOT NULL REFERENCES workflows(id) ON DELETE RESTRICT,
   status            TEXT NOT NULL
                       CHECK (status IN ('pending','ready','sent-back','business-approval-waiting','reflected')),
-  assignee_id       TEXT REFERENCES actors(id) ON DELETE RESTRICT,   -- NULL = 未割当
+  assignee_name     TEXT,                                            -- 表示用所有者名 (live owner; 佐藤花子/高橋 等は actor 非対象ゆえ FK にしない、NULL = 未割当)
   flags             INTEGER NOT NULL DEFAULT 0 CHECK (flags >= 0),
   origin            TEXT NOT NULL DEFAULT 'ai' CHECK (origin IN ('ai','manual')),
   input_approved_by TEXT REFERENCES actors(id) ON DELETE RESTRICT,   -- SoD discriminant (= effective_actor_id)

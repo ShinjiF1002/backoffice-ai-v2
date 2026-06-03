@@ -114,8 +114,12 @@ export function validateSeed(db: Db, data: SeedData = loadSeedData()): { ok: boo
   }
 
   // (9) timestamps: received_at (cases + historical) + demo_clock are full tz-ISO, never future, never date-only
-  if (!TZ_ISO.test(data.demo_clock.now_iso)) fail(`demo_clock.now_iso not tz-ISO: ${data.demo_clock.now_iso}`)
-  const nowMs = Date.parse(data.demo_clock.now_iso)
+  // the "now" authority is the live DB demo_clock row (08 d single-row SSOT), not the seed JSON
+  const clockRows = db.prepare('SELECT id, now_iso FROM demo_clock').all() as { id: number; now_iso: string }[]
+  if (clockRows.length !== 1 || clockRows[0]!.id !== 1) fail(`demo_clock must be exactly one row id=1 (got ${clockRows.length})`)
+  const dbNowIso = clockRows[0]?.now_iso ?? data.demo_clock.now_iso
+  if (!TZ_ISO.test(dbNowIso)) fail(`demo_clock.now_iso not tz-ISO: ${dbNowIso}`)
+  const nowMs = Date.parse(dbNowIso)
   const dated = [
     ...(db.prepare('SELECT id, received_at FROM cases').all() as { id: string; received_at: string }[]),
     ...(db.prepare('SELECT id, received_at FROM historical_cases').all() as { id: string; received_at: string }[]),
@@ -131,12 +135,7 @@ export function validateSeed(db: Db, data: SeedData = loadSeedData()): { ok: boo
   // (11) cases ∩ historical_cases id space disjoint
   for (const cid of caseIds) if (histIds.includes(cid)) fail(`id ${cid} is in both cases and historical_cases`)
 
-  // (12) demo_clock single-row DB SSOT (08 d) — validate the live DB row, not just the seed JSON
-  const clockRows = db.prepare('SELECT id, now_iso FROM demo_clock').all() as { id: number; now_iso: string }[]
-  if (clockRows.length !== 1 || clockRows[0]!.id !== 1) fail(`demo_clock must be exactly one row id=1 (got ${clockRows.length})`)
-  else if (!TZ_ISO.test(clockRows[0]!.now_iso)) fail(`demo_clock.now_iso not tz-ISO: ${clockRows[0]!.now_iso}`)
-
-  // (13) actor display-name uniqueness — notification ownership matches assignee by display name,
+  // (12) actor display-name uniqueness — notification ownership matches assignee by display name,
   // so the 5 actor names must not collide (else a same-named persona could read another's queue)
   const actorNames = (db.prepare('SELECT name FROM actors').all() as { name: string }[]).map((r) => r.name)
   if (new Set(actorNames).size !== actorNames.length) fail('actor display names must be unique (notification name-match safety)')

@@ -47,6 +47,13 @@ describe('token sign/verify (03 §1)', () => {
     expect(v.ok).toBe(false)
     if (!v.ok) expect(v.denialReason).toBe('TOKEN_INVALID')
   })
+
+  it('missing/non-string issued_at → TOKEN_INVALID (contract-required field)', () => {
+    const token = signToken({ operator_id: 'op-demo-1', issued_at: 123 as unknown as string, expires_at: '2099-01-01T00:00:00.000Z', jti: 'j1' }, SECRET)
+    const v = verifyToken(token, SECRET, { now: T0 })
+    expect(v.ok).toBe(false)
+    if (!v.ok) expect(v.denialReason).toBe('TOKEN_INVALID')
+  })
 })
 
 describe('SessionStore jti revoke-on-reissue (03 OD-4)', () => {

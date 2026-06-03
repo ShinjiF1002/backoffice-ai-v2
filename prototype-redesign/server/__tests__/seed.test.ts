@@ -88,6 +88,9 @@ describe('seed + seed:validate (PR3 parity gate)', () => {
     expect(countOf(db2, 'audit_events')).toBe(0) // empty: recreated, NOT trigger-deleted
     expect(countOf(db2, 'cases')).toBe(loadSeedData().cases.length) // re-seeded
     db2.close()
+    // atomic swap leaves no .bak / .rebuild residue
+    expect(fs.existsSync(`${dbPath}.bak`)).toBe(false)
+    expect(fs.existsSync(`${dbPath}.rebuild`)).toBe(false)
   })
 
   it('detects an injected parity violation (negative control)', () => {

@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { StoreProvider } from '@/store/StoreProvider'
-import { CaseDetail } from '@/pages/CaseDetail'
-import { ProposalDetail } from '@/pages/ProposalDetail'
-import { AgentDetail } from '@/pages/AgentDetail'
+import { CaseDetailV2 } from '@/v2/CaseDetailV2'
+import { ProposalDetailV2 } from '@/v2/ProposalDetailV2'
+import { AgentDetailV2 } from '@/v2/AgentDetailV2'
 import { clearPersisted } from '@/store/persist'
 import { CASE_DETAILS } from '@/data/mock-case-detail'
 
@@ -27,23 +27,23 @@ function renderDetail(node: ReactNode, path: string, route: string) {
 describe('F-056 C 型 detail contract (単一決定面)', () => {
   beforeEach(() => clearPersisted())
 
-  it('CaseDetail は sticky footer を 1 つだけ持つ (C 単一決定面)', () => {
-    const { container } = renderDetail(<CaseDetail />, '/cases/CASE-2026-0142', '/cases/:id')
+  it('CaseDetailV2 は sticky footer を 1 つだけ持つ (C 単一決定面)', () => {
+    const { container } = renderDetail(<CaseDetailV2 />, '/cases/CASE-2026-0142', '/cases/:id')
     expect(container.querySelectorAll('footer')).toHaveLength(1)
   })
 
-  it('ProposalDetail は sticky footer を 1 つだけ持つ', () => {
-    const { container } = renderDetail(<ProposalDetail />, '/proposals/PROP-2026-031', '/proposals/:id')
+  it('ProposalDetailV2 は sticky footer を 1 つだけ持つ', () => {
+    const { container } = renderDetail(<ProposalDetailV2 />, '/proposals/PROP-2026-031', '/proposals/:id')
     expect(container.querySelectorAll('footer')).toHaveLength(1)
   })
 
-  it('AgentDetail は (mode 分岐後も) sticky footer を 1 つだけ持つ', () => {
-    const { container } = renderDetail(<AgentDetail />, '/agents/agent-corporate-address-change', '/agents/:id')
+  it('AgentDetailV2 は (mode 分岐後も) sticky footer を 1 つだけ持つ', () => {
+    const { container } = renderDetail(<AgentDetailV2 />, '/agents/agent-corporate-address-change', '/agents/:id')
     expect(container.querySelectorAll('footer')).toHaveLength(1)
   })
 
-  it('CaseDetail は A 全体レビュー可能性: 対象案件の全項目を default 表示 (折りたたまない)', () => {
-    renderDetail(<CaseDetail />, '/cases/CASE-2026-0142', '/cases/:id')
+  it('CaseDetailV2 は A 全体レビュー可能性: 対象案件の全項目を default 表示 (折りたたまない)', () => {
+    renderDetail(<CaseDetailV2 />, '/cases/CASE-2026-0142', '/cases/:id')
     // CASE-2026-0142 の全 field ラベルが既定で可視 (resolved/一致 を折りたたみ default にしない)。
     const expected = CASE_DETAILS['CASE-2026-0142']!.fields.map((f) => f.fieldLabel)
     for (const label of expected) {

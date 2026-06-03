@@ -1,3 +1,7 @@
+> **⚠ ROUTE-SWAP (2026-06-03): greenfield v2 (`prototype-redesign/src/v2/*`) が本番 UI に昇格。**
+> 本 doc の画面契約・IA は **v2 (V2Shell Operator Console + 15 画面、store 配線済)** に適用。route path は不変、shell は `V2Shell`
+> (3-group nav: 処理/監督/改善)、component は `*V2`。旧 v1 (AppShell + `src/pages/*`) は撤去。配線/parity ledger: `greenfield-v2-wiring-ledger.md`。
+
 # Coverage Matrix v2 (F-* × R-* × screen × component × prompt × gate)
 
 > user 16 指摘を個別分解した **F-01〜F-19** が、要件 R-* → 画面 → component → prompt → Acceptance gate で**漏れなく閉じる**ことを mechanical に追跡する。

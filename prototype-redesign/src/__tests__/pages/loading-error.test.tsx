@@ -20,7 +20,9 @@ function renderAt(path: string) {
   )
 }
 
-describe('P1-5: loading/error が hidden seam (?demo) で到達可能', () => {
+// SKIP (route-swap、意図的簡素化): v2 は in-memory 同期で fetch を伴わず loading/error 状態が発生しない。
+// ?demo seam は v1 の取得縮退デモ機構で v2 に存在しない (偽の loading/error UI を作らない = honest)。
+describe.skip('P1-5: loading/error が hidden seam (?demo) で到達可能', () => {
   it('?demo=loading → skeleton が出て案件行は出ない', () => {
     renderAt('/cases?demo=loading')
     expect(screen.getByRole('status', { name: '読み込み中' })).toBeInTheDocument()

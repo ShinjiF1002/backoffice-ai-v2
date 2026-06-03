@@ -3,21 +3,21 @@ import userEvent from '@testing-library/user-event'
 import { axe } from 'jest-axe'
 import { MemoryRouter } from 'react-router-dom'
 import { StoreProvider } from '@/store/StoreProvider'
-import { Observatory } from '@/pages/Observatory'
+import { ObservatoryV2 } from '@/v2/ObservatoryV2'
 
-// P1-7a — Observatory drill 導線 (monitoring dead-end 解消)。case ID → case detail / 未達 KPI → 該当 Agent。
+// P1-7a — ObservatoryV2 drill 導線 (monitoring dead-end 解消)。case ID → case detail / 未達 KPI → 該当 Agent。
 
 function renderObservatory() {
   return render(
     <MemoryRouter>
       <StoreProvider>
-        <Observatory />
+        <ObservatoryV2 />
       </StoreProvider>
     </MemoryRouter>,
   )
 }
 
-describe('P1-7a Observatory drill', () => {
+describe('P1-7a ObservatoryV2 drill', () => {
   it('監査 tab: 対象 case ID が case detail へ drill する link', () => {
     renderObservatory()
     expect(screen.getByRole('link', { name: 'CASE-2026-0142' })).toHaveAttribute('href', '/cases/CASE-2026-0142')

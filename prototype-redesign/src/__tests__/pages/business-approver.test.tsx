@@ -2,8 +2,8 @@ import { renderHook, act, render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import type { Dispatch } from 'react'
 import { StoreProvider } from '@/store/StoreProvider'
-import { AgentDetail } from '@/pages/AgentDetail'
-import { BusinessApproverHub } from '@/pages/BusinessApproverHub'
+import { AgentDetailV2 } from '@/v2/AgentDetailV2'
+import { BusinessApproverHubV2 } from '@/v2/BusinessApproverHubV2'
 import type { StoreAction } from '@/store/types'
 import {
   useForwardedProposals,
@@ -85,7 +85,7 @@ describe('W2c/P1-3 業務責任者 selector', () => {
   })
 })
 
-describe('AgentDetail 承認者 mode (W2c/P1-3、F3 regression)', () => {
+describe('AgentDetailV2 承認者 mode (W2c/P1-3、F3 regression)', () => {
   // dispatch を render 中に capture し、act() で setup action を流す (store 事前 seed)。
   function renderAgentDetail(id: string) {
     let dispatch!: Dispatch<StoreAction>
@@ -98,7 +98,7 @@ describe('AgentDetail 承認者 mode (W2c/P1-3、F3 regression)', () => {
         <StoreProvider>
           <Capture />
           <Routes>
-            <Route path="/agents/:id" element={<AgentDetail />} />
+            <Route path="/agents/:id" element={<AgentDetailV2 />} />
           </Routes>
         </StoreProvider>
       </MemoryRouter>,
@@ -138,7 +138,7 @@ describe('AgentDetail 承認者 mode (W2c/P1-3、F3 regression)', () => {
   })
 })
 
-describe('F-025 BusinessApproverHub persona truthfulness', () => {
+describe('F-025 BusinessApproverHubV2 persona truthfulness', () => {
   function renderHub() {
     let dispatch!: Dispatch<StoreAction>
     function Capture() {
@@ -150,7 +150,7 @@ describe('F-025 BusinessApproverHub persona truthfulness', () => {
         <StoreProvider>
           <Capture />
           <Routes>
-            <Route path="/business-approver" element={<BusinessApproverHub />} />
+            <Route path="/business-approver" element={<BusinessApproverHubV2 />} />
           </Routes>
         </StoreProvider>
       </MemoryRouter>,

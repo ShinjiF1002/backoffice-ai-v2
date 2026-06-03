@@ -102,4 +102,17 @@ describe('seed + seed:validate (PR3 parity gate)', () => {
     expect(errors.some((e) => e.includes('CASE-NOPE'))).toBe(true)
     db.close()
   })
+
+  it('seed:validate negative controls: missing demo_clock row + duplicate actor names', () => {
+    const db = migratedMemDb()
+    seedDemo(db)
+    db.prepare('DELETE FROM demo_clock').run()
+    expect(validateSeed(db).errors.some((e) => e.includes('demo_clock'))).toBe(true)
+    db.close()
+    const db2 = migratedMemDb()
+    seedDemo(db2)
+    db2.prepare("UPDATE actors SET name = '山田太郎' WHERE id = 'actor-checker'").run() // collide display names
+    expect(validateSeed(db2).errors.some((e) => e.toLowerCase().includes('unique'))).toBe(true)
+    db2.close()
+  })
 })

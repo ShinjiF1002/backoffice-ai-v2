@@ -112,5 +112,6 @@ export function checkSchemaDrift(db: Db, opts: { dir?: string } = {}): SchemaDri
   const dbVersion = applied.size ? Math.max(...applied) : 0
   const present = new Set(listTables(db))
   const missingTables = REQUIRED_TABLES.filter((t) => !present.has(t))
-  return { ok: missingTables.length === 0 && dbVersion >= expectedVersion, missingTables, dbVersion, expectedVersion }
+  // exact version match: a DB behind OR ahead of the on-disk latest is drift → db:reset-demo (08 f)
+  return { ok: missingTables.length === 0 && dbVersion === expectedVersion, missingTables, dbVersion, expectedVersion }
 }

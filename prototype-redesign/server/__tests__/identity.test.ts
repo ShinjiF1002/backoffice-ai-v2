@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { migratedMemDb, seedRefData } from './helpers/db.js'
 import { createApp } from '../src/app.js'
-import { issueToken, verifyToken, TOKEN_EXPIRY_MS } from '../src/identity/token.js'
+import { signToken, issueToken, verifyToken, TOKEN_EXPIRY_MS } from '../src/identity/token.js'
 import { SessionStore } from '../src/identity/session.js'
 import { resolveOperator, resolveIdentity, loginOperator, loadAllowedActors } from '../src/identity/identity.js'
 
@@ -38,6 +38,14 @@ describe('token sign/verify (03 §1)', () => {
     const v = verifyToken(token, SECRET, { now: T0 + TOKEN_EXPIRY_MS + 1 })
     expect(v.ok).toBe(false)
     if (!v.ok) expect(v.denialReason).toBe('TOKEN_EXPIRED')
+  })
+
+  it('malformed-expiry-rejected → TOKEN_INVALID (a non-date expires_at is NOT immortal)', () => {
+    // signed with the real secret but a non-date expiry — Date.parse → NaN must not pass as unexpired
+    const token = signToken({ operator_id: 'op-demo-1', issued_at: '2026-05-30T09:00:00.000Z', expires_at: 'not-a-date', jti: 'j1' }, SECRET)
+    const v = verifyToken(token, SECRET, { now: T0 })
+    expect(v.ok).toBe(false)
+    if (!v.ok) expect(v.denialReason).toBe('TOKEN_INVALID')
   })
 })
 

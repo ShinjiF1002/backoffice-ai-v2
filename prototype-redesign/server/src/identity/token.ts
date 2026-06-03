@@ -63,7 +63,10 @@ export function verifyToken(token: string, secret: string, opts: { now?: number 
   } catch {
     return { ok: false, denialReason: 'TOKEN_INVALID' }
   }
-  if (typeof payload.expires_at !== 'string' || Date.parse(payload.expires_at) <= now)
-    return { ok: false, denialReason: 'TOKEN_EXPIRED' }
+  if (typeof payload.operator_id !== 'string' || typeof payload.jti !== 'string' || typeof payload.expires_at !== 'string')
+    return { ok: false, denialReason: 'TOKEN_INVALID' }
+  const expMs = Date.parse(payload.expires_at)
+  if (!Number.isFinite(expMs)) return { ok: false, denialReason: 'TOKEN_INVALID' } // malformed expiry ≠ never-expires
+  if (expMs <= now) return { ok: false, denialReason: 'TOKEN_EXPIRED' }
   return { ok: true, payload }
 }

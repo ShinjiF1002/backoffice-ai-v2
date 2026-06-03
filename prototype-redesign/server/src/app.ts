@@ -41,8 +41,8 @@ export function createApp(db: Db, deps: AppDeps = {}): Express {
   const rateLimit = makeRateLimiter()
 
   const app = express()
+  app.use(securityHeaders) // CSP + nosniff + referrer on EVERY response — before json() so body-parse errors keep them
   app.use(express.json())
-  app.use(securityHeaders) // CSP + nosniff + referrer on every response
 
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json(healthCheck(db))

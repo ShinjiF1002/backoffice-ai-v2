@@ -500,7 +500,7 @@ CREATE UNIQUE INDEX idx_escalation_one_per_case ON escalations(case_id); -- 1 �
 
 | 表名 | 必須列 | blocking 完了基準 | approval owner |
 |---|---|---|---|
-| (index 群) | 上記 7 index | (1) `/escalations` queue が `idx_escalations_unresolved` を使う (EXPLAIN QUERY PLAN)、(2) `UNIQUE(case_id)` で 2 件目 escalation INSERT が reject | データモデル責任者 |
+| (index 群) | 上記 7 index (P1a 実装は **6 explicit index**; `idx_escalation_one_per_case` は `escalations.case_id` PRIMARY KEY が生成する autoindex が 1-案件-0..1 を強制するため別 index を作らない = redundant 回避) | (1) `/escalations` queue が `idx_escalations_unresolved` を使う (EXPLAIN QUERY PLAN)、(2) `UNIQUE(case_id)` で 2 件目 escalation INSERT が reject | データモデル責任者 |
 | `case_fields.confidence_milli` | 整数 0-1000 (nullable) | float 直接格納をしない (0.72 → 720)。live confidence は OPTIONAL ゆえ **NULL-majority** を前提に、(1) NULL 行 / 値あり行の双方で業務 view に生数字を出さない (band 表示のみ) ことを API 層テストで assert、(2) NULL を 0 と誤表示しない | データモデル責任者 |
 | (mutation 共通) | read-after-write | 案件承認 endpoint が更新後 status + 新 `seq` を 1 レスポンスで返すことをテスト | バックエンド技術責任者 |
 

@@ -22,7 +22,8 @@ export function toLogPayload(input: AuditLogInput): Record<string, unknown> {
   const out: Record<string, unknown> = {}
   for (const field of LOG_ALLOWLIST) {
     const value = input[field]
-    if (value !== undefined) out[field] = value
+    // allowlist by key AND require a scalar value — an object value (e.g. {token,secret}) is dropped
+    if (value !== undefined && (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) out[field] = value
   }
   return out
 }

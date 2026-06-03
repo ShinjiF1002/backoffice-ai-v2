@@ -70,8 +70,9 @@ export function listCases(db: Db, _ctx: Ctx, q: z.infer<typeof ListCasesQuery>):
 }
 
 export function searchCases(db: Db, _ctx: Ctx, q: z.infer<typeof SearchQuery>): ReadResult {
-  // bind-only LIKE (no string concatenation) — SQL meta is treated as literal text
-  const rows = db.prepare('SELECT id, workflow_id, status FROM cases WHERE id LIKE ? ORDER BY id LIMIT ?').all(`%${q.q}%`, PAGE_CAP)
+  // literal substring via instr() — LIKE wildcards (% / _) in user input are NOT treated as wildcards
+  // (bound param + instr means `q='%'` matches nothing, not every row)
+  const rows = db.prepare('SELECT id, workflow_id, status FROM cases WHERE instr(id, ?) > 0 ORDER BY id LIMIT ?').all(q.q, PAGE_CAP)
   return { ok: true, data: { rows } }
 }
 
@@ -165,7 +166,10 @@ function notificationsFor(db: Db, actorId: string): { id: string; type: string; 
     if (e.escalated_to === actorId && e.resolution === null) out.push({ id: `esc-to:${e.case_id}`, type: 'arbitration-request', caseId: e.case_id })
     if (e.escalated_from === actorId && e.resolution !== null) out.push({ id: `esc-from:${e.case_id}`, type: 'arbitration-result', caseId: e.case_id })
   }
-  // sendback + reversal notifications go to the case assignee, matched by display name (live useNotifications)
+  // sendback + reversal notifications go to the case assignee, matched by display name (live
+  // useNotifications). SAFE because actor display names are unique (enforced by seed:validate);
+  // cases assigned to a non-actor owner (e.g. 佐藤花子/高橋, free names not in `actors`) have no
+  // matching persona and are intentionally unreachable (those owners are not demo personas).
   const actorName = (db.prepare('SELECT name FROM actors WHERE id = ?').get(actorId) as { name: string } | undefined)?.name
   if (actorName) {
     const rows = db.prepare("SELECT id, reversal_kind FROM cases WHERE status = 'sent-back' AND assignee_name = ?").all(actorName) as {

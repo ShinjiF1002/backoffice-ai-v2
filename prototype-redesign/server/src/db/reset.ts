@@ -21,16 +21,34 @@ export function resetDemo(config: ServerConfig): ResetResult {
   if (!config.resetEnabled) {
     return { ok: false, reason: 'DEMO_RESET_ENABLED is not set (refusing destructive reset; 0 writes)' }
   }
-  if (config.dbPath !== ':memory:') {
-    for (const suffix of ['', '-wal', '-shm']) {
-      const file = `${config.dbPath}${suffix}`
-      if (fs.existsSync(file)) fs.rmSync(file)
-    }
+  if (config.dbPath === ':memory:') {
+    const db = openDb(':memory:')
+    const migrationsApplied = runMigrations(db)
+    seedDemo(db)
+    db.close()
+    return { ok: true, migrationsApplied }
+  }
+  // ATOMIC (06 §契約3 "失敗時は中間状態を残さない"): build a fresh DB in a sibling temp file, then
+  // swap. If migrate/seed throws, the live DB is untouched — no partial state on the serving path.
+  const tmp = `${config.dbPath}.rebuild`
+  for (const suffix of ['', '-wal', '-shm']) {
+    const f = `${tmp}${suffix}`
+    if (fs.existsSync(f)) fs.rmSync(f)
   }
   ensureDbDir(config.dbPath)
-  const db = openDb(config.dbPath)
+  const db = openDb(tmp)
   const migrationsApplied = runMigrations(db)
   seedDemo(db) // recreate = migrate + re-seed (audit_events starts empty; no trigger-DELETE)
-  db.close()
+  db.close() // checkpoint WAL into the temp main file
+  // swap: remove the old DB only now that the new one is fully built, then rename in
+  for (const suffix of ['', '-wal', '-shm']) {
+    const f = `${config.dbPath}${suffix}`
+    if (fs.existsSync(f)) fs.rmSync(f)
+  }
+  fs.renameSync(tmp, config.dbPath)
+  for (const suffix of ['-wal', '-shm']) {
+    const f = `${tmp}${suffix}`
+    if (fs.existsSync(f)) fs.renameSync(f, `${config.dbPath}${suffix}`)
+  }
   return { ok: true, migrationsApplied }
 }

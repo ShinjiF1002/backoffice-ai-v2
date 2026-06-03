@@ -1,6 +1,6 @@
 import type { Db } from '../db/connection.js'
 import { denial, type Denial } from '../denial.js'
-import { insertAudit } from '../audit.js'
+import { insertAudit, nextSeq } from '../audit.js'
 import {
   type Ctx,
   type Cmd,
@@ -57,13 +57,16 @@ function approveOne(db: Db, ctx: Ctx, id: string, by: 'input' | 'checker'): Case
   if (isSelfApproval(cur.input_approved_by, ctx.effectiveActorId)) return denial('SELF_APPROVAL')
   const audit = db.transaction(() => {
     db.prepare('UPDATE cases SET status = ? WHERE id = ?').run('reflected', id)
+    const seq = nextSeq(db) // == the seq insertAudit will use (no audit row inserted yet)
     return insertAudit(db, ctx, {
       entityType: 'case',
       entityId: id,
       caseId: id,
       action: '承認者承認',
       before: JSON.stringify({ status: 'business-approval-waiting' }),
-      after: JSON.stringify({ status: 'reflected' }),
+      // approvalId = A-(8000+seq) ported from live reducer (reducer.ts:95); recorded in after_json
+      // rather than a redundant column (08 makes approval_id optional/derivable from seq).
+      after: JSON.stringify({ status: 'reflected', approvalId: `A-${8000 + seq}` }),
     })
   })()
   return ok(db, id, audit)

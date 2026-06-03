@@ -143,4 +143,15 @@ describe('input allowlist + pagination + injection (09 §2)', () => {
     expect((db.prepare('SELECT COUNT(*) AS c FROM cases').get() as { c: number }).c).toBe(before) // table survives
     db.close()
   })
+
+  it('search wildcards are literal: q="%" matches nothing (not every row), q=<id> matches exactly', () => {
+    const db = seededDb()
+    const ctx = ctxFor(db, 'actor-inputter')
+    const wild = reads.searchCases(db, ctx, { actorId: 'actor-inputter', q: '%' })
+    expect(wild.ok).toBe(true)
+    if (wild.ok) expect((wild.data as { rows: unknown[] }).rows.length).toBe(0) // % is literal, matches no id
+    const exact = reads.searchCases(db, ctx, { actorId: 'actor-inputter', q: 'CASE-2026-0139' })
+    if (exact.ok) expect((exact.data as { rows: unknown[] }).rows.length).toBe(1)
+    db.close()
+  })
 })

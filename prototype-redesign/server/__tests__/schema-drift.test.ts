@@ -24,6 +24,16 @@ describe('schema drift detection', () => {
     db.close()
   })
 
+  it('detects a DB version AHEAD of the on-disk latest (=== match, not >=)', () => {
+    const db = migratedMemDb()
+    db.prepare("INSERT INTO schema_migrations (version, name, applied_at, checksum) VALUES (2, '0002_future.sql', '2026-05-30T18:00:00+09:00', 'x')").run()
+    const drift = checkSchemaDrift(db)
+    expect(drift.ok).toBe(false)
+    expect(drift.dbVersion).toBe(2)
+    expect(drift.expectedVersion).toBe(1)
+    db.close()
+  })
+
   it('REQUIRED_TABLES has 21 entries', () => {
     expect(REQUIRED_TABLES.length).toBe(21)
   })

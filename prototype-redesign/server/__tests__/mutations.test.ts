@@ -173,6 +173,15 @@ describe('audit emission (T-NO-AUDIT + monotonic seq)', () => {
     expect(row.session_operator_id).toBe('op-demo-1')
     db.close()
   })
+
+  it('checker-approval audit after_json carries the derived approvalId (A-8000+seq, ported from reducer)', () => {
+    const db = seededDb()
+    cases.approveCase(db, ctxFor(db, 'actor-inputter'), { id: READY0, by: 'input' }) // audit seq 0
+    cases.approveCase(db, ctxFor(db, 'actor-checker'), { id: READY0, by: 'checker' }) // audit seq 1 → reflected
+    const row = db.prepare("SELECT after_json FROM audit_events WHERE action = '承認者承認'").get() as { after_json: string }
+    expect(JSON.parse(row.after_json).approvalId).toBe('A-8001') // 8000 + seq(1)
+    db.close()
+  })
 })
 
 describe('idempotency + atomicity', () => {

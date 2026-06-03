@@ -6,10 +6,13 @@ import type { Db } from './db/connection.js'
  * No runtime wall-clock — the value is a pure function of seq (test-deterministic).
  */
 export function auditTs(seq: number): string {
-  const total = 18 * 60 + seq
-  const hh = String(Math.floor(total / 60) % 24).padStart(2, '0')
-  const mm = String(total % 60).padStart(2, '0')
-  return `2026-05-30T${hh}:${mm}:00+09:00`
+  // deterministic + MONOTONIC: fixed JST epoch 2026-05-30T18:00:00+09:00 + seq minutes, with the
+  // DATE rolling forward past midnight (the live reducer's `% 24` wrapped the hour keeping the date,
+  // which is non-monotonic after seq 360 — fixed here while keeping the +09:00 tz). No wall-clock.
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  const epochUtcMs = Date.UTC(2026, 4, 30, 9, 0, 0) // 2026-05-30T18:00:00+09:00 == 09:00Z
+  const jst = new Date(epochUtcMs + seq * 60_000 + 9 * 3_600_000) // +9h to read JST wall-clock via getUTC*
+  return `${jst.getUTCFullYear()}-${pad(jst.getUTCMonth() + 1)}-${pad(jst.getUTCDate())}T${pad(jst.getUTCHours())}:${pad(jst.getUTCMinutes())}:${pad(jst.getUTCSeconds())}+09:00`
 }
 
 /** Next monotonic seq = contiguous 0-based (= current row count). */

@@ -1,6 +1,4 @@
-import type { ProposalStatus } from './types'
-import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
-import type { ConsequenceImpact } from '@/components/cross-cutting/ConsequencePanel'
+import type { ProposalStatus, MetricRow, ConsequenceImpact } from './types'
 
 /**
  * 提案詳細 (PROP-2026-031) detail 専用 model

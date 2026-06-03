@@ -324,3 +324,35 @@ export interface FieldReview {
   /** REFRESH STUDIO (Diff/Change Preview): 変更の取消可能性 tier。metadata strip + irreversible-on-top 序列に使う。 */
   reversibility?: Reversibility
 }
+
+/**
+ * MetricRow — 実績値 vs 閾値 vs 判定 の 1 指標 (原則 A 全件表示、集約値を捨てる)。
+ * AgentDetail / ProposalDetail / Observatory メトリクスの KPI 行データ型。全数 [仮説/要検証]。
+ * (旧 components/cross-cutting/MetricVsThreshold から data SSOT へ移設 — UI 非依存の純データ型)
+ */
+export interface MetricRow {
+  metricLabel: string
+  actualValue: string
+  threshold: string
+  /** 達成 / 未達 (+ 差分) */
+  judgment: string
+  achieved: boolean
+  period: string
+  denominator: string
+  previousDelta?: string
+  /** 除外条件 (spec)。例: エスカレーション案件を除く */
+  exclusions?: string
+  /** Agent drill 先 (P1-7、未達 KPI を該当 Agent へ)。持つ row のみ metricLabel が Link 化。tone/severity とは別軸 prop。 */
+  agentHref?: string
+}
+
+/**
+ * ConsequenceImpact — 変更の影響 1 件 (何が減り / 増え / どこで止まるか、原則 B)。
+ * AgentDetail (Trust 昇格) / ProposalDetail (ルール改定) の影響データ型。
+ * (旧 components/cross-cutting/ConsequencePanel から data SSOT へ移設 — UI 非依存の純データ型)
+ */
+export interface ConsequenceImpact {
+  /** down=減る / up=増える / guard=安全条件 (非遡及・rollback) */
+  direction: 'down' | 'up' | 'guard'
+  label: string
+}

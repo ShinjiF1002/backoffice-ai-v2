@@ -1,4 +1,4 @@
-import type { MetricRow } from '@/components/cross-cutting/MetricVsThreshold'
+import type { MetricRow } from './types'
 import { KPI_ROWS } from './mock-kpi'
 import { CASE_LIST } from './mock-case-list'
 // 証跡台帳の行型 LedgerEvent は store layer に集約 (F-002 guardrail #2)。

@@ -178,29 +178,30 @@ describe('P0-W3 flywheel: AgentDetail 緊急停止 → 一覧反映', () => {
     expect(screen.queryByText('緊急停止中')).not.toBeInTheDocument()
   })
 
-  // SKIP (route-swap deferral): v2 は breadcrumb 構造 (data-page-header) / 一覧 heading 文言 / 一覧 chip 文言 (停止中) が v1 と異なる。
-  // 緊急停止→一覧反映 capability は Playwright (v2-parity2.mjs I) + AgentsV2 昇格列 (停止中 反映) で担保。jsdom 版は v2-DOM 書き換え別 batch。
-  it.skip('緊急停止後、一覧 (/agents) の該当行に緊急停止中が反映される (P0 evidence)', async () => {
+  it('緊急停止後、一覧 (/agents) の該当行に停止中が反映される (P0 evidence, v2)', async () => {
     const user = userEvent.setup()
-    renderAt('/agents/agent-account-opening')
+    const { unmount } = renderAt('/agents/agent-account-opening')
 
-    // P1-1: account-opening は UC-BO-02。Process-First filter (既定 UC-BO-01) で一覧に出すため業務を全業務に切替。
-    await user.click(screen.getByRole('button', { name: '法人住所変更' }))
-    await user.click(screen.getByRole('option', { name: '全業務' }))
+    // 差分性の前提: この agent は停止前は未停止 (= 後段の一覧 停止中 は本 test の停止操作のみが source)。
+    expect(screen.queryByText('緊急停止中')).not.toBeInTheDocument()
 
+    // 緊急停止 (理由必須) → detail header に緊急停止中。
     await user.click(screen.getByRole('button', { name: '緊急停止' }))
     await user.type(screen.getByLabelText('停止理由（必須）'), '誤入力が急増したため')
     await user.click(screen.getByRole('button', { name: '緊急停止する' }))
-
-    // breadcrumb (page header 内) から一覧へ戻る。sidebar / mobile-nav の同名 'Agent 設定' link と
-    // 衝突するため data-page-header 内に scope して breadcrumb を一意に取る。
-    const toList = screen
-      .getAllByRole('link', { name: 'Agent 設定' })
-      .find((el) => el.closest('[data-page-header]'))!
-    await user.click(toList)
-
-    // 一覧へ遷移し、該当 Agent 行に緊急停止中 chip が store-truth で join されている (Agents.tsx)。
-    expect(screen.getByRole('heading', { name: 'Agent 設定 — エージェント一覧' })).toBeInTheDocument()
     expect(screen.getAllByText('緊急停止中').length).toBeGreaterThan(0)
+
+    // store は paused を localStorage に persist 済 (StoreProvider effect)。v2 の sidebar/breadcrumb は
+    // plain <a href> で jsdom client-nav しないため、unmount → /agents で remount し persist hydrate 経由で
+    // 一覧反映を検証する (store-truth が一覧 chip に join されることの evidence)。
+    unmount()
+    renderAt('/agents')
+
+    // account-opening = UC-BO-02。既定 process UC-BO-01 ゆえ一覧に出すため業務を 口座開設書類完備 に切替。
+    await user.click(screen.getByRole('button', { name: /法人住所変更/ })) // ProcessSelector trigger (既定 UC-BO-01)
+    await user.click(screen.getByRole('option', { name: '口座開設書類完備' }))
+
+    // 一覧の該当行に store-truth で 停止中 が反映 (AgentsV2: paused → 停止中)。
+    expect(screen.getAllByText('停止中').length).toBeGreaterThan(0)
   })
 })

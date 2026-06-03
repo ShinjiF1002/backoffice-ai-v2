@@ -19,12 +19,12 @@
 > `src/v2/*` (greenfield Operator Console、light operator console 視覚言語) を store 配線し v1 と機能 parity に到達後、
 > **本番 route に昇格 (v1 pages 撤去、`/v2` prefix 除去)**。`src/App.tsx` は `V2Shell` layout 配下に v2 15 画面。
 > **削除済**: 旧 v1 pages (`src/pages/*` 全 15) + v1 shell (`components/shell/{AppShell,Sidebar,TopBar}`) + v1-only shared
-> (`components/shared/{PersonaSwitcher,MiniTrend,DetailDemoFallback}`)。
+> (`components/shared/{PersonaSwitcher,MiniTrend,DetailDemoFallback}`) + v1-only cross-cutting/case
+> (`cross-cutting/{ReconcilePanel,ConsequencePanel,MetricVsThreshold}`・`case/{DocumentViewer,LifecycleStepper}`)。
+> 後者は dead-code 撤去 slice (postv4) で削除: live mock data が参照していた純データ型 `MetricRow`・`ConsequenceImpact` を
+> `data/types.ts` へ移設 → 全 importer を `./types` へ再 point → component 5 file 削除 (tsc/build/test green)。
 > **継続利用 (v2 が render)**: `components/shell/ProcessSelector` (v2 TopBar) + `components/shared/*` overlay primitive (Modal/ReasonDialog/FieldActionModal/Toast/DataTable 等)。
-> **retained (dead UI だが live type export)**: cross-cutting (ReconcilePanel/ConsequencePanel/MetricVsThreshold)・case (DocumentViewer/LifecycleStepper) は v2 で未 render だが、
-> 各 file が export する data 型 (`MetricVsThresholdData`/`ConsequencePanelData` 等) を live mock data が `import type` で参照するため file は残置。
-> UI dead-code の完全撤去は型を `data/` へ抽出する別 slice (deferred、本 route-swap の scope 外)。
-> **main 置換は user 最終承認 gate (本コミット時点で branch `redesign/greenfield-v2` 上)**。
+> **main 置換済**: PR #24 で main に merge 済 (`fd35150`)。dead-code 撤去は postv4 follow-up。
 > 配線 ledger: `../handoff-redesign/00-shared/greenfield-v2-wiring-ledger.md`。
 
 ## 15 routes (v2 本番、Process-First)

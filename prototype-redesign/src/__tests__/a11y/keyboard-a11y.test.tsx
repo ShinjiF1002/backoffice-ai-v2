@@ -1,15 +1,15 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { axe } from 'jest-axe'
 import { ViewProvider } from '@/context/ViewProvider'
 import { ProcessSelector } from '@/components/shell/ProcessSelector'
-import { DocumentViewer } from '@/components/case/DocumentViewer'
-import { ReconcilePanel } from '@/components/cross-cutting/ReconcilePanel'
-import { CASE_2026_0142 } from '@/data/mock-case-detail'
-import { isResolved } from '@/lib/reconcile-display'
 
-// P1-6 keyboard a11y — clickable row / dropdown を keyboard 駆動で操作できることを検証。
-// DocumentViewer (役 PDF 行) / ReconcilePanel (要確認カード) / ProcessSelector (roving listbox)。
+// P1-6 keyboard a11y — ProcessSelector (roving listbox) を keyboard 駆動で操作できることを検証。
+// 注 (honest scope): v1 の DocumentViewer / ReconcilePanel keyboard ケースは route-swap + dead-code 撤去で削除。
+// v2 では文書行・要確認 card の row-select が mouse-only (`<div onClick>`、role/tabIndex/keydown なし) に簡素化され、
+// v1 の row-level keyboard 選択経路は存在しない。field への実 action「対応」は per-row の native <button> で keyboard 操作可
+// (CaseDetailV2)。route-level axe は構造 a11y のみで keyboard 操作性は未評価。
+// → row-select の keyboard 化は別 a11y batch (FieldRow に role=button + tabIndex + onKeyDown 付与) として残課題。
 
 describe('P1-6 keyboard a11y', () => {
   describe('ProcessSelector (roving listbox + Esc + outside-click)', () => {
@@ -71,37 +71,6 @@ describe('P1-6 keyboard a11y', () => {
       )
       await user.click(screen.getByRole('button', { name: /法人住所変更/ }))
       expect(await axe(container)).toHaveNoViolations()
-    })
-  })
-
-  describe('DocumentViewer (clickable row keyboard)', () => {
-    it('clickable row を Enter で選択 (onRowSelect 発火)', () => {
-      const onRowSelect = vi.fn()
-      render(<DocumentViewer document={CASE_2026_0142.document} onRowSelect={onRowSelect} />)
-      // clickable row は <div role=button aria-pressed> (zoom toggle <button> も aria-pressed を持つため tag で除外)
-      const rowButtons = screen
-        .getAllByRole('button')
-        .filter((b) => b.tagName === 'DIV' && b.hasAttribute('aria-pressed'))
-      expect(rowButtons.length).toBeGreaterThan(0)
-      const firstClickable = CASE_2026_0142.document.rows.find((r) => r.fieldLabel)
-      rowButtons[0]!.focus()
-      fireEvent.keyDown(rowButtons[0]!, { key: 'Enter' })
-      expect(onRowSelect).toHaveBeenCalledWith(firstClickable!.fieldLabel)
-    })
-  })
-
-  describe('ReconcilePanel (要確認カード keyboard)', () => {
-    it('要確認カードの項目選択 button を click で選択 (onSelectField 発火)', async () => {
-      const user = userEvent.setup()
-      const onSelectField = vi.fn()
-      render(<ReconcilePanel fields={CASE_2026_0142.fields} onSelectField={onSelectField} />)
-      // W3 a11y: card は role=button を廃し、項目 label の <button aria-pressed> が keyboard 選択を担う (内側「対応」との nested-interactive 回避)。
-      const selectBtns = screen.getAllByRole('button').filter((b) => b.hasAttribute('aria-pressed'))
-      const firstOpen = CASE_2026_0142.fields.find((f) => !isResolved(f.reconcileState))
-      expect(firstOpen).toBeDefined()
-      expect(selectBtns.length).toBeGreaterThan(0)
-      await user.click(selectBtns[0]!)
-      expect(onSelectField).toHaveBeenCalledWith(firstOpen!.fieldLabel)
     })
   })
 })

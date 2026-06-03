@@ -84,10 +84,11 @@
 - **機能 parity (Playwright 14/14)**: 承認/一括承認(SoD)/SoD banner/forward/promotion req+approve/create/markAllRead/escalate/escalation queue/reverse/emergencyStop/resume。
 - **Codex #1 (配線後)**: 1 blocking + 3 high 修正済。**Codex #2 (pre-merge)**: 0 blocking、1 high (CaseDraftV2 focus-to-first-invalid a11y) 修正済 + v2 test 追加。全 8 capability が passing test に map (Codex 確認)。skip 25 件は v2 design 差として正当 (silent drop 無し、product code 非弱体化を Codex 確認)。
 - route-swap: v2 15 画面 = 本番 route (`/`…)、v1 pages 削除、`/v2` prefix 全除去。CLAUDE.md route SSOT + IA doc banner 更新。
+- **#23 merge reconciliation (2026-06-03)**: PR 作成後に origin/main が PR #23 (post-v3 data: 自動化業務 2→5、UC-BO-03/04/05) を先取り。`git merge origin/main` で v1 4 page の modify/delete conflict は **削除側を採用**。v2 への影響は **data 増分のみ** (route/視覚不変): HubV2 `PROC_ICON` を transfer/stamp/card へ拡張 (RepeatIcon/StampIcon/CreditCardIcon、#23 v1 Hub と同 icon)。ObservatoryV2 メトリクスは OBS_METRICS (5 業務) を render、未達 2 件 (法人住所変更/改印・代表者変更届=agent-corp-notification) のみ drill link → observatory-drill.test の 5-業務期待に適合。再 verify: **check:all green (test 281 pass + 14 skip = 295)** / prod-axe 16 route 0 s/c / Observatory 5 tab 0 s/c。
 
 ### 残 (deferred、main 置換前/後の follow-up、user 判断)
 1. **Observatory depth + model governance** (compliance/oversight): v2 ObservatoryV2 は監視 3-card 縮約版。v1 tabbed cockpit (監査/メトリクス/ナレッジ/モデルガバナンス [SR11-7 model台帳/drift]) + 台帳 drill/filter/search/pagination の port。skip: observatory-drill 9 + w3 reset/ナレッジ 2。**最大の残 feature (compliance 関連)**。
-2. **dead-code 0**: orphan v1 component (shell/AppShell・Sidebar・TopBar、cross-cutting・case の一部) 削除。before-after/keyboard-a11y test (v1 component import) の v2 移行 + #1 の Observatory port で使う MetricVsThreshold/ConsequencePanel 保持判断と一括。build は tree-shake 済 (bundle 影響無)。
+2. **dead-code 0** (要型抽出、本 route-swap scope 外): cross-cutting (ReconcilePanel/ConsequencePanel/MetricVsThreshold) + case (DocumentViewer/LifecycleStepper) は v2 で未 render だが、各 file が export する data 型 (`MetricVsThresholdData`/`ConsequencePanelData` 等) を **live mock data が `import type` で参照**するため file 削除不可 (#23 merge 時に確認、tsc TS2307 で検出)。完全撤去 = 型を `data/` へ抽出 → 全 importer 再 point → component 削除 → before-after.test 撤去 + keyboard-a11y の DocumentViewer/ReconcilePanel block 撤去。build は tree-shake 済 (bundle 影響無)。
 3. manual-entry v1-form test (skip、v2-form test で代替済) / loading-error seam (v2 同期で非該当)。
 4. v2-parity*.mjs は /v2 URL (swap 前検証、historical)。prod-axe-sweep.mjs が本番 route 版。
 - **main 置換 = 全て branch `redesign/greenfield-v2` 上 (uncommitted)。main 不可侵。user 最終承認後に commit/merge**。

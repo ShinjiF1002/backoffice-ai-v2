@@ -15,6 +15,12 @@
 > - **W7 approach 変更 (本計画 §3 W7 / §4 末で SSOT 化済)**: F-039 は当初 plan の「新規 route /models」でなく、finding の route 指定/suggestedFix に従い **Observatory「モデルガバナンス」tab + Agents/AgentDetail 拡張**で実装。**route count は 15 維持 (16 へ拡張せず)** → **remediation-roadmap 画面 ledger の plan-lock 手続きは発生せず不要**。よって本 file 旧記述の「net-new 画面 / 15→16 / 専用 route」は §3 W7 の as-built が supersede する。
 > - **closure 台帳の位置づけ**: `final-ledger.json` は **監査入力の原本 (immutable)** として保持。56 件の closure status/evidence は `BUILD-PROGRESS.md` 末尾の wave 別 closure ledger + `closure-ledger.json` (working-tree 照合済) を SSOT とする。
 
+> **★ post-v3 増分 closure (2026-06-01、PV0–PV3 完了)**: v3 完了後の **後継増分**。plan = `~/.claude/plans/boav2-postv3-data-and-cleanup-plan.md`。**scope**: (a) 自動化対象業務 2→5 (新規 UC-BO-03 口座振替登録 supervised / UC-BO-04 改印・代表者変更届 supervised・承認率93%未達 / UC-BO-05 カード再発行 **checkpoint**=trust 多様性)、route 不変 (15 維持、データ母数増)。(b) 薄画面 seed (escalations 1→4・設定承認 0→1・通知 複数 kind・却下 proposal 実体化)。(c) surgical 冗長清掃 med 2 (ReconcilePanel per-field prose 集約 / CaseDetail checker banner 削除)。**WS-A 当初「構造的」想定は v3 (F-036/F-025/F-012/F-022/P1-5) 既了ゆえ surgical 2 件に縮小**。
+> - **wave / commit**: PV0 rebaseline + PV1 型/関数 scaffold (`00ddecf`) → PV2a core data (`ae7f7d0`) → PV2b 薄画面 seed (`7ff3ab4`) → PV2b-c 設定承認 SoD seed (`60b4bf4`) → PV3 surgical 清掃 (`063c782`)。branch `postv3/data-and-cleanup`。
+> - **gate**: `npm run check:all` green = **vitest 292 test (32 file、272→+20 = 新 case/agent の data-driven 拡張 + pv2b-seed presence test)** / lint 0 / check:design 0 / build OK。**業務数 count gate = 5** を全 doc surface (process-selector-spec/ia-overview-v2/master plan/両 CLAUDE.md) + 全 code 列挙 surface (KpiProcessKey/HUB_PROCESSES/AGENT_DETAILS/OBS_METRICS/ProcessSelector/CaseDraft/LEDGER_WORKFLOWS/seed/MODEL_INVENTORY/DRIFT) で grep 一致。off-token hex 0。**reset-premised browser visual smoke** (vite preview + playwright、fresh context=localStorage 空=reset): /agents 全業務 5 Agent (checkpoint 含む)・/config-approvals 設定承認 live・/proposals 却下 row・/escalations 4 件・page error 0。
+> - **架構規律遵守**: 980 は UC-BO-02 専用不変・新業務は metric 単位母数 / Hub total・dist は store-derived 尊重 (静的値非更新) / persist schema 不変 (却下理由は criteria で data-visible、promotionRequestedBy は既存 field) / JP-only / mock-only / design token・lucide・chip taxonomy 継承。
+> - **未着手 (defer)**: WS-A low 4 (subtitle prose / hypothesis form 統一 / breadcrumb ID / 展開行 prose、費用対効果で drop) / full live-axe 22-surface sweep (route 不変ゆえ jsdom routes-axe + check:design で代替) / branch push・PR 化 (user 判断)。
+
 ---
 
 ## 1. v3 の定義 (flawless bar)

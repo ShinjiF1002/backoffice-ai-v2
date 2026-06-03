@@ -46,7 +46,9 @@ describe('P1-1: ProcessSelector が /cases の list filter に伝播する', () 
     await user.click(screen.getByRole('button', { name: '法人住所変更' }))
     await user.click(screen.getByRole('option', { name: '全業務' }))
 
-    expect(screen.getAllByText('CASE-2026-0142').length).toBeGreaterThan(0) // UC-BO-01
-    expect(screen.getAllByText('CASE-2026-0112').length).toBeGreaterThan(0) // UC-BO-02
+    expect(screen.getAllByText('CASE-2026-0142').length).toBeGreaterThan(0) // UC-BO-01 (recommended=先頭固定)
+    // PV2a で業務母数 29 件 → 全業務は pagination。0112 (reflected) は後ページゆえ、page 1 固定の
+    // recommended な UC-BO-02 case (0104) で横断表示を確認 (両業務が出ることの検証意図は不変)。
+    expect(screen.getAllByText('CASE-2026-0104').length).toBeGreaterThan(0) // UC-BO-02
   })
 })

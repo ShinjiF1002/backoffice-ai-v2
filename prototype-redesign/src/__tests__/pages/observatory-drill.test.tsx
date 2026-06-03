@@ -27,8 +27,13 @@ describe('P1-7a ObservatoryV2 drill', () => {
     const user = userEvent.setup()
     renderObservatory()
     await user.click(screen.getByRole('button', { name: 'メトリクス' }))
-    // 法人住所変更の「AI 入力承認率」= 未達 → agent drill link (口座開設の同名 KPI は達成=非リンクなので link は 1 つ)
-    expect(screen.getByRole('link', { name: 'AI 入力承認率' })).toHaveAttribute('href', '/agents/agent-corporate-address-change')
+    // 未達業務 (法人住所変更 92% / 改印・代表者変更届 93%) の「AI 入力承認率」= agent drill link。
+    // 達成業務 (口座開設/口座振替/カード再発行) の同名 KPI は非リンク (PV2a で業務 2→5)。
+    const rateLinks = screen.getAllByRole('link', { name: 'AI 入力承認率' })
+    expect(rateLinks).toHaveLength(2)
+    const hrefs = rateLinks.map((l) => l.getAttribute('href'))
+    expect(hrefs).toContain('/agents/agent-corporate-address-change')
+    expect(hrefs).toContain('/agents/agent-corp-notification')
   })
 
   it('F-039: モデルガバナンス tab に model 台帳 + drift 監視 + SR 26-2 honest framing が出る', async () => {

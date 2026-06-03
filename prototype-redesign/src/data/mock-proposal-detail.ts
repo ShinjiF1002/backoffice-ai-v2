@@ -177,9 +177,58 @@ export const PROP_2026_024: ProposalDetailModel = {
   approver: '渡辺部長',
 }
 
+/**
+ * PV2b: 却下 (rejected) 提案の実体化。却下理由 = 判定基準の未達 (判定精度 82% < 90% / 影響件数 28 > 20) を
+ * criteria (achieved:false) で data-visible に表現 — ProposalDetail の MetricVsThreshold が「なぜ却下か」を render する。
+ * store ProposalEntity は status のみ保持 (rejectionReason field は持たせず schema 不変、persist bump 回避)。
+ * sourceCases は 改印・代表者変更届 の実在 case (CASE_DETAILS 整合)。agentId は当該 Agent (lineage は forwarded/approved のみゆえ rejected は非露出)。
+ */
+export const PROP_2026_019: ProposalDetailModel = {
+  id: 'PROP-2026-019',
+  workflow: '改印・代表者変更届',
+  agentId: 'agent-corp-notification',
+  changeTitle: '届出種別の自動判定を追加',
+  status: 'rejected',
+  criteria: [
+    { metricLabel: '届出種別の判定精度', actualValue: '82%', threshold: '> 90%', judgment: '未達 (-8pt)', achieved: false, period: '直近 30 日', denominator: '28 件で試算', previousDelta: '前回 -3pt', exclusions: 'エスカレーション案件を除く' },
+    { metricLabel: '影響件数', actualValue: '28 件', threshold: '≤ 20 件', judgment: '未達 (超過 8 件)', achieved: false, period: '過去案件で試算', denominator: '28 件' },
+  ],
+  consequence: {
+    before: '届出種別 手動判定',
+    after: '届出種別 自動判定',
+    scope: '改印・代表者変更届の届出種別、過去 28 件で試算',
+    impacts: [
+      { direction: 'down', label: '入力者の種別選択の手間が減る' },
+      { direction: 'up', label: '判定精度が基準未達のため誤判定のリスクが残る' },
+      { direction: 'guard', label: '却下: 判定精度 82% (基準 90%) 未達・影響件数 28 件 (基準 20 件) 超過のため不採用' },
+    ],
+  },
+  procedureSteps: [
+    { n: 1, text: '届出書を受け付ける' },
+    { n: 2, text: 'AI が届出欄を読み取る' },
+    {
+      n: 3,
+      text: '届出種別を判定する',
+      changed: true,
+      before: '入力者が届出種別を選択する',
+      after: 'AI が届出種別を自動判定する',
+    },
+    { n: 4, text: '判定結果を入力者の要確認へ振り分ける' },
+    { n: 5, text: '入力者が確認し、承認または差戻しする' },
+  ],
+  sourceCases: [
+    { id: 'CASE-2026-0232', field: '届出種別', comment: '「改印」と「代表者変更」を誤判定。種別の自動判定はまだ精度が不足している。', date: '2026-05-30' },
+    { id: 'CASE-2026-0231', field: '新代表者名', comment: '代表者変更の届出で氏名表記が揺れ、自動判定では拾えなかった。', date: '2026-05-30' },
+    { id: 'CASE-2026-0234', field: '届出種別', comment: '複合的な届出 (改印+代表者変更) を単一種別に誤分類した。', date: '2026-05-29' },
+  ],
+  queueOwner: '佐藤',
+  approver: '田中部長',
+}
+
 /** id-keyed dict。PROPOSAL_LIST 全 id を網羅。 */
 export const PROPOSAL_DETAILS: Record<string, ProposalDetailModel> = {
   'PROP-2026-031': PROP_2026_031,
   'PROP-2026-028': PROP_2026_028,
   'PROP-2026-024': PROP_2026_024,
+  'PROP-2026-019': PROP_2026_019,
 }

@@ -4,6 +4,9 @@ import {
   InboxIcon,
   Building2Icon,
   WalletIcon,
+  RepeatIcon,
+  StampIcon,
+  CreditCardIcon,
   ArrowRightIcon,
   ChevronRightIcon,
   ActivityIcon,
@@ -19,7 +22,7 @@ import { PageHeader, Card } from './ui'
  */
 
 const KPI_ICON = { alert: AlertTriangleIcon, clock: ClockIcon, inbox: InboxIcon } as const
-const PROC_ICON = { building: Building2Icon, wallet: WalletIcon } as const
+const PROC_ICON = { building: Building2Icon, wallet: WalletIcon, transfer: RepeatIcon, stamp: StampIcon, card: CreditCardIcon } as const
 
 export function HubV2() {
   const { processes, headline, primaryAction } = useHubModel()

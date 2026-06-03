@@ -31,7 +31,7 @@ export interface LifecycleEvent {
 
 export interface KnowledgeGroup {
   process: string
-  icon: 'building' | 'wallet'
+  icon: 'building' | 'wallet' | 'transfer' | 'stamp' | 'card'
   items: { title: string; id: string; version: string }[]
 }
 
@@ -55,7 +55,7 @@ export const FLYWHEEL_STAGES: LineageStage[] = [
 
 export interface ObservatoryProcessMetrics {
   process: string
-  icon: 'building' | 'wallet'
+  icon: 'building' | 'wallet' | 'transfer' | 'stamp' | 'card'
   rows: MetricRow[]
 }
 
@@ -124,6 +124,10 @@ function withAgentDrill(rows: MetricRow[], agentId: string): MetricRow[] {
 export const OBS_METRICS: ObservatoryProcessMetrics[] = [
   { process: '法人住所変更', icon: 'building', rows: withAgentDrill(KPI_ROWS['UC-BO-01'], 'agent-corporate-address-change') },
   { process: '口座開設書類完備', icon: 'wallet', rows: withAgentDrill(KPI_ROWS['UC-BO-02'], 'agent-account-opening') },
+  // PV2a (2026-06-01) 新業務 ×3。KPI_ROWS SSOT 参照、未達 KPI のみ withAgentDrill が drill link 付与。
+  { process: '口座振替登録', icon: 'transfer', rows: withAgentDrill(KPI_ROWS['UC-BO-03'], 'agent-direct-debit') },
+  { process: '改印・代表者変更届', icon: 'stamp', rows: withAgentDrill(KPI_ROWS['UC-BO-04'], 'agent-corp-notification') },
+  { process: 'カード再発行', icon: 'card', rows: withAgentDrill(KPI_ROWS['UC-BO-05'], 'agent-card-reissue') },
 ]
 
 // ナレッジ (Process 別 grouping)。'番地表記正規化ルール' は KB 規定の正式名 (status enum の内部語ではなく domain 用語)。
@@ -143,6 +147,31 @@ export const OBS_KNOWLEDGE: KnowledgeGroup[] = [
     items: [
       { title: '口座開設書類チェックリスト', id: 'KB-FLOW-031', version: 'v2.2' },
       { title: '本人確認書類の有効期限基準', id: 'KB-RULE-019', version: 'v1.1' },
+    ],
+  },
+  // PV2a (2026-06-01) 新業務 ×3 の KB group。
+  {
+    process: '口座振替登録',
+    icon: 'transfer',
+    items: [
+      { title: '口座振替登録フロー', id: 'KB-FLOW-044', version: 'v1.3' },
+      { title: '金融機関コード照合基準', id: 'KB-RULE-027', version: 'v1.0' },
+    ],
+  },
+  {
+    process: '改印・代表者変更届',
+    icon: 'stamp',
+    items: [
+      { title: '改印・代表者変更届フロー', id: 'KB-FLOW-052', version: 'v1.1' },
+      { title: '届出種別の判定基準', id: 'KB-RULE-033', version: 'v1.2' },
+    ],
+  },
+  {
+    process: 'カード再発行',
+    icon: 'card',
+    items: [
+      { title: 'カード再発行フロー', id: 'KB-FLOW-061', version: 'v2.0' },
+      { title: '送付先住所の照合基準', id: 'KB-RULE-041', version: 'v1.1' },
     ],
   },
 ]

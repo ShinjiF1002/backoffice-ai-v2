@@ -13,7 +13,7 @@
 
 | 軸 | v1 (機能集約) | v2 (Process-First) |
 |---|---|---|
-| 組織の第一軸 | 機能 (Hub/Queue/Case/...) | **業務 Process** (法人住所変更 / 口座開設) |
+| 組織の第一軸 | 機能 (Hub/Queue/Case/...) | **業務 Process** (法人住所変更 / 口座開設 ほか、現 5 業務 → §1 配置 note) |
 | nav | 機能 5 nav | **Global Process Selector + Process-scoped 機能 nav** |
 | master-detail | detail 直行 (master 削除) | **master 完備** (承認待ち / 提案一覧 / Agent 一覧 新設) |
 | 意思決定支援 | 集約値のみ | **実数値 vs 閾値 / before-after / reconcile** |
@@ -29,8 +29,10 @@
 ### 配置
 TopBar 左端に Process selector を常時表示:
 ```
-[業務: 法人住所変更 ▾]   ← 選択肢: 法人住所変更 / 口座開設書類完備 / 全業務
+[業務: 法人住所変更 ▾]   ← 選択肢: 法人住所変更 / 口座開設書類完備 / 口座振替登録 / 改印・代表者変更届 / カード再発行 / 全業務
 ```
+
+> **業務 Process 拡張 (PV0、2026-06-01)**: 自動化対象業務を 2 → **5** に拡張 (post-v3 増分 plan)。新規 3 業務 (canonical workflowName、freeze 済): **口座振替登録** (UC-BO-03、supervised) / **改印・代表者変更届** (UC-BO-04、supervised) / **カード再発行** (UC-BO-05、**checkpoint** = 段階的自動化の trust 多様性)。国際送金 (boundary-only) は自動化対象外で従来通り非掲載。**業務数 count gate = 5** の surface 詳細は `process-selector-spec.md` §配置 note に SSOT 化 (PV0 doc surface 5 = 本 doc / process-selector-spec / master plan / 両 CLAUDE.md。PV1 code 列挙 surface は同 spec Acceptance。`screen-contracts-v2`/`coverage-matrix-v2` は generic「全業務」のみで非対象)。§3 の画面 typology (15) は不変 (業務追加は route を増やさず、既存 /cases・/agents 等のデータ母数を増やす)。
 
 ### 挙動
 - **特定 Process 選択時**: Sidebar 全機能 nav がその Process に scoped (案件/承認待ち/提案/Agent/モニタリング すべて該当 Process のみ)

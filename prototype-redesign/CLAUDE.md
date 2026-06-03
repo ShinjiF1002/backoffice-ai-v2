@@ -5,6 +5,8 @@
 > **⚠ REBASELINE (2026-05-29、frame C 承認) — remediation 実装 baseline へ移行**
 > 本番 Readiness 監査を受け remediation を開始。**P0/P1 の実装 baseline = `../handoff-redesign/00-shared/remediation-roadmap-p0-p1-p2-2026-05-29.md`** が以下の本 doc lock を supersede する: 「exactly 9 画面」は **9→15 に拡張** (IA scope=(a) 確定 — W2b: `/search`・`/inbox` で 9→11 ✓ / W2c: 業務責任者面 3 画面分離 `/business-approver`・`/config-approvals`・`/escalations` で 11→14 ✓ / W3 C4: `/cases/new` 手動起票で 14→15、typology A×3/B×9/C×3) / KPI 分母は `mock-kpi.ts` SSOT で **980** 統一 / **口座開設 case を CASE_LIST に追加** / store に SoD actor・override 訂正値・sendback 理由を拡張 (P0-W1 実装済、commit ba2f2ba) + W2a で promotionStatus / escalation / readNotificationIds + SCHEMA 4→5、W3 で reversal + receivedAt(elapsedLabel 置換) + SCHEMA 5→6。**継承デザイン規律 (token / lucide icon / chip taxonomy / tone v2 / status-tones SSOT / JP-only) は不変**で remediation も遵守する。下記「9 routes」list は historical baseline、現行 route は roadmap §1b が SSOT。
 
+> **⚠ REBASELINE (PV0、2026-06-01、承認済) — post-v3 増分**: 実装 baseline は **v3 (PR #20) + UI refresh (PR #22)、test 272 green**。実装 SSOT = `../handoff-redesign/00-shared/v3-audit/{V3-UPGRADE-PLAN.md, closure-ledger.json}` (上記 2026-05-29 roadmap を supersede)。増分 plan = `~/.claude/plans/boav2-postv3-data-and-cleanup-plan.md`。承認済スコープ変更: **自動化対象業務 2→5** (新規 口座振替登録 UC-BO-03 supervised / 改印・代表者変更届 UC-BO-04 supervised / カード再発行 UC-BO-05 **checkpoint**)。route 不変 (15 画面維持、既存 /cases・/agents のデータ母数増)。`KpiProcessKey` を UC-BO-03/04/05 に拡張 (`KPI_ROWS` 全 key を同 commit で充足)、`fieldsForWorkflow` を lookup map 化、`HubProcess.icon` enum 拡張。**980 は UC-BO-02 専用で不変、新業務は metric 単位母数**。Hub の total/breakdown は store-derived ゆえ静的値は触らない。**業務数 count gate = 5**。
+
 > **正準 (SSOT)**:
 > - design = `../handoff-redesign/00-shared/canonical-design-spec.md` (token / lucide / status-tones / chip taxonomy 継承 + soft-tint -200 + tone v2 + C 型 contract)
 > - base IA (historical 9 画面) = `../handoff-redesign/00-shared/ia-overview-v2.md` §2 (9 画面 / 6-nav grouped、typology は expansion note 参照) ／ **現行 route・chrome (remediation 11→14) の SSOT = roadmap §1b ledger**
@@ -16,8 +18,13 @@
 > **⚠ ROUTE-SWAP (2026-06-03) — greenfield v2 が本番 UI に昇格**
 > `src/v2/*` (greenfield Operator Console、light operator console 視覚言語) を store 配線し v1 と機能 parity に到達後、
 > **本番 route に昇格 (v1 pages 撤去、`/v2` prefix 除去)**。`src/App.tsx` は `V2Shell` layout 配下に v2 15 画面。
-> 旧 v1 pages (`src/pages/*`) + v1 shell (`components/shell/*`) + v1-only cross-cutting (ReconcilePanel/ConsequencePanel/
-> MetricVsThreshold/DocumentViewer/LifecycleStepper) は削除。**main 置換は user 最終承認 gate (本コミット時点で branch `redesign/greenfield-v2` 上)**。
+> **削除済**: 旧 v1 pages (`src/pages/*` 全 15) + v1 shell (`components/shell/{AppShell,Sidebar,TopBar}`) + v1-only shared
+> (`components/shared/{PersonaSwitcher,MiniTrend,DetailDemoFallback}`)。
+> **継続利用 (v2 が render)**: `components/shell/ProcessSelector` (v2 TopBar) + `components/shared/*` overlay primitive (Modal/ReasonDialog/FieldActionModal/Toast/DataTable 等)。
+> **retained (dead UI だが live type export)**: cross-cutting (ReconcilePanel/ConsequencePanel/MetricVsThreshold)・case (DocumentViewer/LifecycleStepper) は v2 で未 render だが、
+> 各 file が export する data 型 (`MetricVsThresholdData`/`ConsequencePanelData` 等) を live mock data が `import type` で参照するため file は残置。
+> UI dead-code の完全撤去は型を `data/` へ抽出する別 slice (deferred、本 route-swap の scope 外)。
+> **main 置換は user 最終承認 gate (本コミット時点で branch `redesign/greenfield-v2` 上)**。
 > 配線 ledger: `../handoff-redesign/00-shared/greenfield-v2-wiring-ledger.md`。
 
 ## 15 routes (v2 本番、Process-First)

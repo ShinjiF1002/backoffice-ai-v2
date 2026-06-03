@@ -21,7 +21,10 @@ function renderAt(path: string) {
   )
 }
 
-describe('W3 C4 manual entry: /cases/new 手動起票 form', () => {
+// SKIP (route-swap deferral): v2 CaseDraftV2 は form 構造が v1 と異なる (業務=button group / inline per-field validation /
+// label に「必須」inline)。case/create 起票 capability は Playwright (v2-parity.mjs F) で検証済。
+// v2-form 構造への jsdom test 書き換え (validation/manual-detail honesty) は別 batch。
+describe.skip('W3 C4 manual entry: /cases/new 手動起票 form', () => {
   beforeEach(() => clearPersisted())
 
   it('全項目未入力で起票 → error、navigate しない (validation)', async () => {
@@ -92,5 +95,30 @@ describe('W3 C4 manual entry: /cases/new 手動起票 form', () => {
     await user.selectOptions(screen.getByLabelText('業務'), '口座開設書類完備')
     expect(screen.getByLabelText('本人確認書類')).toBeInTheDocument()
     expect(screen.queryByLabelText('法人名')).not.toBeInTheDocument()
+  })
+})
+
+// v2 form 構造 (button-group 業務 / inline per-field validation / label に「必須」inline) に合わせた a11y 検証。
+describe('W3 C4 manual entry (v2 form): inline validation a11y', () => {
+  beforeEach(() => clearPersisted())
+
+  it('F-008(v2): 全項目未入力で起票 → 最初の無効 field へ focus が移り aria-invalid が付く', async () => {
+    const user = userEvent.setup()
+    renderAt('/cases/new')
+    await user.click(screen.getByRole('button', { name: '起票する' }))
+    const first = screen.getByLabelText(/法人名/) // v2 label は「法人名 必須」ゆえ regex
+    expect(first).toHaveFocus()
+    expect(first).toHaveAttribute('aria-invalid', 'true')
+    // 未 navigate (form 上に残る = 業務 selector が見える)
+    expect(screen.getByRole('button', { name: '起票する' })).toBeInTheDocument()
+  })
+
+  it('v2: 業務切替 (button group) で入力項目が口座開設の field 集合に変わる', async () => {
+    const user = userEvent.setup()
+    renderAt('/cases/new')
+    expect(screen.getByLabelText(/法人名/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '口座開設書類完備' }))
+    expect(screen.getByLabelText(/本人確認書類/)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/法人名/)).not.toBeInTheDocument()
   })
 })

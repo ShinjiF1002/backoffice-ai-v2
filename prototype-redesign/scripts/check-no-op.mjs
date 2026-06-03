@@ -39,9 +39,6 @@ const REPO_ROOT = resolve(__dirname, '../..')
 function walkTsx(dir, out = []) {
   for (const entry of readdirSync(dir)) {
     if (entry === '__tests__') continue // test fixtures は no-op gate 対象外 (Phase 0)
-    // greenfield v2 (src/v2/) は §8 checkpoint の未配線 preview (self-contained mock、store 非接続)。
-    // dead-button gate は wired production 用ゆえ対象外。**rollout 完了で store 配線後にこの除外を削除し再有効化する** (residual)。
-    if (entry === 'v2') continue
     const full = join(dir, entry)
     const stat = statSync(full)
     if (stat.isDirectory()) walkTsx(full, out)

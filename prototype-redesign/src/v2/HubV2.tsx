@@ -9,7 +9,8 @@ import {
   ActivityIcon,
   ShieldCheckIcon,
 } from 'lucide-react'
-import { HUB_HEADLINE, HUB_PRIMARY_ACTION, HUB_DAILY_SUMMARY, HUB_PROCESSES } from '@/data/mock-hub'
+import { HUB_DAILY_SUMMARY } from '@/data/mock-hub'
+import { useHubModel } from '@/store/hooks'
 import { PageHeader, Card } from './ui'
 
 /**
@@ -21,6 +22,7 @@ const KPI_ICON = { alert: AlertTriangleIcon, clock: ClockIcon, inbox: InboxIcon 
 const PROC_ICON = { building: Building2Icon, wallet: WalletIcon } as const
 
 export function HubV2() {
+  const { processes, headline, primaryAction } = useHubModel()
   return (
     <div className="flex h-full flex-col overflow-auto">
       <PageHeader title="ハブ" sub="今日の状況 — 2026-06-02" />
@@ -28,13 +30,13 @@ export function HubV2() {
       <div className="mx-auto w-full max-w-[1080px] px-6 py-5">
         {/* 最優先アクション */}
         <a
-          href="/v2/cases"
+          href={primaryAction.to}
           className="flex items-center justify-between gap-4 rounded-[var(--v2-radius-card)] border border-[var(--v2-accent-soft-border)] bg-[var(--v2-accent-soft)] px-5 py-4 transition-colors hover:border-[var(--v2-accent)]"
         >
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--v2-accent-soft-fg)]">{HUB_PRIMARY_ACTION.kicker}</div>
-            <div className="mt-1 text-[15px] font-semibold text-[var(--v2-fg)]">{HUB_PRIMARY_ACTION.title}</div>
-            <div className="mt-0.5 text-[13px] text-[var(--v2-fg-muted)]">{HUB_PRIMARY_ACTION.detail}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--v2-accent-soft-fg)]">{primaryAction.kicker}</div>
+            <div className="mt-1 text-[15px] font-semibold text-[var(--v2-fg)]">{primaryAction.title}</div>
+            <div className="mt-0.5 text-[13px] text-[var(--v2-fg-muted)]">{primaryAction.detail}</div>
           </div>
           <span className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--v2-radius-control)] bg-[var(--v2-accent)] px-3.5 py-2 text-[13px] font-medium text-white">
             承認待ちへ
@@ -44,11 +46,11 @@ export function HubV2() {
 
         {/* KPI strip */}
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {HUB_HEADLINE.map((k) => {
+          {headline.map((k) => {
             const Icon = KPI_ICON[k.icon]
             const soft = k.tone === 'alert' ? 'alert' : 'accent'
             return (
-              <a key={k.key} href="/v2/cases" className="group">
+              <a key={k.key} href={k.to} className="group">
                 <Card className="h-full p-4 transition-colors group-hover:border-[var(--v2-border-strong)]">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-[var(--v2-fg-muted)]">{k.label}</span>
@@ -101,13 +103,13 @@ export function HubV2() {
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-medium text-[var(--v2-fg)]">業務の健全性</span>
-              <a href="/v2/observatory" className="flex items-center gap-1 text-[12px] text-[var(--v2-accent-strong)] hover:underline">
+              <a href="/observatory" className="flex items-center gap-1 text-[12px] text-[var(--v2-accent-strong)] hover:underline">
                 <ActivityIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 モニタリングへ
               </a>
             </div>
             <ul className="mt-3 flex flex-col gap-2">
-              {HUB_PROCESSES.map((p) => {
+              {processes.map((p) => {
                 const Icon = PROC_ICON[p.icon]
                 return (
                   <li key={p.id} className="flex items-center gap-3 rounded-[var(--v2-radius-control)] border border-[var(--v2-hairline)] px-3 py-2.5">

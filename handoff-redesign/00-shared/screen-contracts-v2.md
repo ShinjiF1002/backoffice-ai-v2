@@ -1,3 +1,7 @@
+> **⚠ ROUTE-SWAP (2026-06-03): greenfield v2 (`prototype-redesign/src/v2/*`) が本番 UI に昇格。**
+> 本 doc の画面契約・IA は **v2 (V2Shell Operator Console + 15 画面、store 配線済)** に適用。route path は不変、shell は `V2Shell`
+> (3-group nav: 処理/監督/改善)、component は `*V2`。旧 v1 (AppShell + `src/pages/*`) は撤去。配線/parity ledger: `greenfield-v2-wiring-ledger.md`。
+
 # Screen Contracts v2 (9 画面)
 
 > 各画面の operate 完了に必要な契約。Claude Design prompt の各画面 Acceptance check はこの contract から導出する。

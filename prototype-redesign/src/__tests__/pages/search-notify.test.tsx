@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { StoreProvider } from '@/store/StoreProvider'
 import { ViewProvider } from '@/context/ViewProvider'
-import { SearchResults } from '@/pages/SearchResults'
+import { SearchV2 } from '@/v2/SearchV2'
 import { useSearchResults, useNotifications, useUnreadCount, useStoreDispatch } from '@/store/hooks'
 
 // W2b/P1-2 — 横断検索 + 通知/inbox の wiring gate。
@@ -95,13 +95,13 @@ describe('W2b/P1-2 横断検索 + 通知', () => {
   })
 })
 
-describe('SearchResults page (自前 input UI、狭幅自己完結)', () => {
+describe('SearchV2 page (自前 input UI、狭幅自己完結)', () => {
   function renderSearch() {
     return render(
       <MemoryRouter initialEntries={['/search']}>
         <StoreProvider>
           <ViewProvider>
-            <SearchResults />
+            <SearchV2 />
           </ViewProvider>
         </StoreProvider>
       </MemoryRouter>,

@@ -13,25 +13,29 @@
 > - pixel-parity reference = `../handoff-redesign/screens-v2/0N-*/canonical-export.md`
 > - 計画 = `~/.claude/plans/hashed-conjuring-spark.md`「Phase 2 — React 集約 & 新規正準」
 
-## 9 routes (Process-First、`ia-overview-v2.md` §2 SSOT)
+> **⚠ ROUTE-SWAP (2026-06-03) — greenfield v2 が本番 UI に昇格**
+> `src/v2/*` (greenfield Operator Console、light operator console 視覚言語) を store 配線し v1 と機能 parity に到達後、
+> **本番 route に昇格 (v1 pages 撤去、`/v2` prefix 除去)**。`src/App.tsx` は `V2Shell` layout 配下に v2 15 画面。
+> 旧 v1 pages (`src/pages/*`) + v1 shell (`components/shell/*`) + v1-only cross-cutting (ReconcilePanel/ConsequencePanel/
+> MetricVsThreshold/DocumentViewer/LifecycleStepper) は削除。**main 置換は user 最終承認 gate (本コミット時点で branch `redesign/greenfield-v2` 上)**。
+> 配線 ledger: `../handoff-redesign/00-shared/greenfield-v2-wiring-ledger.md`。
 
-`src/App.tsx` で React Router v7。下記は **historical baseline の 9 画面** (remediation で **15 画面実装完了** — W2b `/search`・`/inbox` ✓ + W2c `/business-approver`・`/config-approvals`・`/escalations` ✓ + W3 `/cases/new` 手動起票 ✓。現行 route の SSOT は roadmap §1b):
+## 15 routes (v2 本番、Process-First)
 
-1. `Hub` — `/`
-2. `Cases` (案件一覧) — `/cases`
-3. `Approvals` (承認待ち) — `/approvals`
-4. `CaseDetail` — `/cases/:id` (入力者 + 承認者 mode、rev.3 文書アンカー)
-5. `Proposals` (提案一覧) — `/proposals`
-6. `ProposalDetail` — `/proposals/:id`
-7. `Agents` (エージェント一覧) — `/agents`
-8. `AgentDetail` — `/agents/:id`
-9. `Observatory` (モニタリング) — `/observatory`
+`src/App.tsx` で React Router v7、`V2Shell` (Operator Console) layout 配下:
 
-CaseDetail / ProposalDetail / AgentDetail は master の row click から navigate (sidebar 非表示)。**旧 IA (Dashboard/Inbox/CaseReview/SendBackComment/AuditTrail/Metrics/KnowledgeBrowser) は使わない**。
+1. `HubV2` — `/`（+ `/hub`）   2. `CasesV2` (案件キュー) — `/cases`   3. `ApprovalsV2` (承認待ち) — `/approvals`
+4. `CaseDetailV2` — `/cases/:id` (入力者 + 承認者 mode、文書アンカー 2-pane)   5. `ProposalsV2` — `/proposals`
+6. `ProposalDetailV2` — `/proposals/:id`   7. `AgentsV2` — `/agents`   8. `AgentDetailV2` — `/agents/:id`
+9. `ObservatoryV2` (モニタリング) — `/observatory`   10. `SearchV2` — `/search`   11. `NotificationsV2` — `/inbox`
+12. `BusinessApproverHubV2` — `/business-approver`   13. `ConfigApprovalsV2` — `/config-approvals`
+14. `EscalationsV2` — `/escalations`   15. `CaseDraftV2` (手動起票) — `/cases/new` (`cases/:id` より先に宣言)
 
-## Sidebar (6-nav grouped)
+detail (CaseDetail/ProposalDetail/AgentDetail) は list の row click から navigate。
 
-ハブ / ─処理─ 受信トレイ(`/cases`)・承認待ち(`/approvals`) / ─改善─ AI 提案レビュー(`/proposals`)・Agent 設定(`/agents`) / ─監視─ モニタリング(`/observatory`)。TopBar に ProcessSelector + PrototypeModeLabel。
+## V2Shell chrome (Operator Console)
+
+graphite recessive sidebar × bright content。Sidebar nav 3 group: ハブ / ─処理─ 案件キュー・承認待ち / ─監督─ モニタリング・業務責任者・エスカレーション / ─改善─ AI 提案・Agent 設定 (件数 badge は store-truth)。TopBar = 横断検索 (`/search`)・通知 (`/inbox`、未読 live)・操作者 persona 切替・起票・PrototypeModeLabel。
 
 ## 継承デザイン規律 (`prototype/` から、有効)
 

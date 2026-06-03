@@ -3,16 +3,16 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import type { Dispatch } from 'react'
 import { StoreProvider } from '@/store/StoreProvider'
-import { CaseDetail } from '@/pages/CaseDetail'
+import { CaseDetailV2 } from '@/v2/CaseDetailV2'
 import type { StoreAction } from '@/store/types'
 import { useStoreDispatch } from '@/store/hooks'
 import { clearPersisted } from '@/store/persist'
 
-// W3 F-013/F-016/F-017 — エスカレーション裁定の CaseDetail 表面。
+// W3 F-013/F-016/F-017 — エスカレーション裁定の CaseDetailV2 表面。
 // store layer (resolveEscalation SoD lock / proceed・sendback / queue closure / 起票者通知) は
-// store.test + business-approver.test + search-notify.test で検証済。本 test は CaseDetail の
+// store.test + business-approver.test + search-notify.test で検証済。本 test は CaseDetailV2 の
 // 永続マーカー (F-013) と裁定面 (F-016 続行可/差戻し + SoD 可視性) を実 UI で固める。
-describe('W3 escalation: CaseDetail 裁定面', () => {
+describe('W3 escalation: CaseDetailV2 裁定面', () => {
   beforeEach(() => clearPersisted())
 
   function renderCaseDetail(id: string) {
@@ -26,7 +26,7 @@ describe('W3 escalation: CaseDetail 裁定面', () => {
         <StoreProvider>
           <Capture />
           <Routes>
-            <Route path="/cases/:id" element={<CaseDetail />} />
+            <Route path="/cases/:id" element={<CaseDetailV2 />} />
           </Routes>
         </StoreProvider>
       </MemoryRouter>,

@@ -9,6 +9,7 @@ import App from '@/App'
 // (pixel/visual ではない)。R0 Gate の coverage matrix の起点にもなる。
 const ROUTES: string[] = [
   '/',
+  '/hub', // HubV2 alias (V2Shell nav 'ハブ')
   '/cases',
   '/approvals',
   '/cases/new', // W3 C4 (手動起票、cases/:id より先に宣言)

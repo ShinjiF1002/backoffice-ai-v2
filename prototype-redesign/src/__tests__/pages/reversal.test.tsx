@@ -3,15 +3,15 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import type { Dispatch } from 'react'
 import { StoreProvider } from '@/store/StoreProvider'
-import { CaseDetail } from '@/pages/CaseDetail'
+import { CaseDetailV2 } from '@/v2/CaseDetailV2'
 import type { StoreAction } from '@/store/types'
 import { useStoreDispatch, useNotifications } from '@/store/hooks'
 import { clearPersisted } from '@/store/persist'
 
 // W3 C3 — 反映済 (terminal) の訂正/取消 affordance (前進のみ→可逆)。
-// store layer (case/reverse / 不可逆 guard) は store.test 検証済。本 test は CaseDetail の screen/flow
+// store layer (case/reverse / 不可逆 guard) は store.test 検証済。本 test は CaseDetailV2 の screen/flow
 // (render + user-event + 状態遷移、hook-only でなく実 UI の役割境界・理由必須・状態反映を検証)。
-describe('W3 C3 reversal: CaseDetail 反映済の訂正/取消', () => {
+describe('W3 C3 reversal: CaseDetailV2 反映済の訂正/取消', () => {
   beforeEach(() => clearPersisted())
 
   // dispatch を render 中に capture し act() で persona 切替 (business-approver.test と同型)。
@@ -26,7 +26,7 @@ describe('W3 C3 reversal: CaseDetail 反映済の訂正/取消', () => {
         <StoreProvider>
           <Capture />
           <Routes>
-            <Route path="/cases/:id" element={<CaseDetail />} />
+            <Route path="/cases/:id" element={<CaseDetailV2 />} />
           </Routes>
         </StoreProvider>
       </MemoryRouter>,

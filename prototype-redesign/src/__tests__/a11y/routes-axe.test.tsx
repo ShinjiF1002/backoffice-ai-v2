@@ -57,10 +57,9 @@ describe('F-050 Bypass Blocks — skip-link + main landmark', () => {
     expect(main).toHaveAttribute('tabindex', '-1')
   })
 
-  it('複数 nav landmark が区別される aria-label を持つ (サイドバー / 主要)', () => {
+  it('nav landmark が区別される aria-label を持つ (v2 Operator Console = 単一サイドバー nav)', () => {
     const { container } = renderAt('/cases')
     const labels = Array.from(container.querySelectorAll('nav')).map((n) => n.getAttribute('aria-label'))
     expect(labels).toContain('サイドバーナビゲーション')
-    expect(labels).toContain('主要ナビゲーション')
   })
 })

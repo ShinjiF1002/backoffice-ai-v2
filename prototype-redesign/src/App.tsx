@@ -15,6 +15,22 @@ import { Notifications } from './pages/Notifications' // W2b/P1-2 (B 型、通�
 import { BusinessApproverHub } from './pages/BusinessApproverHub' // W2c/P1-3 (A 型、業務責任者 landing)
 import { ConfigApprovals } from './pages/ConfigApprovals' // W2c/P1-3 (B 型、設定承認 queue)
 import { Escalations } from './pages/Escalations' // W2c/P1-3 (B 型、escalation 受信)
+import { V2Shell } from './v2/V2Shell' // greenfield v2 preview shell (checkpoint reference)
+import { CaseDetailV2 } from './v2/CaseDetailV2' // greenfield v2 reference 画面
+import { CasesV2 } from './v2/CasesV2' // greenfield v2 案件キュー
+import { HubV2 } from './v2/HubV2' // greenfield v2 ハブ (dashboard)
+import { CaseDraftV2 } from './v2/CaseDraftV2' // greenfield v2 起票 (form)
+import { ObservatoryV2 } from './v2/ObservatoryV2' // greenfield v2 モニタリング (oversight)
+import { ApprovalsV2 } from './v2/ApprovalsV2' // greenfield v2 承認待ち
+import { ProposalsV2 } from './v2/ProposalsV2' // greenfield v2 AI 提案
+import { AgentsV2 } from './v2/AgentsV2' // greenfield v2 Agent 設定
+import { EscalationsV2 } from './v2/EscalationsV2' // greenfield v2 エスカレーション
+import { NotificationsV2 } from './v2/NotificationsV2' // greenfield v2 通知
+import { SearchV2 } from './v2/SearchV2' // greenfield v2 横断検索
+import { ConfigApprovalsV2 } from './v2/ConfigApprovalsV2' // greenfield v2 設定承認
+import { ProposalDetailV2 } from './v2/ProposalDetailV2' // greenfield v2 提案詳細
+import { AgentDetailV2 } from './v2/AgentDetailV2' // greenfield v2 Agent 詳細
+import { BusinessApproverHubV2 } from './v2/BusinessApproverHubV2' // greenfield v2 業務責任者ハブ
 
 /**
  * Backoffice AI v2 (redesign) — App Router
@@ -33,6 +49,25 @@ import { Escalations } from './pages/Escalations' // W2c/P1-3 (B 型、escalatio
 function App() {
   return (
     <Routes>
+      {/* greenfield v2 preview (§8 checkpoint reference、既存 app と非干渉) */}
+      <Route path="/v2" element={<V2Shell />}>
+        <Route index element={<HubV2 />} />
+        <Route path="hub" element={<HubV2 />} />
+        <Route path="cases" element={<CasesV2 />} />
+        <Route path="cases/:id" element={<CaseDetailV2 />} />
+        <Route path="draft" element={<CaseDraftV2 />} />
+        <Route path="observatory" element={<ObservatoryV2 />} />
+        <Route path="approvals" element={<ApprovalsV2 />} />
+        <Route path="proposals" element={<ProposalsV2 />} />
+        <Route path="agents" element={<AgentsV2 />} />
+        <Route path="escalations" element={<EscalationsV2 />} />
+        <Route path="inbox" element={<NotificationsV2 />} />
+        <Route path="search" element={<SearchV2 />} />
+        <Route path="config-approvals" element={<ConfigApprovalsV2 />} />
+        <Route path="proposal" element={<ProposalDetailV2 />} />
+        <Route path="agent" element={<AgentDetailV2 />} />
+        <Route path="business" element={<BusinessApproverHubV2 />} />
+      </Route>
       <Route element={<AppShell />}>
         <Route index element={<Hub />} />
         <Route path="cases" element={<Cases />} />

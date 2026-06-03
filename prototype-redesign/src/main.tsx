@@ -5,6 +5,7 @@ import App from './App'
 import { StoreProvider } from './store/StoreProvider'
 import { ViewProvider } from './context/ViewProvider'
 import './index.css'
+import './v2/v2.css' // greenfield v2 token (.v2-root scoped、global 非汚染)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -12,6 +12,8 @@ Backoffice 業務に AI Agent を段階自動化する構想 の v2 repo。cowor
 
 > **⚠ REBASELINE 2 (PV0、2026-06-01、承認済) — post-v3 増分**: v3 (PR #20、55 implemented + 1 accepted) + UI refresh (PR #22) を baseline (test 272 green) とし、実装 SSOT = `handoff-redesign/00-shared/v3-audit/{V3-UPGRADE-PLAN.md, closure-ledger.json}` (2026-05-29 roadmap は supersede 済)。増分 plan = `~/.claude/plans/boav2-postv3-data-and-cleanup-plan.md`。承認済: **業務追加 (自動化対象 2→5)** — 口座振替登録 (UC-BO-03, supervised) / 改印・代表者変更届 (UC-BO-04, supervised) / カード再発行 (UC-BO-05, checkpoint)。route 不変 (画面 15 維持、データ母数増)。**業務数 count gate = 5**、980 は UC-BO-02 専用不変。surgical 冗長清掃 med 2。
 
+> **⚠ REBASELINE 3 (postv5、2026-06-03、P0 preflight 承認 + Codex review 収束)**: prototype を **Node + better-sqlite3 + API backend (server-authoritative な SoD / propose-execute 分離 / append-only audit / 3-role IA) へ昇格**することを承認。実装 SSOT = **`handoff-redesign/00-shared/postv5-p0-preflight-contract.md`** (10 contract sections + ratified SD-1..SD-5、Codex 4-round review 収束済)。**本 REBASELINE は以下の scope-out を改定する**: 下記「## Connectivity (… prototype 実装対象外)」「### v2 (Session 4) でやらない: backend / external connection」「backend / external connection / real automation は実装しない (scope-out)」のうち **backend (SQLite + 実 API + server-authoritative 統制 enforcement) は postv5 で in-scope**。**ただし mock core は不変** — 実 LLM / 実 OCR / 実顧客データ / 実 PDF / 実外部銀行接続 / 実規制 cite は引き続き scope-out (mock = privacy safeguard)。postv5 以降は静的 Pages 単体で動かない (server 常駐)。deploy = Node host (#1 option ②、pages.yml redesign job の archive は P1a deploy 時に D-2 で確定)。各 phase = branch → gate → PR → 承認、main 置換は最終 user gate。
+
 ## 中核 message
 
 **差戻しを、次の正解手順に変える仕組み**。差戻し → staging ナレッジに記録 (未承認ヒント、AI 正式実行根拠ではない) → AI 日次分析 + 手順承認 → 設定承認で正式手順に昇格、の loop が中心。

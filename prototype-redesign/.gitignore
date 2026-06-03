@@ -30,3 +30,11 @@ audit-bundle/
 
 # P0-W3 browser-proof / review 生成物 (再生成可能、commit しない)
 output/
+
+# postv5 demo-scope backend (SQLite + Node API) — gitignored DB + nested install
+*.sqlite
+*.db
+*.sqlite-wal
+*.sqlite-shm
+server/node_modules
+server/data/

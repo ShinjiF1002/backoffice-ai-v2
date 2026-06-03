@@ -1,0 +1,16 @@
+{
+  "comment": "tsconfig used ONLY by `npm run seed:gen` (tsx) to resolve the client @ alias when importing live fixtures. NOT part of check:server (tsc -p server/tsconfig.server.json). The server runtime imports only the committed JSON, never client src.",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": { "@/*": ["src/*"] },
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2023",
+    "lib": ["es2023", "dom"],
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "skipLibCheck": true,
+    "noEmit": true
+  }
+}

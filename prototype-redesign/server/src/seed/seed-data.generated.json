@@ -1,0 +1,5993 @@
+{
+  "meta": {
+    "generatedFrom": "live client fixtures (CASE_LIST/PROPOSAL_LIST/AGENT_LIST + detail dicts + governance/kpi)",
+    "note": "DO NOT hand-edit. Regenerate via `npm run seed:gen`. Counts derive from source array lengths.",
+    "sourceCardinalities": {
+      "cases": 29,
+      "case_fields": 145,
+      "proposals": 4,
+      "agents": 5,
+      "agent_samples": 16,
+      "proposal_source_cases": 12,
+      "governance_model_inventory": 15,
+      "drift_monitors": 10,
+      "escalations": 5,
+      "synthetic_metric_rows": 20,
+      "historical_cases": 5,
+      "workflows": 5,
+      "roles": 4,
+      "actors": 5
+    }
+  },
+  "demo_clock": {
+    "now_iso": "2026-05-30T18:00:00+09:00"
+  },
+  "workflows": [
+    {
+      "id": "UC-BO-01",
+      "name": "法人住所変更",
+      "display_order": 1
+    },
+    {
+      "id": "UC-BO-02",
+      "name": "口座開設書類完備",
+      "display_order": 2
+    },
+    {
+      "id": "UC-BO-03",
+      "name": "口座振替登録",
+      "display_order": 3
+    },
+    {
+      "id": "UC-BO-04",
+      "name": "改印・代表者変更届",
+      "display_order": 4
+    },
+    {
+      "id": "UC-BO-05",
+      "name": "カード再発行",
+      "display_order": 5
+    }
+  ],
+  "roles": [
+    {
+      "id": "inputter",
+      "label": "入力者"
+    },
+    {
+      "id": "checker",
+      "label": "承認者"
+    },
+    {
+      "id": "business-approver",
+      "label": "業務責任者"
+    },
+    {
+      "id": "governance",
+      "label": "ガバナンス担当者"
+    }
+  ],
+  "actors": [
+    {
+      "id": "actor-inputter",
+      "name": "山田太郎",
+      "role_id": "inputter"
+    },
+    {
+      "id": "actor-checker",
+      "name": "鈴木課長",
+      "role_id": "checker"
+    },
+    {
+      "id": "actor-approver",
+      "name": "業務責任者",
+      "role_id": "business-approver"
+    },
+    {
+      "id": "actor-gov-legal",
+      "name": "リーガル担当",
+      "role_id": "governance"
+    },
+    {
+      "id": "actor-gov-compliance",
+      "name": "コンプラ担当",
+      "role_id": "governance"
+    }
+  ],
+  "cases": [
+    {
+      "id": "CASE-2026-0142",
+      "workflow_id": "UC-BO-01",
+      "status": "ready",
+      "assignee_name": "山田太郎",
+      "flags": 1,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T16:40:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0145",
+      "workflow_id": "UC-BO-01",
+      "status": "ready",
+      "assignee_name": "山田太郎",
+      "flags": 2,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:22:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0139",
+      "workflow_id": "UC-BO-01",
+      "status": "ready",
+      "assignee_name": "山田太郎",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T15:55:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0131",
+      "workflow_id": "UC-BO-01",
+      "status": "sent-back",
+      "assignee_name": "山田太郎",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T13:48:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0128",
+      "workflow_id": "UC-BO-01",
+      "status": "business-approval-waiting",
+      "assignee_name": "鈴木課長",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": "actor-inputter",
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T12:30:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0150",
+      "workflow_id": "UC-BO-01",
+      "status": "pending",
+      "assignee_name": null,
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:52:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0149",
+      "workflow_id": "UC-BO-01",
+      "status": "pending",
+      "assignee_name": null,
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:46:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0120",
+      "workflow_id": "UC-BO-01",
+      "status": "reflected",
+      "assignee_name": "山田太郎",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-29T16:40:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0112",
+      "workflow_id": "UC-BO-02",
+      "status": "reflected",
+      "assignee_name": "佐藤花子",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-29T14:10:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0101",
+      "workflow_id": "UC-BO-02",
+      "status": "ready",
+      "assignee_name": "佐藤花子",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T16:58:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0104",
+      "workflow_id": "UC-BO-02",
+      "status": "ready",
+      "assignee_name": "高橋",
+      "flags": 1,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:14:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0103",
+      "workflow_id": "UC-BO-02",
+      "status": "pending",
+      "assignee_name": null,
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:49:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0110",
+      "workflow_id": "UC-BO-02",
+      "status": "business-approval-waiting",
+      "assignee_name": "高橋",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": "actor-inputter",
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T14:40:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0201",
+      "workflow_id": "UC-BO-03",
+      "status": "ready",
+      "assignee_name": "佐藤花子",
+      "flags": 1,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T15:10:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0202",
+      "workflow_id": "UC-BO-03",
+      "status": "ready",
+      "assignee_name": "佐藤花子",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T14:20:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0203",
+      "workflow_id": "UC-BO-03",
+      "status": "business-approval-waiting",
+      "assignee_name": "高橋",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": "actor-inputter",
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T11:30:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0204",
+      "workflow_id": "UC-BO-03",
+      "status": "reflected",
+      "assignee_name": "佐藤花子",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-29T13:00:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0205",
+      "workflow_id": "UC-BO-03",
+      "status": "pending",
+      "assignee_name": null,
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:40:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0231",
+      "workflow_id": "UC-BO-04",
+      "status": "ready",
+      "assignee_name": "山田太郎",
+      "flags": 1,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T16:05:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0232",
+      "workflow_id": "UC-BO-04",
+      "status": "sent-back",
+      "assignee_name": "山田太郎",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T12:50:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0233",
+      "workflow_id": "UC-BO-04",
+      "status": "business-approval-waiting",
+      "assignee_name": "鈴木課長",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": "actor-inputter",
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T10:40:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0234",
+      "workflow_id": "UC-BO-04",
+      "status": "reflected",
+      "assignee_name": "山田太郎",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-29T15:20:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0235",
+      "workflow_id": "UC-BO-04",
+      "status": "pending",
+      "assignee_name": null,
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:35:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0241",
+      "workflow_id": "UC-BO-05",
+      "status": "ready",
+      "assignee_name": "高橋",
+      "flags": 1,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T16:30:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0242",
+      "workflow_id": "UC-BO-05",
+      "status": "ready",
+      "assignee_name": "佐藤花子",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T15:45:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0243",
+      "workflow_id": "UC-BO-05",
+      "status": "business-approval-waiting",
+      "assignee_name": "高橋",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": "actor-inputter",
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T13:15:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0244",
+      "workflow_id": "UC-BO-05",
+      "status": "reflected",
+      "assignee_name": "佐藤花子",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-29T11:00:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0245",
+      "workflow_id": "UC-BO-05",
+      "status": "reflected",
+      "assignee_name": "高橋",
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-29T14:40:00+09:00"
+    },
+    {
+      "id": "CASE-2026-0246",
+      "workflow_id": "UC-BO-05",
+      "status": "pending",
+      "assignee_name": null,
+      "flags": 0,
+      "origin": "ai",
+      "input_approved_by": null,
+      "sendback_reason": null,
+      "sendback_category": null,
+      "reversal_kind": null,
+      "reversal_reason": null,
+      "received_at": "2026-05-30T17:48:00+09:00"
+    }
+  ],
+  "case_fields": [
+    {
+      "case_id": "CASE-2026-0142",
+      "field_label": "ビル名",
+      "ai_value": "サンプルビル",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": 720
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプルHD",
+      "master_value": "株式会社サンプルHD",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "normalized_match",
+      "resolved": 0,
+      "confidence_milli": 930
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "field_label": "新住所",
+      "ai_value": "東京都千代田区丸の内 2 丁目 3 番 5 号",
+      "master_value": null,
+      "previous_value": "東京都千代田区丸の内 1 丁目 1 番 1 号",
+      "human_value": null,
+      "reconcile_state": "normalized_match",
+      "resolved": 0,
+      "confidence_milli": 840
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": 970
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "field_label": "効力発生日",
+      "ai_value": "2026-06-15",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": 950
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "field_label": "新住所",
+      "ai_value": "大阪市北区梅田 3-4-5",
+      "master_value": null,
+      "previous_value": "大阪市北区梅田 1-2",
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "field_label": "ビル名",
+      "ai_value": "サンプルビル",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "field_label": "効力発生日",
+      "ai_value": "2026-06-15",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "field_label": "新住所",
+      "ai_value": "名古屋市中区栄 4-1-1",
+      "master_value": null,
+      "previous_value": "名古屋市中区栄 2-1",
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "field_label": "ビル名",
+      "ai_value": "サンプルビル",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "field_label": "効力発生日",
+      "ai_value": "2026-06-15",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": "株式会社旧商号",
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "field_label": "新住所",
+      "ai_value": "東京都千代田区丸の内 2 丁目 3 番 5 号",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "field_label": "ビル名",
+      "ai_value": "サンプルビル",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "field_label": "効力発生日",
+      "ai_value": "2026-06-15",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "field_label": "新住所",
+      "ai_value": "福岡市博多区博多駅前 2-2-2",
+      "master_value": null,
+      "previous_value": "福岡市博多区 1-1",
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "field_label": "ビル名",
+      "ai_value": "サンプルビル",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "field_label": "効力発生日",
+      "ai_value": "2026-06-15",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "field_label": "法人名",
+      "ai_value": "—",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "field_label": "新住所",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "field_label": "ビル名",
+      "ai_value": "—",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "field_label": "支店コード",
+      "ai_value": "—",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "field_label": "効力発生日",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "field_label": "法人名",
+      "ai_value": "—",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "field_label": "新住所",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "field_label": "ビル名",
+      "ai_value": "—",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "field_label": "支店コード",
+      "ai_value": "—",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "field_label": "効力発生日",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "field_label": "新住所",
+      "ai_value": "札幌市中央区大通西 3-1",
+      "master_value": null,
+      "previous_value": "札幌市中央区 1-2",
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "field_label": "ビル名",
+      "ai_value": "サンプルビル",
+      "master_value": "サンプルビル",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "field_label": "効力発生日",
+      "ai_value": "2026-06-15",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "field_label": "生年月日",
+      "ai_value": "1988-04-12",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "field_label": "有効期限",
+      "ai_value": "2029-04-11",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "field_label": "住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "field_label": "生年月日",
+      "ai_value": "1988-04-12",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "field_label": "有効期限",
+      "ai_value": "2029-04-11",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "field_label": "住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "field_label": "有効期限",
+      "ai_value": "2026-06-12",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "field_label": "生年月日",
+      "ai_value": "1988-04-12",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "field_label": "住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "field_label": "本人確認書類",
+      "ai_value": "—",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "field_label": "氏名",
+      "ai_value": "—",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "field_label": "生年月日",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "field_label": "有効期限",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "field_label": "住所",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "field_label": "生年月日",
+      "ai_value": "1988-04-12",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "field_label": "有効期限",
+      "ai_value": "2029-04-11",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "field_label": "住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "field_label": "口座番号",
+      "ai_value": "1234567",
+      "master_value": "1234567",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "field_label": "依頼人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "field_label": "金融機関コード",
+      "ai_value": "0009",
+      "master_value": "0009",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "field_label": "収納企業コード",
+      "ai_value": "SC-0482",
+      "master_value": "SC-0482",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "field_label": "振替開始月",
+      "ai_value": "2026-07",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "field_label": "依頼人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "field_label": "金融機関コード",
+      "ai_value": "0009",
+      "master_value": "0009",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "field_label": "口座番号",
+      "ai_value": "1234567",
+      "master_value": "1234567",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "field_label": "収納企業コード",
+      "ai_value": "SC-0482",
+      "master_value": "SC-0482",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "field_label": "振替開始月",
+      "ai_value": "2026-07",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "field_label": "依頼人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "field_label": "金融機関コード",
+      "ai_value": "0009",
+      "master_value": "0009",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "field_label": "口座番号",
+      "ai_value": "1234567",
+      "master_value": "1234567",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "field_label": "収納企業コード",
+      "ai_value": "SC-0482",
+      "master_value": "SC-0482",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "field_label": "振替開始月",
+      "ai_value": "2026-07",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "field_label": "振替開始月",
+      "ai_value": "2026-07",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "field_label": "依頼人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "field_label": "金融機関コード",
+      "ai_value": "0009",
+      "master_value": "0009",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "field_label": "口座番号",
+      "ai_value": "1234567",
+      "master_value": "1234567",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "field_label": "収納企業コード",
+      "ai_value": "SC-0482",
+      "master_value": "SC-0482",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "field_label": "依頼人名",
+      "ai_value": "—",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "field_label": "金融機関コード",
+      "ai_value": "—",
+      "master_value": "0009",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "field_label": "口座番号",
+      "ai_value": "—",
+      "master_value": "1234567",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "field_label": "収納企業コード",
+      "ai_value": "—",
+      "master_value": "SC-0482",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "field_label": "振替開始月",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "field_label": "新代表者名",
+      "ai_value": "山本 健一",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "field_label": "届出種別",
+      "ai_value": "代表者変更",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "field_label": "効力発生日",
+      "ai_value": "2026-07-01",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "field_label": "届出種別",
+      "ai_value": "代表者変更",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "field_label": "新代表者名",
+      "ai_value": "山本 健一",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "field_label": "効力発生日",
+      "ai_value": "2026-07-01",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "field_label": "届出種別",
+      "ai_value": "代表者変更",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "field_label": "新代表者名",
+      "ai_value": "山本 健一",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "field_label": "効力発生日",
+      "ai_value": "2026-07-01",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "field_label": "法人名",
+      "ai_value": "株式会社サンプル商事",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "field_label": "支店コード",
+      "ai_value": "042",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "field_label": "届出種別",
+      "ai_value": "代表者変更",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "field_label": "新代表者名",
+      "ai_value": "山本 健一",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "field_label": "効力発生日",
+      "ai_value": "2026-07-01",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "field_label": "法人名",
+      "ai_value": "—",
+      "master_value": "株式会社サンプル商事",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "field_label": "支店コード",
+      "ai_value": "—",
+      "master_value": "042",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "field_label": "届出種別",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "field_label": "新代表者名",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "field_label": "効力発生日",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "field_label": "送付先住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "needs_review",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "field_label": "会員番号",
+      "ai_value": "4980-1234",
+      "master_value": "4980-1234",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "field_label": "カード種別",
+      "ai_value": "デビットカード",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "field_label": "会員番号",
+      "ai_value": "4980-1234",
+      "master_value": "4980-1234",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "field_label": "カード種別",
+      "ai_value": "デビットカード",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "field_label": "送付先住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "matched",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "field_label": "会員番号",
+      "ai_value": "4980-1234",
+      "master_value": "4980-1234",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "field_label": "カード種別",
+      "ai_value": "デビットカード",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "field_label": "送付先住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "field_label": "会員番号",
+      "ai_value": "4980-1234",
+      "master_value": "4980-1234",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "field_label": "カード種別",
+      "ai_value": "デビットカード",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "field_label": "送付先住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "field_label": "氏名",
+      "ai_value": "佐藤花子",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "field_label": "会員番号",
+      "ai_value": "4980-1234",
+      "master_value": "4980-1234",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "field_label": "カード種別",
+      "ai_value": "デビットカード",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "field_label": "本人確認書類",
+      "ai_value": "運転免許証",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "field_label": "送付先住所",
+      "ai_value": "東京都新宿区西新宿 2-8-1",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "manually_confirmed",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "field_label": "氏名",
+      "ai_value": "—",
+      "master_value": "佐藤花子",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "field_label": "会員番号",
+      "ai_value": "—",
+      "master_value": "4980-1234",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "field_label": "カード種別",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "field_label": "本人確認書類",
+      "ai_value": "—",
+      "master_value": "運転免許証",
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "field_label": "送付先住所",
+      "ai_value": "—",
+      "master_value": null,
+      "previous_value": null,
+      "human_value": null,
+      "reconcile_state": "not_extracted",
+      "resolved": 0,
+      "confidence_milli": null
+    }
+  ],
+  "case_documents": [
+    {
+      "case_id": "CASE-2026-0142",
+      "file_name": "CASE-2026-0142.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "file_name": "CASE-2026-0145.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "file_name": "CASE-2026-0139.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "file_name": "CASE-2026-0131.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "file_name": "CASE-2026-0128.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "file_name": "CASE-2026-0150.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "file_name": "CASE-2026-0149.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "file_name": "CASE-2026-0120.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "法人住所変更届"
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "file_name": "CASE-2026-0112.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座開設申込書"
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "file_name": "CASE-2026-0101.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座開設申込書"
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "file_name": "CASE-2026-0104.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座開設申込書"
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "file_name": "CASE-2026-0103.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座開設申込書"
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "file_name": "CASE-2026-0110.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座開設申込書"
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "file_name": "CASE-2026-0201.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座振替依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "file_name": "CASE-2026-0202.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座振替依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "file_name": "CASE-2026-0203.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座振替依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "file_name": "CASE-2026-0204.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座振替依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "file_name": "CASE-2026-0205.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "口座振替依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "file_name": "CASE-2026-0231.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "改印・代表者変更届"
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "file_name": "CASE-2026-0232.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "改印・代表者変更届"
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "file_name": "CASE-2026-0233.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "改印・代表者変更届"
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "file_name": "CASE-2026-0234.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "改印・代表者変更届"
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "file_name": "CASE-2026-0235.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "改印・代表者変更届"
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "file_name": "CASE-2026-0241.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "カード再発行依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "file_name": "CASE-2026-0242.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "カード再発行依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "file_name": "CASE-2026-0243.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "カード再発行依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "file_name": "CASE-2026-0244.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "カード再発行依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "file_name": "CASE-2026-0245.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "カード再発行依頼書"
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "file_name": "CASE-2026-0246.pdf",
+      "page": "P.2",
+      "page_count": 3,
+      "title": "カード再発行依頼書"
+    }
+  ],
+  "case_document_rows": [
+    {
+      "case_id": "CASE-2026-0142",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプルＨＤ",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "row_order": 1,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "row_order": 2,
+      "label": "新住所",
+      "value": "千代田区丸の内２－３－５ サンプルビルディング８Ｆ",
+      "field_label": "ビル名",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "row_order": 3,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "row_order": 4,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "row_order": 0,
+      "label": "新住所",
+      "value": "大阪市北区梅田 3-4-5",
+      "field_label": "新住所",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "row_order": 1,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "row_order": 0,
+      "label": "新住所",
+      "value": "名古屋市中区栄 4-1-1",
+      "field_label": "新住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "row_order": 1,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "row_order": 1,
+      "label": "新住所",
+      "value": "東京都千代田区丸の内 2 丁目 3 番 5 号",
+      "field_label": "新住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "row_order": 0,
+      "label": "新住所",
+      "value": "福岡市博多区博多駅前 2-2-2",
+      "field_label": "新住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "row_order": 1,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "row_order": 1,
+      "label": "新住所",
+      "value": "東京都千代田区丸の内 2 丁目 3 番 5 号",
+      "field_label": "新住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "row_order": 1,
+      "label": "新住所",
+      "value": "東京都千代田区丸の内 2 丁目 3 番 5 号",
+      "field_label": "新住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "row_order": 0,
+      "label": "新住所",
+      "value": "札幌市中央区大通西 3-1",
+      "field_label": "新住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "row_order": 1,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "row_order": 2,
+      "label": "ビル名",
+      "value": "サンプルビル",
+      "field_label": "ビル名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "row_order": 3,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-06-15",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "row_order": 0,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "row_order": 1,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "row_order": 2,
+      "label": "生年月日",
+      "value": "1988-04-12",
+      "field_label": "生年月日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "row_order": 3,
+      "label": "有効期限",
+      "value": "2029-04-11",
+      "field_label": "有効期限",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "row_order": 4,
+      "label": "住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "row_order": 0,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "row_order": 1,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "row_order": 2,
+      "label": "生年月日",
+      "value": "1988-04-12",
+      "field_label": "生年月日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "row_order": 3,
+      "label": "有効期限",
+      "value": "2029-04-11",
+      "field_label": "有効期限",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "row_order": 4,
+      "label": "住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "row_order": 0,
+      "label": "有効期限",
+      "value": "2026-06-12",
+      "field_label": "有効期限",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "row_order": 1,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "row_order": 2,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "row_order": 3,
+      "label": "生年月日",
+      "value": "1988-04-12",
+      "field_label": "生年月日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "row_order": 4,
+      "label": "住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "row_order": 0,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "row_order": 1,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "row_order": 2,
+      "label": "生年月日",
+      "value": "1988-04-12",
+      "field_label": "生年月日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "row_order": 3,
+      "label": "有効期限",
+      "value": "2029-04-11",
+      "field_label": "有効期限",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "row_order": 4,
+      "label": "住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "row_order": 0,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "row_order": 1,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "row_order": 2,
+      "label": "生年月日",
+      "value": "1988-04-12",
+      "field_label": "生年月日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "row_order": 3,
+      "label": "有効期限",
+      "value": "2029-04-11",
+      "field_label": "有効期限",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "row_order": 4,
+      "label": "住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "row_order": 0,
+      "label": "口座番号",
+      "value": "1234567",
+      "field_label": "口座番号",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "row_order": 1,
+      "label": "依頼人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "依頼人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "row_order": 2,
+      "label": "金融機関コード",
+      "value": "0009",
+      "field_label": "金融機関コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "row_order": 3,
+      "label": "収納企業コード",
+      "value": "SC-0482",
+      "field_label": "収納企業コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "row_order": 4,
+      "label": "振替開始月",
+      "value": "2026-07",
+      "field_label": "振替開始月",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "row_order": 0,
+      "label": "依頼人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "依頼人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "row_order": 1,
+      "label": "金融機関コード",
+      "value": "0009",
+      "field_label": "金融機関コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "row_order": 2,
+      "label": "口座番号",
+      "value": "1234567",
+      "field_label": "口座番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "row_order": 3,
+      "label": "収納企業コード",
+      "value": "SC-0482",
+      "field_label": "収納企業コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "row_order": 4,
+      "label": "振替開始月",
+      "value": "2026-07",
+      "field_label": "振替開始月",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "row_order": 0,
+      "label": "依頼人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "依頼人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "row_order": 1,
+      "label": "金融機関コード",
+      "value": "0009",
+      "field_label": "金融機関コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "row_order": 2,
+      "label": "口座番号",
+      "value": "1234567",
+      "field_label": "口座番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "row_order": 3,
+      "label": "収納企業コード",
+      "value": "SC-0482",
+      "field_label": "収納企業コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "row_order": 4,
+      "label": "振替開始月",
+      "value": "2026-07",
+      "field_label": "振替開始月",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "row_order": 0,
+      "label": "振替開始月",
+      "value": "2026-07",
+      "field_label": "振替開始月",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "row_order": 1,
+      "label": "依頼人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "依頼人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "row_order": 2,
+      "label": "金融機関コード",
+      "value": "0009",
+      "field_label": "金融機関コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "row_order": 3,
+      "label": "口座番号",
+      "value": "1234567",
+      "field_label": "口座番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "row_order": 4,
+      "label": "収納企業コード",
+      "value": "SC-0482",
+      "field_label": "収納企業コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "row_order": 0,
+      "label": "依頼人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "依頼人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "row_order": 1,
+      "label": "金融機関コード",
+      "value": "0009",
+      "field_label": "金融機関コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "row_order": 2,
+      "label": "口座番号",
+      "value": "1234567",
+      "field_label": "口座番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "row_order": 3,
+      "label": "収納企業コード",
+      "value": "SC-0482",
+      "field_label": "収納企業コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "row_order": 4,
+      "label": "振替開始月",
+      "value": "2026-07",
+      "field_label": "振替開始月",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "row_order": 0,
+      "label": "新代表者名",
+      "value": "山本 健一",
+      "field_label": "新代表者名",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "row_order": 1,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "row_order": 2,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "row_order": 3,
+      "label": "届出種別",
+      "value": "代表者変更",
+      "field_label": "届出種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-07-01",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "row_order": 0,
+      "label": "届出種別",
+      "value": "代表者変更",
+      "field_label": "届出種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "row_order": 1,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "row_order": 2,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "row_order": 3,
+      "label": "新代表者名",
+      "value": "山本 健一",
+      "field_label": "新代表者名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-07-01",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "row_order": 1,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "row_order": 2,
+      "label": "届出種別",
+      "value": "代表者変更",
+      "field_label": "届出種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "row_order": 3,
+      "label": "新代表者名",
+      "value": "山本 健一",
+      "field_label": "新代表者名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-07-01",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "row_order": 1,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "row_order": 2,
+      "label": "届出種別",
+      "value": "代表者変更",
+      "field_label": "届出種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "row_order": 3,
+      "label": "新代表者名",
+      "value": "山本 健一",
+      "field_label": "新代表者名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-07-01",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "row_order": 0,
+      "label": "法人名",
+      "value": "株式会社サンプル商事",
+      "field_label": "法人名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "row_order": 1,
+      "label": "支店コード",
+      "value": "042",
+      "field_label": "支店コード",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "row_order": 2,
+      "label": "届出種別",
+      "value": "代表者変更",
+      "field_label": "届出種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "row_order": 3,
+      "label": "新代表者名",
+      "value": "山本 健一",
+      "field_label": "新代表者名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "row_order": 4,
+      "label": "効力発生日",
+      "value": "2026-07-01",
+      "field_label": "効力発生日",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "row_order": 0,
+      "label": "送付先住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "送付先住所",
+      "highlight": 1
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "row_order": 1,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "row_order": 2,
+      "label": "会員番号",
+      "value": "4980-1234",
+      "field_label": "会員番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "row_order": 3,
+      "label": "カード種別",
+      "value": "デビットカード",
+      "field_label": "カード種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "row_order": 4,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "row_order": 0,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "row_order": 1,
+      "label": "会員番号",
+      "value": "4980-1234",
+      "field_label": "会員番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "row_order": 2,
+      "label": "カード種別",
+      "value": "デビットカード",
+      "field_label": "カード種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "row_order": 3,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "row_order": 4,
+      "label": "送付先住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "送付先住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "row_order": 0,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "row_order": 1,
+      "label": "会員番号",
+      "value": "4980-1234",
+      "field_label": "会員番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "row_order": 2,
+      "label": "カード種別",
+      "value": "デビットカード",
+      "field_label": "カード種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "row_order": 3,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "row_order": 4,
+      "label": "送付先住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "送付先住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "row_order": 0,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "row_order": 1,
+      "label": "会員番号",
+      "value": "4980-1234",
+      "field_label": "会員番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "row_order": 2,
+      "label": "カード種別",
+      "value": "デビットカード",
+      "field_label": "カード種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "row_order": 3,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "row_order": 4,
+      "label": "送付先住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "送付先住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "row_order": 0,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "row_order": 1,
+      "label": "会員番号",
+      "value": "4980-1234",
+      "field_label": "会員番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "row_order": 2,
+      "label": "カード種別",
+      "value": "デビットカード",
+      "field_label": "カード種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "row_order": 3,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "row_order": 4,
+      "label": "送付先住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "送付先住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "row_order": 0,
+      "label": "氏名",
+      "value": "佐藤花子",
+      "field_label": "氏名",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "row_order": 1,
+      "label": "会員番号",
+      "value": "4980-1234",
+      "field_label": "会員番号",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "row_order": 2,
+      "label": "カード種別",
+      "value": "デビットカード",
+      "field_label": "カード種別",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "row_order": 3,
+      "label": "本人確認書類",
+      "value": "運転免許証",
+      "field_label": "本人確認書類",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "row_order": 4,
+      "label": "送付先住所",
+      "value": "東京都新宿区西新宿 2-8-1",
+      "field_label": "送付先住所",
+      "highlight": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "row_order": 5,
+      "label": "押印 / 署名欄",
+      "value": "(押印済・サンプル)",
+      "field_label": null,
+      "highlight": 0
+    }
+  ],
+  "lifecycle_events": [
+    {
+      "case_id": "CASE-2026-0142",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "16:40",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "16:42",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認中。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0142",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0145",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0139",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0131",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "進行中",
+      "actor": "田中部長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0128",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "未割当",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0150",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "未割当",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0149",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0112",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0101",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "高橋",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0104",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "未割当",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0103",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "高橋",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "進行中",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0110",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0202",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "高橋",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "進行中",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0203",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0204",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "未割当",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0205",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0232",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "進行中",
+      "actor": "田中部長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0233",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "山田太郎",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0234",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "未割当",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0235",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "高橋",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "進行中",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0242",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "高橋",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "進行中",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0243",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "佐藤花子",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0244",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "完了",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "完了",
+      "actor": "高橋",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "完了",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0245",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "step_order": 0,
+      "step": "受付",
+      "time_label": "完了",
+      "actor": "システム",
+      "detail": "申請書類を受け付けました。",
+      "done": 1,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "step_order": 1,
+      "step": "AI処理",
+      "time_label": "進行中",
+      "actor": "AI 担当 Agent",
+      "detail": "読み取り + 登録情報照合 + 値生成。",
+      "done": 0,
+      "is_current": 1
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "step_order": 2,
+      "step": "入力者確認",
+      "time_label": "—",
+      "actor": "未割当",
+      "detail": "AI 入力と申請書類を照合して確認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "step_order": 3,
+      "step": "承認者承認",
+      "time_label": "—",
+      "actor": "鈴木課長",
+      "detail": "最終承認。",
+      "done": 0,
+      "is_current": 0
+    },
+    {
+      "case_id": "CASE-2026-0246",
+      "step_order": 4,
+      "step": "反映",
+      "time_label": "—",
+      "actor": "システム",
+      "detail": "登録情報を更新。",
+      "done": 0,
+      "is_current": 0
+    }
+  ],
+  "agents": [
+    {
+      "id": "agent-corporate-address-change",
+      "workflow_id": "UC-BO-01",
+      "trust": "supervised",
+      "promotion_status": "none",
+      "promotion_requested_by": null,
+      "promotion_sendback_reason": null,
+      "paused": 0,
+      "paused_reason": null,
+      "trust_before_pause": null
+    },
+    {
+      "id": "agent-account-opening",
+      "workflow_id": "UC-BO-02",
+      "trust": "supervised",
+      "promotion_status": "none",
+      "promotion_requested_by": null,
+      "promotion_sendback_reason": null,
+      "paused": 0,
+      "paused_reason": null,
+      "trust_before_pause": null
+    },
+    {
+      "id": "agent-direct-debit",
+      "workflow_id": "UC-BO-03",
+      "trust": "supervised",
+      "promotion_status": "requested",
+      "promotion_requested_by": "actor-inputter",
+      "promotion_sendback_reason": null,
+      "paused": 0,
+      "paused_reason": null,
+      "trust_before_pause": null
+    },
+    {
+      "id": "agent-corp-notification",
+      "workflow_id": "UC-BO-04",
+      "trust": "supervised",
+      "promotion_status": "none",
+      "promotion_requested_by": null,
+      "promotion_sendback_reason": null,
+      "paused": 0,
+      "paused_reason": null,
+      "trust_before_pause": null
+    },
+    {
+      "id": "agent-card-reissue",
+      "workflow_id": "UC-BO-05",
+      "trust": "checkpoint",
+      "promotion_status": "none",
+      "promotion_requested_by": null,
+      "promotion_sendback_reason": null,
+      "paused": 0,
+      "paused_reason": null,
+      "trust_before_pause": null
+    }
+  ],
+  "agent_samples": [
+    {
+      "agent_id": "agent-corporate-address-change",
+      "case_id": "CASE-2026-0142",
+      "outcome": "要確認",
+      "tone": "alert",
+      "note": "ビル名が申請書類と不一致 → 入力者が確認",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-corporate-address-change",
+      "case_id": "CASE-2026-0139",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "全項目一致、人の修正なし",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-corporate-address-change",
+      "case_id": "CASE-2026-0131",
+      "outcome": "差戻し",
+      "tone": "alert",
+      "note": "法人名の旧商号を誤入力 → 入力者が差戻し",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-corporate-address-change",
+      "case_id": "CASE-2026-0120",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "住所変更を正しく入力、承認済",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-account-opening",
+      "case_id": "CASE-2026-0112",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "本人確認書類が完備、人の修正なし",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-account-opening",
+      "case_id": "CASE-2026-0104",
+      "outcome": "要確認",
+      "tone": "alert",
+      "note": "在留カードの期限が間近 → 入力者が確認",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-account-opening",
+      "case_id": "CASE-2026-0101",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "全項目一致、承認済",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-direct-debit",
+      "case_id": "CASE-2026-0201",
+      "outcome": "要確認",
+      "tone": "alert",
+      "note": "口座番号が依頼書と 1 桁相違 → 入力者が確認",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-direct-debit",
+      "case_id": "CASE-2026-0204",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "振替開始月を正しく入力、承認済",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-direct-debit",
+      "case_id": "CASE-2026-0202",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "全項目一致、人の修正なし",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-corp-notification",
+      "case_id": "CASE-2026-0231",
+      "outcome": "要確認",
+      "tone": "alert",
+      "note": "新代表者名の表記が届出書と不一致 → 入力者が確認",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-corp-notification",
+      "case_id": "CASE-2026-0232",
+      "outcome": "差戻し",
+      "tone": "alert",
+      "note": "届出種別の判定を誤り → 入力者が差戻し",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-corp-notification",
+      "case_id": "CASE-2026-0234",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "全項目一致、承認済",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-card-reissue",
+      "case_id": "CASE-2026-0241",
+      "outcome": "要確認",
+      "tone": "alert",
+      "note": "送付先住所が会員情報と相違 → 入力者が確認",
+      "kpi": "承認率"
+    },
+    {
+      "agent_id": "agent-card-reissue",
+      "case_id": "CASE-2026-0244",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "本人確認書類が完備、人の修正なし",
+      "kpi": "上書き率"
+    },
+    {
+      "agent_id": "agent-card-reissue",
+      "case_id": "CASE-2026-0245",
+      "outcome": "自動入力",
+      "tone": "success",
+      "note": "全項目一致、承認済",
+      "kpi": "上書き率"
+    }
+  ],
+  "proposals": [
+    {
+      "id": "PROP-2026-031",
+      "workflow_id": "UC-BO-01",
+      "status": "pending-triage",
+      "agent_id": "agent-corporate-address-change",
+      "forwarded_by": null,
+      "decision_kind": null,
+      "decision_reason": null,
+      "decision_category": null,
+      "change_area": "住所読み取りの判定基準を厳しめに調整",
+      "impact_count": 12
+    },
+    {
+      "id": "PROP-2026-028",
+      "workflow_id": "UC-BO-01",
+      "status": "forwarded",
+      "agent_id": "agent-corporate-address-change",
+      "forwarded_by": null,
+      "decision_kind": null,
+      "decision_reason": null,
+      "decision_category": null,
+      "change_area": "法人名の表記ゆれ補正ルールを追加",
+      "impact_count": 7
+    },
+    {
+      "id": "PROP-2026-024",
+      "workflow_id": "UC-BO-02",
+      "status": "approved",
+      "agent_id": "agent-account-opening",
+      "forwarded_by": null,
+      "decision_kind": null,
+      "decision_reason": null,
+      "decision_category": null,
+      "change_area": "本人確認書類の有効期限チェックを追加",
+      "impact_count": 19
+    },
+    {
+      "id": "PROP-2026-019",
+      "workflow_id": "UC-BO-04",
+      "status": "rejected",
+      "agent_id": "agent-corp-notification",
+      "forwarded_by": null,
+      "decision_kind": null,
+      "decision_reason": null,
+      "decision_category": null,
+      "change_area": "届出種別の自動判定を追加",
+      "impact_count": 28
+    }
+  ],
+  "proposal_source_cases": [
+    {
+      "proposal_id": "PROP-2026-031",
+      "case_id": "CASE-2026-0098",
+      "field": "ビル名",
+      "comment": "ビル名が申請書類と異なっていたが、自動確定されていた。「サンプルビルディング」が正しい。判定基準が甘く見逃された。",
+      "observed_date": "2026-05-22"
+    },
+    {
+      "proposal_id": "PROP-2026-031",
+      "case_id": "CASE-2026-0087",
+      "field": "新住所",
+      "comment": "番地の枝番 (2-3-5 の「5」) が欠落したまま自動確定。読み取りが微妙な精度だったが基準を超えて確定していた。",
+      "observed_date": "2026-05-18"
+    },
+    {
+      "proposal_id": "PROP-2026-031",
+      "case_id": "CASE-2026-0079",
+      "field": "ビル名",
+      "comment": "カナ表記の揺れを誤読。要確認に回すべきだったが自動確定された。基準引き上げで防げる類型。",
+      "observed_date": "2026-05-14"
+    },
+    {
+      "proposal_id": "PROP-2026-028",
+      "case_id": "CASE-2026-0131",
+      "field": "法人名",
+      "comment": "旧商号の表記が登録情報と全角半角で異なり、要確認に回された。実体は同一法人で、補正できれば自動確定できた。",
+      "observed_date": "2026-05-20"
+    },
+    {
+      "proposal_id": "PROP-2026-028",
+      "case_id": "CASE-2026-0118",
+      "field": "法人名",
+      "comment": "「髙」と「高」の旧字体差で不一致判定。人手で同一と確認した。補正対象にすべき類型。",
+      "observed_date": "2026-05-15"
+    },
+    {
+      "proposal_id": "PROP-2026-028",
+      "case_id": "CASE-2026-0106",
+      "field": "法人名",
+      "comment": "「株式会社」の前後位置の違いで不一致。表記補正で吸収できる。",
+      "observed_date": "2026-05-11"
+    },
+    {
+      "proposal_id": "PROP-2026-024",
+      "case_id": "CASE-2026-0112",
+      "field": "本人確認書類",
+      "comment": "運転免許証の有効期限が切れていたが完備扱いになっていた。期限チェックが必要。",
+      "observed_date": "2026-05-19"
+    },
+    {
+      "proposal_id": "PROP-2026-024",
+      "case_id": "CASE-2026-0104",
+      "field": "本人確認書類",
+      "comment": "在留カードの期限が翌週で、更新確認が漏れた。",
+      "observed_date": "2026-05-12"
+    },
+    {
+      "proposal_id": "PROP-2026-024",
+      "case_id": "CASE-2026-0101",
+      "field": "本人確認書類",
+      "comment": "パスポートの残存期間不足を見逃した。",
+      "observed_date": "2026-05-09"
+    },
+    {
+      "proposal_id": "PROP-2026-019",
+      "case_id": "CASE-2026-0232",
+      "field": "届出種別",
+      "comment": "「改印」と「代表者変更」を誤判定。種別の自動判定はまだ精度が不足している。",
+      "observed_date": "2026-05-30"
+    },
+    {
+      "proposal_id": "PROP-2026-019",
+      "case_id": "CASE-2026-0231",
+      "field": "新代表者名",
+      "comment": "代表者変更の届出で氏名表記が揺れ、自動判定では拾えなかった。",
+      "observed_date": "2026-05-30"
+    },
+    {
+      "proposal_id": "PROP-2026-019",
+      "case_id": "CASE-2026-0234",
+      "field": "届出種別",
+      "comment": "複合的な届出 (改印+代表者変更) を単一種別に誤分類した。",
+      "observed_date": "2026-05-29"
+    }
+  ],
+  "governance_model_inventory": [
+    {
+      "agent_id": "agent-corporate-address-change",
+      "process": "法人住所変更",
+      "model": "帳票 OCR",
+      "version": "ocr-2.4",
+      "purpose": "申請書類の文字読み取り",
+      "owner": "モデル管理部",
+      "validation": "独立検証済",
+      "last_validated": "2026-04-30",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-corporate-address-change",
+      "process": "法人住所変更",
+      "model": "項目分類",
+      "version": "cls-1.8",
+      "purpose": "読み取り値の項目割当",
+      "owner": "モデル管理部",
+      "validation": "要再検証",
+      "last_validated": "2025-12-15",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-corporate-address-change",
+      "process": "法人住所変更",
+      "model": "照合ルール",
+      "version": "rule-v3.1",
+      "purpose": "登録情報との突合 (確定的)",
+      "owner": "業務部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-10",
+      "scope": "rule-based (model 定義外)"
+    },
+    {
+      "agent_id": "agent-account-opening",
+      "process": "口座開設書類完備",
+      "model": "帳票 OCR",
+      "version": "ocr-2.4",
+      "purpose": "本人確認書類の読み取り",
+      "owner": "モデル管理部",
+      "validation": "独立検証済",
+      "last_validated": "2026-04-30",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-account-opening",
+      "process": "口座開設書類完備",
+      "model": "項目分類",
+      "version": "cls-1.9",
+      "purpose": "書類種別・項目の割当",
+      "owner": "モデル管理部",
+      "validation": "検証中",
+      "last_validated": "2026-05-20",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-account-opening",
+      "process": "口座開設書類完備",
+      "model": "照合ルール",
+      "version": "rule-v2.7",
+      "purpose": "完備チェック (確定的)",
+      "owner": "業務部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-10",
+      "scope": "rule-based (model 定義外)"
+    },
+    {
+      "agent_id": "agent-direct-debit",
+      "process": "口座振替登録",
+      "model": "帳票 OCR",
+      "version": "ocr-2.4",
+      "purpose": "依頼書の文字読み取り",
+      "owner": "モデル管理部",
+      "validation": "独立検証済",
+      "last_validated": "2026-04-30",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-direct-debit",
+      "process": "口座振替登録",
+      "model": "項目分類",
+      "version": "cls-1.7",
+      "purpose": "口座情報項目の割当",
+      "owner": "モデル管理部",
+      "validation": "検証中",
+      "last_validated": "2026-05-18",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-direct-debit",
+      "process": "口座振替登録",
+      "model": "照合ルール",
+      "version": "rule-v1.9",
+      "purpose": "口座情報との突合 (確定的)",
+      "owner": "業務部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-10",
+      "scope": "rule-based (model 定義外)"
+    },
+    {
+      "agent_id": "agent-corp-notification",
+      "process": "改印・代表者変更届",
+      "model": "帳票 OCR",
+      "version": "ocr-2.4",
+      "purpose": "届出書の文字読み取り",
+      "owner": "モデル管理部",
+      "validation": "独立検証済",
+      "last_validated": "2026-04-30",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-corp-notification",
+      "process": "改印・代表者変更届",
+      "model": "項目分類",
+      "version": "cls-1.5",
+      "purpose": "届出種別・項目の割当",
+      "owner": "モデル管理部",
+      "validation": "要再検証",
+      "last_validated": "2025-11-30",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-corp-notification",
+      "process": "改印・代表者変更届",
+      "model": "照合ルール",
+      "version": "rule-v2.2",
+      "purpose": "法人マスタとの突合 (確定的)",
+      "owner": "業務部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-10",
+      "scope": "rule-based (model 定義外)"
+    },
+    {
+      "agent_id": "agent-card-reissue",
+      "process": "カード再発行",
+      "model": "帳票 OCR",
+      "version": "ocr-2.5",
+      "purpose": "依頼書の文字読み取り",
+      "owner": "モデル管理部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-12",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-card-reissue",
+      "process": "カード再発行",
+      "model": "本人確認照合",
+      "version": "cls-2.1",
+      "purpose": "本人確認書類と会員情報の照合",
+      "owner": "モデル管理部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-12",
+      "scope": "MRM 適用 (非生成 model)"
+    },
+    {
+      "agent_id": "agent-card-reissue",
+      "process": "カード再発行",
+      "model": "照合ルール",
+      "version": "rule-v3.0",
+      "purpose": "送付先・会員番号の突合 (確定的)",
+      "owner": "業務部",
+      "validation": "独立検証済",
+      "last_validated": "2026-05-10",
+      "scope": "rule-based (model 定義外)"
+    }
+  ],
+  "drift_monitors": [
+    {
+      "workflow_id": "UC-BO-01",
+      "metric": "入力分布 drift (PSI)",
+      "value": "0.07",
+      "threshold": "< 0.10",
+      "status": "安定"
+    },
+    {
+      "workflow_id": "UC-BO-01",
+      "metric": "OCR 信頼度の低下傾向",
+      "value": "−1.2pt / 30日",
+      "threshold": "> −3pt",
+      "status": "監視中"
+    },
+    {
+      "workflow_id": "UC-BO-02",
+      "metric": "入力分布 drift (PSI)",
+      "value": "0.11",
+      "threshold": "< 0.10",
+      "status": "要確認"
+    },
+    {
+      "workflow_id": "UC-BO-02",
+      "metric": "書類種別の構成変化",
+      "value": "+4pt / 30日",
+      "threshold": "< +5pt",
+      "status": "監視中"
+    },
+    {
+      "workflow_id": "UC-BO-03",
+      "metric": "入力分布 drift (PSI)",
+      "value": "0.06",
+      "threshold": "< 0.10",
+      "status": "安定"
+    },
+    {
+      "workflow_id": "UC-BO-03",
+      "metric": "OCR 信頼度の低下傾向",
+      "value": "−0.8pt / 30日",
+      "threshold": "> −3pt",
+      "status": "監視中"
+    },
+    {
+      "workflow_id": "UC-BO-04",
+      "metric": "入力分布 drift (PSI)",
+      "value": "0.12",
+      "threshold": "< 0.10",
+      "status": "要確認"
+    },
+    {
+      "workflow_id": "UC-BO-04",
+      "metric": "届出種別の構成変化",
+      "value": "+3pt / 30日",
+      "threshold": "< +5pt",
+      "status": "監視中"
+    },
+    {
+      "workflow_id": "UC-BO-05",
+      "metric": "入力分布 drift (PSI)",
+      "value": "0.05",
+      "threshold": "< 0.10",
+      "status": "安定"
+    },
+    {
+      "workflow_id": "UC-BO-05",
+      "metric": "本人確認照合率の低下傾向",
+      "value": "−0.3pt / 30日",
+      "threshold": "> −2pt",
+      "status": "安定"
+    }
+  ],
+  "escalations": [
+    {
+      "case_id": "CASE-2026-0145",
+      "reason": "前例のない住所表記で確定可否の判断に迷う",
+      "category": "業務ルール抵触",
+      "escalated_to": "actor-approver",
+      "escalated_from": "actor-inputter",
+      "resolution": null
+    },
+    {
+      "case_id": "CASE-2026-0120",
+      "reason": "過去の住所表記との整合を確認依頼",
+      "category": "業務ルール抵触",
+      "escalated_to": "actor-approver",
+      "escalated_from": "actor-inputter",
+      "resolution": "proceed"
+    },
+    {
+      "case_id": "CASE-2026-0201",
+      "reason": "収納企業コードが未登録で確定可否の判断に迷う",
+      "category": "前例なし",
+      "escalated_to": "actor-approver",
+      "escalated_from": "actor-inputter",
+      "resolution": null
+    },
+    {
+      "case_id": "CASE-2026-0231",
+      "reason": "新代表者の本人確認書類の整合が取れない",
+      "category": "書類不備",
+      "escalated_to": "actor-approver",
+      "escalated_from": "actor-inputter",
+      "resolution": null
+    },
+    {
+      "case_id": "CASE-2026-0241",
+      "reason": "送付先住所が登録と相違し本人確認が必要",
+      "category": "本人確認",
+      "escalated_to": "actor-approver",
+      "escalated_from": "actor-inputter",
+      "resolution": null
+    }
+  ],
+  "synthetic_metric_rows": [
+    {
+      "workflow_id": "UC-BO-01",
+      "metric_label": "AI 入力承認率",
+      "actual_value": "92%",
+      "threshold": "≥ 95%",
+      "achieved": 0,
+      "denominator": "1,240 件",
+      "exclusions": "エスカレーション案件を除く",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-01",
+      "metric_label": "人手上書き率",
+      "actual_value": "0.12",
+      "threshold": "≤ 0.15",
+      "achieved": 1,
+      "denominator": "1,240 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-01",
+      "metric_label": "Alert 発生率",
+      "actual_value": "0.08",
+      "threshold": "≤ 0.10",
+      "achieved": 1,
+      "denominator": "1,240 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-01",
+      "metric_label": "承認者差戻し率",
+      "actual_value": "0.05",
+      "threshold": "≤ 0.07",
+      "achieved": 1,
+      "denominator": "1,140 件",
+      "exclusions": "承認者レビュー到達分のみ（入力段階で差戻し/取消した分は母集合外）",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-02",
+      "metric_label": "AI 入力承認率",
+      "actual_value": "96%",
+      "threshold": "≥ 95%",
+      "achieved": 1,
+      "denominator": "980 件",
+      "exclusions": "エスカレーション案件を除く",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-02",
+      "metric_label": "人手上書き率",
+      "actual_value": "0.10",
+      "threshold": "≤ 0.15",
+      "achieved": 1,
+      "denominator": "980 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-02",
+      "metric_label": "Alert 発生率",
+      "actual_value": "0.06",
+      "threshold": "≤ 0.10",
+      "achieved": 1,
+      "denominator": "980 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-02",
+      "metric_label": "承認者差戻し率",
+      "actual_value": "0.04",
+      "threshold": "≤ 0.07",
+      "achieved": 1,
+      "denominator": "910 件",
+      "exclusions": "承認者レビュー到達分のみ（入力段階で差戻し/取消した分は母集合外）",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-03",
+      "metric_label": "AI 入力承認率",
+      "actual_value": "95%",
+      "threshold": "≥ 95%",
+      "achieved": 1,
+      "denominator": "1,050 件",
+      "exclusions": "エスカレーション案件を除く",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-03",
+      "metric_label": "人手上書き率",
+      "actual_value": "0.11",
+      "threshold": "≤ 0.15",
+      "achieved": 1,
+      "denominator": "1,050 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-03",
+      "metric_label": "Alert 発生率",
+      "actual_value": "0.07",
+      "threshold": "≤ 0.10",
+      "achieved": 1,
+      "denominator": "1,050 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-03",
+      "metric_label": "承認者差戻し率",
+      "actual_value": "0.05",
+      "threshold": "≤ 0.07",
+      "achieved": 1,
+      "denominator": "980 件",
+      "exclusions": "承認者レビュー到達分のみ（入力段階で差戻し/取消した分は母集合外）",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-04",
+      "metric_label": "AI 入力承認率",
+      "actual_value": "93%",
+      "threshold": "≥ 95%",
+      "achieved": 0,
+      "denominator": "760 件",
+      "exclusions": "エスカレーション案件を除く",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-04",
+      "metric_label": "人手上書き率",
+      "actual_value": "0.13",
+      "threshold": "≤ 0.15",
+      "achieved": 1,
+      "denominator": "760 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-04",
+      "metric_label": "Alert 発生率",
+      "actual_value": "0.09",
+      "threshold": "≤ 0.10",
+      "achieved": 1,
+      "denominator": "760 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-04",
+      "metric_label": "承認者差戻し率",
+      "actual_value": "0.06",
+      "threshold": "≤ 0.07",
+      "achieved": 1,
+      "denominator": "700 件",
+      "exclusions": "承認者レビュー到達分のみ（入力段階で差戻し/取消した分は母集合外）",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-05",
+      "metric_label": "AI 入力承認率",
+      "actual_value": "97%",
+      "threshold": "≥ 95%",
+      "achieved": 1,
+      "denominator": "1,520 件",
+      "exclusions": "エスカレーション案件を除く",
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-05",
+      "metric_label": "人手上書き率",
+      "actual_value": "0.08",
+      "threshold": "≤ 0.15",
+      "achieved": 1,
+      "denominator": "1,520 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-05",
+      "metric_label": "Alert 発生率",
+      "actual_value": "0.05",
+      "threshold": "≤ 0.10",
+      "achieved": 1,
+      "denominator": "1,520 件",
+      "exclusions": null,
+      "period": "直近 30 日"
+    },
+    {
+      "workflow_id": "UC-BO-05",
+      "metric_label": "承認者差戻し率",
+      "actual_value": "0.03",
+      "threshold": "≤ 0.07",
+      "achieved": 1,
+      "denominator": "1,440 件",
+      "exclusions": "承認者レビュー到達分のみ（入力段階で差戻し/取消した分は母集合外）",
+      "period": "直近 30 日"
+    }
+  ],
+  "historical_cases": [
+    {
+      "id": "CASE-2026-0098",
+      "workflow_id": "UC-BO-01",
+      "status": "reflected",
+      "owner_name": "山田太郎",
+      "received_at": "2026-05-22T09:00:00+09:00",
+      "history_note": "この案件は、AI が基準内で誤確定し、後に是正・再反映された実例です（手順改定提案の根拠）。"
+    },
+    {
+      "id": "CASE-2026-0087",
+      "workflow_id": "UC-BO-01",
+      "status": "reflected",
+      "owner_name": "山田太郎",
+      "received_at": "2026-05-18T09:00:00+09:00",
+      "history_note": "この案件は、AI が基準内で誤確定し、後に是正・再反映された実例です（手順改定提案の根拠）。"
+    },
+    {
+      "id": "CASE-2026-0079",
+      "workflow_id": "UC-BO-01",
+      "status": "reflected",
+      "owner_name": "山田太郎",
+      "received_at": "2026-05-14T09:00:00+09:00",
+      "history_note": "この案件は、AI が基準内で誤確定し、後に是正・再反映された実例です（手順改定提案の根拠）。"
+    },
+    {
+      "id": "CASE-2026-0118",
+      "workflow_id": "UC-BO-01",
+      "status": "reflected",
+      "owner_name": "山田太郎",
+      "received_at": "2026-05-15T09:00:00+09:00",
+      "history_note": "この案件は、AI が基準内で誤確定し、後に是正・再反映された実例です（手順改定提案の根拠）。"
+    },
+    {
+      "id": "CASE-2026-0106",
+      "workflow_id": "UC-BO-01",
+      "status": "reflected",
+      "owner_name": "山田太郎",
+      "received_at": "2026-05-11T09:00:00+09:00",
+      "history_note": "この案件は、AI が基準内で誤確定し、後に是正・再反映された実例です（手順改定提案の根拠）。"
+    }
+  ]
+}

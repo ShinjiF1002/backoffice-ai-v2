@@ -1,0 +1,2 @@
+# Forward-only migration files (NNNN_*.sql) live here. PR2 adds 0001_*.sql (21-table schema).
+# This .gitkeep keeps the directory tracked while it is empty (PR1).

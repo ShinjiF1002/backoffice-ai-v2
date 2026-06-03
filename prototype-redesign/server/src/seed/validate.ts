@@ -54,11 +54,13 @@ export function validateSeed(db: Db, data: SeedData = loadSeedData()): { ok: boo
 
   // (3) CASE_DETAILS 相互参照: every seeded case has fields, a document, and lifecycle rows
   const caseIds = (db.prepare('SELECT id FROM cases').all() as { id: string }[]).map((r) => r.id)
+  const countFields = db.prepare('SELECT COUNT(*) AS c FROM case_fields WHERE case_id = ?')
+  const countLifecycle = db.prepare('SELECT COUNT(*) AS c FROM lifecycle_events WHERE case_id = ?')
   for (const cid of caseIds) {
-    if (count(db, `case_fields WHERE case_id = '${cid}'`) === 0) fail(`case ${cid} has no case_fields`)
+    if ((countFields.get(cid) as { c: number }).c === 0) fail(`case ${cid} has no case_fields`)
     const docs = db.prepare('SELECT id FROM case_documents WHERE case_id = ?').all(cid) as { id: number }[]
     if (docs.length !== 1) fail(`case ${cid} must have exactly 1 case_documents row (has ${docs.length})`)
-    if (count(db, `lifecycle_events WHERE case_id = '${cid}'`) === 0) fail(`case ${cid} has no lifecycle_events`)
+    if ((countLifecycle.get(cid) as { c: number }).c === 0) fail(`case ${cid} has no lifecycle_events`)
   }
 
   // (4) KPI 分母不変: UC-BO-02 AI 入力承認率 denominator pins 980

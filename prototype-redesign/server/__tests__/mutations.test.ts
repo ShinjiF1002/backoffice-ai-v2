@@ -199,3 +199,98 @@ describe('idempotency + atomicity', () => {
     db.close()
   })
 })
+
+describe('gate-2 coverage backfill (04 §D falsifiability)', () => {
+  it('T-EMPTY (all 9): every required reason/value guard rejects empty input', () => {
+    const db = seededDb()
+    const inp = ctxFor(db, 'actor-inputter')
+    const chk = ctxFor(db, 'actor-checker')
+    const app = ctxFor(db, 'actor-approver')
+    expect(reason(cases.overrideField(db, inp, { id: READY_FLAGGED, fieldLabel: '新住所', value: '' }))).toBe('EMPTY_VALUE')
+    expect(reason(cases.sendbackCase(db, inp, { id: READY0, reason: ' ', category: 'c' }))).toBe('EMPTY_REASON')
+    expect(reason(cases.escalateCase(db, inp, { id: READY0, reason: '', category: 'c', to: 'actor-approver' }))).toBe('EMPTY_REASON')
+    expect(reason(cases.reverseCase(db, chk, { id: REFLECTED, kind: '訂正', reason: '' }))).toBe('EMPTY_REASON')
+    expect(reason(proposals.rejectProposal(db, app, { id: 'PROP-2026-031', reason: '' }))).toBe('EMPTY_REASON')
+    expect(reason(proposals.sendbackProposal(db, app, { id: 'PROP-2026-028', reason: '' }))).toBe('EMPTY_REASON')
+    expect(reason(agents.sendbackPromotion(db, app, { id: 'agent-direct-debit', reason: '' }))).toBe('EMPTY_REASON')
+    expect(reason(agents.emergencyStop(db, chk, { id: 'agent-card-reissue', reason: '' }))).toBe('EMPTY_REASON')
+    expect(reason(agents.resumeAgent(db, chk, { id: 'agent-card-reissue', reason: '' }))).toBe('EMPTY_REASON')
+    db.close()
+  })
+
+  it('T-STATE h/i/k + happy paths (proposal reject/sendback, promotion sendback — prev. untested)', () => {
+    const db = seededDb()
+    const app = ctxFor(db, 'actor-approver')
+    // (h) proposal reject: WRONG_STATE on approved, happy on pending-triage
+    expect(reason(proposals.rejectProposal(db, app, { id: 'PROP-2026-024', reason: 'r' }))).toBe('WRONG_STATE')
+    expect(proposals.rejectProposal(db, app, { id: 'PROP-2026-031', reason: 'r' }).ok).toBe(true)
+    // (i) proposal sendback: WRONG_STATE on approved, happy on forwarded
+    expect(reason(proposals.sendbackProposal(db, app, { id: 'PROP-2026-024', reason: 'r' }))).toBe('WRONG_STATE')
+    expect(proposals.sendbackProposal(db, app, { id: 'PROP-2026-028', reason: 'r' }).ok).toBe(true)
+    // (k) promotion sendback: WRONG_STATE on none, happy on requested
+    expect(reason(agents.sendbackPromotion(db, app, { id: 'agent-card-reissue', reason: 'r' }))).toBe('WRONG_STATE')
+    expect(agents.sendbackPromotion(db, app, { id: 'agent-direct-debit', reason: 'r' }).ok).toBe(true)
+    db.close()
+  })
+
+  it('escalate + emergencyStop + resume (the two audit-emitting handlers, prev. uncovered)', () => {
+    const db = seededDb()
+    const inp = ctxFor(db, 'actor-inputter')
+    const chk = ctxFor(db, 'actor-checker')
+
+    const b0 = auditCount(db)
+    expect(cases.escalateCase(db, inp, { id: READY0, reason: 'r', category: 'c', to: 'actor-approver' }).ok).toBe(true)
+    expect(auditCount(db)).toBe(b0 + 1) // audit-emitting
+    const esc = db.prepare('SELECT escalated_to, escalated_from, resolution FROM escalations WHERE case_id = ?').get(READY0) as {
+      escalated_to: string
+      escalated_from: string
+      resolution: string | null
+    }
+    expect(esc.escalated_to).toBe('actor-approver')
+    expect(esc.escalated_from).toBe('actor-inputter')
+    expect(esc.resolution).toBe(null)
+    // escalate to a non-actor → VALIDATION (server FK guard, not in live reducer)
+    expect(reason(cases.escalateCase(db, inp, { id: 'CASE-2026-0202', reason: 'r', category: 'c', to: 'actor-nope' }))).toBe('VALIDATION')
+
+    const trustBefore = (db.prepare("SELECT trust FROM agents WHERE id = 'agent-card-reissue'").get() as { trust: string }).trust
+    const b1 = auditCount(db)
+    expect(agents.emergencyStop(db, chk, { id: 'agent-card-reissue', reason: 'stop' }).ok).toBe(true)
+    expect(auditCount(db)).toBe(b1 + 1) // un-paused → paused transition emits audit
+    const stopped = db.prepare("SELECT trust, paused, trust_before_pause FROM agents WHERE id = 'agent-card-reissue'").get() as {
+      trust: string
+      paused: number
+      trust_before_pause: string
+    }
+    expect(stopped.trust).toBe('supervised')
+    expect(stopped.paused).toBe(1)
+    expect(stopped.trust_before_pause).toBe(trustBefore)
+    // already-paused stop → reason updated, NO audit (idempotent path)
+    const b2 = auditCount(db)
+    expect(agents.emergencyStop(db, chk, { id: 'agent-card-reissue', reason: 'again' }).ok).toBe(true)
+    expect(auditCount(db)).toBe(b2)
+    // resume → restore trust + audit
+    expect(agents.resumeAgent(db, chk, { id: 'agent-card-reissue', reason: 'resume' }).ok).toBe(true)
+    expect((db.prepare("SELECT trust, paused FROM agents WHERE id = 'agent-card-reissue'").get() as { trust: string; paused: number }).trust).toBe(trustBefore)
+    db.close()
+  })
+
+  it('T-NO-AUDIT (all 10 audit-less actions append +0)', () => {
+    const db = seededDb()
+    const inp = ctxFor(db, 'actor-inputter')
+    const chk = ctxFor(db, 'actor-checker')
+    const app = ctxFor(db, 'actor-approver')
+    const before = auditCount(db)
+    expect(cases.assignCase(db, chk, { id: READY0, assignee: '田中' }).ok).toBe(true)
+    expect(proposals.forwardProposal(db, inp, { id: 'PROP-2026-031' }).ok).toBe(true) // pending-triage → forwarded
+    expect(proposals.sendbackProposal(db, app, { id: 'PROP-2026-031', reason: 'r' }).ok).toBe(true) // forwarded → pending-triage
+    expect(proposals.rejectProposal(db, app, { id: 'PROP-2026-031', reason: 'r' }).ok).toBe(true) // pending-triage → rejected
+    expect(proposals.approveProposal(db, app, { id: 'PROP-2026-028' }).ok).toBe(true) // forwarded → approved
+    expect(agents.requestPromotion(db, inp, { id: 'agent-card-reissue' }).ok).toBe(true) // none → requested
+    expect(agents.sendbackPromotion(db, app, { id: 'agent-card-reissue', reason: 'r' }).ok).toBe(true) // requested → none
+    expect(agents.approvePromotion(db, app, { id: 'agent-direct-debit' }).ok).toBe(true) // requested → approved
+    expect(notifications.markRead(db, inp, { id: 'n1' }).ok).toBe(true)
+    expect(notifications.markAllRead(db, inp, { ids: ['n2', 'n3'] }).ok).toBe(true)
+    expect(auditCount(db)).toBe(before)
+    db.close()
+  })
+})

@@ -81,6 +81,36 @@ export function getCaseById(db: Db, _ctx: Ctx, _q: unknown, params: Record<strin
   return { ok: true, data: row }
 }
 
+export function listProposals(db: Db): ReadResult {
+  return { ok: true, data: db.prepare('SELECT id, workflow_id, status, agent_id, change_area, impact_count FROM proposals ORDER BY id').all() }
+}
+
+export function getProposalById(db: Db, _ctx: Ctx, _q: unknown, params: Record<string, string>): ReadResult {
+  const row = db.prepare('SELECT * FROM proposals WHERE id = ?').get(params.id!)
+  if (!row) return denial('NOT_FOUND')
+  return { ok: true, data: row }
+}
+
+export function listAgents(db: Db): ReadResult {
+  // promotion_status is included so the business-approver sees the pending-promotion surface here
+  // (config-approvals is the separate governance oversight view).
+  return { ok: true, data: db.prepare('SELECT id, workflow_id, trust, promotion_status, promotion_requested_by, paused FROM agents ORDER BY id').all() }
+}
+
+export function getAgentById(db: Db, _ctx: Ctx, _q: unknown, params: Record<string, string>): ReadResult {
+  const row = db.prepare('SELECT * FROM agents WHERE id = ?').get(params.id!)
+  if (!row) return denial('NOT_FOUND')
+  return { ok: true, data: row }
+}
+
+export function listApprovals(db: Db): ReadResult {
+  // approver queue = business-approval-waiting cases
+  return {
+    ok: true,
+    data: db.prepare("SELECT id, workflow_id, status, assignee_name, input_approved_by, received_at FROM cases WHERE status = 'business-approval-waiting' ORDER BY id").all(),
+  }
+}
+
 export function getHub(db: Db): ReadResult {
   const n = (sql: string): number => (db.prepare(sql).get() as { n: number }).n
   return {
@@ -128,11 +158,24 @@ interface EscRow {
   resolution: string | null
 }
 function notificationsFor(db: Db, actorId: string): { id: string; type: string; caseId: string }[] {
-  const rows = db.prepare('SELECT case_id, escalated_to, escalated_from, resolution FROM escalations').all() as EscRow[]
   const out: { id: string; type: string; caseId: string }[] = []
-  for (const e of rows) {
+  // escalation queue (arbiter, escalated_to) + resolution closure (requester, escalated_from) — keyed by actor id
+  const escs = db.prepare('SELECT case_id, escalated_to, escalated_from, resolution FROM escalations').all() as EscRow[]
+  for (const e of escs) {
     if (e.escalated_to === actorId && e.resolution === null) out.push({ id: `esc-to:${e.case_id}`, type: 'arbitration-request', caseId: e.case_id })
     if (e.escalated_from === actorId && e.resolution !== null) out.push({ id: `esc-from:${e.case_id}`, type: 'arbitration-result', caseId: e.case_id })
+  }
+  // sendback + reversal notifications go to the case assignee, matched by display name (live useNotifications)
+  const actorName = (db.prepare('SELECT name FROM actors WHERE id = ?').get(actorId) as { name: string } | undefined)?.name
+  if (actorName) {
+    const rows = db.prepare("SELECT id, reversal_kind FROM cases WHERE status = 'sent-back' AND assignee_name = ?").all(actorName) as {
+      id: string
+      reversal_kind: string | null
+    }[]
+    for (const c of rows) {
+      if (c.reversal_kind === null) out.push({ id: `sendback:${c.id}`, type: 'sendback', caseId: c.id })
+      else out.push({ id: `reversal:${c.id}`, type: 'reversal', caseId: c.id })
+    }
   }
   return out
 }
@@ -180,6 +223,11 @@ export function dispatchRead<Q extends { actorId: string }>(
 export const READ_MANIFEST = [
   'GET /api/cases',
   'GET /api/cases/:id',
+  'GET /api/approvals',
+  'GET /api/proposals',
+  'GET /api/proposals/:id',
+  'GET /api/agents',
+  'GET /api/agents/:id',
   'GET /api/search',
   'GET /api/hub',
   'GET /api/audit-events (governance)',
@@ -210,6 +258,11 @@ export function mountReads(app: Express, db: Db, deps: MutationDeps): void {
 
   route('/api/cases', ListCasesQuery, (d, c, q) => listCases(d, c, q))
   route('/api/cases/:id', ActorQuery, (d, c, q, p) => getCaseById(d, c, q, p))
+  route('/api/approvals', ActorQuery, (d) => listApprovals(d))
+  route('/api/proposals', ActorQuery, (d) => listProposals(d))
+  route('/api/proposals/:id', ActorQuery, (d, c, q, p) => getProposalById(d, c, q, p))
+  route('/api/agents', ActorQuery, (d) => listAgents(d))
+  route('/api/agents/:id', ActorQuery, (d, c, q, p) => getAgentById(d, c, q, p))
   route('/api/search', SearchQuery, (d, c, q) => searchCases(d, c, q))
   route('/api/hub', ActorQuery, (d) => getHub(d))
   route('/api/audit-events', ActorQuery, (d, c) => getAuditEvents(d, c))

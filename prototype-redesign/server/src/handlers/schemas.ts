@@ -21,7 +21,8 @@ export const CreateCaseSchema = z
     actorId,
     id: z.string().min(1),
     workflowId: z.string().min(1),
-    workflowName: z.string().min(1),
+    workflowName: z.string().min(1), // accepted for client-body parity (04 row #11); server persists only workflow_id (FK), display name is derived from the workflows join
+
     assignee: z.string().optional(),
     fieldLabels: z.array(z.string()).min(1),
     values: z.record(z.string(), z.string()),

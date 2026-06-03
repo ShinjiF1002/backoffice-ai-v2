@@ -28,6 +28,8 @@
 > object-scope 規約（下表 scope 列の語）:
 > - **存在**: 対象 id が dict に在ること。無ければ `denialReason==='NOT_FOUND'`（reducer は `if (!cur) return state`、例 `reducer.ts:85,107,119,131,142,170,199,212,219,228,251,261,268,279,297`）。**object-level IDOR**（他 actor の object を直 ID で触る）も同じく `denialReason==='NOT_FOUND'` で reject し、existence-hiding として **HTTP 404** を返す（「権限なし」と「不在」を区別しない）。これは default 403 の唯一の例外。
 > - **id 重複 no-op**: `case/create` のみ id 既存で冪等 no-op（`reducer.ts:181`）→ server は `CONFLICT`（既存）か 200 冪等のいずれか（OPEN D-2）。
+>
+> **VALIDATION denialReason（P1a 実装時追加、FK guard）**: postv5 schema は live reducer に無い DB FK を持つ（`escalations.escalated_to`→actors / `cases.workflow_id`→workflows）。よって `case/escalate`（#5）の `to` が未知 actor、`case/create`（#11）の `workflowId` が未知 workflow の場合、生 SQLite FOREIGN KEY error を errorSanitizer の opaque 500 に落とさず **`denialReason='VALIDATION'`（HTTP 403）** で clean に reject する（reducer は任意 string を受けていた、`reducer.ts:131-136`）。`#5` の denialReason 集合に `VALIDATION`（未知 to）、`#11` に `VALIDATION`（未知 workflowId）を追加。denialReason enum の真実源は server `denial.ts`（`VALIDATION` を含む、SD-4）。
 
 ---
 

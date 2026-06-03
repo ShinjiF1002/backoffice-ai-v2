@@ -68,12 +68,43 @@ describe('read-side IDOR (09 §1-2)', () => {
     const inputter = reads.getNotifications(db, ctxFor(db, 'actor-inputter'))
     expect(approver.ok && inputter.ok).toBe(true)
     if (approver.ok && inputter.ok) {
-      // approver sees arbitration-requests (escalated_to); inputter sees the resolved closure (escalated_from)
-      const a = approver.data as { type: string }[]
-      const i = inputter.data as { type: string }[]
-      expect(a.every((n) => n.type === 'arbitration-request')).toBe(true)
-      expect(i.every((n) => n.type === 'arbitration-result')).toBe(true)
-      expect(a.length).toBeGreaterThan(0)
+      const a = (approver.data as { type: string }[]).map((n) => n.type)
+      const i = (inputter.data as { type: string }[]).map((n) => n.type)
+      expect(a).toContain('arbitration-request') // escalated_to queue
+      expect(i).toContain('arbitration-result') // escalated_from closure
+      expect(i).toContain('sendback') // sent-back case assigned to 山田太郎 (actor-inputter)
+    }
+    db.close()
+  })
+
+  it('idor sendback vector: a non-assignee persona gets NOT_FOUND for a sendback notification', () => {
+    const db = seededDb()
+    // CASE-2026-0131 is sent-back, assignee 山田太郎 (= actor-inputter); actor-checker (鈴木課長) is not the assignee
+    const inputter = ctxFor(db, 'actor-inputter')
+    const checker = ctxFor(db, 'actor-checker')
+    expect(reads.getNotificationById(db, inputter, undefined, { id: 'sendback:CASE-2026-0131' }).ok).toBe(true)
+    expect(reason(reads.getNotificationById(db, checker, undefined, { id: 'sendback:CASE-2026-0131' }))).toBe('NOT_FOUND')
+    db.close()
+  })
+})
+
+describe('business reads (all-role) coverage', () => {
+  it('proposals / agents / approvals lists + detail return data and 404 on missing', () => {
+    const db = seededDb()
+    const ctx = ctxFor(db, 'actor-inputter')
+    for (const r of [reads.listProposals(db), reads.listAgents(db), reads.listApprovals(db)]) {
+      expect(r.ok).toBe(true)
+      if (r.ok) expect(Array.isArray(r.data)).toBe(true)
+    }
+    expect(reads.getProposalById(db, ctx, undefined, { id: 'PROP-2026-031' }).ok).toBe(true)
+    expect(reason(reads.getProposalById(db, ctx, undefined, { id: 'PROP-NOPE' }))).toBe('NOT_FOUND')
+    expect(reads.getAgentById(db, ctx, undefined, { id: 'agent-direct-debit' }).ok).toBe(true)
+    expect(reason(reads.getAgentById(db, ctx, undefined, { id: 'agent-nope' }))).toBe('NOT_FOUND')
+    // business-approver sees pending promotions via /api/agents (promotion_status included)
+    const agents = reads.listAgents(db)
+    if (agents.ok) {
+      const rows = agents.data as { id: string; promotion_status: string }[]
+      expect(rows.find((a) => a.id === 'agent-direct-debit')?.promotion_status).toBe('requested')
     }
     db.close()
   })

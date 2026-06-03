@@ -41,6 +41,9 @@ describe('migration boot-apply (06 §契約1 / SD-3)', () => {
       checksum: string
     }).checksum
     expect(stored).toBe(expected)
+    // content-sensitivity: the stored value is the CONTENT hash, not the path hash (catches a shared
+    // runner/test regression that hashes the filename instead of the bytes)
+    expect(stored).not.toBe(crypto.createHash('sha256').update(mig.path).digest('hex'))
     db.close()
   })
 

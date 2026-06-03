@@ -1,11 +1,27 @@
 import { openDb, type Db } from '../../src/db/connection.js'
 import { runMigrations } from '../../src/db/migrate-runner.js'
+import { seedDemo } from '../../src/seed/seed.js'
+import { resolveRole, type Ctx } from '../../src/handlers/shared.js'
 
 /** A migrated in-memory DB with PRAGMAs (FK on) applied — the default fixture for server tests. */
 export function migratedMemDb(): Db {
   const db = openDb(':memory:')
   runMigrations(db)
   return db
+}
+
+/** A migrated + fully seeded in-memory DB (parity fixture for mutation tests). */
+export function seededDb(): Db {
+  const db = migratedMemDb()
+  seedDemo(db)
+  return db
+}
+
+/** Build a mutation Ctx for a persona (role resolved from the seeded actors table). */
+export function ctxFor(db: Db, effectiveActorId: string, sessionOperatorId = 'op-demo-1'): Ctx {
+  const role = resolveRole(db, effectiveActorId)
+  if (!role) throw new Error(`ctxFor: unknown actor ${effectiveActorId}`)
+  return { sessionOperatorId, effectiveActorId, role }
 }
 
 /** Minimal reference rows so child-table tests have valid FK parents. */

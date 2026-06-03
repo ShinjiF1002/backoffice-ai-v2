@@ -7,6 +7,7 @@ import { httpStatusFor, type DenialReason } from './denial.js'
 import { SessionStore } from './identity/session.js'
 import { loginOperator, resolveOperator, loadAllowedActors } from './identity/identity.js'
 import { parseStrict } from './validation.js'
+import { mountMutations } from './handlers/router.js'
 
 /** Liveness probe logic (testable in-process without HTTP). */
 export function healthCheck(db: Db): { ok: boolean; status: string } {
@@ -71,6 +72,9 @@ export function createApp(db: Db, deps: AppDeps = {}): Express {
       expires_at: result.expiresAt,
     })
   })
+
+  // 22 mutation endpoints (SoD / state / audit enforcement; governance-boundary gated).
+  mountMutations(app, db, { sessionStore, secret })
 
   return app
 }

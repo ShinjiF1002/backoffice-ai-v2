@@ -22,6 +22,7 @@ export type DenialReason =
   | 'WRONG_STATE'
   | 'FLAGS_REMAIN'
   | 'ALREADY_RESOLVED'
+  | 'NO_ESCALATION'
   | 'ALREADY_REVERSED'
   | 'ALREADY_APPROVED'
   | 'NOT_PAUSED'

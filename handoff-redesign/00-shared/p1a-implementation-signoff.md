@@ -20,7 +20,7 @@ Branch: `postv5/p1a-server` (base `main` @ `1e45ea7` = postv4). Default terminal
 ## Verification (all green)
 
 - **`check:all` EXIT 0** = client lint / check:no-op / check:types / check:types:test / check:design / **check:server** / client test / client build. Passes with `BOAI_SESSION_SECRET` unset (07 §5c).
-- **server**: 94 in-process tests (18 files, Vitest node project — no HTTP/supertest), `npm audit` 0 high.
+- **server**: 103 in-process tests (19 files, Vitest node project — no HTTP/supertest), `npm audit` 0 high.
 - **client**: 278 pass / 8 pre-existing skips (no regression), build (tsc -b + vite) green.
 - **`seed:validate`**: OK (parity + integrity).
 - **client-unchanged gate**: zero `src/**` diff vs `main`; full diff surface = allowed additive only
@@ -53,6 +53,16 @@ Destructive: reset-cli-disabled-by-default + reset-recreates-db-not-deletes-rows
   F3 T-STATE h/i/k, F4 escalate/emergencyStop coverage, F5 VALIDATION doc, F6 read-surface
   completion, F7–F10 nits, F11 confirmed right-sized). Convergence: the 6 previously-0-invocation
   handlers now have 3–4 test invocations each; check:all green post-fix.
+- **Gate-3 (external Codex review-loop, 4-chunk × 3 rounds → final Claude sign-off)**: user-requested
+  external second pass per review-loop Phase 3→4. Severity trend **R1: 12 (1 HIGH/6 MED/5 LOW) → R2:
+  3 residuals (1 HIGH/1 MED/1 LOW) → R3: 0 BLOCKER/HIGH** (converged). All triaged vs contracts +
+  reducer + the demo data; all accepted/fixed (reset failure-atomicity, auditTs midnight-monotonic,
+  drift `===`, demo_clock-from-DB, token NaN/issued_at guards, log scalar-guard, headers-before-json,
+  searchCases `instr()` literal, notification name-uniqueness invariant, approvalId in after_json,
+  dead-schema cleanup; honest contract notes for VALIDATION FK-guards + idx PK-redundancy). Final
+  **Claude sign-off = ship-ready** (independent re-verify of all 7 fix areas + the untested
+  hadLive=true reset path empirically exercised; non-vacuous tests confirmed; 0 contract
+  contradiction). Server tests 88 → **103**. Commits: `1ac8e6d` / `b77198c` / `2266930`.
 
 ## Honest contract fixes (reality → contract)
 
@@ -66,4 +76,4 @@ Destructive: reset-cli-disabled-by-default + reset-recreates-db-not-deletes-rows
 - P1b (client API wiring + MSW), P2 (data volume), P3 (3-role UI), P4 (selector) → later phases.
 - `src/legacy/` purge → a client-cleanup phase (P1a keeps client unchanged).
 
-**Status: ready for executor handoff → PR (merge held).**
+**Status: converged + signed off (gate-1 + gate-2 Claude + gate-3 Codex review-loop) → PR #26 (merge held).**
